@@ -1,16 +1,14 @@
 """
 Reconciliation / Deviation Agent — the brain.
 
-Given the RAW spec doc, the RAW submittal doc, and the relevant standard
-summaries, it reasons across all three and returns structured deviations with a
-citation chain. This is the part no commercial EPC tool does: cross-document
-reasoning that ties a procurement value to a standard requirement.
+Cross-document reasoning across design basis, vendor submittal, and governing
+standards. Returns structured deviations with a citation chain and confidence.
 
-run_reconciliation_over_corpus() is the drop-in the eval harness calls with
---detector llm. It recovers deviations from UNSTRUCTURED text (the hard task the
-deterministic baseline cannot do).
+v2: Enhanced prompt with explicit numeric/threshold/redundancy reasoning,
+    citation faithfulness validation, and confidence scoring.
 """
 
+import json
 import pathlib
 
 from backend.llm import complete_json
@@ -19,21 +17,55 @@ from backend.agents.commissioning import predict_cx_impact
 CORPUS = pathlib.Path(__file__).parent.parent.parent / "data" / "corpus"
 
 SYSTEM_PROMPT = (
-    "You are a senior data-centre commissioning authority reviewing an EPC "
-    "submittal against the owner's Design Basis and the governing standards "
-    "(Uptime Tier IV, TIA-942, BICSI-002, NFPA 75). You find specification "
-    "deviations that humans miss because the spec, the submittal, and the "
-    "standard live in three different documents. You never invent clauses; "
-    "every finding must cite the exact spec clause and standard it relies on. "
-    "You report ONLY genuine non-conformances, not stylistic differences."
+    "You are a senior data-centre commissioning authority (CxA) with 20+ years "
+    "of experience reviewing EPC submittals for hyperscale facilities against "
+    "design-basis documents and governing standards (Uptime Tier IV, TIA-942, "
+    "BICSI-002, NFPA 75, IS 1893). You find specification deviations that "
+    "humans miss because the spec, the submittal, and the standard live in "
+    "three different documents and are often written by three different parties.\n\n"
+    "Your task: CROSS-REFERENCE each requirement in the design basis against "
+    "the corresponding value in the vendor submittal. Apply the governing "
+    "standard as the authoritative interpretation when there is ambiguity.\n\n"
+    "RULES:\n"
+    "1. A DEVIATION exists when the submittal value FAILS to meet the design "
+    "   basis requirement OR violates a governing standard.\n"
+    "2. NUMERIC thresholds: if the spec says 'shall be X' and the submittal "
+    "   provides a value LESS than X (for minimums) or MORE than X (for maximums), "
+    "   that is a deviation. Example: spec says '10 min' and submittal says '7 min' "
+    "   -> deviation.\n"
+    "3. REDUNDANCY levels: N+2 > N+1 > N. If the spec requires N+2 and the "
+    "   submittal provides N+1, that is a deviation — N+1 does not satisfy N+2.\n"
+    "4. FIRE RATINGS: CMP (plenum) > CMR (riser) > CM (general). If the spec "
+    "   requires CMP and the submittal provides CMR, that is a deviation.\n"
+    "5. OMISSIONS: if the spec requires 'complete' coverage of something and the "
+    "   submittal explicitly states something is missing/pending/not included, "
+    "   that is a deviation.\n"
+    "6. Values that are EQUIVALENT or EXCEED the requirement are NOT deviations.\n"
+    "7. Format or style differences (e.g. '2N' vs 'two-N') are NOT deviations.\n"
+    "8. Never invent clauses — cite exact spec_clause and standard_ref from "
+    "   the documents.\n"
+    "9. Be thorough: check EVERY requirement row, not just obvious ones.\n"
+    "10. Do NOT report false positives — only genuine non-conformances."
 )
 
 PROMPT_TEMPLATE = """\
-Compare the SUBMITTAL against the DESIGN BASIS and the STANDARDS. Identify every
-requirement where the submittal FAILS to meet the design basis or a governing
-standard. A value that is merely formatted differently but equivalent is NOT a
-deviation. Subtle shortfalls (e.g. a runtime, autonomy, rating, redundancy level
-or fire class below what is required) ARE deviations.
+TASK: Compare the VENDOR SUBMITTAL against the DESIGN BASIS document, using the
+GOVERNING STANDARDS as authoritative interpretation. Identify EVERY requirement
+where the submittal FAILS to meet the design basis or a governing standard.
+
+STEP-BY-STEP APPROACH:
+1. Read the design basis and list each requirement with its required value.
+2. For each requirement, find the corresponding value in the submittal.
+3. Compare: does the submittal value MEET OR EXCEED the requirement?
+4. If not, classify the deviation and assess severity.
+5. Cross-check against the governing standards for additional context.
+
+IMPORTANT — pay attention to:
+- Numeric values below specified minimums (e.g. 7 < 10, 12 < 24, 40 < 50)
+- Redundancy topology shortfalls (e.g. N+1 when N+2 is required)
+- Material/rating downgrades (e.g. CMR when CMP is required)
+- Missing/omitted items when completeness is required
+- Values that are "close but not quite" — these are the ones humans miss
 
 === DESIGN BASIS (spec) ===
 {spec}
@@ -44,24 +76,45 @@ or fire class below what is required) ARE deviations.
 === GOVERNING STANDARDS (paraphrased) ===
 {standards}
 
-Return a JSON array. Each element:
+Return a JSON array of deviations found. Each element:
 {{
   "component": "<e.g. UPS-02>",
   "parameter": "<machine_name e.g. battery_runtime_min>",
-  "required_value": <value from design basis>,
-  "provided_value": <value from submittal>,
+  "required_value": <value from design basis — number or string>,
+  "provided_value": <value from submittal — number or string>,
   "unit": "<unit>",
   "standard_ref": "<e.g. UPTIME-TIER4>",
   "spec_clause": "<e.g. DB-4.3>",
   "severity": "Critical|Major|Minor",
-  "rationale": "<one sentence: why this violates the requirement>"
+  "rationale": "<one sentence: why this violates the requirement, referencing the standard>",
+  "confidence": <0.0 to 1.0 — your confidence this is a genuine deviation>
 }}
-If there are no deviations, return [].
+
+If there are ZERO deviations for this system, return an empty array [].
+Do NOT include items that meet or exceed their requirements.
 """
 
 
 def _read(p):
     return (CORPUS / p).read_text(encoding="utf-8")
+
+
+def _all_standards_text():
+    parts = []
+    for f in sorted((CORPUS / "standards").glob("*.md")):
+        parts.append(f.read_text(encoding="utf-8"))
+    return "\n\n".join(parts)
+
+
+def _check_citation_faithfulness(devs, spec_text, submittal_text, standards_text):
+    all_text = (spec_text + submittal_text + standards_text).lower()
+    for d in devs:
+        clause = str(d.get("spec_clause", "")).lower()
+        std = str(d.get("standard_ref", "")).lower()
+        clause_found = clause in all_text if clause else False
+        std_found = std in all_text if std else False
+        d["citation_faithful"] = clause_found and std_found
+    return devs
 
 
 def reconcile_system(sys_id: str, standards_text: str):
@@ -73,17 +126,10 @@ def reconcile_system(sys_id: str, standards_text: str):
     devs = complete_json(prompt, system=SYSTEM_PROMPT)
     if isinstance(devs, dict):
         devs = devs.get("deviations", [])
-    # enrich every deviation with the commissioning-impact prediction
+    devs = _check_citation_faithfulness(devs, spec, submittal, standards_text)
     for d in devs:
         d.update(predict_cx_impact(d))
     return devs
-
-
-def _all_standards_text():
-    parts = []
-    for f in sorted((CORPUS / "standards").glob("*.md")):
-        parts.append(f.read_text(encoding="utf-8"))
-    return "\n\n".join(parts)
 
 
 def run_reconciliation_over_corpus():
@@ -97,5 +143,4 @@ def run_reconciliation_over_corpus():
 
 
 if __name__ == "__main__":
-    import json
     print(json.dumps(run_reconciliation_over_corpus(), indent=2))

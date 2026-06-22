@@ -4,16 +4,16 @@ Eval harness — scores a detector's deviation findings against ground_truth.jso
 Usage:
     python3 eval/run_eval.py                 # scores the deterministic baseline
     python3 eval/run_eval.py --detector llm  # scores the LLM agent (needs GEMINI key)
+    python3 eval/run_eval.py --json          # output as JSON for the metrics endpoint
 
 Reports precision / recall / F1 on deviation DETECTION, plus accuracy of the
-commissioning-test PREDICTION on the true positives. These are the exact metrics
-the PS4 evaluation focus asks for ("specification compliance detection accuracy
-on test cases").
+commissioning-test PREDICTION, citation faithfulness, and lead-time stats.
 """
 
 import argparse
 import json
 import pathlib
+import time
 
 CORPUS = pathlib.Path(__file__).parent.parent / "data" / "corpus"
 
@@ -41,7 +41,6 @@ def score(findings, ground_truth):
     f1 = (2 * precision * recall / (precision + recall)
           if (precision + recall) else 0.0)
 
-    # commissioning-test prediction accuracy on the true positives
     found_by_key = {key(f): f for f in findings}
     cx_correct = sum(
         1 for k in tp
@@ -49,10 +48,27 @@ def score(findings, ground_truth):
     )
     cx_acc = cx_correct / len(tp) if tp else 0.0
 
+    faithful = sum(
+        1 for f in findings
+        if f.get("citation_faithful", True)
+    )
+    faith_pct = faithful / len(findings) if findings else 0.0
+
+    lead_times = [
+        found_by_key[k].get("lead_time_weeks")
+        for k in tp
+        if found_by_key[k].get("lead_time_weeks") is not None
+    ]
+    mean_lead = sum(lead_times) / len(lead_times) if lead_times else 0
+    max_lead = max(lead_times) if lead_times else 0
+
     return {
         "tp": sorted(tp), "fp": sorted(fp), "fn": sorted(fn),
         "precision": precision, "recall": recall, "f1": f1,
         "cx_prediction_accuracy": cx_acc,
+        "citation_faithfulness": faith_pct,
+        "mean_lead_time_weeks": mean_lead,
+        "max_lead_time_weeks": max_lead,
     }
 
 
@@ -61,7 +77,6 @@ def get_findings(detector):
         from eval.baseline_reconciler import reconcile
         return reconcile()
     elif detector == "llm":
-        # Drop-in: the real agent path. Requires GEMINI_API_KEY.
         import sys
         sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))
         from backend.agents.reconciliation import run_reconciliation_over_corpus
@@ -73,24 +88,47 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--detector", default="baseline",
                     choices=["baseline", "llm"])
+    ap.add_argument("--json", action="store_true",
+                    help="Output results as JSON")
     args = ap.parse_args()
 
     gt = load_ground_truth()
+    t0 = time.time()
     findings = get_findings(args.detector)
+    elapsed = time.time() - t0
     r = score(findings, gt)
 
-    print(f"\n=== Pramaan deviation-detection eval [{args.detector}] ===")
-    print(f"ground-truth deviations : {len(gt)}")
-    print(f"findings                : {len(findings)}")
-    print(f"true positives          : {len(r['tp'])}  {r['tp']}")
-    print(f"false positives         : {len(r['fp'])}  {r['fp']}")
-    print(f"false negatives         : {len(r['fn'])}  {r['fn']}")
-    print(f"-----------------------------------------------")
-    print(f"precision               : {r['precision']:.3f}")
-    print(f"recall                  : {r['recall']:.3f}")
-    print(f"F1                      : {r['f1']:.3f}")
-    print(f"cx-test prediction acc  : {r['cx_prediction_accuracy']:.3f}")
-    print(f"===============================================\n")
+    if args.json:
+        print(json.dumps({
+            "detector": args.detector,
+            "elapsed_seconds": round(elapsed, 2),
+            **{k: v for k, v in r.items() if k not in ("tp", "fp", "fn")},
+            "tp": [list(k) for k in r["tp"]],
+            "fp": [list(k) for k in r["fp"]],
+            "fn": [list(k) for k in r["fn"]],
+        }, indent=2))
+        return
+
+    print(f"\n{'='*55}")
+    print(f"  PRAMAAN DEVIATION-DETECTION EVAL [{args.detector.upper()}]")
+    print(f"{'='*55}")
+    print(f"  ground-truth deviations : {len(gt)}")
+    print(f"  findings                : {len(findings)}")
+    print(f"  elapsed                 : {elapsed:.1f}s")
+    print(f"{'~'*55}")
+    print(f"  true positives          : {len(r['tp'])}  {r['tp']}")
+    print(f"  false positives         : {len(r['fp'])}  {r['fp']}")
+    print(f"  false negatives         : {len(r['fn'])}  {r['fn']}")
+    print(f"{'~'*55}")
+    print(f"  PRECISION               : {r['precision']:.3f}")
+    print(f"  RECALL                  : {r['recall']:.3f}")
+    print(f"  F1                      : {r['f1']:.3f}")
+    print(f"{'~'*55}")
+    print(f"  Cx-test prediction acc  : {r['cx_prediction_accuracy']:.3f}")
+    print(f"  Citation faithfulness   : {r['citation_faithfulness']:.3f}")
+    print(f"  Mean lead time          : {r['mean_lead_time_weeks']:.1f} weeks")
+    print(f"  Max lead time           : {r['max_lead_time_weeks']} weeks")
+    print(f"{'='*55}\n")
 
 
 if __name__ == "__main__":

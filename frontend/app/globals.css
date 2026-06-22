@@ -1,0 +1,103 @@
+:root {
+  /* control-room graphite */
+  --bg: #0c0f13;
+  --panel: #141921;
+  --panel-2: #1b2230;
+  --line: #28303d;
+  --ink: #e7ecf3;
+  --muted: #8a96a8;
+  /* signal colours */
+  --fault: #ff4d4d;       /* Critical */
+  --warn: #ffb020;        /* Major */
+  --ok: #35c98b;          /* compliant */
+  --lead: #36d6e7;        /* the hero metric: lead time */
+  --accent: #5b8cff;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --sans: ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: radial-gradient(1200px 600px at 70% -10%, #131a24 0%, var(--bg) 55%);
+  color: var(--ink);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 1100px; margin: 0 auto; padding: 28px 22px 80px; }
+
+.topbar {
+  display: flex; align-items: baseline; gap: 14px;
+  border-bottom: 1px solid var(--line); padding-bottom: 14px; margin-bottom: 26px;
+}
+.brand { font-family: var(--mono); font-weight: 700; letter-spacing: .18em;
+  font-size: 14px; color: var(--ink); }
+.brand b { color: var(--lead); }
+.project { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.spacer { flex: 1; }
+.tier { font-family: var(--mono); font-size: 11px; color: var(--warn);
+  border: 1px solid var(--line); padding: 3px 8px; border-radius: 4px; }
+
+/* ---- the SIGNATURE: the firing card ---- */
+.sentinel {
+  background: linear-gradient(180deg, #1a1116 0%, var(--panel) 60%);
+  border: 1px solid #3a1f24; border-left: 3px solid var(--fault);
+  border-radius: 10px; padding: 22px 24px; margin-bottom: 30px;
+}
+.sentinel .eyebrow {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .16em;
+  color: var(--fault); text-transform: uppercase; margin-bottom: 10px;
+}
+.sentinel h1 {
+  font-size: 26px; line-height: 1.25; margin: 0 0 6px; font-weight: 650;
+}
+.sentinel .sub { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+
+.leadrow { display: flex; align-items: flex-end; gap: 26px; flex-wrap: wrap; }
+.leadnum { font-family: var(--mono); font-size: 64px; line-height: .9;
+  color: var(--lead); font-weight: 700; }
+.leadnum span { font-size: 18px; color: var(--muted); margin-left: 6px; }
+.leadlabel { font-size: 13px; color: var(--muted); max-width: 260px; }
+
+/* commissioning timeline strip — encodes the whole thesis */
+.timeline { margin-top: 22px; }
+.track { position: relative; height: 6px; background: var(--panel-2);
+  border-radius: 3px; }
+.track .fill { position: absolute; left: 0; top: 0; bottom: 0;
+  background: linear-gradient(90deg, var(--lead), #2a93a0); border-radius: 3px; }
+.ticks { display: flex; justify-content: space-between; margin-top: 8px;
+  font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.tick b { color: var(--ink); }
+.tick.fail b { color: var(--fault); }
+
+/* citation chain */
+.chain { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px;
+  margin-top: 22px; background: var(--line); border: 1px solid var(--line);
+  border-radius: 8px; overflow: hidden; }
+.chain .cell { background: var(--panel); padding: 12px 14px; }
+.chain .k { font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
+  color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
+.chain .v { font-size: 14px; }
+.chain .v .ref { font-family: var(--mono); font-size: 11px; color: var(--accent);
+  display: block; margin-top: 4px; }
+
+/* ---- register table ---- */
+h2.section { font-size: 13px; font-family: var(--mono); letter-spacing: .14em;
+  color: var(--muted); text-transform: uppercase; margin: 0 0 12px; }
+table.reg { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.reg th { text-align: left; font-family: var(--mono); font-size: 10px;
+  letter-spacing: .1em; color: var(--muted); text-transform: uppercase;
+  padding: 8px 10px; border-bottom: 1px solid var(--line); }
+table.reg td { padding: 11px 10px; border-bottom: 1px solid var(--line);
+  vertical-align: top; }
+table.reg tr:hover td { background: var(--panel); }
+.sev { font-family: var(--mono); font-size: 11px; padding: 2px 7px;
+  border-radius: 4px; }
+.sev.Critical { color: var(--fault); border: 1px solid #50232a; }
+.sev.Major { color: var(--warn); border: 1px solid #4d3a16; }
+.val { font-family: var(--mono); }
+.val .bad { color: var(--fault); }
+.val .good { color: var(--muted); }
+.lead-cell { font-family: var(--mono); color: var(--lead); font-weight: 600; }
+.cx { font-family: var(--mono); font-size: 11px; color: var(--accent); }

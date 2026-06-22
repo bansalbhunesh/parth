@@ -1,0 +1,14 @@
+# secrets
+.env
+.env.*
+*.key
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+# node
+node_modules/
+.next/
+# data artifacts (regenerate via data/generate_corpus.py)
+data/corpus/

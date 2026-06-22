@@ -7,6 +7,8 @@ const PRESETS = [
   "Has the UPS battery runtime issue come up before?",
   "What is the required cooling redundancy for Tier IV?",
   "Which deviations will fail during IST testing?",
+  "What are the seismic requirements for the structural system?",
+  "Summarize all critical findings and their lead times",
 ];
 
 export default function CopilotPanel() {
@@ -19,12 +21,13 @@ export default function CopilotPanel() {
     if (!actualQuery.trim()) return;
     setLoading(true);
     setQuery(actualQuery);
+    setResponse(null);
     try {
       const res = await askCopilot(actualQuery);
       setResponse(res);
     } catch {
       setResponse({
-        answer: "Error connecting to backend. Ensure the API is running.",
+        answer: "Error connecting to backend. Ensure the API is running at localhost:8000.",
         sources: [],
         prior_rfis: [],
       });
@@ -61,11 +64,18 @@ export default function CopilotPanel() {
           onClick={() => handleSubmit(query)}
           disabled={loading}
         >
-          {loading ? "..." : "Ask"}
+          {loading ? "Searching..." : "Ask"}
         </button>
       </div>
 
-      {response && (
+      {loading && (
+        <div className="copilot-loading">
+          <div className="copilot-loading-bar" />
+          <span>Searching across specs, submittals, standards, and RFI log...</span>
+        </div>
+      )}
+
+      {response && !loading && (
         <div className="copilot-response">
           <div className="copilot-answer">{response.answer}</div>
           {response.sources.length > 0 && (

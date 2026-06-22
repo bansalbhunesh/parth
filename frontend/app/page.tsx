@@ -3,15 +3,23 @@ import DeviationRegister from "../components/DeviationRegister";
 import CommissioningTwin from "../components/CommissioningTwin";
 import CopilotPanel from "../components/CopilotPanel";
 import StatsBar from "../components/StatsBar";
+import PipelineViz from "../components/PipelineViz";
+import RiskMatrix from "../components/RiskMatrix";
+import NavBar from "../components/NavBar";
+import ScrollReveal from "../components/ScrollReveal";
 
 function Sentinel({ d }: { d: Deviation }) {
   const span = 52;
   const caught = (d.week_caught / span) * 100;
   const fail = ((d.week_fail ?? span) / span) * 100;
   return (
-    <section className="sentinel">
+    <section className="sentinel" id="sentinel">
       <div className="sentinel-glow" />
-      <div className="eyebrow">DEVIATION SENTINEL — {d.severity.toUpperCase()}</div>
+      <div className="sentinel-scan" />
+      <div className="eyebrow">
+        <span className="eyebrow-dot" />
+        DEVIATION SENTINEL — {d.severity.toUpperCase()}
+      </div>
       <h1>
         {d.component}: {d.parameter.replace(/_/g, " ")} — {d.provided_value}{" "}
         {d.unit} vs {d.required_value} {d.unit} required
@@ -96,16 +104,16 @@ function Sentinel({ d }: { d: Deviation }) {
 
 function SystemHealthGrid({ rows }: { rows: Deviation[] }) {
   const systems = [
-    { id: "UPS", label: "UPS & Battery", icon: "+" },
-    { id: "GEN", label: "Generators", icon: "G" },
-    { id: "COOL", label: "Cooling", icon: "~" },
-    { id: "SWGR", label: "Switchgear", icon: "#" },
-    { id: "CABLE", label: "Cabling", icon: "|" },
-    { id: "BMS", label: "BMS/EPMS", icon: "@" },
-    { id: "FIRE", label: "Fire Suppression", icon: "!" },
-    { id: "BUSWAY", label: "Busway", icon: "=" },
-    { id: "PDU", label: "PDU", icon: ">" },
-    { id: "STRUCT", label: "Structural", icon: "^" },
+    { id: "UPS", label: "UPS & Battery", icon: "⚡" },
+    { id: "GEN", label: "Generators", icon: "🔋" },
+    { id: "COOL", label: "Cooling", icon: "❄️" },
+    { id: "SWGR", label: "Switchgear", icon: "🔌" },
+    { id: "CABLE", label: "Cabling", icon: "🔗" },
+    { id: "BMS", label: "BMS/EPMS", icon: "📡" },
+    { id: "FIRE", label: "Fire Suppression", icon: "🔥" },
+    { id: "BUSWAY", label: "Busway", icon: "⏚" },
+    { id: "PDU", label: "PDU", icon: "🔧" },
+    { id: "STRUCT", label: "Structural", icon: "🏗️" },
   ];
 
   const devsBySys: Record<string, Deviation[]> = {};
@@ -122,27 +130,49 @@ function SystemHealthGrid({ rows }: { rows: Deviation[] }) {
 
   return (
     <div className="health-grid">
-      {systems.map((s) => {
+      {systems.map((s, i) => {
         const devs = devsBySys[s.id] || [];
         const hasCritical = devs.some((d) => d.severity === "Critical");
         const hasMajor = devs.some((d) => d.severity === "Major");
         const status = hasCritical ? "critical" : hasMajor ? "major" : "ok";
         return (
-          <div key={s.id} className={`health-card ${status}`}>
-            <div className="health-icon">{s.icon}</div>
-            <div className="health-label">{s.label}</div>
-            <div className="health-status">
-              {devs.length === 0 ? (
-                <span className="health-ok">COMPLIANT</span>
-              ) : (
-                <span className={`health-alert ${status}`}>
-                  {devs.length} {devs.length === 1 ? "finding" : "findings"}
-                </span>
+          <ScrollReveal key={s.id} delay={i * 60}>
+            <div className={`health-card ${status}`}>
+              <div className="health-icon">{s.icon}</div>
+              <div className="health-label">{s.label}</div>
+              <div className="health-status">
+                {devs.length === 0 ? (
+                  <span className="health-ok">COMPLIANT</span>
+                ) : (
+                  <span className={`health-alert ${status}`}>
+                    {devs.length} {devs.length === 1 ? "finding" : "findings"}
+                  </span>
+                )}
+              </div>
+              {devs.length > 0 && (
+                <div className="health-lead">
+                  {Math.max(...devs.map((d) => d.lead_time_weeks ?? 0))}w lead
+                </div>
               )}
             </div>
-          </div>
+          </ScrollReveal>
         );
       })}
+    </div>
+  );
+}
+
+function TotalSavingsHero() {
+  return (
+    <div className="savings-hero">
+      <div className="savings-glow" />
+      <div className="savings-number">144</div>
+      <div className="savings-unit">total weeks of lead time saved</div>
+      <div className="savings-sub">
+        6 deviations caught at Week 11 — before a single bolt turns on site.
+        That&apos;s 144 weeks of avoided commissioning rework, schedule delays,
+        and cost overruns across all findings.
+      </div>
     </div>
   );
 }
@@ -163,12 +193,18 @@ export default async function Page() {
 
   return (
     <main className="wrap">
+      <NavBar />
+
       <div className="topbar">
         <div className="brand">
           PRA<b>MAAN</b>
         </div>
         <div className="project">Project Meghdoot &middot; 40 MW &middot; Navi Mumbai</div>
         <div className="spacer" />
+        <div className="live-badge">
+          <span className="live-dot" />
+          LIVE
+        </div>
         <div className="tier">UPTIME TIER IV</div>
       </div>
 
@@ -183,31 +219,58 @@ export default async function Page() {
 
       {hero && <Sentinel d={hero} />}
 
+      <ScrollReveal>
+        <TotalSavingsHero />
+      </ScrollReveal>
+
+      <h2 className="section" id="pipeline">
+        AI agent pipeline &middot; 5 agents &middot; narratable in 60 seconds
+      </h2>
+      <ScrollReveal>
+        <PipelineViz />
+      </ScrollReveal>
+
       <h2 className="section" id="systems">
         System health overview &middot; {10} systems
       </h2>
       <SystemHealthGrid rows={rows} />
 
+      <h2 className="section" id="risk">
+        Risk matrix &middot; severity × lead time
+      </h2>
+      <ScrollReveal>
+        <RiskMatrix rows={rows} />
+      </ScrollReveal>
+
       <h2 className="section" id="register">
         Deviation register &middot; {rows.length} findings &middot; {critical}{" "}
         critical
       </h2>
-      <DeviationRegister rows={rows} />
+      <ScrollReveal>
+        <DeviationRegister rows={rows} />
+      </ScrollReveal>
 
       <h2 className="section" id="twin">
         Commissioning risk twin &middot; L1&ndash;L5 test schedule
       </h2>
-      {cxPlan && <CommissioningTwin cxPlan={cxPlan} deviations={rows} />}
+      <ScrollReveal>
+        {cxPlan && <CommissioningTwin cxPlan={cxPlan} deviations={rows} />}
+      </ScrollReveal>
 
       <h2 className="section" id="copilot">
         Project copilot &middot; RAG over specs, submittals, standards &amp; RFIs
       </h2>
-      <CopilotPanel />
+      <ScrollReveal>
+        <CopilotPanel />
+      </ScrollReveal>
 
       <div className="footer">
         <div className="footer-brand">PRA<b>MAAN</b></div>
         <div className="footer-sub">
           EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4
+        </div>
+        <div className="footer-meta">
+          5 AI Agents &middot; 10 Systems &middot; 33 Requirements &middot; 6 Deviations &middot; 144 Weeks Saved
         </div>
       </div>
     </main>

@@ -197,6 +197,7 @@ def export_audit_html():
     rows_html = ""
     for i, d in enumerate(data["evidence"], 1):
         sev_color = "#ff4d4d" if d.get("severity") == "Critical" else "#ffb020"
+        rationale = d.get("rationale", "")
         rows_html += f"""
         <tr>
             <td>{i}</td>
@@ -209,51 +210,110 @@ def export_audit_html():
             <td>{d.get('predicted_cx_test','—')}</td>
             <td><b>{d.get('lead_time_weeks','—')}w</b></td>
             <td style="color:{sev_color}"><b>{d.get('severity','')}</b></td>
-        </tr>"""
+        </tr>
+        <tr class="rationale-row"><td colspan="10">{rationale}</td></tr>"""
+
+    lead_times = [d.get("lead_time_weeks", 0) for d in data["evidence"]]
+    total_lead = sum(lead_times)
+    max_lead = max(lead_times) if lead_times else 0
+    bar_html = ""
+    for d in data["evidence"]:
+        lt = d.get("lead_time_weeks", 0)
+        pct = (lt / max_lead * 100) if max_lead else 0
+        sev_color = "#ff4d4d" if d.get("severity") == "Critical" else "#ffb020"
+        bar_html += f"""<div class="bar-row">
+          <span class="bar-label">{d.get('component','')}</span>
+          <div class="bar-track"><div class="bar-fill" style="width:{pct}%;background:{sev_color}"></div></div>
+          <span class="bar-val">{lt}w</span>
+        </div>"""
 
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8">
 <title>Pramaan Compliance Evidence Pack — {data['project']}</title>
 <style>
-body {{ font-family: -apple-system, system-ui, sans-serif; margin: 40px; background: #fafbfc; color: #1a1a2e; }}
-h1 {{ color: #0c0f13; border-bottom: 3px solid #36d6e7; padding-bottom: 10px; }}
-h2 {{ color: #333; margin-top: 30px; }}
-table {{ border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 13px; }}
-th {{ background: #0c0f13; color: #e7ecf3; padding: 10px 8px; text-align: left; font-size: 11px;
-     text-transform: uppercase; letter-spacing: 0.05em; }}
-td {{ padding: 10px 8px; border-bottom: 1px solid #e0e0e0; }}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+body {{ font-family: 'Inter', -apple-system, system-ui, sans-serif; margin: 0; background: #fafbfc; color: #1a1a2e; }}
+.header {{ background: linear-gradient(135deg, #0c0f13 0%, #1a2233 100%); color: #e7ecf3;
+  padding: 40px; margin-bottom: 32px; }}
+.header h1 {{ font-family: 'JetBrains Mono', monospace; font-size: 28px; margin: 0 0 8px;
+  letter-spacing: 0.05em; }}
+.header h1 span {{ color: #36d6e7; }}
+.header p {{ color: #7a8899; font-size: 14px; margin: 0; }}
+.content {{ max-width: 1100px; margin: 0 auto; padding: 0 40px 60px; }}
+h2 {{ color: #333; margin-top: 36px; font-size: 16px; letter-spacing: 0.03em;
+  border-bottom: 2px solid #e0e0e0; padding-bottom: 8px; }}
+table {{ border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 12px; }}
+th {{ background: #0c0f13; color: #e7ecf3; padding: 10px 8px; text-align: left; font-size: 10px;
+     text-transform: uppercase; letter-spacing: 0.05em; font-family: 'JetBrains Mono', monospace; }}
+td {{ padding: 10px 8px; border-bottom: 1px solid #e0e0e0; vertical-align: top; }}
 tr:hover td {{ background: #f0f4ff; }}
-.meta {{ display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin: 20px 0; }}
-.meta-card {{ background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; }}
-.meta-card h3 {{ margin: 0 0 8px; font-size: 13px; color: #666; text-transform: uppercase; }}
-.meta-card .val {{ font-size: 28px; font-weight: 700; color: #0c0f13; }}
+.rationale-row td {{ font-size: 11px; color: #666; font-style: italic;
+  padding: 4px 8px 12px 32px; border-bottom: 2px solid #e8e8e8; }}
+.meta {{ display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin: 24px 0; }}
+.meta-card {{ background: white; border: 1px solid #e0e0e0; border-radius: 8px;
+  padding: 16px; text-align: center; }}
+.meta-card h3 {{ margin: 0 0 6px; font-size: 10px; color: #888;
+  text-transform: uppercase; letter-spacing: 0.08em; font-family: 'JetBrains Mono', monospace; }}
+.meta-card .val {{ font-size: 32px; font-weight: 800; color: #0c0f13;
+  font-family: 'JetBrains Mono', monospace; }}
 .meta-card .val.critical {{ color: #ff4d4d; }}
 .meta-card .val.lead {{ color: #0891b2; }}
-.footer {{ margin-top: 40px; padding-top: 20px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #888; }}
+.meta-card .val.total {{ color: #36d6e7; }}
+.bar-chart {{ margin: 20px 0; }}
+.bar-row {{ display: flex; align-items: center; gap: 8px; margin: 6px 0; }}
+.bar-label {{ width: 80px; font-size: 11px; font-weight: 600;
+  font-family: 'JetBrains Mono', monospace; text-align: right; }}
+.bar-track {{ flex: 1; height: 20px; background: #f0f0f0; border-radius: 4px; overflow: hidden; }}
+.bar-fill {{ height: 100%; border-radius: 4px; transition: width 0.3s; }}
+.bar-val {{ width: 40px; font-size: 12px; font-weight: 700;
+  font-family: 'JetBrains Mono', monospace; color: #0891b2; }}
+.standards {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }}
+.std {{ background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px;
+  padding: 10px; font-size: 12px; }}
+.footer {{ margin-top: 48px; padding: 24px 40px; border-top: 2px solid #e0e0e0;
+  font-size: 11px; color: #888; text-align: center; background: #f8f9fa; }}
+@media print {{
+  body {{ margin: 0; }}
+  .header {{ break-after: avoid; }}
+  table {{ font-size: 10px; }}
+  tr {{ break-inside: avoid; }}
+}}
 </style></head><body>
-<h1>Pramaan Compliance Evidence Pack</h1>
-<p><b>Project:</b> {data['project']} &middot; <b>Tier:</b> {data['tier']} &middot;
-<b>Location:</b> {data['location']} &middot; <b>Generated:</b> Week {data['generated_week']}</p>
-
+<div class="header">
+  <h1>PRA<span>MAAN</span> Compliance Evidence Pack</h1>
+  <p>{data['project']} &middot; {data['tier']} &middot; {data['location']} &middot; Generated Week {data['generated_week']}</p>
+</div>
+<div class="content">
 <div class="meta">
   <div class="meta-card">
     <h3>Total Deviations</h3>
     <div class="val critical">{data['summary']['total_deviations']}</div>
   </div>
   <div class="meta-card">
-    <h3>Critical Findings</h3>
+    <h3>Critical</h3>
     <div class="val critical">{data['summary']['critical']}</div>
   </div>
   <div class="meta-card">
+    <h3>Major</h3>
+    <div class="val" style="color:#ffb020">{data['summary']['major']}</div>
+  </div>
+  <div class="meta-card">
     <h3>Max Lead Time</h3>
-    <div class="val lead">{data['summary']['max_lead_time_weeks']} weeks</div>
+    <div class="val lead">{data['summary']['max_lead_time_weeks']}w</div>
+  </div>
+  <div class="meta-card">
+    <h3>Total Savings</h3>
+    <div class="val total">{total_lead}w</div>
   </div>
 </div>
 
-<h2>Standards Basis</h2>
-<ul>{''.join(f'<li>{s}</li>' for s in data['standard_basis'])}</ul>
+<h2>Lead Time by Deviation</h2>
+<div class="bar-chart">{bar_html}</div>
 
-<h2>Deviation Register</h2>
+<h2>Standards Basis</h2>
+<div class="standards">{''.join(f'<div class="std">{s}</div>' for s in data['standard_basis'])}</div>
+
+<h2>Deviation Register with AI Rationale</h2>
 <table>
 <thead><tr>
   <th>#</th><th>Component</th><th>Parameter</th><th>Required</th><th>Provided</th>
@@ -261,10 +321,11 @@ tr:hover td {{ background: #f0f4ff; }}
 </tr></thead>
 <tbody>{rows_html}</tbody>
 </table>
+</div>
 
 <div class="footer">
-  Generated by <b>Pramaan</b> — EPC Deviation Intelligence &middot;
-  This is an automated compliance evidence pack. All findings are traceable to
-  source documents via the citation chain.
+  Generated by <b>Pramaan</b> — EPC Deviation Intelligence<br>
+  All findings are traceable to source documents via the citation chain.
+  Total lead time savings: <b>{total_lead} weeks</b> of avoided commissioning rework.
 </div>
 </body></html>"""

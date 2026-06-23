@@ -7,6 +7,11 @@ import PipelineViz from "../components/PipelineViz";
 import RiskMatrix from "../components/RiskMatrix";
 import NavBar from "../components/NavBar";
 import ScrollReveal from "../components/ScrollReveal";
+import EvalDashboard from "../components/EvalDashboard";
+import StandardsKB from "../components/StandardsKB";
+import ExportButton from "../components/ExportButton";
+import AcademicRefs from "../components/AcademicRefs";
+import ScaleStory from "../components/ScaleStory";
 
 function Sentinel({ d }: { d: Deviation }) {
   const span = 52;
@@ -201,6 +206,7 @@ export default async function Page() {
         </div>
         <div className="project">Project Meghdoot &middot; 40 MW &middot; Navi Mumbai</div>
         <div className="spacer" />
+        <ExportButton />
         <div className="live-badge">
           <span className="live-dot" />
           LIVE
@@ -257,11 +263,39 @@ export default async function Page() {
         {cxPlan && <CommissioningTwin cxPlan={cxPlan} deviations={rows} />}
       </ScrollReveal>
 
+      <h2 className="section" id="standards">
+        Standards knowledge base &middot; 7 governing standards
+      </h2>
+      <ScrollReveal>
+        <StandardsKB />
+      </ScrollReveal>
+
+      <h2 className="section" id="eval">
+        Eval harness &middot; precision &middot; recall &middot; F1
+      </h2>
+      <ScrollReveal>
+        <EvalDashboard />
+      </ScrollReveal>
+
+      <h2 className="section" id="scale">
+        Scale story &middot; 10 systems → 14,000 line items
+      </h2>
+      <ScrollReveal>
+        <ScaleStory />
+      </ScrollReveal>
+
       <h2 className="section" id="copilot">
         Project copilot &middot; RAG over specs, submittals, standards &amp; RFIs
       </h2>
       <ScrollReveal>
         <CopilotPanel />
+      </ScrollReveal>
+
+      <h2 className="section" id="refs">
+        Academic references &middot; peer-reviewed foundations
+      </h2>
+      <ScrollReveal>
+        <AcademicRefs />
       </ScrollReveal>
 
       <div className="footer">

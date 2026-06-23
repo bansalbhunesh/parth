@@ -6,10 +6,14 @@ const SECTIONS = [
   { id: "sentinel", label: "Sentinel" },
   { id: "pipeline", label: "Pipeline" },
   { id: "systems", label: "Systems" },
-  { id: "risk", label: "Risk Matrix" },
+  { id: "risk", label: "Risk" },
   { id: "register", label: "Register" },
   { id: "twin", label: "Cx Twin" },
+  { id: "standards", label: "Standards" },
+  { id: "eval", label: "Eval" },
+  { id: "scale", label: "Scale" },
   { id: "copilot", label: "Copilot" },
+  { id: "refs", label: "Research" },
 ];
 
 export default function NavBar() {

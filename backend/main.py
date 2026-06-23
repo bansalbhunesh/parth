@@ -26,8 +26,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
-from backend.orchestrator import run_pipeline
+from backend.orchestrator import run_pipeline, run_full_pipeline
 from backend.agents.rfi_copilot import ask
+from backend.agents.ingestion import ingest_corpus
 
 logging.basicConfig(
     level=logging.INFO,
@@ -38,7 +39,7 @@ log = logging.getLogger("pramaan.api")
 
 CORPUS = pathlib.Path(__file__).parent.parent / "data" / "corpus"
 
-VALID_SYSTEMS = None
+VALID_SYSTEMS: set[str] | None = None
 
 def _get_valid_systems() -> set[str]:
     global VALID_SYSTEMS
@@ -395,3 +396,44 @@ tr:hover td {{ background: #f0f4ff; }}
   Total lead time savings: <b>{total_lead} weeks</b> of avoided commissioning rework.
 </div>
 </body></html>"""
+
+
+@app.get("/pipeline")
+def pipeline_info():
+    return {
+        "name": "Pramaan 5-Agent Pipeline",
+        "framework": "LangGraph",
+        "nodes": [
+            {"id": "ingest", "agent": "Ingestion Agent", "description": "Document intake, parsing, normalization"},
+            {"id": "load_standards", "agent": "Standards Loader", "description": "Load governing standards corpus"},
+            {"id": "reconcile", "agent": "Reconciliation Agent", "description": "Cross-document deviation reasoning"},
+            {"id": "cx_predict", "agent": "Cx Predictor", "description": "Map deviations to commissioning tests"},
+            {"id": "format_output", "agent": "Output Formatter", "description": "Enrich and structure findings"},
+        ],
+        "edges": [
+            ["ingest", "load_standards"],
+            ["load_standards", "reconcile"],
+            ["reconcile", "cx_predict"],
+            ["cx_predict", "format_output"],
+        ],
+        "separate_agents": [
+            {"id": "extraction", "agent": "Extraction Agent", "description": "Raw document to structured triples"},
+            {"id": "rfi_copilot", "agent": "RFI Copilot", "description": "RAG over project corpus with prior-RFI matching"},
+        ],
+    }
+
+
+@app.get("/corpus/stats")
+def corpus_stats():
+    result = ingest_corpus()
+    standards_dir = CORPUS / "standards"
+    total_lines = 0
+    if standards_dir.exists():
+        for f in standards_dir.glob("*.md"):
+            total_lines += f.read_text().count("\n")
+    return {
+        "total_systems": result["total_systems"],
+        "total_standards": result["total_standards"],
+        "total_documents": result["total_documents"],
+        "standards_lines": total_lines,
+    }

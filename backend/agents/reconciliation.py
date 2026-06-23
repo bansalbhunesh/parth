@@ -18,8 +18,6 @@ from backend.agents.commissioning import predict_cx_impact
 log = logging.getLogger("pramaan.reconciliation")
 CORPUS = pathlib.Path(__file__).parent.parent.parent / "data" / "corpus"
 
-REQUIRED_DEV_KEYS = {"component", "parameter", "required_value", "provided_value"}
-
 SYSTEM_PROMPT = (
     "You are a senior data-centre commissioning authority (CxA) with 20+ years "
     "of experience reviewing EPC submittals for hyperscale facilities against "
@@ -121,6 +119,9 @@ def _check_citation_faithfulness(devs, spec_text, submittal_text, standards_text
     return devs
 
 
+REQUIRED_DEV_KEYS = {"component", "parameter", "required_value", "provided_value"}
+
+
 def _validate_deviations(raw) -> list[dict]:
     """Validate and normalize LLM output into a list of deviation dicts."""
     if isinstance(raw, dict):
@@ -178,8 +179,6 @@ def run_reconciliation_over_corpus():
     findings = []
     for sys_id in systems:
         findings.extend(reconcile_system(sys_id, standards))
-    log.info("Corpus reconciliation complete: %d findings across %d systems",
-             len(findings), len(systems))
     return findings
 
 

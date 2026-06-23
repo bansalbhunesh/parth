@@ -9,9 +9,12 @@ v2: Added LLM fallback for unmapped deviations + risk scoring.
 """
 
 import json
+import logging
 import pathlib
 
-from backend.llm import complete_json
+from backend.llm import complete_json, LLMError
+
+log = logging.getLogger("pramaan.cx_predictor")
 
 CORPUS = pathlib.Path(__file__).parent.parent.parent / "data" / "corpus"
 
@@ -81,6 +84,9 @@ Return JSON:
             if t["id"] == test_id:
                 week_fail = t.get("scheduled_week")
                 break
+        log.info("LLM Cx prediction for %s.%s → %s (week %s)",
+                 deviation.get("component"), deviation.get("parameter"),
+                 test_id, week_fail)
         return {
             "predicted_cx_test": test_id,
             "predicted_cx_level": test_level,
@@ -91,7 +97,9 @@ Return JSON:
             "severity": deviation.get("severity", "Major"),
             "cx_source": "llm",
         }
-    except Exception:
+    except (LLMError, KeyError, TypeError) as exc:
+        log.warning("Cx prediction fallback for %s.%s: %s",
+                    deviation.get("component"), deviation.get("parameter"), exc)
         return {
             "predicted_cx_test": None,
             "predicted_cx_level": None,

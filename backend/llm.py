@@ -6,10 +6,17 @@ Set GEMINI_API_KEY (and optionally ANTHROPIC_API_KEY). No keys are committed.
 """
 
 import json
+import logging
 import os
 import re
 
+log = logging.getLogger("pramaan.llm")
+
 PROVIDER = os.getenv("PRAMAAN_LLM", "gemini")  # "gemini" | "claude"
+
+
+class LLMError(Exception):
+    """Raised when an LLM call fails after exhausting retries."""
 
 
 def _extract_json(text: str):
@@ -17,10 +24,19 @@ def _extract_json(text: str):
     text = text.strip()
     text = re.sub(r"^```(?:json)?", "", text).strip()
     text = re.sub(r"```$", "", text).strip()
-    # grab the outermost JSON object/array
-    m = re.search(r"(\{.*\}|\[.*\])", text, re.DOTALL)
-    if m:
-        text = m.group(1)
+    for start, end in [("[", "]"), ("{", "}")]:
+        i = text.find(start)
+        if i == -1:
+            continue
+        depth, j = 0, i
+        while j < len(text):
+            if text[j] == start:
+                depth += 1
+            elif text[j] == end:
+                depth -= 1
+                if depth == 0:
+                    return json.loads(text[i : j + 1])
+            j += 1
     return json.loads(text)
 
 
@@ -32,14 +48,23 @@ def complete(prompt: str, system: str = "", json_mode: bool = True) -> str:
 
 def complete_json(prompt: str, system: str = ""):
     raw = complete(prompt, system, json_mode=True)
-    return _extract_json(raw)
+    try:
+        return _extract_json(raw)
+    except (json.JSONDecodeError, ValueError) as exc:
+        log.error("JSON extraction failed: %s — raw[:200]: %s", exc, raw[:200])
+        raise LLMError(f"LLM returned unparseable JSON: {exc}") from exc
 
 
 def _gemini(prompt, system, json_mode):
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        raise LLMError("GEMINI_API_KEY not set")
     model_name = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+    log.info("Gemini call: model=%s, json_mode=%s, prompt_len=%d",
+             model_name, json_mode, len(prompt))
     try:
         from google import genai
-        client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+        client = genai.Client(api_key=api_key)
         config = genai.types.GenerateContentConfig(
             temperature=0.1,
             system_instruction=system or None,
@@ -51,7 +76,7 @@ def _gemini(prompt, system, json_mode):
         return resp.text
     except ImportError:
         import google.generativeai as genai
-        genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+        genai.configure(api_key=api_key)
         model = genai.GenerativeModel(
             model_name,
             system_instruction=system or None,
@@ -61,16 +86,26 @@ def _gemini(prompt, system, json_mode):
             },
         )
         return model.generate_content(prompt).text
+    except Exception as exc:
+        log.error("Gemini API error: %s", exc)
+        raise LLMError(f"Gemini API call failed: {exc}") from exc
 
 
 def _claude(prompt, system, json_mode):
-    import anthropic
-    client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY
-    msg = client.messages.create(
-        model=os.getenv("CLAUDE_MODEL", "claude-opus-4-8"),
-        max_tokens=2000,
-        temperature=0.1,
-        system=system or None,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return msg.content[0].text
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise LLMError("ANTHROPIC_API_KEY not set")
+    log.info("Claude call: prompt_len=%d", len(prompt))
+    try:
+        import anthropic
+        client = anthropic.Anthropic()
+        msg = client.messages.create(
+            model=os.getenv("CLAUDE_MODEL", "claude-opus-4-8"),
+            max_tokens=2000,
+            temperature=0.1,
+            system=system or None,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        return msg.content[0].text
+    except Exception as exc:
+        log.error("Claude API error: %s", exc)
+        raise LLMError(f"Claude API call failed: {exc}") from exc

@@ -9,12 +9,16 @@ v2: Enhanced prompt with explicit numeric/threshold/redundancy reasoning,
 """
 
 import json
+import logging
 import pathlib
 
-from backend.llm import complete_json
+from backend.llm import complete_json, LLMError
 from backend.agents.commissioning import predict_cx_impact
 
+log = logging.getLogger("pramaan.reconciliation")
 CORPUS = pathlib.Path(__file__).parent.parent.parent / "data" / "corpus"
+
+REQUIRED_DEV_KEYS = {"component", "parameter", "required_value", "provided_value"}
 
 SYSTEM_PROMPT = (
     "You are a senior data-centre commissioning authority (CxA) with 20+ years "
@@ -117,16 +121,51 @@ def _check_citation_faithfulness(devs, spec_text, submittal_text, standards_text
     return devs
 
 
+def _validate_deviations(raw) -> list[dict]:
+    """Validate and normalize LLM output into a list of deviation dicts."""
+    if isinstance(raw, dict):
+        raw = raw.get("deviations", [])
+    if not isinstance(raw, list):
+        log.warning("LLM returned non-list type: %s", type(raw).__name__)
+        return []
+    valid = []
+    for i, d in enumerate(raw):
+        if not isinstance(d, dict):
+            log.warning("Skipping non-dict deviation at index %d", i)
+            continue
+        missing = REQUIRED_DEV_KEYS - d.keys()
+        if missing:
+            log.warning("Deviation %d missing keys %s, skipping", i, missing)
+            continue
+        d.setdefault("unit", "")
+        d.setdefault("severity", "Major")
+        d.setdefault("standard_ref", "DESIGN-BASIS")
+        d.setdefault("spec_clause", "")
+        d.setdefault("rationale", "")
+        d.setdefault("confidence", 0.5)
+        valid.append(d)
+    return valid
+
+
 def reconcile_system(sys_id: str, standards_text: str):
-    spec = _read(f"specs/{sys_id}.md")
-    submittal = _read(f"submittals/{sys_id}.md")
+    spec_path = CORPUS / "specs" / f"{sys_id}.md"
+    sub_path = CORPUS / "submittals" / f"{sys_id}.md"
+    if not spec_path.exists() or not sub_path.exists():
+        log.warning("Missing spec or submittal for %s", sys_id)
+        return []
+    spec = spec_path.read_text(encoding="utf-8")
+    submittal = sub_path.read_text(encoding="utf-8")
     prompt = PROMPT_TEMPLATE.format(
         spec=spec, submittal=submittal, standards=standards_text
     )
-    devs = complete_json(prompt, system=SYSTEM_PROMPT)
-    if isinstance(devs, dict):
-        devs = devs.get("deviations", [])
+    try:
+        raw = complete_json(prompt, system=SYSTEM_PROMPT)
+    except LLMError as exc:
+        log.error("LLM reconciliation failed for %s: %s", sys_id, exc)
+        return []
+    devs = _validate_deviations(raw)
     devs = _check_citation_faithfulness(devs, spec, submittal, standards_text)
+    log.info("System %s: %d deviations found", sys_id, len(devs))
     for d in devs:
         d.update(predict_cx_impact(d))
     return devs
@@ -139,6 +178,8 @@ def run_reconciliation_over_corpus():
     findings = []
     for sys_id in systems:
         findings.extend(reconcile_system(sys_id, standards))
+    log.info("Corpus reconciliation complete: %d findings across %d systems",
+             len(findings), len(systems))
     return findings
 
 

@@ -46,14 +46,16 @@ export interface CopilotResponse {
   }>;
 }
 
-const API = process.env.NEXT_PUBLIC_API ?? "http://localhost:8000";
+const API = process.env.NEXT_PUBLIC_API ?? "http://localhost:8099";
 
 export async function getRegister(): Promise<Deviation[]> {
   try {
     const r = await fetch(`${API}/deviations`, { cache: "no-store" });
     if (!r.ok) throw new Error(String(r.status));
     const data = await r.json();
-    return data.register as Deviation[];
+    const register = data?.register;
+    if (!Array.isArray(register)) return FALLBACK;
+    return register as Deviation[];
   } catch {
     return FALLBACK;
   }

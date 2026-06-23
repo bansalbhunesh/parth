@@ -24,7 +24,11 @@ def load_ground_truth():
 
 
 def key(d):
-    return (d["component"], d["parameter"])
+    comp = d.get("component")
+    param = d.get("parameter")
+    if not comp or not param:
+        raise ValueError(f"Finding missing component/parameter: {d}")
+    return (comp, param)
 
 
 def load_true_negatives():

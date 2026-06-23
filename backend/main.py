@@ -17,10 +17,11 @@ Run: uvicorn backend.main:app --reload
 """
 
 import json
+import logging
 import pathlib
 import time
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
@@ -28,7 +29,23 @@ from pydantic import BaseModel, Field
 from backend.orchestrator import run_pipeline
 from backend.agents.rfi_copilot import ask
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(name)s] %(levelname)s %(message)s",
+    datefmt="%H:%M:%S",
+)
+log = logging.getLogger("pramaan.api")
+
 CORPUS = pathlib.Path(__file__).parent.parent / "data" / "corpus"
+
+VALID_SYSTEMS = None
+
+def _get_valid_systems() -> set[str]:
+    global VALID_SYSTEMS
+    if VALID_SYSTEMS is None:
+        specs_dir = CORPUS / "specs"
+        VALID_SYSTEMS = {p.stem for p in specs_dir.glob("*.md")} if specs_dir.exists() else set()
+    return VALID_SYSTEMS
 
 app = FastAPI(
     title="Pramaan — EPC Deviation Intelligence",
@@ -71,13 +88,18 @@ def systems():
 
 @app.post("/ingest/{system_id}")
 def ingest(system_id: str):
+    if system_id not in _get_valid_systems():
+        raise HTTPException(404, f"Unknown system '{system_id}'. Valid: {sorted(_get_valid_systems())}")
     t0 = time.time()
+    log.info("Ingesting system %s", system_id)
     devs = run_pipeline(system_id)
+    elapsed = round((time.time() - t0) * 1000)
+    log.info("System %s: %d deviations in %dms", system_id, len(devs), elapsed)
     return {
         "system": system_id,
         "deviations": devs,
         "count": len(devs),
-        "elapsed_ms": round((time.time() - t0) * 1000),
+        "elapsed_ms": elapsed,
     }
 
 
@@ -110,7 +132,8 @@ def deviations():
         for p in sorted(specs_dir.glob("*.md")):
             out.extend(run_pipeline(p.stem))
         return _build_register(out)
-    except (KeyError, FileNotFoundError, ValueError, json.JSONDecodeError, RuntimeError):
+    except Exception as exc:
+        log.warning("Pipeline failed, using ground-truth fallback: %s", exc)
         return _build_register(_deviations_from_ground_truth())
 
 
@@ -118,7 +141,8 @@ def deviations():
 def copilot(q: CopilotQuery):
     try:
         return ask(q.query)
-    except (KeyError, FileNotFoundError, ValueError, RuntimeError):
+    except Exception as exc:
+        log.warning("Copilot LLM failed, using fallback: %s", exc)
         gt = _load_json("ground_truth.json")
         devs = gt.get("seeded_deviations", [])
         relevant = [d for d in devs if any(

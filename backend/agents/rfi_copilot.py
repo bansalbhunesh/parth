@@ -9,12 +9,15 @@ v2: Improved TF-IDF-style retriever, deviation-aware context, and structured
 """
 
 import json
+import logging
 import math
 import pathlib
 import re
 from collections import Counter
 
 from backend.llm import complete
+
+log = logging.getLogger("pramaan.copilot")
 
 CORPUS = pathlib.Path(__file__).parent.parent.parent / "data" / "corpus"
 
@@ -115,7 +118,9 @@ def _retrieve(query: str, k: int = 6):
 
 
 def ask(query: str):
+    log.info("Copilot query: %s", query[:120])
     ctx = _retrieve(query)
+    log.info("Retrieved %d context chunks", len(ctx))
     context = "\n\n".join(f"[{c['source']}]\n{c['text']}" for c in ctx)
     prompt = (
         f"Answer the project question using ONLY the context provided below. "

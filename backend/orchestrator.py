@@ -8,11 +8,14 @@ Falls back to sequential runner if langgraph is not installed.
 """
 
 import json
+import logging
 import pathlib
 import time
 from typing import List, Optional, TypedDict
 
 from backend.agents.reconciliation import reconcile_system, _all_standards_text
+
+log = logging.getLogger("pramaan.orchestrator")
 
 CORPUS = pathlib.Path(__file__).parent.parent / "data" / "corpus"
 
@@ -81,12 +84,18 @@ def run_pipeline(system_id: str) -> List[dict]:
     graph = build_graph()
     state = _init_state(system_id)
     if graph is not None:
+        log.info("Running LangGraph pipeline for %s", system_id)
         result = graph.invoke(state)
-        return result["deviations"]
-    state = node_load_standards(state)
-    state = node_load_documents(state)
-    state = node_reconcile(state)
-    return state["deviations"]
+        devs = result["deviations"]
+    else:
+        log.info("LangGraph not available, running sequential for %s", system_id)
+        state = node_load_standards(state)
+        state = node_load_documents(state)
+        state = node_reconcile(state)
+        devs = state["deviations"]
+    elapsed = round((time.time() - t0) * 1000)
+    log.info("Pipeline for %s: %d deviations in %dms", system_id, len(devs), elapsed)
+    return devs
 
 
 def run_full_pipeline() -> dict:

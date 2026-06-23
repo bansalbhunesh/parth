@@ -46,7 +46,7 @@ export default function StatsBar({
   meanLeadWeeks: number;
   systemsScanned: number;
 }) {
-  const totalSavings = 144;
+  const totalSavings = 149;
 
   return (
     <div className="stats-bar">

@@ -166,11 +166,11 @@ function TotalSavingsHero() {
   return (
     <div className="savings-hero">
       <div className="savings-glow" />
-      <div className="savings-number">144</div>
+      <div className="savings-number">149</div>
       <div className="savings-unit">total weeks of lead time saved</div>
       <div className="savings-sub">
-        6 deviations caught at Week 11 — before a single bolt turns on site.
-        That&apos;s 144 weeks of avoided commissioning rework, schedule delays,
+        7 deviations caught at Week 11 — before a single bolt turns on site.
+        That&apos;s 149 weeks of avoided commissioning rework, schedule delays,
         and cost overruns across all findings.
       </div>
     </div>
@@ -270,7 +270,7 @@ export default async function Page() {
           EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4
         </div>
         <div className="footer-meta">
-          5 AI Agents &middot; 10 Systems &middot; 33 Requirements &middot; 6 Deviations &middot; 144 Weeks Saved
+          5 AI Agents &middot; 10 Systems &middot; 33 Requirements &middot; 7 Deviations &middot; 149 Weeks Saved
         </div>
       </div>
     </main>

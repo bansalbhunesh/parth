@@ -23,6 +23,7 @@ _RULES = {
     ("SWGR-MV", "short_circuit_rating_ka"): ("FAT-03", 3, 30, "Critical"),
     ("CABLE-DC", "fire_rating"): ("ITP-02", 2, 22, "Major"),
     ("BMS", "critical_alarm_points"): ("IST-14", 4, 40, "Major"),
+    ("FLOOR", "height_mm"): ("ITP-01", 1, 16, "Major"),
 }
 
 

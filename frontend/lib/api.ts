@@ -180,4 +180,14 @@ export const FALLBACK: Deviation[] = [
     predicted_cx_name: "Monitoring & alarm verification",
     week_caught: 11, week_fail: 40, lead_time_weeks: 29,
   },
+  {
+    component: "FLOOR", parameter: "height_mm",
+    required_value: 900, provided_value: 600, unit: "mm",
+    standard_ref: "DESIGN-BASIS", spec_clause: "DB-13.3",
+    severity: "Major",
+    rationale: "Raised floor height 600 mm vs required 900 mm; insufficient clearance for under-floor chilled-air distribution, power cabling, and fire suppression piping.",
+    predicted_cx_test: "ITP-01", predicted_cx_level: 1,
+    predicted_cx_name: "Equipment receipt inspection",
+    week_caught: 11, week_fail: 16, lead_time_weeks: 5,
+  },
 ];

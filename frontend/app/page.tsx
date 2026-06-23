@@ -16,6 +16,8 @@ import HeroIntro from "../components/HeroIntro";
 import ArchitectureDiagram from "../components/ArchitectureDiagram";
 import ROICalculator from "../components/ROICalculator";
 import BeforeAfter from "../components/BeforeAfter";
+import ScreenshotShowcase from "../components/ScreenshotShowcase";
+import SectionIndex from "../components/SectionIndex";
 
 function Sentinel({ d }: { d: Deviation }) {
   const span = 52;
@@ -208,6 +210,10 @@ export default async function Page() {
         <HeroIntro />
       </ScrollReveal>
 
+      <ScrollReveal>
+        <SectionIndex />
+      </ScrollReveal>
+
       <div className="topbar">
         <div className="brand">
           PRA<b>MAAN</b>
@@ -256,6 +262,13 @@ export default async function Page() {
       </h2>
       <ScrollReveal>
         <ArchitectureDiagram />
+      </ScrollReveal>
+
+      <h2 className="section" id="screenshots">
+        Live screenshots &middot; interactive dashboard gallery
+      </h2>
+      <ScrollReveal>
+        <ScreenshotShowcase />
       </ScrollReveal>
 
       <h2 className="section" id="systems">

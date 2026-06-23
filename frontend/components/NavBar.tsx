@@ -7,6 +7,7 @@ const SECTIONS = [
   { id: "workflow", label: "Before/After" },
   { id: "pipeline", label: "Pipeline" },
   { id: "architecture", label: "Architecture" },
+  { id: "screenshots", label: "Screenshots" },
   { id: "systems", label: "Systems" },
   { id: "risk", label: "Risk" },
   { id: "register", label: "Register" },

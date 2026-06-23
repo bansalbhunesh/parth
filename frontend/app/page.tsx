@@ -7,6 +7,15 @@ import PipelineViz from "../components/PipelineViz";
 import RiskMatrix from "../components/RiskMatrix";
 import NavBar from "../components/NavBar";
 import ScrollReveal from "../components/ScrollReveal";
+import EvalDashboard from "../components/EvalDashboard";
+import StandardsKB from "../components/StandardsKB";
+import ExportButton from "../components/ExportButton";
+import AcademicRefs from "../components/AcademicRefs";
+import ScaleStory from "../components/ScaleStory";
+import HeroIntro from "../components/HeroIntro";
+import ArchitectureDiagram from "../components/ArchitectureDiagram";
+import ROICalculator from "../components/ROICalculator";
+import BeforeAfter from "../components/BeforeAfter";
 
 function Sentinel({ d }: { d: Deviation }) {
   const span = 52;
@@ -195,12 +204,17 @@ export default async function Page() {
     <main className="wrap">
       <NavBar />
 
+      <ScrollReveal>
+        <HeroIntro />
+      </ScrollReveal>
+
       <div className="topbar">
         <div className="brand">
           PRA<b>MAAN</b>
         </div>
         <div className="project">Project Meghdoot &middot; 40 MW &middot; Navi Mumbai</div>
         <div className="spacer" />
+        <ExportButton />
         <div className="live-badge">
           <span className="live-dot" />
           LIVE
@@ -223,11 +237,25 @@ export default async function Page() {
         <TotalSavingsHero />
       </ScrollReveal>
 
+      <h2 className="section" id="workflow">
+        Before vs after &middot; manual review vs Pramaan
+      </h2>
+      <ScrollReveal>
+        <BeforeAfter />
+      </ScrollReveal>
+
       <h2 className="section" id="pipeline">
         AI agent pipeline &middot; 5 agents &middot; narratable in 60 seconds
       </h2>
       <ScrollReveal>
         <PipelineViz />
+      </ScrollReveal>
+
+      <h2 className="section" id="architecture">
+        System architecture &middot; LangGraph multi-agent orchestration
+      </h2>
+      <ScrollReveal>
+        <ArchitectureDiagram />
       </ScrollReveal>
 
       <h2 className="section" id="systems">
@@ -257,11 +285,46 @@ export default async function Page() {
         {cxPlan && <CommissioningTwin cxPlan={cxPlan} deviations={rows} />}
       </ScrollReveal>
 
+      <h2 className="section" id="standards">
+        Standards knowledge base &middot; 7 governing standards
+      </h2>
+      <ScrollReveal>
+        <StandardsKB />
+      </ScrollReveal>
+
+      <h2 className="section" id="eval">
+        Eval harness &middot; precision &middot; recall &middot; F1
+      </h2>
+      <ScrollReveal>
+        <EvalDashboard />
+      </ScrollReveal>
+
+      <h2 className="section" id="roi">
+        ROI calculator &middot; quantified business impact
+      </h2>
+      <ScrollReveal>
+        <ROICalculator />
+      </ScrollReveal>
+
+      <h2 className="section" id="scale">
+        Scale story &middot; 10 systems → 14,000 line items
+      </h2>
+      <ScrollReveal>
+        <ScaleStory />
+      </ScrollReveal>
+
       <h2 className="section" id="copilot">
         Project copilot &middot; RAG over specs, submittals, standards &amp; RFIs
       </h2>
       <ScrollReveal>
         <CopilotPanel />
+      </ScrollReveal>
+
+      <h2 className="section" id="refs">
+        Academic references &middot; peer-reviewed foundations
+      </h2>
+      <ScrollReveal>
+        <AcademicRefs />
       </ScrollReveal>
 
       <div className="footer">
@@ -270,7 +333,7 @@ export default async function Page() {
           EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4
         </div>
         <div className="footer-meta">
-          5 AI Agents &middot; 10 Systems &middot; 33 Requirements &middot; 7 Deviations &middot; 149 Weeks Saved
+          5 AI Agents &middot; 10 Systems &middot; 7 Standards &middot; 33 Requirements &middot; 7 Deviations &middot; 149 Weeks Saved &middot; 0 False Positives
         </div>
       </div>
     </main>

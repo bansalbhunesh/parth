@@ -777,8 +777,13 @@ def build():
                 })
         w(ROOT / "submittals" / f"{sys_id}.md", "\n".join(sub_md) + "\n")
 
+    scraped_dir = pathlib.Path(__file__).parent / "scraped"
     for std_id, text in STANDARDS.items():
-        w(ROOT / "standards" / f"{std_id}.md", text)
+        merged = text
+        if scraped_dir.exists():
+            for sp in sorted(scraped_dir.glob(f"{std_id}_*.md")):
+                merged += f"\n\n---\n\n## Supplementary: {sp.stem}\n\n{sp.read_text()}"
+        w(ROOT / "standards" / f"{std_id}.md", merged)
 
     cx_plan = {
         "project": PROJECT["name"],

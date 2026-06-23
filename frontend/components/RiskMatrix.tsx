@@ -39,8 +39,8 @@ export default function RiskMatrix({ rows }: { rows: Deviation[] }) {
           <div key={i} className="risk-matrix-col-head">{b.label}</div>
         ))}
         {[...SEVERITY_ORDER].reverse().map((sev) => (
-          <>
-            <div key={`label-${sev}`} className="risk-matrix-row-head">{sev}</div>
+          <div key={sev} style={{ display: "contents" }}>
+            <div className="risk-matrix-row-head">{sev}</div>
             {LEAD_BUCKETS.map((_, bIdx) => {
               const devs = matrix[sev][bIdx];
               return (
@@ -60,7 +60,7 @@ export default function RiskMatrix({ rows }: { rows: Deviation[] }) {
                 </div>
               );
             })}
-          </>
+          </div>
         ))}
       </div>
       <div className="risk-matrix-xlabel">LEAD TIME →</div>

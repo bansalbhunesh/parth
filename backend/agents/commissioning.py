@@ -14,7 +14,14 @@ import pathlib
 from backend.llm import complete_json
 
 CORPUS = pathlib.Path(__file__).parent.parent.parent / "data" / "corpus"
-CURRENT_WEEK = 11
+
+
+def _current_week():
+    gt_path = CORPUS / "ground_truth.json"
+    if gt_path.exists():
+        gt = json.loads(gt_path.read_text())
+        return gt.get("project", {}).get("current_week", 11)
+    return 11
 
 _RULES = {
     ("UPS-02", "battery_runtime_min"): ("IST-07", 4, 38, "Critical"),
@@ -78,9 +85,9 @@ Return JSON:
             "predicted_cx_test": test_id,
             "predicted_cx_level": test_level,
             "predicted_cx_name": _cx_name(test_id) or "LLM-estimated, needs Cx review",
-            "week_caught": CURRENT_WEEK,
+            "week_caught": _current_week(),
             "week_fail": week_fail,
-            "lead_time_weeks": (week_fail - CURRENT_WEEK) if week_fail else None,
+            "lead_time_weeks": (week_fail - _current_week()) if week_fail else None,
             "severity": deviation.get("severity", "Major"),
             "cx_source": "llm",
         }
@@ -89,7 +96,7 @@ Return JSON:
             "predicted_cx_test": None,
             "predicted_cx_level": None,
             "predicted_cx_name": "Unmapped — requires Cx engineer review",
-            "week_caught": CURRENT_WEEK,
+            "week_caught": _current_week(),
             "week_fail": None,
             "lead_time_weeks": None,
             "severity": deviation.get("severity", "Major"),
@@ -101,13 +108,14 @@ def predict_cx_impact(deviation: dict) -> dict:
     key = (deviation.get("component"), deviation.get("parameter"))
     if key in _RULES:
         test_id, level, week_fail, severity = _RULES[key]
+        cw = _current_week()
         return {
             "predicted_cx_test": test_id,
             "predicted_cx_level": level,
             "predicted_cx_name": _cx_name(test_id),
-            "week_caught": CURRENT_WEEK,
+            "week_caught": cw,
             "week_fail": week_fail,
-            "lead_time_weeks": week_fail - CURRENT_WEEK,
+            "lead_time_weeks": week_fail - cw,
             "severity": deviation.get("severity", severity),
             "cx_source": "rule",
         }

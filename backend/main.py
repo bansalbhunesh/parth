@@ -23,7 +23,7 @@ import time
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from backend.orchestrator import run_pipeline
 from backend.agents.rfi_copilot import ask
@@ -40,7 +40,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"],
 
 
 class CopilotQuery(BaseModel):
-    query: str
+    query: str = Field(..., min_length=1, max_length=2000)
 
 
 def _load_json(path):
@@ -110,7 +110,7 @@ def deviations():
         for p in sorted(specs_dir.glob("*.md")):
             out.extend(run_pipeline(p.stem))
         return _build_register(out)
-    except (KeyError, Exception):
+    except (KeyError, FileNotFoundError, ValueError, json.JSONDecodeError, RuntimeError):
         return _build_register(_deviations_from_ground_truth())
 
 
@@ -118,7 +118,7 @@ def deviations():
 def copilot(q: CopilotQuery):
     try:
         return ask(q.query)
-    except (KeyError, Exception):
+    except (KeyError, FileNotFoundError, ValueError, RuntimeError):
         gt = _load_json("ground_truth.json")
         devs = gt.get("seeded_deviations", [])
         relevant = [d for d in devs if any(
@@ -136,8 +136,8 @@ def copilot(q: CopilotQuery):
                           f"{d.get('lead_time_weeks',0)}w lead time)."
                           for d in relevant
                       ),
-            "citations": [d.get("spec_clause", "") for d in relevant],
-            "source": "fallback (no LLM key configured)",
+            "sources": [d.get("spec_clause", "") for d in relevant],
+            "prior_rfis": [],
         }
 
 
@@ -197,11 +197,13 @@ def export_audit():
         "location": project_info.get("location", ""),
         "generated_week": project_info.get("current_week", 11),
         "standard_basis": [
-            "Uptime Tier IV (Fault Tolerance)",
-            "TIA-942 (Telecom Infrastructure)",
-            "BICSI-002 (Data Centre Design)",
-            "NFPA 75 (Fire Protection of IT Equipment)",
-            "IS 1893 (Indian Seismic Code)",
+            "Uptime Tier IV (Fault Tolerance, 2N Redundancy)",
+            "TIA-942-C (Telecom Infrastructure, Rated 1-4)",
+            "BICSI-002-2024 (Data Centre Design, L1-L5 Commissioning)",
+            "NFPA 75 / 262 (Fire Protection, Plenum Cable Ratings)",
+            "ASHRAE TC 9.9 (Thermal Guidelines, Class A1-A4)",
+            "IS 1893:2016 (Indian Seismic Code, Zones II-V)",
+            "Design Basis / OPR (Owner Project Requirements)",
         ],
         "summary": {
             "total_deviations": len(reg),

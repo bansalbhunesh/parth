@@ -36,17 +36,31 @@ def complete_json(prompt: str, system: str = ""):
 
 
 def _gemini(prompt, system, json_mode):
-    import google.generativeai as genai
-    genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-    model = genai.GenerativeModel(
-        os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
-        system_instruction=system or None,
-        generation_config={
-            "temperature": 0.1,
-            "response_mime_type": "application/json" if json_mode else "text/plain",
-        },
-    )
-    return model.generate_content(prompt).text
+    model_name = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+    try:
+        from google import genai
+        client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+        config = genai.types.GenerateContentConfig(
+            temperature=0.1,
+            system_instruction=system or None,
+            response_mime_type="application/json" if json_mode else "text/plain",
+        )
+        resp = client.models.generate_content(
+            model=model_name, contents=prompt, config=config,
+        )
+        return resp.text
+    except ImportError:
+        import google.generativeai as genai
+        genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+        model = genai.GenerativeModel(
+            model_name,
+            system_instruction=system or None,
+            generation_config={
+                "temperature": 0.1,
+                "response_mime_type": "application/json" if json_mode else "text/plain",
+            },
+        )
+        return model.generate_content(prompt).text
 
 
 def _claude(prompt, system, json_mode):

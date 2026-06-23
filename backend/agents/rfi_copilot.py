@@ -76,15 +76,24 @@ def _build_idf(chunks):
     return {t: math.log((doc_count + 1) / (freq + 1)) + 1 for t, freq in df.items()}
 
 
-try:
-    _CHUNKS = _load_chunks()
-    _IDF = _build_idf(_CHUNKS)
-except Exception:
-    _CHUNKS = []
-    _IDF = {}
+_CHUNKS = None
+_IDF = None
+
+
+def _ensure_index():
+    global _CHUNKS, _IDF
+    if _CHUNKS is not None:
+        return
+    try:
+        _CHUNKS = _load_chunks()
+        _IDF = _build_idf(_CHUNKS)
+    except Exception:
+        _CHUNKS = []
+        _IDF = {}
 
 
 def _retrieve(query: str, k: int = 6):
+    _ensure_index()
     q_tokens = _tokenize(query)
     if not q_tokens:
         return _CHUNKS[:k]

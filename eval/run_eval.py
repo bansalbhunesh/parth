@@ -61,6 +61,12 @@ def score(findings, ground_truth):
     ]
     mean_lead = sum(lead_times) / len(lead_times) if lead_times else 0
     max_lead = max(lead_times) if lead_times else 0
+    total_lead = sum(lead_times)
+
+    conf_scores = [
+        f.get("confidence") for f in findings if f.get("confidence") is not None
+    ]
+    mean_conf = sum(conf_scores) / len(conf_scores) if conf_scores else None
 
     return {
         "tp": sorted(tp), "fp": sorted(fp), "fn": sorted(fn),
@@ -69,6 +75,8 @@ def score(findings, ground_truth):
         "citation_faithfulness": faith_pct,
         "mean_lead_time_weeks": mean_lead,
         "max_lead_time_weeks": max_lead,
+        "total_lead_time_weeks": total_lead,
+        "mean_confidence": mean_conf,
     }
 
 
@@ -126,8 +134,12 @@ def main():
     print(f"{'~'*55}")
     print(f"  Cx-test prediction acc  : {r['cx_prediction_accuracy']:.3f}")
     print(f"  Citation faithfulness   : {r['citation_faithfulness']:.3f}")
+    if r['mean_confidence'] is not None:
+        print(f"  Mean confidence         : {r['mean_confidence']:.3f}")
+    print(f"{'~'*55}")
     print(f"  Mean lead time          : {r['mean_lead_time_weeks']:.1f} weeks")
     print(f"  Max lead time           : {r['max_lead_time_weeks']} weeks")
+    print(f"  Total lead time saved   : {r['total_lead_time_weeks']} weeks")
     print(f"{'='*55}\n")
 
 

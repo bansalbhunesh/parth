@@ -4,13 +4,16 @@ import { useEffect, useState } from "react";
 
 const SECTIONS = [
   { id: "sentinel", label: "Sentinel" },
+  { id: "workflow", label: "Before/After" },
   { id: "pipeline", label: "Pipeline" },
+  { id: "architecture", label: "Architecture" },
   { id: "systems", label: "Systems" },
   { id: "risk", label: "Risk" },
   { id: "register", label: "Register" },
   { id: "twin", label: "Cx Twin" },
   { id: "standards", label: "Standards" },
   { id: "eval", label: "Eval" },
+  { id: "roi", label: "ROI" },
   { id: "scale", label: "Scale" },
   { id: "copilot", label: "Copilot" },
   { id: "refs", label: "Research" },

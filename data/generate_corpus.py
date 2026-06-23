@@ -469,10 +469,19 @@ STANDARDS = {
         "- Delta-T across cooling coils: 10-14 C typical\n"
         "- Free cooling economiser hours evaluated for climate zone\n\n"
         "## Commissioning\n"
-        "- Five commissioning levels: L1 (ITP/receipt inspection), "
-        "L2 (installation verification), L3 (functional/FAT), "
-        "L4 (integrated systems test/IST), L5 (owner acceptance)\n"
-        "- 72-hour sustained operations test required before handover\n"
+        "- Five commissioning levels:\n"
+        "  - L1: Factory Acceptance Testing (FAT) — component verification "
+        "at manufacturer facilities before shipment\n"
+        "  - L2: Site Acceptance / Installation Verification — equipment "
+        "correctly delivered, installed, grounding, connections checked\n"
+        "  - L3: Startup Testing — individual equipment powers up, "
+        "operates, and responds as expected\n"
+        "  - L4: Performance Testing — system validation under real-world "
+        "loads, load-bank testing, failover scenarios\n"
+        "  - L5: End-to-End Systems Testing — full facility scenarios "
+        "simulating real data centre events\n"
+        "- 72-hour sustained operations test required before handover "
+        "(no critical alarms for 72 continuous hours)\n"
         "- Commissioning authority independent of design and construction teams\n"
     ),
     "NFPA-75": (
@@ -751,11 +760,11 @@ def build():
         "project": PROJECT["name"],
         "cx_authority": PROJECT["cx_authority"],
         "levels": {
-            "1": "Factory inspections & witness tests (ITP)",
-            "2": "Installation verification & inspection (ITP)",
-            "3": "Functional / factory acceptance test (FAT)",
-            "4": "Integrated systems test (IST)",
-            "5": "Owner acceptance & sustained operations",
+            "1": "Factory Acceptance Testing (FAT) — component verification at manufacturer",
+            "2": "Site Acceptance / Installation Verification — delivery, install, connections",
+            "3": "Startup Testing — individual equipment power-up and response verification",
+            "4": "Performance Testing — system validation under load, failover scenarios",
+            "5": "End-to-End Systems Testing — full facility event simulation, 72-hr sustained ops",
         },
         "tests": [
             {"id": "ITP-01", "level": 1, "name": "Equipment receipt inspection",

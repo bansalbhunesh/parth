@@ -2,22 +2,19 @@
 Pramaan — Standards Data Scraper
 
 Scrapes real technical data from public standards resources and integrates
-into the corpus. Uses Firecrawl (cloud API) as primary, falls back to
-Crawl4ai (Playwright + headless Chromium) for sites that block API crawlers.
+into the corpus. Three-tier fallback: Firecrawl API → Crawl4ai → Playwright.
 
 Usage:
-    # Set Firecrawl API key (free tier: 500 pages/month)
+    # Option 1: Firecrawl (cloud API, best success rate)
     export FIRECRAWL_API_KEY="fc-..."
-
-    # Run scraper
     python data/scrape_standards.py
 
-    # Then regenerate corpus to embed any new findings
-    python data/generate_corpus.py
+    # Option 2: No key needed (uses Crawl4ai / Playwright directly)
+    python data/scrape_standards.py
 
 Requirements:
     pip install firecrawl-py crawl4ai
-    crawl4ai-setup
+    # Chromium must be available (session-start hook handles this)
 """
 
 import asyncio
@@ -29,67 +26,60 @@ import sys
 
 SCRAPED_DIR = pathlib.Path(__file__).parent / "scraped"
 
+# Secondary/blog sources that have real technical content and are less
+# likely to block scrapers than official standards body sites.
 TARGETS = [
     {
         "id": "ASHRAE-TC9.9",
         "urls": [
-            "https://tc0909.ashraetcs.org/",
-            "https://www.ashrae.org/technical-resources/bookstore/datacom-series",
-        ],
-        "search_terms": [
-            "ASHRAE TC 9.9 thermal guidelines data centre temperature humidity",
-            "ASHRAE TC 9.9 class A1 A2 A3 A4 allowable recommended envelope",
+            "https://envigilance.com/compliance/ashrae-tc-9-9/",
+            "https://www.cky.com.tw/en/insights/ashrae-tc9-datacenter-thermal-guidelines",
+            "https://alliancechemical.com/blogs/articles/ashrae-tc-9-9-thermal-guidelines-ai-data-center-cooling",
+            "https://www.birtech.com/en/blog/environmental-monitoring/server-room-temperature-ASHRAE-standard",
         ],
     },
     {
         "id": "UPTIME-TIER4",
         "urls": [
-            "https://uptimeinstitute.com/tier-certification",
-            "https://uptimeinstitute.com/resources/asset/tier-standard-topology",
-        ],
-        "search_terms": [
-            "Uptime Institute Tier IV fault tolerance concurrent maintainability",
-            "Uptime Tier IV 2N power N+2 cooling battery autonomy requirements",
+            "https://www.ingenious.build/blog-posts/data-center-tiers-explained",
+            "https://datacenterss.com/uptime-institute-tier-certifications-what-data-centers-need-to-know/",
+            "https://constructandcommission.com/data-center-uptime-tiers-explained/",
+            "https://stratacore.com/uptime-institute-data-center-tiers-explained/",
         ],
     },
     {
         "id": "TIA-942",
         "urls": [
-            "https://www.tiaonline.org/standard/tia-942-c/",
-        ],
-        "search_terms": [
-            "TIA-942-C data centre rated 1 2 3 4 cabling requirements",
-            "TIA-942 Cat6A structured cabling MDA HDA EDA pathway fill",
+            "https://datacenterss.com/data-center-cabling-standards-guide/",
+            "https://datacenterss.com/data-center-tier-classification-uptime-institute-vs-tia-942/",
+            "https://thenetworkinstallers.com/blog/ansi-tia-942-c-standard/",
+            "https://www.tiafotc.org/tia-standards-update/tia-942-c/",
         ],
     },
     {
         "id": "NFPA-75",
         "urls": [
-            "https://www.nfpa.org/codes-and-standards/nfpa-75-standard-development",
-        ],
-        "search_terms": [
-            "NFPA 75 fire protection IT equipment CMP CMR plenum cable rating",
-            "NFPA 262 UL 910 plenum cable test smoke density flame spread",
+            "https://www.focc-fiber.com/info/cmp-cable-explained-plenum-rating-103498029.html",
+            "https://www.alphagary.com/post/understanding-nfpa-262-plenum-fire-test-requirements-for-cables",
+            "https://www.zion-communication.com/NFPA-262-Explained-Flame-Travel-and-Smoke-Testing-for-Plenum-Cables-id49141455.html",
+            "https://firetron.com/fire-suppression-systems/best-fire-suppression-systems-data-centers-server-rooms/",
         ],
     },
     {
         "id": "BICSI-002",
         "urls": [
-            "https://www.bicsi.org/standards/bicsi-standards/data-center-design",
-        ],
-        "search_terms": [
-            "BICSI-002-2024 data centre design cable bundle 48 pathway fill",
-            "BICSI 002 commissioning levels L1 L2 L3 L4 L5 72-hour test",
+            "https://constructandcommission.com/5-levels-of-commissioning-explained-data-center/",
+            "https://dataxconnect.com/insights-data-centre-commissioning-levels/",
+            "https://cxplanner.com/data-centers/resources/data-centers-level-testing",
+            "https://karnodatacenter.com/files/ANSI-%20Bicsi%20002%202024%20Rev%20Overview.pdf",
         ],
     },
     {
         "id": "IS-1893",
         "urls": [
-            "https://www.bis.gov.in/product/is-1893-part-1/",
-        ],
-        "search_terms": [
-            "IS 1893 part 1 2016 seismic zone factor India II III IV V",
-            "IS 1893 importance factor data centre critical infrastructure 1.5",
+            "https://www.sseacademy.com/blog/seismic-load-application-as-per-is-1893-2016",
+            "https://www.iitk.ac.in/nicee/IITGN-WB/EQ03.pdf",
+            "https://infralens.in/maps/seismic-zones",
         ],
     },
 ]
@@ -122,7 +112,6 @@ async def scrape_crawl4ai(url: str) -> str | None:
     """Scrape via Crawl4ai (headless Chromium, stealth mode)."""
     try:
         from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig
-
         config = BrowserConfig(
             headless=True,
             browser_type="chromium",
@@ -135,12 +124,73 @@ async def scrape_crawl4ai(url: str) -> str | None:
         )
         async with AsyncWebCrawler(config=config) as crawler:
             result = await crawler.arun(url, config=run_config)
-            if result.success and result.markdown:
+            if result.success and result.markdown and len(result.markdown) > 200:
                 return result.markdown
-            print(f"  Crawl4ai failed for {url}: {result.error_message}")
+            msg = getattr(result, "error_message", "unknown")
+            print(f"  Crawl4ai failed for {url}: {msg}")
             return None
+    except ImportError:
+        print("  Crawl4ai not installed, skipping")
+        return None
     except Exception as e:
         print(f"  Crawl4ai error for {url}: {e}")
+        return None
+
+
+async def scrape_playwright(url: str) -> str | None:
+    """Direct Playwright fallback — simpler, no crawl4ai dependency."""
+    chrome_bin = "/opt/chromium/chrome-linux/chrome"
+    if not os.path.exists(chrome_bin):
+        return None
+    try:
+        from playwright.async_api import async_playwright
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(
+                headless=True,
+                executable_path=chrome_bin,
+                args=["--no-sandbox", "--disable-gpu",
+                      "--disable-dev-shm-usage", "--ignore-certificate-errors"],
+            )
+            ctx = await browser.new_context(
+                ignore_https_errors=True,
+                viewport={"width": 1280, "height": 900},
+            )
+            page = await ctx.new_page()
+            resp = await page.goto(url, timeout=30000, wait_until="domcontentloaded")
+            if resp and resp.status == 200:
+                content = await page.content()
+                if len(content) > 500:
+                    from html.parser import HTMLParser
+                    text_parts = []
+                    class TextExtractor(HTMLParser):
+                        skip = {"script", "style", "noscript"}
+                        def __init__(self):
+                            super().__init__()
+                            self._skip = False
+                        def handle_starttag(self, tag, attrs):
+                            self._skip = tag.lower() in TextExtractor.skip
+                        def handle_endtag(self, tag):
+                            self._skip = False
+                        def handle_data(self, data):
+                            if not self._skip:
+                                text_parts.append(data)
+                    TextExtractor().feed(content)
+                    text = "\n".join(
+                        line.strip() for line in "".join(text_parts).splitlines()
+                        if line.strip()
+                    )
+                    await browser.close()
+                    if len(text) > 200:
+                        return text
+            status = resp.status if resp else "none"
+            print(f"  Playwright failed for {url}: status={status}")
+            await browser.close()
+            return None
+    except ImportError:
+        print("  Playwright not installed, skipping")
+        return None
+    except Exception as e:
+        print(f"  Playwright error for {url}: {e}")
         return None
 
 
@@ -150,38 +200,60 @@ async def scrape_target(target: dict):
     print(f"Scraping: {std_id}")
     print(f"{'='*60}")
 
+    successes = 0
     for url in target["urls"]:
-        print(f"\n  Trying Firecrawl: {url}")
-        content = await scrape_firecrawl(url)
-        if content and len(content) > 200:
-            save_scraped(std_id, url, content)
-            continue
+        content = None
 
-        print(f"  Trying Crawl4ai: {url}")
-        content = await scrape_crawl4ai(url)
+        print(f"\n  [1/3] Firecrawl: {url}")
+        content = await scrape_firecrawl(url)
+
+        if not content or len(content) < 200:
+            print(f"  [2/3] Crawl4ai: {url}")
+            content = await scrape_crawl4ai(url)
+
+        if not content or len(content) < 200:
+            print(f"  [3/3] Playwright: {url}")
+            content = await scrape_playwright(url)
+
         if content and len(content) > 200:
             save_scraped(std_id, url, content)
+            successes += 1
+        else:
+            print(f"  SKIP: all methods failed for {url}")
+
+    return successes
 
 
 async def main():
-    print("Pramaan Standards Scraper")
+    print("Pramaan Standards Scraper v2")
     print("=" * 60)
 
     firecrawl_key = os.environ.get("FIRECRAWL_API_KEY")
-    print(f"Firecrawl API key: {'set' if firecrawl_key else 'NOT SET'}")
-    print(f"Output directory: {SCRAPED_DIR}")
+    print(f"Firecrawl API key: {'SET' if firecrawl_key else 'NOT SET (using Crawl4ai/Playwright)'}")
+    print(f"Output directory:  {SCRAPED_DIR}")
 
-    if not firecrawl_key:
-        print("\nWARNING: No FIRECRAWL_API_KEY set.")
-        print("Get a free key at https://firecrawl.dev (500 pages/month)")
-        print("Falling back to Crawl4ai only.\n")
+    chrome_bin = "/opt/chromium/chrome-linux/chrome"
+    print(f"Chromium:          {'FOUND' if os.path.exists(chrome_bin) else 'NOT FOUND'}")
+    print()
 
+    total = 0
     for target in TARGETS:
-        await scrape_target(target)
+        total += await scrape_target(target)
 
     print(f"\n{'='*60}")
-    print(f"Scraping complete. Check {SCRAPED_DIR}/")
-    print("Run 'python data/generate_corpus.py' to regenerate corpus.")
+    print(f"Done. {total} pages scraped to {SCRAPED_DIR}/")
+    if total > 0:
+        print("Run 'python data/generate_corpus.py' to regenerate corpus.")
+    else:
+        print("No pages scraped — check egress allowlist or set FIRECRAWL_API_KEY.")
+        print("Required domains in egress allowlist:")
+        domains = set()
+        for t in TARGETS:
+            for u in t["urls"]:
+                from urllib.parse import urlparse
+                domains.add(urlparse(u).hostname)
+        for d in sorted(domains):
+            print(f"  {d}")
 
 
 if __name__ == "__main__":

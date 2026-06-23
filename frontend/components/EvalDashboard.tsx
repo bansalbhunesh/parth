@@ -112,11 +112,11 @@ export default function EvalDashboard() {
             ["Citations", "N/A", "≥ 0.95"],
             ["Unstructured input", "No", "Yes"],
           ].map(([metric, baseline, llm]) => (
-            <>
-              <div key={`m-${metric}`} className="eval-comp-cell eval-comp-metric">{metric}</div>
-              <div key={`b-${metric}`} className="eval-comp-cell eval-comp-baseline">{baseline}</div>
-              <div key={`l-${metric}`} className="eval-comp-cell eval-comp-llm">{llm}</div>
-            </>
+            <div key={metric} style={{ display: "contents" }}>
+              <div className="eval-comp-cell eval-comp-metric">{metric}</div>
+              <div className="eval-comp-cell eval-comp-baseline">{baseline}</div>
+              <div className="eval-comp-cell eval-comp-llm">{llm}</div>
+            </div>
           ))}
         </div>
       </div>

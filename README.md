@@ -24,6 +24,60 @@
 
 ---
 
+## Screenshots
+
+<p align="center">
+  <img src="frontend/public/screenshots/hero-full.png" alt="Dashboard Overview" width="800"><br>
+  <em>Dashboard overview — hero intro, stats bar, and sentinel deviation alert</em>
+</p>
+
+<p align="center">
+  <img src="frontend/public/screenshots/sentinel.png" alt="Deviation Sentinel" width="800"><br>
+  <em>Deviation Sentinel — UPS-02 battery runtime: 7 min vs 10 min required, caught 27 weeks early</em>
+</p>
+
+<p align="center">
+  <img src="frontend/public/screenshots/architecture.png" alt="System Architecture" width="800"><br>
+  <em>System Architecture — LangGraph multi-agent orchestrator with 4-layer data flow</em>
+</p>
+
+<p align="center">
+  <img src="frontend/public/screenshots/pipeline.png" alt="AI Agent Pipeline" width="800"><br>
+  <em>AI Agent Pipeline — 5 agents: Ingestion → Extraction → Reconciliation → Cx Predictor → RFI Copilot</em>
+</p>
+
+<p align="center">
+  <img src="frontend/public/screenshots/systems.png" alt="System Health Grid" width="800"><br>
+  <em>System Health Grid — 10 systems: 7 with findings (4 critical), 3 compliant</em>
+</p>
+
+<p align="center">
+  <img src="frontend/public/screenshots/register.png" alt="Deviation Register" width="800"><br>
+  <em>Deviation Register — full register with severity, lead time, Cx test mapping</em>
+</p>
+
+<p align="center">
+  <img src="frontend/public/screenshots/twin.png" alt="Commissioning Twin" width="800"><br>
+  <em>Commissioning Risk Twin — L1–L5 Gantt timeline with at-risk test predictions</em>
+</p>
+
+<p align="center">
+  <img src="frontend/public/screenshots/eval.png" alt="Eval Dashboard" width="800"><br>
+  <em>Eval Dashboard — P/R/F1 = 1.000, Cx accuracy 1.000, 149 weeks total lead time</em>
+</p>
+
+<p align="center">
+  <img src="frontend/public/screenshots/roi.png" alt="ROI Calculator" width="800"><br>
+  <em>ROI Calculator — interactive cost savings model with project value slider</em>
+</p>
+
+<p align="center">
+  <img src="frontend/public/screenshots/standards.png" alt="Standards Knowledge Base" width="800"><br>
+  <em>Standards Knowledge Base — 7 governing standards with deviation counts per standard</em>
+</p>
+
+---
+
 ## The Headline
 
 > **Pramaan caught a critical UPS battery shortfall 27 weeks before it would have failed integrated systems testing.**
@@ -149,28 +203,29 @@ curl http://localhost:8000/export/audit/html > evidence.html
 
 ---
 
-## Frontend — 14-Section Dashboard
+## Frontend — 15-Section Dashboard
 
 The dashboard is a single-page application designed for a **60-second demo narrative**:
 
 | # | Section | What judges see |
 |---|---------|----------------|
-| 1 | **Hero Intro** | Problem statement + project context (40 MW, 7 standards, 87 submittals) |
-| 2 | **Sentinel** | Critical deviation fires: UPS-02 battery 7 min vs 10 min required |
-| 3 | **149-Week Savings** | Giant animated counter — the headline number |
-| 4 | **Before / After** | Manual review (10–15 weeks) vs Pramaan (< 5 minutes) toggle |
-| 5 | **Pipeline** | 5-agent pipeline with animated stage-by-stage reveal |
-| 6 | **Architecture** | 4-layer system diagram: Documents → Agents → Infrastructure → Outputs |
-| 7 | **System Health** | 10 systems grid — critical/major/compliant status at a glance |
-| 8 | **Risk Matrix** | Severity × Lead Time matrix with deviation dots |
-| 9 | **Deviation Register** | Full table: component, spec vs submittal, standard, Cx test, lead time |
-| 10 | **Cx Risk Twin** | L1–L5 Gantt chart with at-risk tests pulsing red |
-| 11 | **Standards KB** | 7 color-coded standard cards with finding counts |
-| 12 | **Eval Dashboard** | Animated P/R/F1 counters + baseline vs LLM comparison table |
-| 13 | **ROI Calculator** | Interactive slider: project value → rework avoided → payback days |
-| 14 | **Scale Story** | 10 → 33 → 87 → 14K animated progression + architecture details |
+| 1 | **Section Index** | 15-section navigable table of contents with color-coded items |
+| 2 | **Hero Intro** | Problem statement + project context (40 MW, 7 standards, 87 submittals) |
+| 3 | **Sentinel** | Critical deviation fires: UPS-02 battery 7 min vs 10 min required |
+| 4 | **149-Week Savings** | Giant animated counter — the headline number |
+| 5 | **Before / After** | Manual review (10–15 weeks) vs Pramaan (< 5 minutes) toggle |
+| 6 | **Pipeline** | 5-agent pipeline with animated stage-by-stage reveal |
+| 7 | **Architecture** | 4-layer diagram: Inputs → Agent Orchestrator → Outputs + tech stack + key properties |
+| 8 | **Screenshots** | Interactive gallery with browser-chrome frame and 10 thumbnail views |
+| 9 | **System Health** | 10 systems grid — critical/major/compliant status at a glance |
+| 10 | **Risk Matrix** | Severity × Lead Time matrix with deviation dots |
+| 11 | **Deviation Register** | Full table: component, spec vs submittal, standard, Cx test, lead time |
+| 12 | **Cx Risk Twin** | L1–L5 Gantt chart with at-risk tests pulsing red |
+| 13 | **Standards KB** | 7 color-coded standard cards with finding counts |
+| 14 | **Eval Dashboard** | Animated P/R/F1 counters + baseline vs LLM comparison table |
+| 15 | **ROI Calculator** | Interactive slider: project value → rework avoided → payback days |
 
-Plus: **Copilot panel** (RAG Q&A with preset queries), **Academic References** (4 peer-reviewed papers), **Export button** (HTML evidence pack download).
+Plus: **Scale Story** (10 → 14K progression), **Copilot panel** (RAG Q&A with preset queries), **Academic References** (4 peer-reviewed papers), **Export button** (HTML evidence pack download).
 
 Built with **Next.js 15**, dark theme, scroll-reveal animations, responsive down to 600px.
 
@@ -243,15 +298,17 @@ pramaan/
 │   └── baseline_reconciler.py     # Deterministic baseline (proves plumbing)
 ├── frontend/
 │   ├── app/
-│   │   ├── page.tsx               # Main dashboard — 14 sections
+│   │   ├── page.tsx               # Main dashboard — 15 sections
 │   │   ├── layout.tsx             # Root layout with fonts
-│   │   └── globals.css            # Full design system (~900 lines)
+│   │   └── globals.css            # Full design system (~1,100 lines)
 │   ├── components/
 │   │   ├── HeroIntro.tsx          # Problem statement for judges
-│   │   ├── NavBar.tsx             # 14-section sticky nav
+│   │   ├── NavBar.tsx             # 15-section sticky nav
+│   │   ├── SectionIndex.tsx       # Navigable 15-section table of contents
+│   │   ├── ScreenshotShowcase.tsx # Interactive screenshot gallery with browser chrome
 │   │   ├── StatsBar.tsx           # Summary stats strip
 │   │   ├── PipelineViz.tsx        # Animated 5-agent pipeline
-│   │   ├── ArchitectureDiagram.tsx # 4-layer architecture diagram
+│   │   ├── ArchitectureDiagram.tsx # 4-layer architecture with animated agents + tech stack
 │   │   ├── RiskMatrix.tsx         # Severity × lead time matrix
 │   │   ├── DeviationRegister.tsx  # Full deviation table
 │   │   ├── CommissioningTwin.tsx  # L1–L5 Gantt with at-risk tests
@@ -264,13 +321,15 @@ pramaan/
 │   │   ├── AcademicRefs.tsx       # 4 peer-reviewed references
 │   │   ├── ExportButton.tsx       # Evidence pack download
 │   │   └── ScrollReveal.tsx       # Intersection observer animations
+│   ├── public/
+│   │   └── screenshots/           # 15 app screenshots (auto-captured via Playwright)
 │   └── lib/
 │       └── api.ts                 # API client + fallback data
 └── .claude/
     └── hooks/                     # Session-start auto-setup
 ```
 
-**36 source files · 5,300 lines of code**
+**38 source files · 5,800+ lines of code · 15 screenshots**
 
 ---
 
@@ -331,7 +390,7 @@ python3 eval/run_eval.py --detector llm
 | **Business Impact** | 149 weeks of early detection prevents seven-figure schedule slips | Interactive ROI calculator, cost-of-delay timeline, before/after comparison |
 | **Technical Excellence** | Eval harness with P/R/F1 = 1.000, deterministic baseline + LLM agent | Reproducible eval, confidence scoring, citation faithfulness metric |
 | **Scalability** | 10 → 14,000 line items via batch ingest + vector store + async pipeline | Architecture diagram, scale story, POST-per-system API design |
-| **UX** | 14-section dashboard with 60-second demo narrative | Scroll animations, dark theme, responsive, interactive copilot + ROI slider |
+| **UX** | 15-section dashboard with 60-second demo narrative | Scroll animations, dark theme, responsive, screenshot gallery, interactive copilot + ROI slider |
 
 ---
 

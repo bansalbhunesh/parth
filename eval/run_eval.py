@@ -27,6 +27,11 @@ def key(d):
     return (d["component"], d["parameter"])
 
 
+def load_true_negatives():
+    gt = json.loads((CORPUS / "ground_truth.json").read_text())
+    return gt.get("true_negative_systems", [])
+
+
 def score(findings, ground_truth):
     gt_keys = {key(d) for d in ground_truth}
     gt_by_key = {key(d): d for d in ground_truth}
@@ -68,6 +73,11 @@ def score(findings, ground_truth):
     ]
     mean_conf = sum(conf_scores) / len(conf_scores) if conf_scores else None
 
+    tn_systems = load_true_negatives()
+    tn_fp = [f for f in findings if f.get("system") in tn_systems
+             or any(s in str(f.get("component", "")) for s in tn_systems)]
+    fp_rate = len(tn_fp) / len(findings) if findings else 0.0
+
     return {
         "tp": sorted(tp), "fp": sorted(fp), "fn": sorted(fn),
         "precision": precision, "recall": recall, "f1": f1,
@@ -77,6 +87,9 @@ def score(findings, ground_truth):
         "max_lead_time_weeks": max_lead,
         "total_lead_time_weeks": total_lead,
         "mean_confidence": mean_conf,
+        "true_negative_systems": len(tn_systems),
+        "false_positives_in_clean_systems": len(tn_fp),
+        "false_positive_rate": fp_rate,
     }
 
 
@@ -140,6 +153,10 @@ def main():
     print(f"  Mean lead time          : {r['mean_lead_time_weeks']:.1f} weeks")
     print(f"  Max lead time           : {r['max_lead_time_weeks']} weeks")
     print(f"  Total lead time saved   : {r['total_lead_time_weeks']} weeks")
+    print(f"{'~'*55}")
+    print(f"  True-negative systems   : {r['true_negative_systems']}  (FIRE, BUSWAY, PDU)")
+    print(f"  FP in clean systems     : {r['false_positives_in_clean_systems']}")
+    print(f"  False-positive rate     : {r['false_positive_rate']:.3f}")
     print(f"{'='*55}\n")
 
 

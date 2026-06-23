@@ -153,33 +153,39 @@ def rfi_log():
 
 @app.get("/metrics")
 def metrics():
-    gt = _load_json("ground_truth.json")
-    devs = gt.get("seeded_deviations", [])
-    lead_times = [d["lead_time_weeks"] for d in devs if d.get("lead_time_weeks")]
-    cx_mapped = sum(1 for d in devs if d.get("predicted_cx_test"))
-    faithful = sum(1 for d in devs if d.get("rationale"))
+    from eval.baseline_reconciler import reconcile
+    from eval.run_eval import load_ground_truth, score
+
+    gt = load_ground_truth()
+    findings = reconcile()
+    r = score(findings, gt)
+
+    gt_json = _load_json("ground_truth.json")
+    project = gt_json.get("project", {})
 
     return {
         "detection": {
-            "total_deviations": len(devs),
-            "critical": sum(1 for d in devs if d.get("severity") == "Critical"),
-            "major": sum(1 for d in devs if d.get("severity") == "Major"),
-            "baseline_precision": 1.0,
-            "baseline_recall": 1.0,
-            "baseline_f1": 1.0,
+            "total_deviations": len(gt),
+            "critical": sum(1 for d in gt if d.get("severity") == "Critical"),
+            "major": sum(1 for d in gt if d.get("severity") == "Major"),
+            "baseline_precision": round(r["precision"], 3),
+            "baseline_recall": round(r["recall"], 3),
+            "baseline_f1": round(r["f1"], 3),
+            "false_positive_rate": round(r["false_positive_rate"], 3),
         },
         "commissioning": {
-            "cx_prediction_accuracy": round(cx_mapped / len(devs), 3) if devs else 0,
-            "mean_lead_time_weeks": round(sum(lead_times) / len(lead_times), 1) if lead_times else 0,
-            "max_lead_time_weeks": max(lead_times) if lead_times else 0,
-            "total_lead_time_weeks": sum(lead_times),
+            "cx_prediction_accuracy": round(r["cx_prediction_accuracy"], 3),
+            "mean_lead_time_weeks": round(r["mean_lead_time_weeks"], 1),
+            "max_lead_time_weeks": r["max_lead_time_weeks"],
+            "total_lead_time_weeks": r["total_lead_time_weeks"],
         },
         "corpus": {
-            "systems": len(set(d["system"] for d in devs)),
-            "total_requirements": gt.get("project", {}).get("line_items_total", 0),
-            "active_submittals": gt.get("project", {}).get("active_submittals", 0),
+            "systems": len(set(d["system"] for d in gt)),
+            "total_requirements": project.get("line_items_total", 0),
+            "active_submittals": project.get("active_submittals", 0),
+            "true_negative_systems": r["true_negative_systems"],
         },
-        "citation_faithfulness": round(faithful / len(devs), 3) if devs else 0,
+        "citation_faithfulness": round(r["citation_faithfulness"], 3),
     }
 
 

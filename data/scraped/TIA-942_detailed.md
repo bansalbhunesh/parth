@@ -1,0 +1,174 @@
+# ANSI/TIA-942-C — Detailed Technical Reference
+
+**Standard:** ANSI/TIA-942-C — Telecommunications Infrastructure Standard for Data Centers
+**Version:** Revision C, approved May 7, 2024
+**Issuing Body:** Telecommunications Industry Association (TIA), TR-42.1 Subcommittee
+**Scope:** Defines telecommunications cabling infrastructure, topology, and spaces for data centres, including a four-level rating system for facility resilience.
+
+---
+
+## 1. Rating System (Rated 1 through Rated 4)
+
+TIA-942-C replaced the term "Tier" with "Rated" to avoid confusion with the Uptime Institute's Tier classification. Higher ratings are inclusive of all lower-level requirements.
+
+### 1.1 Rated-1 (Basic)
+
+| Attribute | Specification |
+|-----------|---------------|
+| Redundancy | None (N) |
+| Distribution paths | Single pathway for power, cooling, and telecom |
+| Uptime target (historical) | 99.671% |
+| Vulnerability | Susceptible to disruptions from both planned and unplanned activity on distribution path or equipment |
+| Maintenance impact | Requires full or partial shutdown for maintenance |
+
+### 1.2 Rated-2 (Redundant Component)
+
+| Attribute | Specification |
+|-----------|---------------|
+| Redundancy | N+1 at the component level |
+| Distribution paths | Single pathway for power, cooling, and telecom |
+| Uptime target (historical) | 99.741% |
+| Vulnerability | Susceptible to disruptions from planned/unplanned activity on the distribution path |
+| Maintenance impact | Component-level maintenance possible without shutdown; path maintenance requires downtime |
+
+### 1.3 Rated-3 (Concurrently Maintainable)
+
+| Attribute | Specification |
+|-----------|---------------|
+| Redundancy | N+1 with dual pathway |
+| Distribution paths | One active (N) + one standby (+1) path for power, cooling, and telecom |
+| Uptime target (historical) | 99.982% |
+| Capability | Planned maintenance on any part of any distribution path or any single piece of equipment without interrupting data centre operations |
+| Key change | Dual pathways become mandatory at this level |
+
+### 1.4 Rated-4 (Fault Tolerant)
+
+| Attribute | Specification |
+|-----------|---------------|
+| Redundancy | 2N or N+N with dual active paths |
+| Distribution paths | Dual active (2N / N+N) paths for power, cooling, and telecom |
+| Uptime target (historical) | 99.995% |
+| Capability | Handles planned maintenance or a single fault on any distribution path, equipment, or component without interrupting operations |
+| Key difference from Rated-3 | Both paths simultaneously active; automatic failover on unplanned events |
+
+---
+
+## 2. Cabling Media Specifications
+
+### 2.1 Copper Cabling
+
+| Parameter | Specification |
+|-----------|---------------|
+| Minimum grade | Category 6A per ANSI/TIA-568.2-D |
+| Application | Horizontal cabling within data centre |
+| Bend radius | Minimum 4x cable outer diameter |
+| New in -C revision | Recognition of single balanced twisted-pair cable for horizontal cabling |
+| Wireless APs | Minimum 2x Category 6A or higher cables to each wireless access point |
+
+### 2.2 Multimode Fibre
+
+| Parameter | Specification |
+|-----------|---------------|
+| Minimum grade | OM3 (laser-optimised 50/125 um) |
+| Recommended | OM4 for 40G/100G short-reach links |
+| Maximum backbone length | 300 m (984 ft) for OM3/OM4 |
+| Application | Intra-building backbone and horizontal fibre links |
+| Connector types | LC and MPO at Equipment Outlet (EO); any TIA-568.3-compliant connector outside EO |
+
+### 2.3 Single-Mode Fibre
+
+| Parameter | Specification |
+|-----------|---------------|
+| Grade | OS2 per ANSI/TIA-568.3-D (ITU-T G.652.D compliant) |
+| Application | Backbone cabling, inter-building links, long-reach connections |
+| Recommended for | All new AI/hyperscale infrastructure beyond short-reach |
+
+### 2.4 Coaxial (Legacy)
+
+| Parameter | Specification |
+|-----------|---------------|
+| Grade | 75-ohm per Telcordia GR-139-CORE |
+| Application | Legacy signalling only |
+
+### 2.5 Minimum Fibre Count (New in TIA-942-C)
+
+- Minimum 2 optical fibres per horizontal link
+- Minimum 2 optical fibres per backbone link
+- This is a new requirement in the C revision, up from 1 fibre previously
+
+---
+
+## 3. Cabinet and Space Requirements
+
+| Parameter | Specification |
+|-----------|---------------|
+| Cabinet width (MDA, IDA, HDA) | Minimum 800 mm (~31.5 in) — new in C revision |
+| Previous allowance | 600 mm / 700 mm / 800 mm were all previously accepted |
+| Alignment | Matches BICSI 002, CENELEC, and ISO/IEC standards |
+| Depth | Standard 1000 mm or 1200 mm (application-dependent) |
+
+---
+
+## 4. Pathway and Fill Ratios
+
+| Parameter | Specification |
+|-----------|---------------|
+| Cable tray fill ratio | Maximum 40% of cross-sectional area (width x depth) |
+| Overhead cable tray access | Maximum 50% fill recommended for maintenance access |
+| Under-floor pathway depth | Minimum 450 mm clear depth for airflow and cabling |
+| Fibre bend radius | Minimum 10x cable outer diameter |
+| Copper bend radius | Minimum 4x cable outer diameter |
+| Maximum bundle size | 48 cables per bundle (per BICSI-002 best practice) |
+
+---
+
+## 5. Telecommunications Topology
+
+TIA-942-C defines a structured cabling topology with the following distribution areas:
+
+| Area | Abbreviation | Function |
+|------|-------------|----------|
+| Entrance Room | ER | Demarcation point for carrier and campus cabling |
+| Main Distribution Area | MDA | Central cross-connect for backbone cabling; houses core routers/switches |
+| Intermediate Distribution Area | IDA | Optional intermediate cross-connect for large facilities |
+| Horizontal Distribution Area | HDA | Houses row/zone-level switching and patching |
+| Zone Distribution Area | ZDA | Optional passive consolidation point near equipment rows |
+| Equipment Distribution Area | EDA | IT equipment cabinets and racks |
+
+---
+
+## 6. Key Changes in TIA-942-C (2024)
+
+1. Renamed "Tier" to "Rated" to differentiate from Uptime Institute terminology
+2. Mandated 800 mm minimum cabinet width in MDA/IDA/HDA
+3. Increased minimum fibre count to 2 per link (horizontal and backbone)
+4. Recognised single balanced twisted-pair as horizontal cabling media
+5. Permitted any TIA-568.3-compliant optical connector outside equipment outlets (LC/MPO still required at EO)
+6. Enhanced guidance for high-density deployments and liquid cooling infrastructure
+7. Updated pathway fill ratios for high-density cable bundles
+8. Alignment with TIA-607-D grounding/bonding standard for data centres
+9. Minimum 2x Cat6A cables required to each wireless access point
+
+---
+
+## 7. Relevance to Data Centre EPC Projects
+
+- Rated levels directly map to project scope: Rated-3 minimum for enterprise colocation, Rated-4 for mission-critical hyperscale.
+- 800 mm cabinet mandate affects rack procurement and floor planning — legacy 600 mm racks are non-compliant in MDA/IDA/HDA.
+- Minimum 2-fibre requirement per link increases fibre counts at design stage; cable tray sizing must account for this.
+- 40% tray fill ratio requires oversizing pathways by approximately 2.5x the initial cable volume to allow for growth.
+- OS2 single-mode fibre is the correct specification for all new AI/hyperscale backbone infrastructure.
+- Grounding/bonding alignment with TIA-607-D must be coordinated with electrical design from early EPC stages.
+
+---
+
+## Sources
+
+- [TIA Fiber Optics Tech Consortium — ANSI/TIA-942-C Update](https://www.tiafotc.org/tia-standards-update/tia-942-c/)
+- [Cabling Installation & Maintenance — TIA-942-C Brings Host of Changes](https://www.cablinginstall.com/standards/article/55245177/tia-942-c-data-center-standard-brings-a-host-of-changes-and-updates)
+- [Data Center Frontier — C Revision of TIA-942](https://www.datacenterfrontier.com/design/article/33037194/c-revision-of-tia-942-data-center-standard-specifies-for-fiber-connectivity-cabinet-widths)
+- [Belden — Introducing ANSI/TIA-942-C](https://www.belden.com/blog/data-center/introducing-ansi-tia-942-c-recent-updates-to-data-center-standards)
+- [datacenterss.com — Data Centre Cabling Standards 2026](https://datacenterss.com/data-center-cabling-standards-guide/)
+- [The Network Installers — ANSI/TIA-942-C Standard: What Changed](https://thenetworkinstallers.com/blog/ansi-tia-942-c-standard/)
+- [TIA Online — ANSI/TIA-942 Global Data Center Standard](https://tiaonline.org/wp-content/uploads/2024/05/Data-Centers-Brochure_040124.pdf)
+- [Kital Philippines — TIA-942 Data Center Cabling Guide](https://www.kital.com.ph/structured-cabling-standards-philippine-data-centers-tia-942/)

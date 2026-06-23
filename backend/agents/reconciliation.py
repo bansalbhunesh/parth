@@ -109,10 +109,10 @@ def _all_standards_text():
 def _check_citation_faithfulness(devs, spec_text, submittal_text, standards_text):
     all_text = (spec_text + submittal_text + standards_text).lower()
     for d in devs:
-        clause = str(d.get("spec_clause", "")).lower()
-        std = str(d.get("standard_ref", "")).lower()
-        clause_found = clause in all_text if clause else False
-        std_found = std in all_text if std else False
+        clause = str(d.get("spec_clause", "")).strip().lower()
+        std = str(d.get("standard_ref", "")).strip().lower()
+        clause_found = bool(clause) and (clause in all_text or clause.replace("-", "") in all_text)
+        std_found = bool(std) and (std in all_text or std.replace("-", "") in all_text)
         d["citation_faithful"] = clause_found and std_found
     return devs
 

@@ -1,0 +1,93 @@
+[
+  {
+    "system": "UPS",
+    "component": "UPS-S1",
+    "parameter": "redundancy",
+    "provided_value": "N+1",
+    "unit": "topology"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-S1",
+    "parameter": "rated_power_kw",
+    "provided_value": 400,
+    "unit": "kW"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-S1",
+    "parameter": "redundancy",
+    "provided_value": "N+1",
+    "unit": "topology"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-S1",
+    "parameter": "rated_power_kva",
+    "provided_value": 1000,
+    "unit": "kVA"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-S1",
+    "parameter": "derating_pct",
+    "provided_value": 0,
+    "unit": "%"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-S1",
+    "parameter": "redundancy",
+    "provided_value": "N+1",
+    "unit": "topology"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-S1",
+    "parameter": "design_ambient_c",
+    "provided_value": 46,
+    "unit": "C"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-S1",
+    "parameter": "capacity_tr",
+    "provided_value": 500,
+    "unit": "TR"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-S1",
+    "parameter": "temp_rating_c",
+    "provided_value": 70,
+    "unit": "C"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-S1",
+    "parameter": "category",
+    "provided_value": "Cat6A",
+    "unit": "type"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-S1",
+    "parameter": "agent",
+    "provided_value": "clean_agent",
+    "unit": "type"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-S1",
+    "parameter": "zones",
+    "provided_value": 2,
+    "unit": "count"
+  },
+  {
+    "system": "STRUCT",
+    "component": "FLOOR-S1",
+    "parameter": "load_rating_kpa",
+    "provided_value": 12,
+    "unit": "kPa"
+  }
+]

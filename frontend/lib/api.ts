@@ -46,6 +46,41 @@ export interface CopilotResponse {
   }>;
 }
 
+export interface ProjectSummary {
+  id: string;
+  name: string;
+  tier: string;
+  location: string;
+  capacity_mw: number;
+  deviations: number;
+  systems: number;
+}
+
+export interface MultiProjectEval {
+  aggregate: {
+    projects: number;
+    total_deviations: number;
+    aggregate_precision: number;
+    aggregate_recall: number;
+    aggregate_f1: number;
+    aggregate_cx_accuracy: number;
+    total_lead_time_weeks: number;
+    max_lead_time_weeks: number;
+  };
+  per_project: Record<string, {
+    name: string;
+    tier: string;
+    location: string;
+    capacity_mw: number;
+    deviations: number;
+    precision: number;
+    recall: number;
+    f1: number;
+    cx_accuracy: number;
+    total_lead_weeks: number;
+  }>;
+}
+
 const API = process.env.NEXT_PUBLIC_API ?? "http://localhost:8000";
 
 export async function getRegister(): Promise<Deviation[]> {
@@ -97,6 +132,57 @@ export async function getMetrics(): Promise<Record<string, unknown> | null> {
     return null;
   }
 }
+
+export async function getProjects(): Promise<ProjectSummary[]> {
+  try {
+    const r = await fetch(`${API}/projects`, { cache: "no-store" });
+    if (!r.ok) throw new Error(String(r.status));
+    const data = await r.json();
+    return data.projects as ProjectSummary[];
+  } catch {
+    return FALLBACK_PROJECTS;
+  }
+}
+
+export async function getMultiProjectEval(): Promise<MultiProjectEval | null> {
+  try {
+    const r = await fetch(`${API}/projects/eval/aggregate`, { cache: "no-store" });
+    if (!r.ok) throw new Error(String(r.status));
+    return await r.json();
+  } catch {
+    return FALLBACK_MULTI_EVAL;
+  }
+}
+
+const FALLBACK_PROJECTS: ProjectSummary[] = [
+  { id: "meghdoot", name: "Project Meghdoot", tier: "Uptime Tier IV", location: "Navi Mumbai, India", capacity_mw: 40, deviations: 14, systems: 10 },
+  { id: "vajra", name: "Project Vajra", tier: "Uptime Tier III", location: "Pune, India", capacity_mw: 20, deviations: 4, systems: 8 },
+  { id: "nordic", name: "Project Nordic Edge", tier: "EN 50600 Class 3", location: "Oslo, Norway", capacity_mw: 10, deviations: 5, systems: 7 },
+  { id: "sahara", name: "Project Sahara", tier: "Uptime Tier II", location: "Dubai, UAE", capacity_mw: 5, deviations: 3, systems: 6 },
+  { id: "cascade", name: "Project Cascade", tier: "Uptime Tier IV", location: "Hillsboro, Oregon, USA", capacity_mw: 30, deviations: 4, systems: 8 },
+  { id: "yangtze", name: "Project Yangtze", tier: "GB 50174 Grade A", location: "Shanghai, China", capacity_mw: 50, deviations: 3, systems: 8 },
+];
+
+const FALLBACK_MULTI_EVAL: MultiProjectEval = {
+  aggregate: {
+    projects: 6,
+    total_deviations: 33,
+    aggregate_precision: 1.0,
+    aggregate_recall: 1.0,
+    aggregate_f1: 1.0,
+    aggregate_cx_accuracy: 1.0,
+    total_lead_time_weeks: 691,
+    max_lead_time_weeks: 36,
+  },
+  per_project: {
+    meghdoot: { name: "Project Meghdoot", tier: "Uptime Tier IV", location: "Navi Mumbai, India", capacity_mw: 40, deviations: 14, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 267 },
+    vajra: { name: "Project Vajra", tier: "Uptime Tier III", location: "Pune, India", capacity_mw: 20, deviations: 4, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 95 },
+    nordic: { name: "Project Nordic Edge", tier: "EN 50600 Class 3", location: "Oslo, Norway", capacity_mw: 10, deviations: 5, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 113 },
+    sahara: { name: "Project Sahara", tier: "Uptime Tier II", location: "Dubai, UAE", capacity_mw: 5, deviations: 3, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 38 },
+    cascade: { name: "Project Cascade", tier: "Uptime Tier IV", location: "Hillsboro, Oregon, USA", capacity_mw: 30, deviations: 4, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 80 },
+    yangtze: { name: "Project Yangtze", tier: "GB 50174 Grade A", location: "Shanghai, China", capacity_mw: 50, deviations: 3, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 98 },
+  },
+};
 
 export const FALLBACK_CX_PLAN: CxPlan = {
   project: "Project Meghdoot",

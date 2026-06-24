@@ -1,0 +1,18 @@
+[
+  {
+    "id": "RFI-N01",
+    "system": "GEN",
+    "status": "open",
+    "question": "Can acoustic enclosure be included to meet NS 8175 noise limit?",
+    "resolution": null,
+    "week": 4
+  },
+  {
+    "id": "RFI-N02",
+    "system": "COOL",
+    "status": "open",
+    "question": "Vendor's free cooling model shows 5500 h/yr \u2014 can they re-evaluate with Oslo TMY data?",
+    "resolution": null,
+    "week": 5
+  }
+]

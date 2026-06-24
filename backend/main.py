@@ -543,3 +543,102 @@ def corpus_stats():
         "total_documents": result["total_documents"],
         "standards_lines": total_lines,
     }
+
+
+PROJECTS_DIR = pathlib.Path(__file__).parent.parent / "data" / "projects"
+
+
+@app.get("/projects")
+def list_projects():
+    """List all available project datasets with summary stats."""
+    projects = []
+    gt = _load_json("ground_truth.json")
+    if gt:
+        proj = gt.get("project", {})
+        devs = gt.get("seeded_deviations", [])
+        projects.append({
+            "id": "meghdoot",
+            "name": proj.get("name", "Project Meghdoot"),
+            "tier": proj.get("tier", ""),
+            "location": proj.get("location", ""),
+            "capacity_mw": proj.get("capacity_mw", 0),
+            "deviations": len(devs),
+            "systems": proj.get("total_systems", 0),
+        })
+
+    if PROJECTS_DIR.exists():
+        for p in sorted(PROJECTS_DIR.iterdir()):
+            gt_path = p / "ground_truth.json"
+            if p.is_dir() and gt_path.exists():
+                pgt = json.loads(gt_path.read_text())
+                proj = pgt.get("project", {})
+                devs = pgt.get("seeded_deviations", [])
+                projects.append({
+                    "id": p.name,
+                    "name": proj.get("name", p.name),
+                    "tier": proj.get("tier", ""),
+                    "location": proj.get("location", ""),
+                    "capacity_mw": proj.get("capacity_mw", 0),
+                    "deviations": len(devs),
+                    "systems": proj.get("total_systems", 0),
+                })
+
+    return {"projects": projects, "count": len(projects)}
+
+
+@app.get("/projects/{project_id}")
+def project_detail(project_id: str):
+    """Get full details for a specific project including deviations and cx plan."""
+    if project_id == "meghdoot":
+        ppath = CORPUS
+    else:
+        ppath = PROJECTS_DIR / project_id
+
+    gt_path = ppath / "ground_truth.json"
+    if not gt_path.exists():
+        raise HTTPException(404, f"Project '{project_id}' not found")
+
+    gt = json.loads(gt_path.read_text())
+    cx_path = ppath / "commissioning" / "cx_plan.json"
+    cx = json.loads(cx_path.read_text()) if cx_path.exists() else {}
+
+    devs = gt.get("seeded_deviations", [])
+    lead_times = [d["lead_time_weeks"] for d in devs if d.get("lead_time_weeks")]
+
+    return {
+        "project": gt.get("project", {}),
+        "deviations": devs,
+        "deviation_summary": {
+            "count": len(devs),
+            "critical": sum(1 for d in devs if d.get("severity") == "Critical"),
+            "major": sum(1 for d in devs if d.get("severity") == "Major"),
+            "total_lead_time_weeks": sum(lead_times),
+            "max_lead_time_weeks": max(lead_times) if lead_times else 0,
+        },
+        "cx_plan": cx,
+        "true_negative_systems": gt.get("true_negative_systems", []),
+    }
+
+
+@app.get("/projects/eval/aggregate")
+def projects_eval_aggregate():
+    """Run eval across all projects and return aggregate metrics."""
+    from eval.multi_project_eval import run_all, aggregate
+    results = run_all()
+    agg = aggregate(results)
+    per_project = {
+        pid: {
+            "name": r["name"],
+            "tier": r["tier"],
+            "location": r["location"],
+            "capacity_mw": r["capacity_mw"],
+            "deviations": r["deviations"],
+            "precision": round(r["scores"]["precision"], 3),
+            "recall": round(r["scores"]["recall"], 3),
+            "f1": round(r["scores"]["f1"], 3),
+            "cx_accuracy": round(r["scores"]["cx_prediction_accuracy"], 3),
+            "total_lead_weeks": r["scores"]["total_lead_time_weeks"],
+        }
+        for pid, r in results.items()
+    }
+    return {"aggregate": agg, "per_project": per_project}

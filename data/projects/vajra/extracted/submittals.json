@@ -1,0 +1,156 @@
+[
+  {
+    "system": "UPS",
+    "component": "UPS-01",
+    "parameter": "battery_runtime_min",
+    "provided_value": 10,
+    "unit": "min"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-01",
+    "parameter": "redundancy",
+    "provided_value": "N+1",
+    "unit": "topology"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-01",
+    "parameter": "rated_power_kw",
+    "provided_value": 800,
+    "unit": "kW"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-01",
+    "parameter": "efficiency_pct",
+    "provided_value": 93,
+    "unit": "%"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-01",
+    "parameter": "redundancy",
+    "provided_value": "N+1",
+    "unit": "topology"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-01",
+    "parameter": "rated_power_kva",
+    "provided_value": 2000,
+    "unit": "kVA"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-01",
+    "parameter": "start_time_sec",
+    "provided_value": 15,
+    "unit": "s"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-FUEL",
+    "parameter": "onsite_fuel_hours",
+    "provided_value": 24,
+    "unit": "h"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-01",
+    "parameter": "redundancy",
+    "provided_value": "N+1",
+    "unit": "topology"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-01",
+    "parameter": "supply_air_temp_c",
+    "provided_value": 27,
+    "unit": "C"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-01",
+    "parameter": "capacity_tr",
+    "provided_value": 800,
+    "unit": "TR"
+  },
+  {
+    "system": "SWGR",
+    "component": "SWGR-01",
+    "parameter": "short_circuit_rating_ka",
+    "provided_value": 40,
+    "unit": "kA"
+  },
+  {
+    "system": "SWGR",
+    "component": "SWGR-01",
+    "parameter": "redundancy",
+    "provided_value": "N+1",
+    "unit": "topology"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-01",
+    "parameter": "fire_rating",
+    "provided_value": "CMP",
+    "unit": "plenum-class"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-01",
+    "parameter": "category",
+    "provided_value": "Cat6A",
+    "unit": "type"
+  },
+  {
+    "system": "PDU",
+    "component": "PDU-01",
+    "parameter": "metering",
+    "provided_value": "per_breaker",
+    "unit": "type"
+  },
+  {
+    "system": "PDU",
+    "component": "PDU-01",
+    "parameter": "redundancy",
+    "provided_value": "A+B",
+    "unit": "topology"
+  },
+  {
+    "system": "PDU",
+    "component": "PDU-01",
+    "parameter": "rated_current_a",
+    "provided_value": 32,
+    "unit": "A"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS-01",
+    "parameter": "protocol",
+    "provided_value": "BACnet_IP",
+    "unit": "standard"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS-01",
+    "parameter": "monitoring_redundancy",
+    "provided_value": "dual",
+    "unit": "topology"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-01",
+    "parameter": "agent",
+    "provided_value": "clean_agent",
+    "unit": "type"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-01",
+    "parameter": "zones",
+    "provided_value": 4,
+    "unit": "count"
+  }
+]

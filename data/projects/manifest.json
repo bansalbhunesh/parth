@@ -1,0 +1,45 @@
+{
+  "generated_by": "data/generate_projects.py",
+  "projects": {
+    "vajra": {
+      "name": "Project Vajra",
+      "path": "data/projects/vajra",
+      "systems": 8,
+      "requirements": 22,
+      "deviations": 4
+    },
+    "nordic": {
+      "name": "Project Nordic Edge",
+      "path": "data/projects/nordic",
+      "systems": 7,
+      "requirements": 20,
+      "deviations": 5
+    },
+    "sahara": {
+      "name": "Project Sahara",
+      "path": "data/projects/sahara",
+      "systems": 6,
+      "requirements": 13,
+      "deviations": 3
+    },
+    "cascade": {
+      "name": "Project Cascade",
+      "path": "data/projects/cascade",
+      "systems": 8,
+      "requirements": 22,
+      "deviations": 4
+    },
+    "yangtze": {
+      "name": "Project Yangtze",
+      "path": "data/projects/yangtze",
+      "systems": 8,
+      "requirements": 20,
+      "deviations": 3
+    }
+  },
+  "meghdoot": {
+    "name": "Project Meghdoot",
+    "path": "data/corpus",
+    "note": "Original project, maintained separately in data/corpus/"
+  }
+}

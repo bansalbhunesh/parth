@@ -1,0 +1,119 @@
+[
+  {
+    "system": "UPS",
+    "component": "UPS-S1",
+    "parameter": "redundancy",
+    "required_value": "N+1",
+    "unit": "topology",
+    "standard_ref": "UPTIME-TIER2",
+    "clause": "SH-4.1"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-S1",
+    "parameter": "rated_power_kw",
+    "required_value": 400,
+    "unit": "kW",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "SH-4.2"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-S1",
+    "parameter": "redundancy",
+    "required_value": "N+1",
+    "unit": "topology",
+    "standard_ref": "UPTIME-TIER2",
+    "clause": "SH-5.1"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-S1",
+    "parameter": "rated_power_kva",
+    "required_value": 1000,
+    "unit": "kVA",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "SH-5.2"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-S1",
+    "parameter": "derating_pct",
+    "required_value": 10,
+    "unit": "%",
+    "standard_ref": "DEWA-REG",
+    "clause": "SH-5.3"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-S1",
+    "parameter": "redundancy",
+    "required_value": "N+1",
+    "unit": "topology",
+    "standard_ref": "UPTIME-TIER2",
+    "clause": "SH-6.1"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-S1",
+    "parameter": "design_ambient_c",
+    "required_value": 50,
+    "unit": "C",
+    "standard_ref": "DEWA-REG",
+    "clause": "SH-6.2"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-S1",
+    "parameter": "capacity_tr",
+    "required_value": 500,
+    "unit": "TR",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "SH-6.3"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-S1",
+    "parameter": "temp_rating_c",
+    "required_value": 90,
+    "unit": "C",
+    "standard_ref": "DEWA-REG",
+    "clause": "SH-8.1"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-S1",
+    "parameter": "category",
+    "required_value": "Cat6A",
+    "unit": "type",
+    "standard_ref": "TIA-942",
+    "clause": "SH-8.2"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-S1",
+    "parameter": "agent",
+    "required_value": "clean_agent",
+    "unit": "type",
+    "standard_ref": "UAE-FIRE-CODE",
+    "clause": "SH-9.1"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-S1",
+    "parameter": "zones",
+    "required_value": 2,
+    "unit": "count",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "SH-9.2"
+  },
+  {
+    "system": "STRUCT",
+    "component": "FLOOR-S1",
+    "parameter": "load_rating_kpa",
+    "required_value": 12,
+    "unit": "kPa",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "SH-10.1"
+  }
+]

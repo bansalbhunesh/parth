@@ -1,0 +1,48 @@
+{
+  "project": "Project Nordic Edge",
+  "cx_authority": "DNV GL Energy",
+  "levels": {
+    "1": "Factory Acceptance Testing (FAT)",
+    "2": "Site Acceptance / Installation Verification",
+    "3": "Startup Testing",
+    "4": "Performance Testing",
+    "5": "End-to-End Systems Testing"
+  },
+  "tests": [
+    {
+      "id": "ITP-N01",
+      "level": 2,
+      "name": "Cable Euroclass fire inspection",
+      "scheduled_week": 18,
+      "acceptance": "Cable marking B2ca-s1,d0 verified"
+    },
+    {
+      "id": "FAT-N01",
+      "level": 3,
+      "name": "UPS battery type verification",
+      "scheduled_week": 22,
+      "acceptance": "Li-ion battery per spec"
+    },
+    {
+      "id": "IST-N01",
+      "level": 4,
+      "name": "Generator noise compliance test",
+      "scheduled_week": 30,
+      "acceptance": "Noise <= 75 dB(A) at boundary"
+    },
+    {
+      "id": "IST-N02",
+      "level": 4,
+      "name": "Annual free cooling performance verification",
+      "scheduled_week": 35,
+      "acceptance": ">= 7000 h/yr free cooling"
+    },
+    {
+      "id": "SAT-N01",
+      "level": 5,
+      "name": "72-hour PUE measurement",
+      "scheduled_week": 38,
+      "acceptance": "PUE <= 1.15"
+    }
+  ]
+}

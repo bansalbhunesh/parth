@@ -1,0 +1,142 @@
+[
+  {
+    "system": "UPS",
+    "component": "UPS-Y1",
+    "parameter": "battery_runtime_min",
+    "provided_value": 10,
+    "unit": "min"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-Y1",
+    "parameter": "redundancy",
+    "provided_value": "2N",
+    "unit": "topology"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-Y1",
+    "parameter": "rated_power_kw",
+    "provided_value": 1500,
+    "unit": "kW"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-Y1",
+    "parameter": "redundancy",
+    "provided_value": "N+1",
+    "unit": "topology"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-Y1",
+    "parameter": "rated_power_kva",
+    "provided_value": 3000,
+    "unit": "kVA"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-FUEL",
+    "parameter": "onsite_fuel_hours",
+    "provided_value": 24,
+    "unit": "h"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-Y1",
+    "parameter": "redundancy",
+    "provided_value": "N+2",
+    "unit": "topology"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-Y1",
+    "parameter": "rack_power_kw",
+    "provided_value": 20,
+    "unit": "kW"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-Y1",
+    "parameter": "liquid_cooling_pct",
+    "provided_value": 60,
+    "unit": "%"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-Y1",
+    "parameter": "fire_rating",
+    "provided_value": "B1_class",
+    "unit": "GB-standard"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-Y1",
+    "parameter": "category",
+    "provided_value": "Cat6A",
+    "unit": "type"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS-Y1",
+    "parameter": "protocol",
+    "provided_value": "BACnet_IP",
+    "unit": "standard"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS-Y1",
+    "parameter": "gov_fire_reporting",
+    "provided_value": "disconnected",
+    "unit": "status"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS-Y1",
+    "parameter": "pue_reporting",
+    "provided_value": "real_time",
+    "unit": "type"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-Y1",
+    "parameter": "agent",
+    "provided_value": "clean_agent",
+    "unit": "type"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-Y1",
+    "parameter": "zones",
+    "provided_value": 10,
+    "unit": "count"
+  },
+  {
+    "system": "PDU",
+    "component": "PDU-Y1",
+    "parameter": "metering",
+    "provided_value": "per_outlet",
+    "unit": "type"
+  },
+  {
+    "system": "PDU",
+    "component": "PDU-Y1",
+    "parameter": "redundancy",
+    "provided_value": "A+B",
+    "unit": "topology"
+  },
+  {
+    "system": "STRUCT",
+    "component": "FLOOR-Y1",
+    "parameter": "load_rating_kpa",
+    "provided_value": 16,
+    "unit": "kPa"
+  },
+  {
+    "system": "STRUCT",
+    "component": "FLOOR-Y1",
+    "parameter": "seismic_intensity",
+    "provided_value": "VII",
+    "unit": "class"
+  }
+]

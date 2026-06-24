@@ -21,6 +21,7 @@ import SectionIndex from "../components/SectionIndex";
 import AnalyzePanel from "../components/AnalyzePanel";
 import ComplianceScore from "../components/ComplianceScore";
 import DocumentDiff from "../components/DocumentDiff";
+import MultiProjectDashboard from "../components/MultiProjectDashboard";
 
 function Sentinel({ d }: { d: Deviation }) {
   const span = 52;
@@ -322,6 +323,13 @@ export default async function Page() {
         <StandardsKB />
       </ScrollReveal>
 
+      <h2 className="section" id="multiproject">
+        Multi-project eval &middot; 6 projects &middot; 5 countries &middot; 4 standards
+      </h2>
+      <ScrollReveal>
+        <MultiProjectDashboard />
+      </ScrollReveal>
+
       <h2 className="section" id="eval">
         Eval harness &middot; precision &middot; recall &middot; F1
       </h2>
@@ -370,7 +378,7 @@ export default async function Page() {
           EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4
         </div>
         <div className="footer-meta">
-          5 AI Agents &middot; 10 Systems &middot; 7 Standards &middot; 33 Requirements &middot; 14 Deviations &middot; 267 Weeks Saved &middot; 0 False Positives
+          6 Projects &middot; 5 Countries &middot; 33 Deviations &middot; 691 Weeks Saved &middot; F1=1.000 &middot; 0 False Positives
         </div>
       </div>
     </main>

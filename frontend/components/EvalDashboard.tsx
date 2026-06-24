@@ -75,14 +75,14 @@ interface Metrics {
 
 const FALLBACK: Metrics = {
   detection: {
-    total_deviations: 7, critical: 4, major: 3,
+    total_deviations: 14, critical: 7, major: 6,
     baseline_precision: 1.0, baseline_recall: 1.0, baseline_f1: 1.0,
     false_positive_rate: 0.0,
   },
   commissioning: {
     cx_prediction_accuracy: 1.0,
-    mean_lead_time_weeks: 21.3, max_lead_time_weeks: 30,
-    total_lead_time_weeks: 149,
+    mean_lead_time_weeks: 19.1, max_lead_time_weeks: 33,
+    total_lead_time_weeks: 267,
   },
   corpus: { systems: 7, total_requirements: 14000, true_negative_systems: 3 },
   citation_faithfulness: 1.0,

@@ -7,15 +7,18 @@ const SECTIONS = [
   { id: "architecture", num: "04", label: "Architecture", desc: "4-layer system design with data flow", color: "#5b8cff" },
   { id: "screenshots", num: "05", label: "Live Screenshots", desc: "Interactive gallery of all dashboard views", color: "#36d6e7" },
   { id: "systems", num: "06", label: "System Health", desc: "10 systems — 3 compliant, 7 with findings", color: "#35c98b" },
-  { id: "risk", num: "07", label: "Risk Matrix", desc: "Severity x lead time deviation mapping", color: "#ff4d4d" },
-  { id: "register", num: "08", label: "Deviation Register", desc: "Full evidence table with citation chains", color: "#ff4d4d" },
-  { id: "twin", num: "09", label: "Cx Risk Twin", desc: "Commissioning timeline with at-risk tests", color: "#5b8cff" },
-  { id: "standards", num: "10", label: "Standards KB", desc: "7 governing standards with 1,580 lines", color: "#5b8cff" },
-  { id: "eval", num: "11", label: "Eval Harness", desc: "P/R/F1 = 1.000 with FP rate testing", color: "#35c98b" },
-  { id: "roi", num: "12", label: "ROI Calculator", desc: "Interactive business impact model", color: "#ffb020" },
-  { id: "scale", num: "13", label: "Scale Story", desc: "10 systems today, 14,000 line items tomorrow", color: "#36d6e7" },
-  { id: "copilot", num: "14", label: "Project Copilot", desc: "RAG over specs, submittals, standards & RFIs", color: "#36d6e7" },
-  { id: "refs", num: "15", label: "Academic Refs", desc: "Peer-reviewed foundations for the approach", color: "#5b8cff" },
+  { id: "compliance", num: "07", label: "Compliance Score", desc: "Animated ring gauge with per-system conformance", color: "#35c98b" },
+  { id: "diff", num: "08", label: "Document Diff", desc: "Side-by-side spec vs submittal with deviation highlights", color: "#ffb020" },
+  { id: "risk", num: "09", label: "Risk Matrix", desc: "Severity x lead time deviation mapping", color: "#ff4d4d" },
+  { id: "register", num: "10", label: "Deviation Register", desc: "Full evidence table with citation chains", color: "#ff4d4d" },
+  { id: "twin", num: "11", label: "Cx Risk Twin", desc: "Commissioning timeline with at-risk tests", color: "#5b8cff" },
+  { id: "standards", num: "12", label: "Standards KB", desc: "7 governing standards with 1,580 lines", color: "#5b8cff" },
+  { id: "eval", num: "13", label: "Eval Harness", desc: "P/R/F1 = 1.000 with FP rate testing", color: "#35c98b" },
+  { id: "roi", num: "14", label: "ROI Calculator", desc: "Interactive business impact model", color: "#ffb020" },
+  { id: "scale", num: "15", label: "Scale Story", desc: "10 systems today, 14,000 line items tomorrow", color: "#36d6e7" },
+  { id: "analyze", num: "16", label: "Live Analysis", desc: "Paste any spec & submittal for real-time deviation detection", color: "#36d6e7" },
+  { id: "copilot", num: "17", label: "Project Copilot", desc: "RAG over specs, submittals, standards & RFIs", color: "#36d6e7" },
+  { id: "refs", num: "18", label: "Academic Refs", desc: "Peer-reviewed foundations for the approach", color: "#5b8cff" },
 ];
 
 export default function SectionIndex() {
@@ -23,7 +26,7 @@ export default function SectionIndex() {
     <div className="sidx">
       <div className="sidx-header">
         <div className="sidx-badge">PRODUCT WALKTHROUGH</div>
-        <div className="sidx-title">15 sections &middot; everything a judge needs</div>
+        <div className="sidx-title">18 sections &middot; everything a judge needs</div>
       </div>
       <div className="sidx-grid">
         {SECTIONS.map((s) => (

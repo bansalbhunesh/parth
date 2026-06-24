@@ -18,6 +18,9 @@ import ROICalculator from "../components/ROICalculator";
 import BeforeAfter from "../components/BeforeAfter";
 import ScreenshotShowcase from "../components/ScreenshotShowcase";
 import SectionIndex from "../components/SectionIndex";
+import AnalyzePanel from "../components/AnalyzePanel";
+import ComplianceScore from "../components/ComplianceScore";
+import DocumentDiff from "../components/DocumentDiff";
 
 function Sentinel({ d }: { d: Deviation }) {
   const span = 52;
@@ -177,11 +180,11 @@ function TotalSavingsHero() {
   return (
     <div className="savings-hero">
       <div className="savings-glow" />
-      <div className="savings-number">149</div>
+      <div className="savings-number">267</div>
       <div className="savings-unit">total weeks of lead time saved</div>
       <div className="savings-sub">
-        7 deviations caught at Week 11 — before a single bolt turns on site.
-        That&apos;s 149 weeks of avoided commissioning rework, schedule delays,
+        14 deviations caught at Week 11 — before a single bolt turns on site.
+        That&apos;s 267 weeks (5+ years) of avoided commissioning rework, schedule delays,
         and cost overruns across all findings.
       </div>
     </div>
@@ -276,6 +279,20 @@ export default async function Page() {
       </h2>
       <SystemHealthGrid rows={rows} />
 
+      <h2 className="section" id="compliance">
+        Compliance score &middot; per-system conformance tracking
+      </h2>
+      <ScrollReveal>
+        <ComplianceScore />
+      </ScrollReveal>
+
+      <h2 className="section" id="diff">
+        Document comparison &middot; spec vs submittal &middot; deviation highlights
+      </h2>
+      <ScrollReveal>
+        <DocumentDiff rows={rows} />
+      </ScrollReveal>
+
       <h2 className="section" id="risk">
         Risk matrix &middot; severity × lead time
       </h2>
@@ -326,6 +343,13 @@ export default async function Page() {
         <ScaleStory />
       </ScrollReveal>
 
+      <h2 className="section" id="analyze">
+        Live analysis &middot; paste any spec &amp; submittal
+      </h2>
+      <ScrollReveal>
+        <AnalyzePanel />
+      </ScrollReveal>
+
       <h2 className="section" id="copilot">
         Project copilot &middot; RAG over specs, submittals, standards &amp; RFIs
       </h2>
@@ -346,7 +370,7 @@ export default async function Page() {
           EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4
         </div>
         <div className="footer-meta">
-          5 AI Agents &middot; 10 Systems &middot; 7 Standards &middot; 33 Requirements &middot; 7 Deviations &middot; 149 Weeks Saved &middot; 0 False Positives
+          5 AI Agents &middot; 10 Systems &middot; 7 Standards &middot; 33 Requirements &middot; 14 Deviations &middot; 267 Weeks Saved &middot; 0 False Positives
         </div>
       </div>
     </main>

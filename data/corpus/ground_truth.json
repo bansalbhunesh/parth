@@ -183,7 +183,7 @@
       "week_caught": 11,
       "week_fail": 36,
       "lead_time_weeks": 25,
-      "rationale": "Chilled water delta-T of 7°C vs required 10°C indicates low delta-T syndrome; pumps must increase flow 43% to meet heat rejection, risking cavitation and exceeding pipe velocity limits per ASHRAE guidelines."
+      "rationale": "Chilled water delta-T of 7 C vs required 10 C indicates low delta-T syndrome; pumps must increase flow 43% to meet heat rejection."
     },
     {
       "id": "DEV-010",
@@ -202,7 +202,7 @@
       "week_caught": 11,
       "week_fail": 24,
       "lead_time_weeks": 13,
-      "rationale": "UPS efficiency 93% vs required 96% adds 36 kW heat load per module at rated load; cooling plant not sized for additional heat rejection, PUE impact of 0.03."
+      "rationale": "UPS efficiency 93% vs required 96% adds 36 kW heat load per module at rated load; cooling plant not sized for additional heat rejection."
     },
     {
       "id": "DEV-011",
@@ -221,7 +221,7 @@
       "week_caught": 11,
       "week_fail": 20,
       "lead_time_weeks": 9,
-      "rationale": "Switchgear Type 2 (no containment) vs required Type 2B (arc containment) exposes operators to incident energy above 40 cal/cm²; PPE category exceeds safe working practice limits per design basis."
+      "rationale": "Switchgear Type 2 vs required Type 2B exposes operators to incident energy above 40 cal/cm2; PPE category exceeds safe working practice limits."
     },
     {
       "id": "DEV-012",
@@ -240,7 +240,7 @@
       "week_caught": 11,
       "week_fail": 18,
       "lead_time_weeks": 7,
-      "rationale": "Bundle size of 72 exceeds BICSI-002 pathway fill limit of 48; thermal derating of cables in overloaded trays reduces current capacity and may cause insulation degradation."
+      "rationale": "Bundle size of 72 exceeds BICSI-002 pathway fill limit of 48; thermal derating reduces current capacity."
     },
     {
       "id": "DEV-013",
@@ -259,7 +259,7 @@
       "week_caught": 11,
       "week_fail": 44,
       "lead_time_weeks": 33,
-      "rationale": "Single monitoring path creates single point of failure for facility oversight; Tier IV requires concurrent maintainability of all monitoring and control systems without loss of visibility."
+      "rationale": "Single monitoring path creates single point of failure; Tier IV requires concurrent maintainability of all monitoring systems."
     },
     {
       "id": "DEV-014",
@@ -278,7 +278,7 @@
       "week_caught": 11,
       "week_fail": 19,
       "lead_time_weeks": 8,
-      "rationale": "Floor load capacity 8 kPa vs required 12 kPa; high-density racks with 15 kW/rack will exceed floor bearing capacity, risking structural failure under seismic Zone IV conditions per IS 1893:2016."
+      "rationale": "Floor load capacity 8 kPa vs required 12 kPa; high-density racks will exceed floor bearing capacity under seismic Zone IV conditions."
     }
   ],
   "true_negative_systems": [

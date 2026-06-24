@@ -4,7 +4,7 @@ _Project: Project Meghdoot · Submittal rev B_
 ## Vendor Notes
 
 Vendor: ABB UniGear ZS2, 11 kV air-insulated.
-The switchgear is offered with a fault withstand rating of 40 kA for 1 second, which is the standard catalogue rating for this product range. ABB notes that 50 kA ratings are available as a special order with extended lead times.
+The switchgear is offered with a fault withstand rating of 40 kA for 1 second, which is the standard catalogue rating for this product range. ABB notes that 50 kA ratings are available as a special order with extended lead times. Arc flash classification is Type 2 (internal arc tested); Type 2B (arc-resistant with operator protection) requires additional arc-venting ducts and is available as an option.
 
 ## Provided values
 

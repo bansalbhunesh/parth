@@ -19,6 +19,7 @@ Run: uvicorn backend.main:app --reload
 import json
 import logging
 import pathlib
+import re
 import time
 
 from fastapi import FastAPI, HTTPException
@@ -61,11 +62,105 @@ class CopilotQuery(BaseModel):
     query: str = Field(..., min_length=1, max_length=2000)
 
 
+class AnalyzeRequest(BaseModel):
+    spec_text: str = Field(..., min_length=10, max_length=50000)
+    submittal_text: str = Field(..., min_length=10, max_length=50000)
+    system_id: str = Field(default="CUSTOM", max_length=50)
+
+
 def _load_json(path):
     full = CORPUS / path
     if full.exists():
         return json.loads(full.read_text())
     return {}
+
+
+def _deterministic_compare(spec_text: str, submittal_text: str) -> list:
+    """Fallback deterministic comparison when LLM is unavailable."""
+    # Extract numeric requirements from spec
+    spec_values = {}
+    for match in re.finditer(
+        r'\*\*([A-Z][\w-]*)\*\*\s*[—–-]\s*([\w\s]+?):\s*(?:shall be\s*)?\*\*(\S+)\s*(\S*)\*\*',
+        spec_text,
+    ):
+        component, param, value, unit = match.groups()
+        param_key = param.strip().lower().replace(' ', '_')
+        spec_values[(component, param_key)] = (value, unit.strip('()'))
+
+    # Extract provided values from submittal
+    sub_values = {}
+    for match in re.finditer(
+        r'\*\*([A-Z][\w-]*)\*\*\s*[—–-]\s*([\w\s]+?):\s*\*\*(\S+)\s*(\S*)\*\*',
+        submittal_text,
+    ):
+        component, param, value, unit = match.groups()
+        param_key = param.strip().lower().replace(' ', '_')
+        sub_values[(component, param_key)] = (value, unit.strip('()'))
+
+    devs = []
+    for key, (req_val, unit) in spec_values.items():
+        if key in sub_values:
+            prov_val, _ = sub_values[key]
+            if str(prov_val) != str(req_val):
+                devs.append({
+                    "component": key[0],
+                    "parameter": key[1],
+                    "required_value": req_val,
+                    "provided_value": prov_val,
+                    "unit": unit,
+                    "standard_ref": "DESIGN-BASIS",
+                    "spec_clause": "",
+                    "severity": "Major",
+                    "rationale": f"Provided value {prov_val} does not match required {req_val} {unit}",
+                    "confidence": 0.7,
+                    "cx_source": "deterministic",
+                })
+    return devs
+
+
+@app.post("/analyze")
+def analyze(req: AnalyzeRequest):
+    """Live analysis: compare arbitrary spec vs submittal text."""
+    from backend.agents.reconciliation import (
+        _all_standards_text,
+        _check_citation_faithfulness,
+        _validate_deviations,
+        SYSTEM_PROMPT,
+        PROMPT_TEMPLATE,
+    )
+    from backend.agents.commissioning import predict_cx_impact
+
+    t0 = time.time()
+    standards = _all_standards_text()
+
+    prompt = PROMPT_TEMPLATE.format(
+        spec=req.spec_text,
+        submittal=req.submittal_text,
+        standards=standards,
+    )
+
+    try:
+        from backend.llm import complete_json, LLMError
+        raw = complete_json(prompt, system=SYSTEM_PROMPT)
+        devs = _validate_deviations(raw)
+        devs = _check_citation_faithfulness(devs, req.spec_text, req.submittal_text, standards)
+        for d in devs:
+            d.update(predict_cx_impact(d))
+            d["system"] = req.system_id
+    except Exception as exc:
+        # Fallback: run deterministic comparison if LLM unavailable
+        log.warning("LLM analysis failed, running deterministic comparison: %s", exc)
+        devs = _deterministic_compare(req.spec_text, req.submittal_text)
+
+    elapsed = round((time.time() - t0) * 1000)
+
+    return {
+        "system": req.system_id,
+        "deviations": devs,
+        "count": len(devs),
+        "elapsed_ms": elapsed,
+        "mode": "llm" if not devs or devs[0].get("cx_source") != "deterministic" else "deterministic",
+    }
 
 
 @app.get("/health")
@@ -421,6 +516,17 @@ def pipeline_info():
             {"id": "rfi_copilot", "agent": "RFI Copilot", "description": "RAG over project corpus with prior-RFI matching"},
         ],
     }
+
+
+@app.get("/corpus/doc/{doc_type}/{system_id}")
+def corpus_doc(doc_type: str, system_id: str):
+    """Return raw document text for spec or submittal."""
+    if doc_type not in ("specs", "submittals"):
+        raise HTTPException(400, "doc_type must be 'specs' or 'submittals'")
+    path = CORPUS / doc_type / f"{system_id}.md"
+    if not path.exists():
+        raise HTTPException(404, f"Document not found: {doc_type}/{system_id}")
+    return {"system": system_id, "doc_type": doc_type, "text": path.read_text(encoding="utf-8")}
 
 
 @app.get("/corpus/stats")

@@ -1,0 +1,299 @@
+[
+  {
+    "system": "UPS",
+    "component": "UPS-02",
+    "parameter": "battery_runtime_min",
+    "required_value": 10,
+    "unit": "min",
+    "standard_ref": "UPTIME-TIER4",
+    "clause": "DB-4.3"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-02",
+    "parameter": "redundancy",
+    "required_value": "2N",
+    "unit": "topology",
+    "standard_ref": "UPTIME-TIER4",
+    "clause": "DB-4.1"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-02",
+    "parameter": "rated_power_kw",
+    "required_value": 1200,
+    "unit": "kW",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "DB-4.2"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-02",
+    "parameter": "efficiency_pct",
+    "required_value": 96,
+    "unit": "%",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "DB-4.5"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-FUEL",
+    "parameter": "onsite_fuel_hours",
+    "required_value": 24,
+    "unit": "h",
+    "standard_ref": "UPTIME-TIER4",
+    "clause": "DB-5.4"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-01",
+    "parameter": "redundancy",
+    "required_value": "N+1",
+    "unit": "topology",
+    "standard_ref": "UPTIME-TIER4",
+    "clause": "DB-5.1"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-01",
+    "parameter": "rated_power_kva",
+    "required_value": 2500,
+    "unit": "kVA",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "DB-5.2"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-01",
+    "parameter": "start_time_sec",
+    "required_value": 10,
+    "unit": "s",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "DB-5.3"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-LOOP",
+    "parameter": "redundancy",
+    "required_value": "N+2",
+    "unit": "topology",
+    "standard_ref": "UPTIME-TIER4",
+    "clause": "DB-6.1"
+  },
+  {
+    "system": "COOL",
+    "component": "CRAH",
+    "parameter": "supply_air_temp_c",
+    "required_value": 24,
+    "unit": "C",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "DB-6.3"
+  },
+  {
+    "system": "COOL",
+    "component": "CHILLER",
+    "parameter": "capacity_tr",
+    "required_value": 1500,
+    "unit": "TR",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "DB-6.2"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-LOOP",
+    "parameter": "delta_t_c",
+    "required_value": 10,
+    "unit": "C",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "DB-6.4"
+  },
+  {
+    "system": "SWGR",
+    "component": "SWGR-MV",
+    "parameter": "short_circuit_rating_ka",
+    "required_value": 50,
+    "unit": "kA",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "DB-7.2"
+  },
+  {
+    "system": "SWGR",
+    "component": "SWGR-MV",
+    "parameter": "redundancy",
+    "required_value": "2N",
+    "unit": "topology",
+    "standard_ref": "UPTIME-TIER4",
+    "clause": "DB-7.1"
+  },
+  {
+    "system": "SWGR",
+    "component": "SWGR-MV",
+    "parameter": "arc_flash_rating",
+    "required_value": "Type_2B",
+    "unit": "class",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "DB-7.3"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-DC",
+    "parameter": "fire_rating",
+    "required_value": "CMP",
+    "unit": "plenum-class",
+    "standard_ref": "NFPA-75",
+    "clause": "DB-8.4"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-DC",
+    "parameter": "category",
+    "required_value": "Cat6A",
+    "unit": "type",
+    "standard_ref": "TIA-942",
+    "clause": "DB-8.1"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-DC",
+    "parameter": "max_bundle_size",
+    "required_value": 48,
+    "unit": "cables",
+    "standard_ref": "BICSI-002",
+    "clause": "DB-8.5"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS",
+    "parameter": "critical_alarm_points",
+    "required_value": "complete",
+    "unit": "set",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "DB-9.5"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS",
+    "parameter": "monitoring_redundancy",
+    "required_value": "dual",
+    "unit": "topology",
+    "standard_ref": "UPTIME-TIER4",
+    "clause": "DB-9.1"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS",
+    "parameter": "protocol",
+    "required_value": "BACnet_IP",
+    "unit": "standard",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "DB-9.3"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-SUP",
+    "parameter": "agent",
+    "required_value": "clean_agent",
+    "unit": "type",
+    "standard_ref": "NFPA-75",
+    "clause": "DB-10.2"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-SUP",
+    "parameter": "zones",
+    "required_value": 8,
+    "unit": "count",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "DB-10.1"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-SUP",
+    "parameter": "vesda_coverage",
+    "required_value": "complete",
+    "unit": "set",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "DB-10.3"
+  },
+  {
+    "system": "BUSWAY",
+    "component": "BUSWAY",
+    "parameter": "rating_a",
+    "required_value": 4000,
+    "unit": "A",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "DB-11.1"
+  },
+  {
+    "system": "BUSWAY",
+    "component": "BUSWAY",
+    "parameter": "redundancy",
+    "required_value": "2N",
+    "unit": "topology",
+    "standard_ref": "UPTIME-TIER4",
+    "clause": "DB-11.2"
+  },
+  {
+    "system": "BUSWAY",
+    "component": "BUSWAY",
+    "parameter": "ip_rating",
+    "required_value": "IP54",
+    "unit": "class",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "DB-11.3"
+  },
+  {
+    "system": "PDU",
+    "component": "PDU-RACK",
+    "parameter": "metering",
+    "required_value": "per_outlet",
+    "unit": "type",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "DB-12.1"
+  },
+  {
+    "system": "PDU",
+    "component": "PDU-RACK",
+    "parameter": "redundancy",
+    "required_value": "A+B",
+    "unit": "topology",
+    "standard_ref": "UPTIME-TIER4",
+    "clause": "DB-12.2"
+  },
+  {
+    "system": "PDU",
+    "component": "PDU-RACK",
+    "parameter": "rated_current_a",
+    "required_value": 63,
+    "unit": "A",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "DB-12.3"
+  },
+  {
+    "system": "STRUCT",
+    "component": "FLOOR",
+    "parameter": "load_rating_kpa",
+    "required_value": 12,
+    "unit": "kPa",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "DB-13.1"
+  },
+  {
+    "system": "STRUCT",
+    "component": "FLOOR",
+    "parameter": "seismic_zone",
+    "required_value": "Zone_IV",
+    "unit": "class",
+    "standard_ref": "IS-1893",
+    "clause": "DB-13.2"
+  },
+  {
+    "system": "STRUCT",
+    "component": "FLOOR",
+    "parameter": "height_mm",
+    "required_value": 900,
+    "unit": "mm",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "DB-13.3"
+  }
+]

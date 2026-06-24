@@ -1,0 +1,233 @@
+[
+  {
+    "system": "UPS",
+    "component": "UPS-02",
+    "parameter": "battery_runtime_min",
+    "provided_value": 7,
+    "unit": "min"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-02",
+    "parameter": "redundancy",
+    "provided_value": "2N",
+    "unit": "topology"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-02",
+    "parameter": "rated_power_kw",
+    "provided_value": 1200,
+    "unit": "kW"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-02",
+    "parameter": "efficiency_pct",
+    "provided_value": 93,
+    "unit": "%"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-FUEL",
+    "parameter": "onsite_fuel_hours",
+    "provided_value": 12,
+    "unit": "h"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-01",
+    "parameter": "redundancy",
+    "provided_value": "N+1",
+    "unit": "topology"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-01",
+    "parameter": "rated_power_kva",
+    "provided_value": 2500,
+    "unit": "kVA"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-01",
+    "parameter": "start_time_sec",
+    "provided_value": 15,
+    "unit": "s"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-LOOP",
+    "parameter": "redundancy",
+    "provided_value": "N+1",
+    "unit": "topology"
+  },
+  {
+    "system": "COOL",
+    "component": "CRAH",
+    "parameter": "supply_air_temp_c",
+    "provided_value": 24,
+    "unit": "C"
+  },
+  {
+    "system": "COOL",
+    "component": "CHILLER",
+    "parameter": "capacity_tr",
+    "provided_value": 1500,
+    "unit": "TR"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-LOOP",
+    "parameter": "delta_t_c",
+    "provided_value": 7,
+    "unit": "C"
+  },
+  {
+    "system": "SWGR",
+    "component": "SWGR-MV",
+    "parameter": "short_circuit_rating_ka",
+    "provided_value": 40,
+    "unit": "kA"
+  },
+  {
+    "system": "SWGR",
+    "component": "SWGR-MV",
+    "parameter": "redundancy",
+    "provided_value": "2N",
+    "unit": "topology"
+  },
+  {
+    "system": "SWGR",
+    "component": "SWGR-MV",
+    "parameter": "arc_flash_rating",
+    "provided_value": "Type_2",
+    "unit": "class"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-DC",
+    "parameter": "fire_rating",
+    "provided_value": "CMR",
+    "unit": "plenum-class"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-DC",
+    "parameter": "category",
+    "provided_value": "Cat6A",
+    "unit": "type"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-DC",
+    "parameter": "max_bundle_size",
+    "provided_value": 72,
+    "unit": "cables"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS",
+    "parameter": "critical_alarm_points",
+    "provided_value": "missing:leak_detection",
+    "unit": "set"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS",
+    "parameter": "monitoring_redundancy",
+    "provided_value": "single",
+    "unit": "topology"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS",
+    "parameter": "protocol",
+    "provided_value": "BACnet_IP",
+    "unit": "standard"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-SUP",
+    "parameter": "agent",
+    "provided_value": "clean_agent",
+    "unit": "type"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-SUP",
+    "parameter": "zones",
+    "provided_value": 8,
+    "unit": "count"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-SUP",
+    "parameter": "vesda_coverage",
+    "provided_value": "complete",
+    "unit": "set"
+  },
+  {
+    "system": "BUSWAY",
+    "component": "BUSWAY",
+    "parameter": "rating_a",
+    "provided_value": 4000,
+    "unit": "A"
+  },
+  {
+    "system": "BUSWAY",
+    "component": "BUSWAY",
+    "parameter": "redundancy",
+    "provided_value": "2N",
+    "unit": "topology"
+  },
+  {
+    "system": "BUSWAY",
+    "component": "BUSWAY",
+    "parameter": "ip_rating",
+    "provided_value": "IP54",
+    "unit": "class"
+  },
+  {
+    "system": "PDU",
+    "component": "PDU-RACK",
+    "parameter": "metering",
+    "provided_value": "per_outlet",
+    "unit": "type"
+  },
+  {
+    "system": "PDU",
+    "component": "PDU-RACK",
+    "parameter": "redundancy",
+    "provided_value": "A+B",
+    "unit": "topology"
+  },
+  {
+    "system": "PDU",
+    "component": "PDU-RACK",
+    "parameter": "rated_current_a",
+    "provided_value": 63,
+    "unit": "A"
+  },
+  {
+    "system": "STRUCT",
+    "component": "FLOOR",
+    "parameter": "load_rating_kpa",
+    "provided_value": 8,
+    "unit": "kPa"
+  },
+  {
+    "system": "STRUCT",
+    "component": "FLOOR",
+    "parameter": "seismic_zone",
+    "provided_value": "Zone_IV",
+    "unit": "class"
+  },
+  {
+    "system": "STRUCT",
+    "component": "FLOOR",
+    "parameter": "height_mm",
+    "provided_value": 600,
+    "unit": "mm"
+  }
+]

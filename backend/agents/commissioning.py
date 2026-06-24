@@ -31,6 +31,13 @@ _RULES = {
     ("CABLE-DC", "fire_rating"): ("ITP-02", 2, 22, "Major"),
     ("BMS", "critical_alarm_points"): ("IST-14", 4, 40, "Major"),
     ("FLOOR", "height_mm"): ("ITP-01", 1, 16, "Major"),
+    ("GEN-01", "start_time_sec"): ("IST-01", 4, 34, "Critical"),
+    ("COOL-LOOP", "delta_t_c"): ("IST-16", 4, 36, "Major"),
+    ("UPS-02", "efficiency_pct"): ("FAT-01", 3, 24, "Major"),
+    ("SWGR-MV", "arc_flash_rating"): ("ITP-03", 2, 20, "Major"),
+    ("CABLE-DC", "max_bundle_size"): ("ITP-04", 2, 18, "Minor"),
+    ("BMS", "monitoring_redundancy"): ("IST-15", 4, 44, "Critical"),
+    ("FLOOR", "load_rating_kpa"): ("ITP-05", 1, 19, "Critical"),
 }
 
 

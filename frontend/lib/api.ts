@@ -123,6 +123,106 @@ export async function askCopilot(query: string): Promise<CopilotResponse> {
   }
 }
 
+export async function streamCopilot(
+  query: string,
+  onMeta: (meta: { sources: string[]; prior_rfis: CopilotResponse["prior_rfis"] }) => void,
+  onToken: (token: string) => void,
+  onDone: () => void,
+  onError: (err: string) => void,
+): Promise<void> {
+  try {
+    const r = await fetch(`${API}/copilot/stream`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query }),
+    });
+    if (!r.ok || !r.body) throw new Error(`HTTP ${r.status}`);
+    const reader = r.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+
+      let currentEvent = "";
+      for (const line of lines) {
+        if (line.startsWith("event: ")) {
+          currentEvent = line.slice(7);
+        } else if (line.startsWith("data: ")) {
+          const data = line.slice(6);
+          if (currentEvent === "meta") {
+            try { onMeta(JSON.parse(data)); } catch {}
+          } else if (currentEvent === "token") {
+            onToken(data);
+          } else if (currentEvent === "done") {
+            onDone();
+            return;
+          }
+        }
+      }
+    }
+    onDone();
+  } catch {
+    onError("Backend not connected. Ensure the API is running at localhost:8000.");
+  }
+}
+
+export async function streamAnalyze(
+  specText: string,
+  submittalText: string,
+  onStatus: (status: string) => void,
+  onToken: (token: string) => void,
+  onResult: (result: unknown) => void,
+  onDone: () => void,
+  onError: (err: string) => void,
+): Promise<void> {
+  try {
+    const r = await fetch(`${API}/analyze/stream`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ spec_text: specText, submittal_text: submittalText }),
+    });
+    if (!r.ok || !r.body) throw new Error(`HTTP ${r.status}`);
+    const reader = r.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+
+      let currentEvent = "";
+      for (const line of lines) {
+        if (line.startsWith("event: ")) {
+          currentEvent = line.slice(7);
+        } else if (line.startsWith("data: ")) {
+          const data = line.slice(6);
+          if (currentEvent === "status") {
+            onStatus(data);
+          } else if (currentEvent === "token") {
+            try { onToken(JSON.parse(data)); } catch { onToken(data); }
+          } else if (currentEvent === "result") {
+            try { onResult(JSON.parse(data)); } catch {}
+          } else if (currentEvent === "done") {
+            onDone();
+            return;
+          }
+        }
+      }
+    }
+    onDone();
+  } catch {
+    onError("Analysis failed — backend not connected.");
+  }
+}
+
 export async function getMetrics(): Promise<Record<string, unknown> | null> {
   try {
     const r = await fetch(`${API}/metrics`, { cache: "no-store" });

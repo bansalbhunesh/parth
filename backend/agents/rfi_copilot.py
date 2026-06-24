@@ -14,7 +14,7 @@ import pathlib
 import re
 from collections import Counter
 
-from backend.llm import complete
+from backend.llm import complete, complete_stream
 
 CORPUS = pathlib.Path(__file__).parent.parent.parent / "data" / "corpus"
 
@@ -137,3 +137,29 @@ def ask(query: str):
         "sources": [c["source"] for c in ctx],
         "prior_rfis": prior_rfis,
     }
+
+
+def ask_stream(query: str):
+    """Streaming variant — yields (event_type, data) tuples."""
+    import json as _json
+    ctx = _retrieve(query)
+    context = "\n\n".join(f"[{c['source']}]\n{c['text']}" for c in ctx)
+    prompt = (
+        f"Answer the project question using ONLY the context provided below. "
+        f"Cite sources in square brackets like [specs/UPS.md] or [rfi/RFI-014]. "
+        f"If a prior RFI is relevant to the question, explicitly mention it and "
+        f"quote its resolution. If a known deviation is relevant, mention it.\n\n"
+        f"Be specific and technical. Include exact values and clause references.\n\n"
+        f"=== CONTEXT ===\n{context}\n\n=== QUESTION ===\n{query}"
+    )
+
+    sources = [c["source"] for c in ctx]
+    prior_rfis = [c["rfi"] for c in ctx if "rfi" in c]
+    yield ("meta", _json.dumps({"sources": sources, "prior_rfis": prior_rfis}))
+
+    for chunk in complete_stream(
+        prompt,
+        system="You are a precise EPC project copilot for a Tier IV data centre. "
+               "Cite every claim. Be concise but thorough.",
+    ):
+        yield ("token", chunk)

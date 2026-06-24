@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { streamAnalyze } from "../lib/api";
 
 const EXAMPLE_SPEC = `# Design Basis: UPS System
 - **UPS-02** — battery runtime min: shall be **10 min** (ref: UPTIME-TIER4; clause DB-4.3)
@@ -39,28 +40,66 @@ export default function AnalyzePanel() {
   const [result, setResult] = useState<AnalyzeResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [status, setStatus] = useState("");
+  const [streamText, setStreamText] = useState("");
+  const [streaming, setStreaming] = useState(false);
+  const abortRef = useRef(false);
 
   const handleAnalyze = async () => {
     if (spec.length < 10 || submittal.length < 10) {
       setError("Both spec and submittal must be at least 10 characters.");
       return;
     }
+    abortRef.current = false;
     setLoading(true);
+    setStreaming(true);
     setError("");
     setResult(null);
+    setStreamText("");
+    setStatus("Connecting to analysis engine...");
+
     try {
-      const r = await fetch(`${API}/analyze`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ spec_text: spec, submittal_text: submittal }),
-      });
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      const data = await r.json();
-      setResult(data);
+      await streamAnalyze(
+        spec,
+        submittal,
+        (s) => setStatus(s),
+        (token) => {
+          if (!abortRef.current) {
+            setStreamText((prev) => prev + token);
+          }
+        },
+        (res) => {
+          setResult(res as AnalyzeResult);
+          setStreamText("");
+          setStreaming(false);
+        },
+        () => {
+          setLoading(false);
+          setStreaming(false);
+          setStatus("");
+        },
+        async (err) => {
+          try {
+            const r = await fetch(`${API}/analyze`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ spec_text: spec, submittal_text: submittal }),
+            });
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            const data = await r.json();
+            setResult(data);
+          } catch (e) {
+            setError(e instanceof Error ? e.message : err);
+          }
+          setLoading(false);
+          setStreaming(false);
+          setStatus("");
+        },
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : "Analysis failed");
-    } finally {
       setLoading(false);
+      setStreaming(false);
     }
   };
 
@@ -69,6 +108,7 @@ export default function AnalyzePanel() {
     setSubmittal(EXAMPLE_SUBMITTAL);
     setResult(null);
     setError("");
+    setStreamText("");
   };
 
   return (
@@ -123,7 +163,17 @@ export default function AnalyzePanel() {
       {loading && (
         <div className="analyze-loading">
           <div className="analyze-loading-bar" />
-          <span>Cross-referencing against 7 governing standards...</span>
+          <span>{status || "Cross-referencing against 7 governing standards..."}</span>
+        </div>
+      )}
+
+      {streaming && streamText && (
+        <div className="analyze-stream">
+          <div className="analyze-stream-label">AI reasoning</div>
+          <pre className="analyze-stream-text">
+            {streamText}
+            <span className="copilot-cursor" />
+          </pre>
         </div>
       )}
 

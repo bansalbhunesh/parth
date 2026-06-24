@@ -1417,3 +1417,47 @@ table.reg .row-critical { border-left: 2px solid var(--fault); }
   .ss-thumbs { grid-template-columns: repeat(2, 1fr); }
   .sidx-grid { grid-template-columns: 1fr; }
 }
+
+/* Streaming cursor animation */
+.copilot-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: #36d6e7;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: cursor-blink 0.8s steps(2) infinite;
+}
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Analyze streaming output */
+.analyze-stream {
+  margin-top: 16px;
+  background: #0a0e14;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  padding: 16px;
+  overflow: hidden;
+}
+.analyze-stream-label {
+  font-size: 10px;
+  color: #36d6e7;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: var(--font-mono);
+  margin-bottom: 8px;
+}
+.analyze-stream-text {
+  font-size: 12px;
+  color: #94a3b8;
+  font-family: var(--font-mono);
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.6;
+  margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
+}

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { askCopilot, CopilotResponse } from "../lib/api";
+import { useState, useRef, useCallback } from "react";
+import { askCopilot, streamCopilot, CopilotResponse } from "../lib/api";
 
 const PRESETS = [
   "Has the UPS battery runtime issue come up before?",
@@ -13,27 +13,58 @@ const PRESETS = [
 
 export default function CopilotPanel() {
   const [query, setQuery] = useState("");
-  const [response, setResponse] = useState<CopilotResponse | null>(null);
+  const [answer, setAnswer] = useState("");
+  const [sources, setSources] = useState<string[]>([]);
+  const [priorRfis, setPriorRfis] = useState<CopilotResponse["prior_rfis"]>([]);
   const [loading, setLoading] = useState(false);
+  const [streaming, setStreaming] = useState(false);
+  const abortRef = useRef(false);
 
-  async function handleSubmit(q: string) {
+  const handleSubmit = useCallback(async (q: string) => {
     const actualQuery = q || query;
     if (!actualQuery.trim()) return;
+    abortRef.current = false;
     setLoading(true);
+    setStreaming(true);
     setQuery(actualQuery);
-    setResponse(null);
+    setAnswer("");
+    setSources([]);
+    setPriorRfis([]);
+
     try {
-      const res = await askCopilot(actualQuery);
-      setResponse(res);
+      await streamCopilot(
+        actualQuery,
+        (meta) => {
+          setSources(meta.sources);
+          setPriorRfis(meta.prior_rfis);
+        },
+        (token) => {
+          if (!abortRef.current) {
+            setAnswer((prev) => prev + token);
+          }
+        },
+        () => {
+          setStreaming(false);
+          setLoading(false);
+        },
+        async (err) => {
+          try {
+            const res = await askCopilot(actualQuery);
+            setAnswer(res.answer);
+            setSources(res.sources);
+            setPriorRfis(res.prior_rfis);
+          } catch {
+            setAnswer(err);
+          }
+          setStreaming(false);
+          setLoading(false);
+        },
+      );
     } catch {
-      setResponse({
-        answer: "Error connecting to backend. Ensure the API is running at localhost:8000.",
-        sources: [],
-        prior_rfis: [],
-      });
+      setStreaming(false);
+      setLoading(false);
     }
-    setLoading(false);
-  }
+  }, [query]);
 
   return (
     <div className="copilot">
@@ -64,34 +95,37 @@ export default function CopilotPanel() {
           onClick={() => handleSubmit(query)}
           disabled={loading}
         >
-          {loading ? "Searching..." : "Ask"}
+          {loading ? "Thinking..." : "Ask"}
         </button>
       </div>
 
-      {loading && (
+      {loading && !answer && (
         <div className="copilot-loading">
           <div className="copilot-loading-bar" />
           <span>Searching across specs, submittals, standards, and RFI log...</span>
         </div>
       )}
 
-      {response && !loading && (
+      {answer && (
         <div className="copilot-response">
-          <div className="copilot-answer">{response.answer}</div>
-          {response.sources.length > 0 && (
+          <div className="copilot-answer">
+            {answer}
+            {streaming && <span className="copilot-cursor" />}
+          </div>
+          {sources.length > 0 && (
             <div className="copilot-sources">
               <span className="copilot-sources-label">Sources:</span>
-              {response.sources.map((s) => (
+              {sources.map((s) => (
                 <span key={s} className="copilot-source">
                   [{s}]
                 </span>
               ))}
             </div>
           )}
-          {response.prior_rfis.length > 0 && (
+          {priorRfis.length > 0 && (
             <div className="copilot-rfis">
               <div className="copilot-rfis-title">Related prior RFIs:</div>
-              {response.prior_rfis.map((r) => (
+              {priorRfis.map((r) => (
                 <div key={r.id} className="copilot-rfi">
                   <span className="copilot-rfi-id">{r.id}</span>
                   <span className={`copilot-rfi-status ${r.status}`}>

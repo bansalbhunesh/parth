@@ -24,11 +24,11 @@ import time
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
 from backend.orchestrator import run_pipeline, run_full_pipeline
-from backend.agents.rfi_copilot import ask
+from backend.agents.rfi_copilot import ask, ask_stream
 from backend.agents.ingestion import ingest_corpus
 
 logging.basicConfig(
@@ -259,6 +259,105 @@ def copilot(q: CopilotQuery):
             "sources": [d.get("spec_clause", "") for d in relevant],
             "prior_rfis": [],
         }
+
+
+@app.post("/copilot/stream")
+def copilot_stream(q: CopilotQuery):
+    """SSE streaming copilot — tokens arrive as they're generated."""
+    def generate():
+        try:
+            for event_type, data in ask_stream(q.query):
+                yield f"event: {event_type}\ndata: {data}\n\n"
+            yield "event: done\ndata: {}\n\n"
+        except Exception as exc:
+            log.warning("Copilot stream failed, sending fallback: %s", exc)
+            gt = _load_json("ground_truth.json")
+            devs = gt.get("seeded_deviations", [])
+            relevant = [d for d in devs if any(
+                term in q.query.lower()
+                for term in [d.get("system", "").lower(), d.get("component", "").lower(),
+                             d.get("parameter", "").replace("_", " ").lower()]
+            )]
+            if not relevant:
+                relevant = devs[:3]
+            fallback = (
+                f"Based on the deviation register, {len(relevant)} relevant finding(s) found. "
+                + " ".join(
+                    f"{d['component']}.{d['parameter']}: provided {d.get('provided_value','')} "
+                    f"vs required {d.get('required_value','')} ({d.get('severity','')}, "
+                    f"{d.get('lead_time_weeks',0)}w lead time)."
+                    for d in relevant
+                )
+            )
+            sources = [d.get("spec_clause", "") for d in relevant]
+            yield f"event: meta\ndata: {json.dumps({'sources': sources, 'prior_rfis': []})}\n\n"
+            yield f"event: token\ndata: {fallback}\n\n"
+            yield "event: done\ndata: {}\n\n"
+
+    return StreamingResponse(generate(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+@app.post("/analyze/stream")
+def analyze_stream(req: AnalyzeRequest):
+    """SSE streaming analysis — sends progress events then results."""
+    def generate():
+        from backend.agents.reconciliation import (
+            _all_standards_text,
+            _check_citation_faithfulness,
+            _validate_deviations,
+            SYSTEM_PROMPT,
+            PROMPT_TEMPLATE,
+        )
+        from backend.agents.commissioning import predict_cx_impact
+        from backend.llm import complete_stream as llm_stream, LLMError
+
+        t0 = time.time()
+        yield f"event: status\ndata: Loading standards knowledge base...\n\n"
+        standards = _all_standards_text()
+
+        prompt = PROMPT_TEMPLATE.format(
+            spec=req.spec_text,
+            submittal=req.submittal_text,
+            standards=standards,
+        )
+
+        yield f"event: status\ndata: Running AI reconciliation engine...\n\n"
+
+        try:
+            full_text = ""
+            for chunk in llm_stream(prompt, system=SYSTEM_PROMPT):
+                full_text += chunk
+                yield f"event: token\ndata: {json.dumps(chunk)}\n\n"
+
+            yield f"event: status\ndata: Validating deviations...\n\n"
+            from backend.llm import _extract_json
+            raw = _extract_json(full_text)
+            devs = _validate_deviations(raw)
+            devs = _check_citation_faithfulness(devs, req.spec_text, req.submittal_text, standards)
+            for d in devs:
+                d.update(predict_cx_impact(d))
+                d["system"] = req.system_id
+            mode = "llm"
+        except Exception as exc:
+            log.warning("LLM stream analysis failed, running deterministic: %s", exc)
+            yield f"event: status\ndata: Falling back to deterministic analysis...\n\n"
+            devs = _deterministic_compare(req.spec_text, req.submittal_text)
+            mode = "deterministic"
+
+        elapsed = round((time.time() - t0) * 1000)
+        result = {
+            "system": req.system_id,
+            "deviations": devs,
+            "count": len(devs),
+            "elapsed_ms": elapsed,
+            "mode": mode,
+        }
+        yield f"event: result\ndata: {json.dumps(result)}\n\n"
+        yield "event: done\ndata: {}\n\n"
+
+    return StreamingResponse(generate(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
 @app.get("/cx-plan")

@@ -87,6 +87,31 @@ class TestCopilotEndpoint:
         assert "sources" in data
 
 
+class TestStreamingEndpoints:
+    def test_copilot_stream_returns_sse(self):
+        r = client.post("/copilot/stream", json={"query": "What is the UPS battery runtime?"})
+        assert r.status_code == 200
+        assert "text/event-stream" in r.headers["content-type"]
+        body = r.text
+        assert "event: meta" in body or "event: token" in body
+        assert "event: done" in body
+
+    def test_copilot_stream_empty_rejected(self):
+        r = client.post("/copilot/stream", json={"query": ""})
+        assert r.status_code == 422
+
+    def test_analyze_stream_returns_sse(self):
+        r = client.post("/analyze/stream", json={
+            "spec_text": "**UPS-02** — battery runtime min: shall be **10 min**",
+            "submittal_text": "**UPS-02** — battery runtime min: **7 min**",
+        })
+        assert r.status_code == 200
+        assert "text/event-stream" in r.headers["content-type"]
+        body = r.text
+        assert "event: result" in body or "event: status" in body
+        assert "event: done" in body
+
+
 class TestExportEndpoints:
     def test_export_audit_json(self):
         r = client.get("/export/audit")

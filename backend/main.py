@@ -22,14 +22,14 @@ import pathlib
 import re
 import time
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
 from backend.orchestrator import run_pipeline, run_full_pipeline
 from backend.agents.rfi_copilot import ask, ask_stream
-from backend.agents.ingestion import ingest_corpus
+from backend.agents.ingestion import ingest_corpus, extract_pdf_bytes
 
 logging.basicConfig(
     level=logging.INFO,
@@ -348,6 +348,163 @@ def analyze_stream(req: AnalyzeRequest):
         elapsed = round((time.time() - t0) * 1000)
         result = {
             "system": req.system_id,
+            "deviations": devs,
+            "count": len(devs),
+            "elapsed_ms": elapsed,
+            "mode": mode,
+        }
+        yield f"event: result\ndata: {json.dumps(result)}\n\n"
+        yield "event: done\ndata: {}\n\n"
+
+    return StreamingResponse(generate(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+def _extract_upload_text(file: UploadFile) -> str:
+    """Extract text from an uploaded file (PDF or text/markdown)."""
+    data = file.file.read()
+    name = file.filename or "upload"
+    if name.lower().endswith(".pdf") or file.content_type == "application/pdf":
+        text = extract_pdf_bytes(data, name)
+        if not text:
+            raise HTTPException(400, f"Could not extract text from PDF: {name}")
+        return text
+    return data.decode("utf-8", errors="replace")
+
+
+@app.post("/analyze/upload")
+def analyze_upload(
+    spec_file: UploadFile = File(...),
+    submittal_file: UploadFile = File(...),
+    system_id: str = "CUSTOM",
+):
+    """Upload spec + submittal PDFs for end-to-end deviation detection."""
+    from backend.agents.reconciliation import (
+        _all_standards_text,
+        _check_citation_faithfulness,
+        _validate_deviations,
+        SYSTEM_PROMPT,
+        PROMPT_TEMPLATE,
+    )
+    from backend.agents.commissioning import predict_cx_impact
+
+    t0 = time.time()
+    spec_text = _extract_upload_text(spec_file)
+    submittal_text = _extract_upload_text(submittal_file)
+    standards = _all_standards_text()
+
+    prompt = PROMPT_TEMPLATE.format(
+        spec=spec_text,
+        submittal=submittal_text,
+        standards=standards,
+    )
+
+    try:
+        from backend.llm import complete_json, LLMError
+        raw = complete_json(prompt, system=SYSTEM_PROMPT)
+        devs = _validate_deviations(raw)
+        devs = _check_citation_faithfulness(devs, spec_text, submittal_text, standards)
+        for d in devs:
+            d.update(predict_cx_impact(d))
+            d["system"] = system_id
+    except Exception as exc:
+        log.warning("LLM analysis failed on upload, running deterministic: %s", exc)
+        devs = _deterministic_compare(spec_text, submittal_text)
+
+    elapsed = round((time.time() - t0) * 1000)
+
+    return {
+        "system": system_id,
+        "spec_filename": spec_file.filename,
+        "submittal_filename": submittal_file.filename,
+        "spec_preview": spec_text[:500],
+        "submittal_preview": submittal_text[:500],
+        "deviations": devs,
+        "count": len(devs),
+        "elapsed_ms": elapsed,
+        "mode": "llm" if not devs or devs[0].get("cx_source") != "deterministic" else "deterministic",
+    }
+
+
+@app.post("/analyze/upload/stream")
+def analyze_upload_stream(
+    spec_file: UploadFile = File(...),
+    submittal_file: UploadFile = File(...),
+    system_id: str = "CUSTOM",
+):
+    """SSE streaming analysis from uploaded PDFs."""
+    spec_data = spec_file.file.read()
+    spec_name = spec_file.filename or "spec"
+    sub_data = submittal_file.file.read()
+    sub_name = submittal_file.filename or "submittal"
+
+    def generate():
+        from backend.agents.reconciliation import (
+            _all_standards_text,
+            _check_citation_faithfulness,
+            _validate_deviations,
+            SYSTEM_PROMPT,
+            PROMPT_TEMPLATE,
+        )
+        from backend.agents.commissioning import predict_cx_impact
+        from backend.llm import complete_stream as llm_stream, _extract_json
+
+        t0 = time.time()
+        yield f"event: status\ndata: Extracting text from {spec_name}...\n\n"
+        if spec_name.lower().endswith(".pdf"):
+            spec_text = extract_pdf_bytes(spec_data, spec_name)
+        else:
+            spec_text = spec_data.decode("utf-8", errors="replace")
+
+        yield f"event: status\ndata: Extracting text from {sub_name}...\n\n"
+        if sub_name.lower().endswith(".pdf"):
+            submittal_text = extract_pdf_bytes(sub_data, sub_name)
+        else:
+            submittal_text = sub_data.decode("utf-8", errors="replace")
+
+        if not spec_text or not submittal_text:
+            yield f"event: error\ndata: Could not extract text from uploaded files.\n\n"
+            yield "event: done\ndata: {}\n\n"
+            return
+
+        yield f"event: preview\ndata: {json.dumps({'spec': spec_text[:500], 'submittal': submittal_text[:500]})}\n\n"
+
+        yield f"event: status\ndata: Loading standards knowledge base...\n\n"
+        standards = _all_standards_text()
+
+        prompt = PROMPT_TEMPLATE.format(
+            spec=spec_text,
+            submittal=submittal_text,
+            standards=standards,
+        )
+
+        yield f"event: status\ndata: Running AI reconciliation on extracted documents...\n\n"
+
+        try:
+            full_text = ""
+            for chunk in llm_stream(prompt, system=SYSTEM_PROMPT):
+                full_text += chunk
+                yield f"event: token\ndata: {json.dumps(chunk)}\n\n"
+
+            yield f"event: status\ndata: Validating deviations...\n\n"
+            raw = _extract_json(full_text)
+            devs = _validate_deviations(raw)
+            devs = _check_citation_faithfulness(devs, spec_text, submittal_text, standards)
+            for d in devs:
+                d.update(predict_cx_impact(d))
+                d["system"] = system_id
+            mode = "llm"
+        except Exception as exc:
+            log.warning("LLM stream failed on upload, deterministic fallback: %s", exc)
+            yield f"event: status\ndata: Falling back to deterministic analysis...\n\n"
+            devs = _deterministic_compare(spec_text, submittal_text)
+            mode = "deterministic"
+
+        elapsed = round((time.time() - t0) * 1000)
+        result = {
+            "system": system_id,
+            "spec_filename": spec_name,
+            "submittal_filename": sub_name,
             "deviations": devs,
             "count": len(devs),
             "elapsed_ms": elapsed,

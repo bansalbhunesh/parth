@@ -112,6 +112,40 @@ class TestStreamingEndpoints:
         assert "event: done" in body
 
 
+class TestPdfUploadEndpoints:
+    def _make_text_file(self, content, filename):
+        import io
+        return ("spec_file", (filename, io.BytesIO(content.encode()), "text/plain"))
+
+    def test_upload_text_files(self):
+        import io
+        spec = io.BytesIO(b"**UPS-02** -- battery runtime min: shall be **10 min**")
+        sub = io.BytesIO(b"**UPS-02** -- battery runtime min: **7 min**")
+        r = client.post("/analyze/upload", files=[
+            ("spec_file", ("spec.txt", spec, "text/plain")),
+            ("submittal_file", ("sub.txt", sub, "text/plain")),
+        ])
+        assert r.status_code == 200
+        data = r.json()
+        assert "deviations" in data
+        assert "spec_filename" in data
+        assert data["spec_filename"] == "spec.txt"
+
+    def test_upload_stream_text_files(self):
+        import io
+        spec = io.BytesIO(b"**UPS-02** -- battery runtime min: shall be **10 min**")
+        sub = io.BytesIO(b"**UPS-02** -- battery runtime min: **7 min**")
+        r = client.post("/analyze/upload/stream", files=[
+            ("spec_file", ("spec.txt", spec, "text/plain")),
+            ("submittal_file", ("sub.txt", sub, "text/plain")),
+        ])
+        assert r.status_code == 200
+        assert "text/event-stream" in r.headers["content-type"]
+        body = r.text
+        assert "event: result" in body or "event: status" in body
+        assert "event: done" in body
+
+
 class TestExportEndpoints:
     def test_export_audit_json(self):
         r = client.get("/export/audit")

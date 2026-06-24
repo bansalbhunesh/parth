@@ -352,7 +352,7 @@ export default async function Page() {
       </ScrollReveal>
 
       <h2 className="section" id="analyze">
-        Live analysis &middot; paste any spec &amp; submittal
+        Live analysis &middot; upload PDFs or paste text
       </h2>
       <ScrollReveal>
         <AnalyzePanel />

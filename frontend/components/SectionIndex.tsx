@@ -17,7 +17,7 @@ const SECTIONS = [
   { id: "eval", num: "14", label: "Eval Harness", desc: "P/R/F1 = 1.000 with FP rate testing", color: "#35c98b" },
   { id: "roi", num: "15", label: "ROI Calculator", desc: "Interactive business impact model", color: "#ffb020" },
   { id: "scale", num: "16", label: "Scale Story", desc: "10 systems today, 14,000 line items tomorrow", color: "#36d6e7" },
-  { id: "analyze", num: "17", label: "Live Analysis", desc: "Paste any spec & submittal for real-time deviation detection", color: "#36d6e7" },
+  { id: "analyze", num: "17", label: "Live Analysis", desc: "Upload PDFs or paste text for end-to-end deviation detection", color: "#36d6e7" },
   { id: "copilot", num: "18", label: "Project Copilot", desc: "RAG over specs, submittals, standards & RFIs", color: "#36d6e7" },
   { id: "refs", num: "19", label: "Academic Refs", desc: "Peer-reviewed foundations for the approach", color: "#5b8cff" },
 ];

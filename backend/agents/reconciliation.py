@@ -1,11 +1,6 @@
 """
-Reconciliation / Deviation Agent — the brain.
-
-Cross-document reasoning across design basis, vendor submittal, and governing
-standards. Returns structured deviations with a citation chain and confidence.
-
-v2: Enhanced prompt with explicit numeric/threshold/redundancy reasoning,
-    citation faithfulness validation, and confidence scoring.
+Reconciliation / Deviation Agent — cross-document reasoning across design
+basis, vendor submittal, and governing standards.
 """
 
 import json
@@ -123,7 +118,6 @@ REQUIRED_DEV_KEYS = {"component", "parameter", "required_value", "provided_value
 
 
 def _validate_deviations(raw) -> list[dict]:
-    """Validate and normalize LLM output into a list of deviation dicts."""
     if isinstance(raw, dict):
         raw = raw.get("deviations", [])
     if not isinstance(raw, list):
@@ -173,7 +167,6 @@ def reconcile_system(sys_id: str, standards_text: str):
 
 
 def run_reconciliation_over_corpus():
-    """Drop-in for the eval harness (--detector llm)."""
     standards = _all_standards_text()
     systems = sorted(p.stem for p in (CORPUS / "specs").glob("*.md"))
     findings = []

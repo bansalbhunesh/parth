@@ -1,19 +1,5 @@
 """
-Pramaan API — FastAPI.
-
-Endpoints:
-  GET  /health
-  GET  /systems                 list modelled systems
-  POST /ingest/{system_id}      run the pipeline for one system -> deviations
-  GET  /deviations              full deviation register (all systems)
-  POST /copilot                 RFI/project copilot Q&A  {"query": "..."}
-  GET  /export/audit            deviation register as compliance evidence pack
-  GET  /metrics                 live eval metrics for the deck
-  GET  /cx-plan                 commissioning plan with test schedule
-  GET  /rfi-log                 full RFI log
-  GET  /project                 project metadata
-
-Run: uvicorn backend.main:app --reload
+Pramaan API — uvicorn backend.main:app --reload
 """
 
 import json
@@ -76,8 +62,6 @@ def _load_json(path):
 
 
 def _deterministic_compare(spec_text: str, submittal_text: str) -> list:
-    """Fallback deterministic comparison when LLM is unavailable."""
-    # Extract numeric requirements from spec
     spec_values = {}
     for match in re.finditer(
         r'\*\*([A-Z][\w-]*)\*\*\s*[—–-]\s*([\w\s]+?):\s*(?:shall be\s*)?\*\*(\S+)\s*(\S*)\*\*',
@@ -87,7 +71,6 @@ def _deterministic_compare(spec_text: str, submittal_text: str) -> list:
         param_key = param.strip().lower().replace(' ', '_')
         spec_values[(component, param_key)] = (value, unit.strip('()'))
 
-    # Extract provided values from submittal
     sub_values = {}
     for match in re.finditer(
         r'\*\*([A-Z][\w-]*)\*\*\s*[—–-]\s*([\w\s]+?):\s*\*\*(\S+)\s*(\S*)\*\*',
@@ -120,7 +103,6 @@ def _deterministic_compare(spec_text: str, submittal_text: str) -> list:
 
 @app.post("/analyze")
 def analyze(req: AnalyzeRequest):
-    """Live analysis: compare arbitrary spec vs submittal text."""
     from backend.agents.reconciliation import (
         _all_standards_text,
         _check_citation_faithfulness,
@@ -148,7 +130,6 @@ def analyze(req: AnalyzeRequest):
             d.update(predict_cx_impact(d))
             d["system"] = req.system_id
     except Exception as exc:
-        # Fallback: run deterministic comparison if LLM unavailable
         log.warning("LLM analysis failed, running deterministic comparison: %s", exc)
         devs = _deterministic_compare(req.spec_text, req.submittal_text)
 
@@ -263,7 +244,6 @@ def copilot(q: CopilotQuery):
 
 @app.post("/copilot/stream")
 def copilot_stream(q: CopilotQuery):
-    """SSE streaming copilot — tokens arrive as they're generated."""
     def generate():
         try:
             for event_type, data in ask_stream(q.query):
@@ -300,7 +280,6 @@ def copilot_stream(q: CopilotQuery):
 
 @app.post("/analyze/stream")
 def analyze_stream(req: AnalyzeRequest):
-    """SSE streaming analysis — sends progress events then results."""
     def generate():
         from backend.agents.reconciliation import (
             _all_standards_text,
@@ -361,7 +340,6 @@ def analyze_stream(req: AnalyzeRequest):
 
 
 def _extract_upload_text(file: UploadFile) -> str:
-    """Extract text from an uploaded file (PDF or text/markdown)."""
     data = file.file.read()
     name = file.filename or "upload"
     if name.lower().endswith(".pdf") or file.content_type == "application/pdf":
@@ -378,7 +356,6 @@ def analyze_upload(
     submittal_file: UploadFile = File(...),
     system_id: str = "CUSTOM",
 ):
-    """Upload spec + submittal PDFs for end-to-end deviation detection."""
     from backend.agents.reconciliation import (
         _all_standards_text,
         _check_citation_faithfulness,
@@ -432,7 +409,6 @@ def analyze_upload_stream(
     submittal_file: UploadFile = File(...),
     system_id: str = "CUSTOM",
 ):
-    """SSE streaming analysis from uploaded PDFs."""
     spec_data = spec_file.file.read()
     spec_name = spec_file.filename or "spec"
     sub_data = submittal_file.file.read()
@@ -776,7 +752,6 @@ def pipeline_info():
 
 @app.get("/corpus/doc/{doc_type}/{system_id}")
 def corpus_doc(doc_type: str, system_id: str):
-    """Return raw document text for spec or submittal."""
     if doc_type not in ("specs", "submittals"):
         raise HTTPException(400, "doc_type must be 'specs' or 'submittals'")
     path = CORPUS / doc_type / f"{system_id}.md"
@@ -806,7 +781,6 @@ PROJECTS_DIR = pathlib.Path(__file__).parent.parent / "data" / "projects"
 
 @app.get("/projects")
 def list_projects():
-    """List all available project datasets with summary stats."""
     projects = []
     gt = _load_json("ground_truth.json")
     if gt:
@@ -844,7 +818,6 @@ def list_projects():
 
 @app.get("/projects/{project_id}")
 def project_detail(project_id: str):
-    """Get full details for a specific project including deviations and cx plan."""
     if project_id == "meghdoot":
         ppath = CORPUS
     else:
@@ -878,7 +851,6 @@ def project_detail(project_id: str):
 
 @app.get("/projects/eval/aggregate")
 def projects_eval_aggregate():
-    """Run eval across all projects and return aggregate metrics."""
     from eval.multi_project_eval import run_all, aggregate
     results = run_all()
     agg = aggregate(results)

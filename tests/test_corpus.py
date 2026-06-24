@@ -1,7 +1,3 @@
-"""
-Tests for corpus integrity — verifies that all required data files exist,
-are valid JSON/Markdown, and cross-reference correctly.
-"""
 
 import json
 import pathlib

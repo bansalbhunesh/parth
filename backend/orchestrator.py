@@ -1,11 +1,7 @@
 """
-Orchestrator — LangGraph state machine wiring all 5 agents into one pipeline:
-
-  ingest -> load_standards -> reconcile (brain) -> cx_predict -> format_output
-
-v4: Full 5-node pipeline with ingestion, standards loading, reconciliation,
-cx prediction, and output formatting. Falls back to sequential runner
-if langgraph is not installed.
+Orchestrator — LangGraph pipeline:
+  ingest -> load_standards -> reconcile -> cx_predict -> format_output
+Falls back to sequential runner if langgraph is not installed.
 """
 
 import logging
@@ -133,7 +129,6 @@ def run_pipeline(system_id: str) -> List[dict]:
 
 
 def run_full_pipeline() -> dict:
-    """Run the pipeline across all systems and return summary stats."""
     t0 = time.time()
     specs_dir = CORPUS / "specs"
     if not specs_dir.exists():

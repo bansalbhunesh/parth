@@ -1,7 +1,3 @@
-"""
-Tests for the FastAPI endpoints — verifies all API routes return expected
-shapes without requiring LLM API keys.
-"""
 
 import pathlib
 import sys
@@ -68,8 +64,6 @@ class TestIngestEndpoint:
         systems = r.json()["systems"]
         if not systems:
             return
-        # We don't actually call ingest (needs LLM keys) but verify
-        # the 404 validation works for invalid systems
         r = client.post("/ingest/DEFINITELY_NOT_REAL")
         assert r.status_code == 404
 

@@ -1,7 +1,3 @@
-"""
-Tests for the agent modules — validates ingestion, extraction, commissioning
-prediction, and reconciliation validation logic without requiring LLM API keys.
-"""
 
 import json
 import pathlib

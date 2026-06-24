@@ -1,11 +1,4 @@
-"""
-Multi-project eval harness — runs baseline reconciliation and scoring across
-all 6 project datasets (meghdoot + 5 additional) and reports aggregate metrics.
-
-Usage:
-    python3 eval/multi_project_eval.py            # human-readable report
-    python3 eval/multi_project_eval.py --json      # JSON output
-"""
+"""Multi-project eval harness."""
 
 import argparse
 import json
@@ -18,7 +11,6 @@ DATA = pathlib.Path(__file__).parent.parent / "data"
 
 
 def discover_projects():
-    """Find all project corpora (meghdoot in data/corpus + others in data/projects/)."""
     projects = {}
 
     corpus = DATA / "corpus"
@@ -35,7 +27,6 @@ def discover_projects():
 
 
 def reconcile_project(corpus_path: pathlib.Path):
-    """Baseline reconciler for any project corpus."""
     reqs = json.loads((corpus_path / "extracted" / "requirements.json").read_text())
     subs = {
         (s["component"], s["parameter"]): s
@@ -72,7 +63,6 @@ def reconcile_project(corpus_path: pathlib.Path):
 
 
 def score_project(findings, ground_truth):
-    """Score findings against ground truth for one project."""
     from eval.run_eval import score
     return score(findings, ground_truth)
 

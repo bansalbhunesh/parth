@@ -1,7 +1,3 @@
-"""
-Tests for multi-project corpus and eval.
-Verifies that all 6 project datasets are valid and score perfectly.
-"""
 
 import json
 import pathlib

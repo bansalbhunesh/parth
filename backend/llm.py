@@ -16,11 +16,10 @@ PROVIDER = os.getenv("PRAMAAN_LLM", "gemini")  # "gemini" | "claude"
 
 
 class LLMError(Exception):
-    """Raised when an LLM call fails after exhausting retries."""
+    pass
 
 
 def _extract_json(text: str):
-    """Tolerant JSON extraction — strips code fences / prose."""
     text = text.strip()
     text = re.sub(r"^```(?:json)?", "", text).strip()
     text = re.sub(r"```$", "", text).strip()
@@ -112,7 +111,6 @@ def _claude(prompt, system, json_mode):
 
 
 def complete_stream(prompt: str, system: str = ""):
-    """Yield text chunks from the LLM. Falls back to single-shot if streaming unsupported."""
     if PROVIDER == "gemini":
         yield from _gemini_stream(prompt, system)
     else:

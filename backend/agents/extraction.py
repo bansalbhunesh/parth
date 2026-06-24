@@ -1,11 +1,6 @@
 """
-Extraction Agent — raw document -> structured triples.
-
-Turns an unstructured spec or submittal into machine-readable triples
-(component, parameter, value, unit, [clause]).
-
-v2: Added batch extraction, accuracy scoring vs reference, and support for
-    both spec and submittal document types.
+Extraction Agent — raw document -> structured triples
+(component, parameter, value, unit, clause).
 """
 
 import json

@@ -1,13 +1,5 @@
 """
 Ingestion Agent — document intake, parsing, and normalization.
-
-Handles raw document ingestion (PDF, Markdown, plain text), extracts clean
-text content, and prepares it for downstream extraction and reconciliation.
-
-Supports:
-  - Markdown pass-through (specs, submittals, standards)
-  - PDF extraction via PyMuPDF (fitz)
-  - Metadata tagging (system_id, doc_type, page_count, word_count)
 """
 
 import hashlib
@@ -59,7 +51,6 @@ def _extract_pdf(path: pathlib.Path) -> str:
 
 
 def extract_pdf_bytes(data: bytes, filename: str = "upload.pdf") -> str:
-    """Extract text from in-memory PDF bytes."""
     try:
         import pdfplumber
         import io

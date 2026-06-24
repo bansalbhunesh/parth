@@ -1,11 +1,5 @@
 """
-Commissioning Risk Predictor.
-
-Maps a confirmed deviation to the specific commissioning test it will jeopardise
-and computes the LEAD TIME — how many weeks earlier Pramaan caught it vs when it
-would have surfaced in commissioning.
-
-v2: Added LLM fallback for unmapped deviations + risk scoring.
+Commissioning Risk Predictor — maps deviations to Cx tests and computes lead time.
 """
 
 import json

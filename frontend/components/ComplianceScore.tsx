@@ -38,7 +38,6 @@ export default function ComplianceScore() {
         const data = await r.json();
         const devs = data.register || [];
 
-        // Count deviations per system
         const devCount: Record<string, number> = {};
         for (const d of devs) {
           const sys = d.system || d.component?.split("-")[0] ||
@@ -66,7 +65,6 @@ export default function ComplianceScore() {
         setSystems(scores);
         setOverall(overallScore);
       } catch {
-        // Fallback
         setOverall(79);
         setSystems(Object.entries(SYSTEM_META).map(([id, meta]) => ({
           system: id, label: meta.label, total: meta.total,
@@ -77,7 +75,6 @@ export default function ComplianceScore() {
     load();
   }, []);
 
-  // Animate the score number
   useEffect(() => {
     if (!overall) return;
     const start = performance.now();

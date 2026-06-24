@@ -7,6 +7,8 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))
 
+from backend.paths import CORPUS, PROJECTS_DIR
+
 DATA = pathlib.Path(__file__).parent.parent / "data"
 
 

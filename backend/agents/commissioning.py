@@ -3,11 +3,9 @@ Commissioning Risk Predictor — maps deviations to Cx tests and computes lead t
 """
 
 import json
-import pathlib
 
 from backend.llm import complete_json
-
-CORPUS = pathlib.Path(__file__).parent.parent.parent / "data" / "corpus"
+from backend.paths import CORPUS
 
 
 def _current_week():

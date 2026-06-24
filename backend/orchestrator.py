@@ -5,17 +5,15 @@ Falls back to sequential runner if langgraph is not installed.
 """
 
 import logging
-import pathlib
 import time
 from typing import List, Optional, TypedDict
 
 from backend.agents.ingestion import ingest_system
 from backend.agents.reconciliation import reconcile_system, _all_standards_text
 from backend.agents.commissioning import predict_cx_impact, compute_risk_score
+from backend.paths import CORPUS
 
 log = logging.getLogger("pramaan.orchestrator")
-
-CORPUS = pathlib.Path(__file__).parent.parent / "data" / "corpus"
 
 
 class PipelineState(TypedDict):

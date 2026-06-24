@@ -1,11 +1,7 @@
-"""
-Pramaan API — uvicorn backend.main:app --reload
-"""
+"""Pramaan API — uvicorn backend.main:app --reload"""
 
 import json
 import logging
-import pathlib
-import re
 import time
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
@@ -13,9 +9,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
+from backend.paths import CORPUS, PROJECTS_DIR
 from backend.orchestrator import run_pipeline, run_full_pipeline
-from backend.agents.rfi_copilot import ask, ask_stream
+from backend.agents.rfi_copilot import ask, ask_stream, ask_fallback
 from backend.agents.ingestion import ingest_corpus, extract_pdf_bytes
+from backend.analyze import run_analysis, run_streaming_analysis
 
 logging.basicConfig(
     level=logging.INFO,
@@ -24,9 +22,8 @@ logging.basicConfig(
 )
 log = logging.getLogger("pramaan.api")
 
-CORPUS = pathlib.Path(__file__).parent.parent / "data" / "corpus"
-
 VALID_SYSTEMS: set[str] | None = None
+
 
 def _get_valid_systems() -> set[str]:
     global VALID_SYSTEMS
@@ -34,6 +31,7 @@ def _get_valid_systems() -> set[str]:
         specs_dir = CORPUS / "specs"
         VALID_SYSTEMS = {p.stem for p in specs_dir.glob("*.md")} if specs_dir.exists() else set()
     return VALID_SYSTEMS
+
 
 app = FastAPI(
     title="Pramaan — EPC Deviation Intelligence",
@@ -54,95 +52,115 @@ class AnalyzeRequest(BaseModel):
     system_id: str = Field(default="CUSTOM", max_length=50)
 
 
-def _load_json(path):
+def _load_json(path: str) -> dict:
     full = CORPUS / path
     if full.exists():
         return json.loads(full.read_text())
     return {}
 
 
-def _deterministic_compare(spec_text: str, submittal_text: str) -> list:
-    spec_values = {}
-    for match in re.finditer(
-        r'\*\*([A-Z][\w-]*)\*\*\s*[—–-]\s*([\w\s]+?):\s*(?:shall be\s*)?\*\*(\S+)\s*(\S*)\*\*',
-        spec_text,
-    ):
-        component, param, value, unit = match.groups()
-        param_key = param.strip().lower().replace(' ', '_')
-        spec_values[(component, param_key)] = (value, unit.strip('()'))
+def _sse_response(generator):
+    return StreamingResponse(
+        generator,
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
-    sub_values = {}
-    for match in re.finditer(
-        r'\*\*([A-Z][\w-]*)\*\*\s*[—–-]\s*([\w\s]+?):\s*\*\*(\S+)\s*(\S*)\*\*',
-        submittal_text,
-    ):
-        component, param, value, unit = match.groups()
-        param_key = param.strip().lower().replace(' ', '_')
-        sub_values[(component, param_key)] = (value, unit.strip('()'))
 
-    devs = []
-    for key, (req_val, unit) in spec_values.items():
-        if key in sub_values:
-            prov_val, _ = sub_values[key]
-            if str(prov_val) != str(req_val):
-                devs.append({
-                    "component": key[0],
-                    "parameter": key[1],
-                    "required_value": req_val,
-                    "provided_value": prov_val,
-                    "unit": unit,
-                    "standard_ref": "DESIGN-BASIS",
-                    "spec_clause": "",
-                    "severity": "Major",
-                    "rationale": f"Provided value {prov_val} does not match required {req_val} {unit}",
-                    "confidence": 0.7,
-                    "cx_source": "deterministic",
-                })
-    return devs
+def _extract_upload_text(file: UploadFile) -> str:
+    data = file.file.read()
+    name = file.filename or "upload"
+    if name.lower().endswith(".pdf") or file.content_type == "application/pdf":
+        text = extract_pdf_bytes(data, name)
+        if not text:
+            raise HTTPException(400, f"Could not extract text from PDF: {name}")
+        return text
+    return data.decode("utf-8", errors="replace")
 
+
+# ── Analysis endpoints ──────────────────────────────────────────────
 
 @app.post("/analyze")
 def analyze(req: AnalyzeRequest):
-    from backend.agents.reconciliation import (
-        _all_standards_text,
-        _check_citation_faithfulness,
-        _validate_deviations,
-        SYSTEM_PROMPT,
-        PROMPT_TEMPLATE,
-    )
-    from backend.agents.commissioning import predict_cx_impact
-
-    t0 = time.time()
-    standards = _all_standards_text()
-
-    prompt = PROMPT_TEMPLATE.format(
-        spec=req.spec_text,
-        submittal=req.submittal_text,
-        standards=standards,
-    )
-
-    try:
-        from backend.llm import complete_json, LLMError
-        raw = complete_json(prompt, system=SYSTEM_PROMPT)
-        devs = _validate_deviations(raw)
-        devs = _check_citation_faithfulness(devs, req.spec_text, req.submittal_text, standards)
-        for d in devs:
-            d.update(predict_cx_impact(d))
-            d["system"] = req.system_id
-    except Exception as exc:
-        log.warning("LLM analysis failed, running deterministic comparison: %s", exc)
-        devs = _deterministic_compare(req.spec_text, req.submittal_text)
-
-    elapsed = round((time.time() - t0) * 1000)
-
+    result = run_analysis(req.spec_text, req.submittal_text, req.system_id)
     return {
         "system": req.system_id,
-        "deviations": devs,
-        "count": len(devs),
-        "elapsed_ms": elapsed,
-        "mode": "llm" if not devs or devs[0].get("cx_source") != "deterministic" else "deterministic",
+        "deviations": result.deviations,
+        "count": len(result.deviations),
+        "elapsed_ms": result.elapsed_ms,
+        "mode": result.mode,
     }
 
+
+@app.post("/analyze/stream")
+def analyze_stream(req: AnalyzeRequest):
+    def generate():
+        t0 = time.time()
+        yield f"event: status\ndata: Loading standards knowledge base...\n\n"
+        yield from run_streaming_analysis(req.spec_text, req.submittal_text, req.system_id)
+
+    return _sse_response(generate())
+
+
+@app.post("/analyze/upload")
+def analyze_upload(
+    spec_file: UploadFile = File(...),
+    submittal_file: UploadFile = File(...),
+    system_id: str = "CUSTOM",
+):
+    spec_text = _extract_upload_text(spec_file)
+    submittal_text = _extract_upload_text(submittal_file)
+    result = run_analysis(spec_text, submittal_text, system_id)
+    return {
+        "system": system_id,
+        "spec_filename": spec_file.filename,
+        "submittal_filename": submittal_file.filename,
+        "spec_preview": spec_text[:500],
+        "submittal_preview": submittal_text[:500],
+        "deviations": result.deviations,
+        "count": len(result.deviations),
+        "elapsed_ms": result.elapsed_ms,
+        "mode": result.mode,
+    }
+
+
+@app.post("/analyze/upload/stream")
+def analyze_upload_stream(
+    spec_file: UploadFile = File(...),
+    submittal_file: UploadFile = File(...),
+    system_id: str = "CUSTOM",
+):
+    spec_data = spec_file.file.read()
+    spec_name = spec_file.filename or "spec"
+    sub_data = submittal_file.file.read()
+    sub_name = submittal_file.filename or "submittal"
+
+    def generate():
+        yield f"event: status\ndata: Extracting text from {spec_name}...\n\n"
+        if spec_name.lower().endswith(".pdf"):
+            spec_text = extract_pdf_bytes(spec_data, spec_name)
+        else:
+            spec_text = spec_data.decode("utf-8", errors="replace")
+
+        yield f"event: status\ndata: Extracting text from {sub_name}...\n\n"
+        if sub_name.lower().endswith(".pdf"):
+            submittal_text = extract_pdf_bytes(sub_data, sub_name)
+        else:
+            submittal_text = sub_data.decode("utf-8", errors="replace")
+
+        if not spec_text or not submittal_text:
+            yield f"event: error\ndata: Could not extract text from uploaded files.\n\n"
+            yield "event: done\ndata: {}\n\n"
+            return
+
+        yield f"event: preview\ndata: {json.dumps({'spec': spec_text[:500], 'submittal': submittal_text[:500]})}\n\n"
+        yield f"event: status\ndata: Loading standards knowledge base...\n\n"
+        yield from run_streaming_analysis(spec_text, submittal_text, system_id)
+
+    return _sse_response(generate())
+
+
+# ── Core data endpoints ─────────────────────────────────────────────
 
 @app.get("/health")
 def health():
@@ -180,15 +198,10 @@ def ingest(system_id: str):
     }
 
 
-def _deviations_from_ground_truth():
-    gt = _load_json("ground_truth.json")
-    return gt.get("seeded_deviations", [])
-
-
-def _build_register(devs):
+def _build_register(devs: list[dict]) -> dict:
     critical = sum(1 for d in devs if d.get("severity") == "Critical")
     major = sum(1 for d in devs if d.get("severity") == "Major")
-    lead_times = [d["lead_time_weeks"] for d in devs if d.get("lead_time_weeks")]
+    lead_times = [d["lead_time_weeks"] for d in devs if d.get("lead_time_weeks") is not None]
     return {
         "count": len(devs),
         "critical": critical,
@@ -211,8 +224,11 @@ def deviations():
         return _build_register(out)
     except Exception as exc:
         log.warning("Pipeline failed, using ground-truth fallback: %s", exc)
-        return _build_register(_deviations_from_ground_truth())
+        gt = _load_json("ground_truth.json")
+        return _build_register(gt.get("seeded_deviations", []))
 
+
+# ── Copilot endpoints ───────────────────────────────────────────────
 
 @app.post("/copilot")
 def copilot(q: CopilotQuery):
@@ -220,26 +236,8 @@ def copilot(q: CopilotQuery):
         return ask(q.query)
     except Exception as exc:
         log.warning("Copilot LLM failed, using fallback: %s", exc)
-        gt = _load_json("ground_truth.json")
-        devs = gt.get("seeded_deviations", [])
-        relevant = [d for d in devs if any(
-            term in q.query.lower()
-            for term in [d.get("system", "").lower(), d.get("component", "").lower(),
-                         d.get("parameter", "").replace("_", " ").lower()]
-        )]
-        if not relevant:
-            relevant = devs[:3]
-        return {
-            "answer": f"Based on the deviation register, {len(relevant)} relevant finding(s) found. "
-                      + " ".join(
-                          f"{d['component']}.{d['parameter']}: provided {d.get('provided_value','')} "
-                          f"vs required {d.get('required_value','')} ({d.get('severity','')}, "
-                          f"{d.get('lead_time_weeks',0)}w lead time)."
-                          for d in relevant
-                      ),
-            "sources": [d.get("spec_clause", "") for d in relevant],
-            "prior_rfis": [],
-        }
+        devs = _load_json("ground_truth.json").get("seeded_deviations", [])
+        return ask_fallback(q.query, devs)
 
 
 @app.post("/copilot/stream")
@@ -251,247 +249,16 @@ def copilot_stream(q: CopilotQuery):
             yield "event: done\ndata: {}\n\n"
         except Exception as exc:
             log.warning("Copilot stream failed, sending fallback: %s", exc)
-            gt = _load_json("ground_truth.json")
-            devs = gt.get("seeded_deviations", [])
-            relevant = [d for d in devs if any(
-                term in q.query.lower()
-                for term in [d.get("system", "").lower(), d.get("component", "").lower(),
-                             d.get("parameter", "").replace("_", " ").lower()]
-            )]
-            if not relevant:
-                relevant = devs[:3]
-            fallback = (
-                f"Based on the deviation register, {len(relevant)} relevant finding(s) found. "
-                + " ".join(
-                    f"{d['component']}.{d['parameter']}: provided {d.get('provided_value','')} "
-                    f"vs required {d.get('required_value','')} ({d.get('severity','')}, "
-                    f"{d.get('lead_time_weeks',0)}w lead time)."
-                    for d in relevant
-                )
-            )
-            sources = [d.get("spec_clause", "") for d in relevant]
-            yield f"event: meta\ndata: {json.dumps({'sources': sources, 'prior_rfis': []})}\n\n"
-            yield f"event: token\ndata: {fallback}\n\n"
+            devs = _load_json("ground_truth.json").get("seeded_deviations", [])
+            fb = ask_fallback(q.query, devs)
+            yield f"event: meta\ndata: {json.dumps({'sources': fb['sources'], 'prior_rfis': fb['prior_rfis']})}\n\n"
+            yield f"event: token\ndata: {fb['answer']}\n\n"
             yield "event: done\ndata: {}\n\n"
 
-    return StreamingResponse(generate(), media_type="text/event-stream",
-                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+    return _sse_response(generate())
 
 
-@app.post("/analyze/stream")
-def analyze_stream(req: AnalyzeRequest):
-    def generate():
-        from backend.agents.reconciliation import (
-            _all_standards_text,
-            _check_citation_faithfulness,
-            _validate_deviations,
-            SYSTEM_PROMPT,
-            PROMPT_TEMPLATE,
-        )
-        from backend.agents.commissioning import predict_cx_impact
-        from backend.llm import complete_stream as llm_stream, LLMError
-
-        t0 = time.time()
-        yield f"event: status\ndata: Loading standards knowledge base...\n\n"
-        standards = _all_standards_text()
-
-        prompt = PROMPT_TEMPLATE.format(
-            spec=req.spec_text,
-            submittal=req.submittal_text,
-            standards=standards,
-        )
-
-        yield f"event: status\ndata: Running AI reconciliation engine...\n\n"
-
-        try:
-            full_text = ""
-            for chunk in llm_stream(prompt, system=SYSTEM_PROMPT):
-                full_text += chunk
-                yield f"event: token\ndata: {json.dumps(chunk)}\n\n"
-
-            yield f"event: status\ndata: Validating deviations...\n\n"
-            from backend.llm import _extract_json
-            raw = _extract_json(full_text)
-            devs = _validate_deviations(raw)
-            devs = _check_citation_faithfulness(devs, req.spec_text, req.submittal_text, standards)
-            for d in devs:
-                d.update(predict_cx_impact(d))
-                d["system"] = req.system_id
-            mode = "llm"
-        except Exception as exc:
-            log.warning("LLM stream analysis failed, running deterministic: %s", exc)
-            yield f"event: status\ndata: Falling back to deterministic analysis...\n\n"
-            devs = _deterministic_compare(req.spec_text, req.submittal_text)
-            mode = "deterministic"
-
-        elapsed = round((time.time() - t0) * 1000)
-        result = {
-            "system": req.system_id,
-            "deviations": devs,
-            "count": len(devs),
-            "elapsed_ms": elapsed,
-            "mode": mode,
-        }
-        yield f"event: result\ndata: {json.dumps(result)}\n\n"
-        yield "event: done\ndata: {}\n\n"
-
-    return StreamingResponse(generate(), media_type="text/event-stream",
-                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
-
-
-def _extract_upload_text(file: UploadFile) -> str:
-    data = file.file.read()
-    name = file.filename or "upload"
-    if name.lower().endswith(".pdf") or file.content_type == "application/pdf":
-        text = extract_pdf_bytes(data, name)
-        if not text:
-            raise HTTPException(400, f"Could not extract text from PDF: {name}")
-        return text
-    return data.decode("utf-8", errors="replace")
-
-
-@app.post("/analyze/upload")
-def analyze_upload(
-    spec_file: UploadFile = File(...),
-    submittal_file: UploadFile = File(...),
-    system_id: str = "CUSTOM",
-):
-    from backend.agents.reconciliation import (
-        _all_standards_text,
-        _check_citation_faithfulness,
-        _validate_deviations,
-        SYSTEM_PROMPT,
-        PROMPT_TEMPLATE,
-    )
-    from backend.agents.commissioning import predict_cx_impact
-
-    t0 = time.time()
-    spec_text = _extract_upload_text(spec_file)
-    submittal_text = _extract_upload_text(submittal_file)
-    standards = _all_standards_text()
-
-    prompt = PROMPT_TEMPLATE.format(
-        spec=spec_text,
-        submittal=submittal_text,
-        standards=standards,
-    )
-
-    try:
-        from backend.llm import complete_json, LLMError
-        raw = complete_json(prompt, system=SYSTEM_PROMPT)
-        devs = _validate_deviations(raw)
-        devs = _check_citation_faithfulness(devs, spec_text, submittal_text, standards)
-        for d in devs:
-            d.update(predict_cx_impact(d))
-            d["system"] = system_id
-    except Exception as exc:
-        log.warning("LLM analysis failed on upload, running deterministic: %s", exc)
-        devs = _deterministic_compare(spec_text, submittal_text)
-
-    elapsed = round((time.time() - t0) * 1000)
-
-    return {
-        "system": system_id,
-        "spec_filename": spec_file.filename,
-        "submittal_filename": submittal_file.filename,
-        "spec_preview": spec_text[:500],
-        "submittal_preview": submittal_text[:500],
-        "deviations": devs,
-        "count": len(devs),
-        "elapsed_ms": elapsed,
-        "mode": "llm" if not devs or devs[0].get("cx_source") != "deterministic" else "deterministic",
-    }
-
-
-@app.post("/analyze/upload/stream")
-def analyze_upload_stream(
-    spec_file: UploadFile = File(...),
-    submittal_file: UploadFile = File(...),
-    system_id: str = "CUSTOM",
-):
-    spec_data = spec_file.file.read()
-    spec_name = spec_file.filename or "spec"
-    sub_data = submittal_file.file.read()
-    sub_name = submittal_file.filename or "submittal"
-
-    def generate():
-        from backend.agents.reconciliation import (
-            _all_standards_text,
-            _check_citation_faithfulness,
-            _validate_deviations,
-            SYSTEM_PROMPT,
-            PROMPT_TEMPLATE,
-        )
-        from backend.agents.commissioning import predict_cx_impact
-        from backend.llm import complete_stream as llm_stream, _extract_json
-
-        t0 = time.time()
-        yield f"event: status\ndata: Extracting text from {spec_name}...\n\n"
-        if spec_name.lower().endswith(".pdf"):
-            spec_text = extract_pdf_bytes(spec_data, spec_name)
-        else:
-            spec_text = spec_data.decode("utf-8", errors="replace")
-
-        yield f"event: status\ndata: Extracting text from {sub_name}...\n\n"
-        if sub_name.lower().endswith(".pdf"):
-            submittal_text = extract_pdf_bytes(sub_data, sub_name)
-        else:
-            submittal_text = sub_data.decode("utf-8", errors="replace")
-
-        if not spec_text or not submittal_text:
-            yield f"event: error\ndata: Could not extract text from uploaded files.\n\n"
-            yield "event: done\ndata: {}\n\n"
-            return
-
-        yield f"event: preview\ndata: {json.dumps({'spec': spec_text[:500], 'submittal': submittal_text[:500]})}\n\n"
-
-        yield f"event: status\ndata: Loading standards knowledge base...\n\n"
-        standards = _all_standards_text()
-
-        prompt = PROMPT_TEMPLATE.format(
-            spec=spec_text,
-            submittal=submittal_text,
-            standards=standards,
-        )
-
-        yield f"event: status\ndata: Running AI reconciliation on extracted documents...\n\n"
-
-        try:
-            full_text = ""
-            for chunk in llm_stream(prompt, system=SYSTEM_PROMPT):
-                full_text += chunk
-                yield f"event: token\ndata: {json.dumps(chunk)}\n\n"
-
-            yield f"event: status\ndata: Validating deviations...\n\n"
-            raw = _extract_json(full_text)
-            devs = _validate_deviations(raw)
-            devs = _check_citation_faithfulness(devs, spec_text, submittal_text, standards)
-            for d in devs:
-                d.update(predict_cx_impact(d))
-                d["system"] = system_id
-            mode = "llm"
-        except Exception as exc:
-            log.warning("LLM stream failed on upload, deterministic fallback: %s", exc)
-            yield f"event: status\ndata: Falling back to deterministic analysis...\n\n"
-            devs = _deterministic_compare(spec_text, submittal_text)
-            mode = "deterministic"
-
-        elapsed = round((time.time() - t0) * 1000)
-        result = {
-            "system": system_id,
-            "spec_filename": spec_name,
-            "submittal_filename": sub_name,
-            "deviations": devs,
-            "count": len(devs),
-            "elapsed_ms": elapsed,
-            "mode": mode,
-        }
-        yield f"event: result\ndata: {json.dumps(result)}\n\n"
-        yield "event: done\ndata: {}\n\n"
-
-    return StreamingResponse(generate(), media_type="text/event-stream",
-                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
-
+# ── Reference data endpoints ────────────────────────────────────────
 
 @app.get("/cx-plan")
 def cx_plan():
@@ -513,7 +280,7 @@ def metrics():
     r = score(findings, gt)
 
     gt_json = _load_json("ground_truth.json")
-    project = gt_json.get("project", {})
+    project_info = gt_json.get("project", {})
 
     return {
         "detection": {
@@ -533,13 +300,15 @@ def metrics():
         },
         "corpus": {
             "systems": len(set(d["system"] for d in gt)),
-            "total_requirements": project.get("line_items_total", 0),
-            "active_submittals": project.get("active_submittals", 0),
+            "total_requirements": project_info.get("line_items_total", 0),
+            "active_submittals": project_info.get("active_submittals", 0),
             "true_negative_systems": r["true_negative_systems"],
         },
         "citation_faithfulness": round(r["citation_faithfulness"], 3),
     }
 
+
+# ── Export endpoints ─────────────────────────────────────────────────
 
 @app.get("/export/audit")
 def export_audit():
@@ -725,6 +494,8 @@ tr:hover td {{ background: #f0f4ff; }}
 </body></html>"""
 
 
+# ── Pipeline info endpoint ───────────────────────────────────────────
+
 @app.get("/pipeline")
 def pipeline_info():
     return {
@@ -776,7 +547,20 @@ def corpus_stats():
     }
 
 
-PROJECTS_DIR = pathlib.Path(__file__).parent.parent / "data" / "projects"
+# ── Multi-project endpoints ─────────────────────────────────────────
+
+def _project_summary(gt: dict, project_id: str) -> dict:
+    proj = gt.get("project", {})
+    devs = gt.get("seeded_deviations", [])
+    return {
+        "id": project_id,
+        "name": proj.get("name", project_id),
+        "tier": proj.get("tier", ""),
+        "location": proj.get("location", ""),
+        "capacity_mw": proj.get("capacity_mw", 0),
+        "deviations": len(devs),
+        "systems": proj.get("total_systems", 0),
+    }
 
 
 @app.get("/projects")
@@ -784,44 +568,21 @@ def list_projects():
     projects = []
     gt = _load_json("ground_truth.json")
     if gt:
-        proj = gt.get("project", {})
-        devs = gt.get("seeded_deviations", [])
-        projects.append({
-            "id": "meghdoot",
-            "name": proj.get("name", "Project Meghdoot"),
-            "tier": proj.get("tier", ""),
-            "location": proj.get("location", ""),
-            "capacity_mw": proj.get("capacity_mw", 0),
-            "deviations": len(devs),
-            "systems": proj.get("total_systems", 0),
-        })
+        projects.append(_project_summary(gt, "meghdoot"))
 
     if PROJECTS_DIR.exists():
         for p in sorted(PROJECTS_DIR.iterdir()):
             gt_path = p / "ground_truth.json"
             if p.is_dir() and gt_path.exists():
                 pgt = json.loads(gt_path.read_text())
-                proj = pgt.get("project", {})
-                devs = pgt.get("seeded_deviations", [])
-                projects.append({
-                    "id": p.name,
-                    "name": proj.get("name", p.name),
-                    "tier": proj.get("tier", ""),
-                    "location": proj.get("location", ""),
-                    "capacity_mw": proj.get("capacity_mw", 0),
-                    "deviations": len(devs),
-                    "systems": proj.get("total_systems", 0),
-                })
+                projects.append(_project_summary(pgt, p.name))
 
     return {"projects": projects, "count": len(projects)}
 
 
 @app.get("/projects/{project_id}")
 def project_detail(project_id: str):
-    if project_id == "meghdoot":
-        ppath = CORPUS
-    else:
-        ppath = PROJECTS_DIR / project_id
+    ppath = CORPUS if project_id == "meghdoot" else PROJECTS_DIR / project_id
 
     gt_path = ppath / "ground_truth.json"
     if not gt_path.exists():
@@ -832,7 +593,7 @@ def project_detail(project_id: str):
     cx = json.loads(cx_path.read_text()) if cx_path.exists() else {}
 
     devs = gt.get("seeded_deviations", [])
-    lead_times = [d["lead_time_weeks"] for d in devs if d.get("lead_time_weeks")]
+    lead_times = [d["lead_time_weeks"] for d in devs if d.get("lead_time_weeks") is not None]
 
     return {
         "project": gt.get("project", {}),

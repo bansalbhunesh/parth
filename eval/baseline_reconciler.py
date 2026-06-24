@@ -2,8 +2,11 @@
 
 import json
 import pathlib
+import sys
 
-CORPUS = pathlib.Path(__file__).parent.parent / "data" / "corpus"
+sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))
+
+from backend.paths import CORPUS
 
 
 def _load(p):

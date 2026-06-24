@@ -4,11 +4,9 @@ Extraction Agent — raw document -> structured triples
 """
 
 import json
-import pathlib
 
 from backend.llm import complete_json
-
-CORPUS = pathlib.Path(__file__).parent.parent.parent / "data" / "corpus"
+from backend.paths import CORPUS
 
 EXTRACT_PROMPT = """\
 Extract every engineering requirement/value from the document below as triples.

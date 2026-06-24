@@ -5,13 +5,12 @@ basis, vendor submittal, and governing standards.
 
 import json
 import logging
-import pathlib
 
 from backend.llm import complete_json, LLMError
 from backend.agents.commissioning import predict_cx_impact
+from backend.paths import CORPUS
 
 log = logging.getLogger("pramaan.reconciliation")
-CORPUS = pathlib.Path(__file__).parent.parent.parent / "data" / "corpus"
 
 SYSTEM_PROMPT = (
     "You are a senior data-centre commissioning authority (CxA) with 20+ years "

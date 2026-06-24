@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef, useCallback } from "react";
-import { streamAnalyze } from "../lib/api";
+import { streamAnalyze, streamUploadAnalyze } from "../lib/api";
 
 const EXAMPLE_SPEC = `# Design Basis: UPS System
 - **UPS-02** — battery runtime min: shall be **10 min** (ref: UPTIME-TIER4; clause DB-4.3)
@@ -126,8 +126,7 @@ export default function AnalyzePanel() {
   const canAnalyzePdf = specFile !== null && submittalFile !== null;
   const canAnalyze = mode === "text" ? canAnalyzeText : canAnalyzePdf;
 
-  const handleAnalyzePdf = async () => {
-    if (!specFile || !submittalFile) return;
+  const resetState = () => {
     abortRef.current = false;
     setLoading(true);
     setStreaming(true);
@@ -136,90 +135,31 @@ export default function AnalyzePanel() {
     setStreamText("");
     setSpecPreview("");
     setSubPreview("");
+  };
+
+  const finalize = () => {
+    setLoading(false);
+    setStreaming(false);
+    setStatus("");
+  };
+
+  const handleAnalyzePdf = async () => {
+    if (!specFile || !submittalFile) return;
+    resetState();
     setStatus("Uploading documents...");
 
-    try {
-      const formData = new FormData();
-      formData.append("spec_file", specFile);
-      formData.append("submittal_file", submittalFile);
+    const formData = new FormData();
+    formData.append("spec_file", specFile);
+    formData.append("submittal_file", submittalFile);
 
-      const r = await fetch(`${API}/analyze/upload/stream`, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!r.ok || !r.body) {
-        const fallbackR = await fetch(`${API}/analyze/upload`, {
-          method: "POST",
-          body: formData,
-        });
-        if (!fallbackR.ok) throw new Error(`HTTP ${fallbackR.status}`);
-        const data = await fallbackR.json();
-        setResult(data);
-        if (data.spec_preview) setSpecPreview(data.spec_preview);
-        if (data.submittal_preview) setSubPreview(data.submittal_preview);
-        setLoading(false);
-        setStreaming(false);
-        setStatus("");
-        return;
-      }
-
-      const reader = r.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-      let currentEvent = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() || "";
-
-        for (const line of lines) {
-          if (line.startsWith("event: ")) {
-            currentEvent = line.slice(7);
-          } else if (line.startsWith("data: ")) {
-            const data = line.slice(6);
-            if (currentEvent === "status") {
-              setStatus(data);
-            } else if (currentEvent === "preview") {
-              try {
-                const p = JSON.parse(data);
-                setSpecPreview(p.spec || "");
-                setSubPreview(p.submittal || "");
-              } catch {}
-            } else if (currentEvent === "token") {
-              if (!abortRef.current) {
-                try {
-                  setStreamText((prev) => prev + JSON.parse(data));
-                } catch {
-                  setStreamText((prev) => prev + data);
-                }
-              }
-            } else if (currentEvent === "result") {
-              try { setResult(JSON.parse(data)); } catch {}
-              setStreamText("");
-              setStreaming(false);
-            } else if (currentEvent === "error") {
-              setError(data);
-            } else if (currentEvent === "done") {
-              setLoading(false);
-              setStreaming(false);
-              setStatus("");
-              return;
-            }
-          }
-        }
-      }
-      setLoading(false);
-      setStreaming(false);
-      setStatus("");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Upload failed");
-      setLoading(false);
-      setStreaming(false);
-    }
+    await streamUploadAnalyze(formData, {
+      onStatus: setStatus,
+      onPreview: (p) => { setSpecPreview(p.spec || ""); setSubPreview(p.submittal || ""); },
+      onToken: (token) => { if (!abortRef.current) setStreamText((prev) => prev + token); },
+      onResult: (res) => { setResult(res as AnalyzeResult); setStreamText(""); setStreaming(false); },
+      onError: (err) => setError(err),
+      onDone: finalize,
+    });
   };
 
   const handleAnalyzeText = async () => {
@@ -227,34 +167,17 @@ export default function AnalyzePanel() {
       setError("Both spec and submittal must be at least 10 characters.");
       return;
     }
-    abortRef.current = false;
-    setLoading(true);
-    setStreaming(true);
-    setError("");
-    setResult(null);
-    setStreamText("");
+    resetState();
     setStatus("Connecting to analysis engine...");
 
     try {
       await streamAnalyze(
         spec,
         submittal,
-        (s) => setStatus(s),
-        (token) => {
-          if (!abortRef.current) {
-            setStreamText((prev) => prev + token);
-          }
-        },
-        (res) => {
-          setResult(res as AnalyzeResult);
-          setStreamText("");
-          setStreaming(false);
-        },
-        () => {
-          setLoading(false);
-          setStreaming(false);
-          setStatus("");
-        },
+        setStatus,
+        (token) => { if (!abortRef.current) setStreamText((prev) => prev + token); },
+        (res) => { setResult(res as AnalyzeResult); setStreamText(""); setStreaming(false); },
+        finalize,
         async (err) => {
           try {
             const r = await fetch(`${API}/analyze`, {
@@ -263,20 +186,16 @@ export default function AnalyzePanel() {
               body: JSON.stringify({ spec_text: spec, submittal_text: submittal }),
             });
             if (!r.ok) throw new Error(`HTTP ${r.status}`);
-            const data = await r.json();
-            setResult(data);
+            setResult(await r.json());
           } catch (e) {
             setError(e instanceof Error ? e.message : err);
           }
-          setLoading(false);
-          setStreaming(false);
-          setStatus("");
+          finalize();
         },
       );
     } catch (e) {
       setError(e instanceof Error ? e.message : "Analysis failed");
-      setLoading(false);
-      setStreaming(false);
+      finalize();
     }
   };
 
@@ -458,7 +377,9 @@ export default function AnalyzePanel() {
                     {d.standard_ref && <span className="analyze-dev-ref">{d.standard_ref}</span>}
                     {d.spec_clause && <span className="analyze-dev-ref">{d.spec_clause}</span>}
                     {d.predicted_cx_test && <span className="analyze-dev-ref">Cx: {d.predicted_cx_test}</span>}
-                    {d.lead_time_weeks && <span className="analyze-dev-ref">{d.lead_time_weeks}w lead</span>}
+                    {d.lead_time_weeks != null && d.lead_time_weeks > 0 && (
+                      <span className="analyze-dev-ref">{d.lead_time_weeks}w lead</span>
+                    )}
                   </div>
                 </div>
               ))}

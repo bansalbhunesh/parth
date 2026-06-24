@@ -83,6 +83,36 @@ export interface MultiProjectEval {
 
 const API = process.env.NEXT_PUBLIC_API ?? "http://localhost:8000";
 
+
+async function consumeSSE(
+  response: Response,
+  handlers: Record<string, (data: string) => void>,
+): Promise<void> {
+  if (!response.body) return;
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let currentEvent = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() || "";
+
+    for (const line of lines) {
+      if (line.startsWith("event: ")) {
+        currentEvent = line.slice(7).trim();
+      } else if (line.startsWith("data: ")) {
+        const handler = handlers[currentEvent];
+        if (handler) handler(line.slice(6));
+      }
+    }
+  }
+}
+
+
 export async function getRegister(): Promise<Deviation[]> {
   try {
     const r = await fetch(`${API}/deviations`, { cache: "no-store" });
@@ -137,34 +167,12 @@ export async function streamCopilot(
       body: JSON.stringify({ query }),
     });
     if (!r.ok || !r.body) throw new Error(`HTTP ${r.status}`);
-    const reader = r.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop() || "";
-
-      let currentEvent = "";
-      for (const line of lines) {
-        if (line.startsWith("event: ")) {
-          currentEvent = line.slice(7);
-        } else if (line.startsWith("data: ")) {
-          const data = line.slice(6);
-          if (currentEvent === "meta") {
-            try { onMeta(JSON.parse(data)); } catch {}
-          } else if (currentEvent === "token") {
-            onToken(data);
-          } else if (currentEvent === "done") {
-            onDone();
-            return;
-          }
-        }
-      }
-    }
+    await consumeSSE(r, {
+      meta: (data) => { try { onMeta(JSON.parse(data)); } catch {} },
+      token: (data) => onToken(data),
+      done: () => { onDone(); },
+    });
     onDone();
   } catch {
     onError("Backend not connected. Ensure the API is running at localhost:8000.");
@@ -187,39 +195,50 @@ export async function streamAnalyze(
       body: JSON.stringify({ spec_text: specText, submittal_text: submittalText }),
     });
     if (!r.ok || !r.body) throw new Error(`HTTP ${r.status}`);
-    const reader = r.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop() || "";
-
-      let currentEvent = "";
-      for (const line of lines) {
-        if (line.startsWith("event: ")) {
-          currentEvent = line.slice(7);
-        } else if (line.startsWith("data: ")) {
-          const data = line.slice(6);
-          if (currentEvent === "status") {
-            onStatus(data);
-          } else if (currentEvent === "token") {
-            try { onToken(JSON.parse(data)); } catch { onToken(data); }
-          } else if (currentEvent === "result") {
-            try { onResult(JSON.parse(data)); } catch {}
-          } else if (currentEvent === "done") {
-            onDone();
-            return;
-          }
-        }
-      }
-    }
+    await consumeSSE(r, {
+      status: (data) => onStatus(data),
+      token: (data) => { try { onToken(JSON.parse(data)); } catch { onToken(data); } },
+      result: (data) => { try { onResult(JSON.parse(data)); } catch {} },
+      done: () => { onDone(); },
+    });
     onDone();
   } catch {
     onError("Analysis failed — backend not connected.");
+  }
+}
+
+export async function streamUploadAnalyze(
+  formData: FormData,
+  handlers: {
+    onStatus: (status: string) => void;
+    onPreview: (preview: { spec: string; submittal: string }) => void;
+    onToken: (token: string) => void;
+    onResult: (result: unknown) => void;
+    onError: (err: string) => void;
+    onDone: () => void;
+  },
+): Promise<void> {
+  try {
+    const r = await fetch(`${API}/analyze/upload/stream`, {
+      method: "POST",
+      body: formData,
+    });
+    if (!r.ok || !r.body) throw new Error(`HTTP ${r.status}`);
+
+    await consumeSSE(r, {
+      status: (data) => handlers.onStatus(data),
+      preview: (data) => { try { handlers.onPreview(JSON.parse(data)); } catch {} },
+      token: (data) => {
+        try { handlers.onToken(JSON.parse(data)); } catch { handlers.onToken(data); }
+      },
+      result: (data) => { try { handlers.onResult(JSON.parse(data)); } catch {} },
+      error: (data) => handlers.onError(data),
+      done: () => { handlers.onDone(); },
+    });
+    handlers.onDone();
+  } catch (e) {
+    handlers.onError(e instanceof Error ? e.message : "Upload failed");
   }
 }
 

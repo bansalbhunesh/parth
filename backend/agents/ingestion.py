@@ -8,9 +8,9 @@ import pathlib
 import re
 from typing import Optional
 
-log = logging.getLogger("pramaan.ingestion")
+from backend.paths import CORPUS
 
-CORPUS = pathlib.Path(__file__).parent.parent.parent / "data" / "corpus"
+log = logging.getLogger("pramaan.ingestion")
 
 
 def _clean_text(text: str) -> str:

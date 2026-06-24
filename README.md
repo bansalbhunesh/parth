@@ -13,11 +13,12 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/deviations_caught-7-ff4d4d?style=flat-square&labelColor=1a0f12" alt="7 deviations">
-  <img src="https://img.shields.io/badge/weeks_saved-149-36d6e7?style=flat-square&labelColor=0d1a1e" alt="149 weeks">
+  <img src="https://img.shields.io/badge/deviations_caught-14-ff4d4d?style=flat-square&labelColor=1a0f12" alt="14 deviations">
+  <img src="https://img.shields.io/badge/weeks_saved-267-36d6e7?style=flat-square&labelColor=0d1a1e" alt="267 weeks">
   <img src="https://img.shields.io/badge/precision-1.000-35c98b?style=flat-square&labelColor=0d1a14" alt="Precision 1.000">
   <img src="https://img.shields.io/badge/recall-1.000-35c98b?style=flat-square&labelColor=0d1a14" alt="Recall 1.000">
   <img src="https://img.shields.io/badge/false_positives-0-35c98b?style=flat-square&labelColor=0d1a14" alt="0 false positives">
+  <img src="https://img.shields.io/badge/tests-105-5b8cff?style=flat-square&labelColor=111820" alt="105 tests">
   <img src="https://img.shields.io/badge/agents-5-5b8cff?style=flat-square&labelColor=111820" alt="5 agents">
   <img src="https://img.shields.io/badge/standards-7-ffb020?style=flat-square&labelColor=1a1508" alt="7 standards">
 </p>
@@ -26,10 +27,10 @@
 
 ## The Headline
 
-> **Pramaan caught a critical UPS battery shortfall 27 weeks before it would have failed integrated systems testing.**
+> **Pramaan caught a critical BMS monitoring single-point-of-failure 33 weeks before it would have failed the full-facility failover drill.**
 > That's the difference between a one-line email and a seven-figure schedule slip.
 >
-> Across 7 deviations: **149 weeks of total lead time saved. Zero false positives.**
+> Across 14 deviations (7 Critical, 6 Major, 1 Minor): **267 weeks of total lead time saved. Zero false positives.**
 
 ---
 
@@ -37,19 +38,26 @@
 
 In a **40 MW Tier IV data centre** build (Project Meghdoot, Navi Mumbai), the design basis, vendor submittals, and governing standards live in different systems, reviewed by different people. Subtle deviations hide in thousands of pages:
 
-| What went wrong | Spec says | Vendor submitted | Impact |
-|-----------------|-----------|------------------|--------|
-| UPS battery runtime | 10 min | 7 min | Tier IV fault tolerance broken |
-| Generator fuel autonomy | 24 h | 12 h | Cannot sustain design-duration outage |
-| Cooling redundancy | N+2 | N+1 | No concurrent maintenance tolerance |
-| Switchgear rating | 50 kA | 40 kA | Below prospective fault level |
-| Cable fire rating | CMP (plenum) | CMR (riser) | NFPA 75 violation in plenum space |
-| BMS alarm coverage | Complete | Missing leak detection | IST-14 alarm test will fail |
-| Raised floor height | 900 mm | 600 mm | Insufficient for under-floor distribution |
+| What went wrong | Spec says | Vendor submitted | Impact | Lead |
+|-----------------|-----------|------------------|--------|------|
+| UPS battery runtime | 10 min | 7 min | Tier IV fault tolerance broken | 27w |
+| Generator fuel autonomy | 24 h | 12 h | Cannot sustain design-duration outage | 30w |
+| Cooling redundancy | N+2 | N+1 | No concurrent maintenance tolerance | 28w |
+| Switchgear fault rating | 50 kA | 40 kA | Below prospective fault level | 19w |
+| Generator start time | 10 s | 15 s | Battery depletion risk during utility failure | 23w |
+| BMS monitoring | Dual | Single | Single point of failure in monitoring path | 33w |
+| Floor load capacity | 12 kPa | 8 kPa | Exceeds bearing capacity under seismic load | 8w |
+| Cable fire rating | CMP | CMR | NFPA 75 violation in plenum space | 11w |
+| BMS alarm coverage | Complete | Missing leak | IST-14 alarm test will fail | 29w |
+| Cooling delta-T | 10 C | 7 C | Low delta-T syndrome; 43% flow increase | 25w |
+| UPS efficiency | 96% | 93% | 36 kW extra heat load per module | 13w |
+| Switchgear arc flash | Type 2B | Type 2 | Operator exposure above 40 cal/cm2 | 9w |
+| Cable bundle size | 48 | 72 | Thermal derating reduces current capacity | 7w |
+| Raised floor height | 900 mm | 600 mm | Insufficient for under-floor distribution | 5w |
 
-**Today**: These surface during commissioning at **Week 38–44** — rework, schedule delays, cost overruns.
+**Today**: These surface during commissioning at **Week 16–44** — rework, schedule delays, cost overruns.
 
-**With Pramaan**: All 7 caught at **Week 11** — the day the submittal was uploaded.
+**With Pramaan**: All 14 caught at **Week 11** — the day the submittal was uploaded.
 
 ---
 
@@ -108,67 +116,75 @@ Pramaan is a **multi-agent AI system** that cross-references every requirement a
 
 | Metric | Value |
 |--------|-------|
-| Deviations caught | **7** |
+| Deviations caught | **14** (7 Critical, 6 Major, 1 Minor) |
 | False positives | **0** |
-| Total lead time saved | **149 weeks** |
-| Max single finding | **30 weeks** (GEN-FUEL) |
-| Mean lead time | **21 weeks** |
-| Systems scanned | **10** |
+| Total lead time saved | **267 weeks** (5+ years) |
+| Max single finding | **33 weeks** (BMS monitoring) |
+| Mean lead time | **19.1 weeks** |
+| Systems scanned | **10** (3 true negatives) |
+| Cx tests mapped | **17** (L1–L5) |
 
 </td>
 </tr>
 </table>
 
-> **The metric that wins: Lead Time.** Every deviation carries `lead_time_weeks`. The UPS-02 hero is **27 weeks** — caught Week 11, would have failed IST-07 at Week 38. Total across all 7: **149 weeks** of avoided commissioning rework.
+> **The metric that wins: Lead Time.** Every deviation carries `lead_time_weeks`. The BMS monitoring finding is **33 weeks** — caught Week 11, would have failed IST-15 at Week 44. Total across all 14: **267 weeks** of avoided commissioning rework.
 
 ---
 
 ## Quick Start
 
 ```bash
-# 1. Generate the labelled corpus (10 systems, 33 requirements, 7 seeded deviations)
+# 1. Generate the labelled corpus (10 systems, 33 requirements, 14 seeded deviations)
 python3 data/generate_corpus.py
 
-# 2. Prove the pipeline + eval harness (no API key needed)
-python3 eval/run_eval.py --detector baseline      # → P/R/F1 = 1.000
+# 2. Run the 105-test suite (no API key needed)
+python3 -m pytest tests/ -q                       # → 105 passed
 
-# 3. The real run — LLM recovers deviations from RAW unstructured documents
+# 3. Prove the pipeline + eval harness
+python3 eval/run_eval.py --detector baseline      # → P/R/F1 = 1.000, 267 weeks saved
+
+# 4. The real run — LLM recovers deviations from RAW unstructured documents
 export GEMINI_API_KEY=your_key_here
 pip install -r backend/requirements.txt
 python3 eval/run_eval.py --detector llm           # the score that matters
 
-# 4. Launch API + Dashboard
+# 5. Launch API + Dashboard
 uvicorn backend.main:app --reload                 # → localhost:8000
 cd frontend && npm install && npm run dev          # → localhost:3000
 
-# 5. Export evidence pack
+# 6. Export evidence pack
 curl http://localhost:8000/export/audit/html > evidence.html
 ```
 
-> **No API key?** The dashboard runs fully with ground-truth fallback data. All 11 API endpoints return 200. The eval harness, corpus, and frontend work offline.
+> **No API key?** The dashboard runs fully with ground-truth fallback data. All 16+ API endpoints return 200. The eval harness, corpus, and frontend work offline. 105 tests pass without any external dependencies.
 
 ---
 
-## Frontend — 14-Section Dashboard
+## Frontend — 18-Section Dashboard
 
-The dashboard is a single-page application designed for a **60-second demo narrative**:
+The dashboard is a single-page application designed for a **60-second demo narrative**, built with **22 React components**:
 
 | # | Section | What judges see |
 |---|---------|----------------|
 | 1 | **Hero Intro** | Problem statement + project context (40 MW, 7 standards, 87 submittals) |
 | 2 | **Sentinel** | Critical deviation fires: UPS-02 battery 7 min vs 10 min required |
-| 3 | **149-Week Savings** | Giant animated counter — the headline number |
+| 3 | **267-Week Savings** | Giant animated counter — the headline number |
 | 4 | **Before / After** | Manual review (10–15 weeks) vs Pramaan (< 5 minutes) toggle |
 | 5 | **Pipeline** | 5-agent pipeline with animated stage-by-stage reveal |
 | 6 | **Architecture** | 4-layer system diagram: Documents → Agents → Infrastructure → Outputs |
-| 7 | **System Health** | 10 systems grid — critical/major/compliant status at a glance |
-| 8 | **Risk Matrix** | Severity × Lead Time matrix with deviation dots |
-| 9 | **Deviation Register** | Full table: component, spec vs submittal, standard, Cx test, lead time |
-| 10 | **Cx Risk Twin** | L1–L5 Gantt chart with at-risk tests pulsing red |
-| 11 | **Standards KB** | 7 color-coded standard cards with finding counts |
-| 12 | **Eval Dashboard** | Animated P/R/F1 counters + baseline vs LLM comparison table |
-| 13 | **ROI Calculator** | Interactive slider: project value → rework avoided → payback days |
-| 14 | **Scale Story** | 10 → 33 → 87 → 14K animated progression + architecture details |
+| 7 | **Screenshots** | Interactive gallery of live dashboard screenshots |
+| 8 | **System Health** | 10 systems grid — critical/major/compliant status at a glance |
+| 9 | **Compliance Score** | Animated SVG ring gauge + per-system conformance cards |
+| 10 | **Document Diff** | Side-by-side spec vs submittal viewer with deviation highlights |
+| 11 | **Risk Matrix** | Severity × Lead Time matrix with deviation dots |
+| 12 | **Deviation Register** | Interactive table with search, filter, sort, and expandable rationale |
+| 13 | **Cx Risk Twin** | L1–L5 Gantt chart with at-risk tests pulsing red |
+| 14 | **Standards KB** | 7 color-coded standard cards with finding counts |
+| 15 | **Eval Dashboard** | Animated P/R/F1 counters + baseline vs LLM comparison table |
+| 16 | **ROI Calculator** | Interactive slider: project value → rework avoided → payback days |
+| 17 | **Scale Story** | 10 → 33 → 87 → 14K animated progression + architecture details |
+| 18 | **Live Analysis** | Paste any spec + submittal — live deviation detection with results |
 
 Plus: **Copilot panel** (RAG Q&A with preset queries), **Academic References** (4 peer-reviewed papers), **Export button** (HTML evidence pack download).
 
@@ -201,10 +217,14 @@ Pramaan cross-references against **7 governing standards** — all content is pa
 | `GET` | `/systems` | List all 10 modelled systems |
 | `POST` | `/ingest/{system_id}` | Run full pipeline for one system |
 | `GET` | `/deviations` | Complete deviation register with citations |
+| `POST` | `/analyze` | Live analysis: paste any spec + submittal text |
 | `POST` | `/copilot` | RAG-powered project Q&A with prior-RFI matching |
-| `GET` | `/cx-plan` | Commissioning plan with L1–L5 test schedule |
+| `GET` | `/cx-plan` | Commissioning plan with 17 L1–L5 tests |
 | `GET` | `/rfi-log` | Full RFI log (12 historical RFIs) |
 | `GET` | `/metrics` | Live eval metrics (P/R/F1, lead time, confidence) |
+| `GET` | `/pipeline` | Agent pipeline topology (nodes + edges) |
+| `GET` | `/corpus/doc/{type}/{id}` | Raw spec or submittal document text |
+| `GET` | `/corpus/stats` | Corpus statistics (systems, standards, documents) |
 | `GET` | `/export/audit` | JSON compliance evidence pack |
 | `GET` | `/export/audit/html` | Printable HTML evidence pack with full audit trail |
 
@@ -217,7 +237,7 @@ All endpoints return 200 with graceful fallback to ground-truth data when no LLM
 ```
 pramaan/
 ├── backend/
-│   ├── main.py                    # FastAPI — 11 endpoints, graceful fallback
+│   ├── main.py                    # FastAPI — 15 endpoints, graceful fallback
 │   ├── orchestrator.py            # LangGraph pipeline wiring
 │   ├── llm.py                     # LLM provider abstraction (Gemini / Claude)
 │   ├── requirements.txt
@@ -233,32 +253,37 @@ pramaan/
 │   │   ├── specs/                 # 10 system design specifications
 │   │   ├── submittals/            # 10 vendor submittals (7 with seeded deviations)
 │   │   ├── standards/             # 7 governing standards (paraphrased)
-│   │   ├── commissioning/         # L1–L5 commissioning test plan
+│   │   ├── commissioning/         # L1–L5 commissioning test plan (17 tests)
 │   │   ├── rfi/                   # 12 historical RFIs
-│   │   ├── extracted/             # Pre-extracted structured data
-│   │   └── ground_truth.json      # 7 deviations + 3 true negatives
+│   │   ├── extracted/             # Pre-extracted structured data (33 reqs, 33 subs)
+│   │   └── ground_truth.json      # 14 deviations + 3 true negatives
 │   └── scraped/                   # Supplementary scraped standards data
 ├── eval/
 │   ├── run_eval.py                # P/R/F1 + Cx accuracy + citation faithfulness
 │   └── baseline_reconciler.py     # Deterministic baseline (proves plumbing)
 ├── frontend/
 │   ├── app/
-│   │   ├── page.tsx               # Main dashboard — 14 sections
+│   │   ├── page.tsx               # Main dashboard — 18 sections
 │   │   ├── layout.tsx             # Root layout with fonts
-│   │   └── globals.css            # Full design system (~900 lines)
-│   ├── components/
+│   │   └── globals.css            # Full design system (~1100 lines)
+│   ├── components/                # 22 React components
 │   │   ├── HeroIntro.tsx          # Problem statement for judges
-│   │   ├── NavBar.tsx             # 14-section sticky nav
+│   │   ├── NavBar.tsx             # 18-section sticky nav
+│   │   ├── SectionIndex.tsx       # Interactive section directory
 │   │   ├── StatsBar.tsx           # Summary stats strip
 │   │   ├── PipelineViz.tsx        # Animated 5-agent pipeline
 │   │   ├── ArchitectureDiagram.tsx # 4-layer architecture diagram
+│   │   ├── ScreenshotShowcase.tsx # Interactive screenshot gallery
+│   │   ├── ComplianceScore.tsx    # Animated SVG ring gauge + system cards
+│   │   ├── DocumentDiff.tsx       # Side-by-side spec vs submittal viewer
 │   │   ├── RiskMatrix.tsx         # Severity × lead time matrix
-│   │   ├── DeviationRegister.tsx  # Full deviation table
+│   │   ├── DeviationRegister.tsx  # Interactive table: search/filter/sort/expand
 │   │   ├── CommissioningTwin.tsx  # L1–L5 Gantt with at-risk tests
 │   │   ├── StandardsKB.tsx        # 7-standard card grid
 │   │   ├── EvalDashboard.tsx      # Animated metrics + comparison table
 │   │   ├── ROICalculator.tsx      # Interactive business impact
 │   │   ├── ScaleStory.tsx         # Scale progression + architecture
+│   │   ├── AnalyzePanel.tsx       # Live paste-and-analyze panel
 │   │   ├── BeforeAfter.tsx        # Manual vs Pramaan comparison
 │   │   ├── CopilotPanel.tsx       # RAG Q&A with presets
 │   │   ├── AcademicRefs.tsx       # 4 peer-reviewed references
@@ -270,7 +295,7 @@ pramaan/
     └── hooks/                     # Session-start auto-setup
 ```
 
-**36 source files · 5,300 lines of code**
+**40+ source files · 6,500+ lines of code · 105 tests**
 
 ---
 
@@ -306,7 +331,7 @@ The eval harness (`eval/run_eval.py`) is **deterministic, reproducible, and audi
 python3 eval/run_eval.py --detector baseline
 # → Precision: 1.000  Recall: 1.000  F1: 1.000
 # → Cx prediction accuracy: 1.000
-# → Lead time saved: 149 weeks
+# → Lead time saved: 267 weeks (14 deviations, 0 FP)
 
 # LLM agent (recovers deviations from raw unstructured documents)
 python3 eval/run_eval.py --detector llm
@@ -328,10 +353,10 @@ python3 eval/run_eval.py --detector llm
 | Rubric Dimension | Pramaan Feature | Evidence |
 |------------------|-----------------|----------|
 | **Innovation** | Cross-document AI reasoning across spec + submittal + standard — no commercial tool does this | 5 specialized agents, LangGraph orchestration, citation chain |
-| **Business Impact** | 149 weeks of early detection prevents seven-figure schedule slips | Interactive ROI calculator, cost-of-delay timeline, before/after comparison |
-| **Technical Excellence** | Eval harness with P/R/F1 = 1.000, deterministic baseline + LLM agent | Reproducible eval, confidence scoring, citation faithfulness metric |
+| **Business Impact** | 267 weeks of early detection across 14 findings prevents seven-figure schedule slips | Interactive ROI calculator, cost-of-delay timeline, before/after comparison |
+| **Technical Excellence** | Eval harness with P/R/F1 = 1.000, 105-test suite, deterministic baseline + LLM agent | Reproducible eval, confidence scoring, citation faithfulness, 0 false positives |
 | **Scalability** | 10 → 14,000 line items via batch ingest + vector store + async pipeline | Architecture diagram, scale story, POST-per-system API design |
-| **UX** | 14-section dashboard with 60-second demo narrative | Scroll animations, dark theme, responsive, interactive copilot + ROI slider |
+| **UX** | 18-section dashboard with 60-second demo narrative, 22 components | Scroll animations, dark theme, responsive, live analysis, compliance scoring, document diff |
 
 ---
 
@@ -353,9 +378,9 @@ python3 eval/run_eval.py --detector llm
 | 0:00 | Open dashboard | "Pramaan scans every vendor submittal against the design basis and 7 governing standards." |
 | 0:08 | Point to Sentinel | "This UPS battery was submitted at 7 minutes — the Tier IV spec requires 10. Caught at Week 11." |
 | 0:15 | Show timeline | "27 weeks before IST-07 would have failed. That's the difference between an email and a schedule slip." |
-| 0:22 | Scroll to 149 weeks | "Across all 7 deviations: 149 weeks of total lead time saved." |
+| 0:22 | Scroll to 267 weeks | "Across all 14 deviations: 267 weeks — over 5 years — of total lead time saved." |
 | 0:28 | Before/After toggle | "Manual review takes 10–15 weeks. Pramaan does it in under 5 minutes." |
-| 0:33 | System health grid | "10 systems scanned. 4 critical findings, 3 major. Everything else compliant." |
+| 0:33 | System health grid | "10 systems scanned. 7 critical, 6 major, 1 minor. Three systems fully compliant." |
 | 0:38 | Cx Twin | "These three tests — IST-07, IST-09, IST-11 — will fail if we don't act now." |
 | 0:43 | ROI calculator | "On an ₹800 Cr project, that's ₹1,788 lakhs of rework avoided." |
 | 0:48 | Copilot query | "Has the UPS runtime come up before? → RFI-014, already resolved." |
@@ -392,5 +417,5 @@ python3 eval/run_eval.py --detector llm
 <p align="center">
   <strong>PRA<span style="color:#36d6e7">MAAN</span></strong><br>
   <em>EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4</em><br>
-  <sub>5 AI Agents &middot; 10 Systems &middot; 7 Standards &middot; 33 Requirements &middot; 7 Deviations &middot; 149 Weeks Saved &middot; 0 False Positives</sub>
+  <sub>5 AI Agents &middot; 10 Systems &middot; 7 Standards &middot; 33 Requirements &middot; 14 Deviations &middot; 267 Weeks Saved &middot; 0 False Positives &middot; 105 Tests</sub>
 </p>

@@ -10,5 +10,6 @@ venv/
 # node
 node_modules/
 .next/
+tsconfig.tsbuildinfo
 # data artifacts (regenerate via data/generate_corpus.py)
 data/corpus/

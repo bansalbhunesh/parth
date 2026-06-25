@@ -187,6 +187,46 @@ class TestReconciliationValidation:
         assert result[0]["citation_faithful"] is False
 
 
+class TestOrchestrator:
+    def test_conditional_routing_with_docs(self):
+        from backend.orchestrator import route_after_validate
+        state = {"system_id": "UPS", "spec_text": "spec", "submittal_text": "sub",
+                 "standards_text": "", "ingestion_meta": None,
+                 "extracted_triples": None, "deviations": [], "elapsed_ms": 0}
+        assert route_after_validate(state) == "reconcile"
+
+    def test_conditional_routing_missing_spec(self):
+        from backend.orchestrator import route_after_validate
+        state = {"system_id": "UPS", "spec_text": None, "submittal_text": "sub",
+                 "standards_text": "", "ingestion_meta": None,
+                 "extracted_triples": None, "deviations": [], "elapsed_ms": 0}
+        assert route_after_validate(state) == "format_output"
+
+    def test_conditional_routing_missing_submittal(self):
+        from backend.orchestrator import route_after_validate
+        state = {"system_id": "UPS", "spec_text": "spec", "submittal_text": None,
+                 "standards_text": "", "ingestion_meta": None,
+                 "extracted_triples": None, "deviations": [], "elapsed_ms": 0}
+        assert route_after_validate(state) == "format_output"
+
+    def test_build_graph_returns_compiled(self):
+        from backend.orchestrator import build_graph
+        graph = build_graph()
+        if graph is not None:
+            assert hasattr(graph, "invoke")
+
+    def test_pipeline_nodes(self):
+        from backend.orchestrator import (
+            node_ingest, node_load_standards, node_validate,
+            node_cx_predict, node_format_output,
+        )
+        assert callable(node_ingest)
+        assert callable(node_load_standards)
+        assert callable(node_validate)
+        assert callable(node_cx_predict)
+        assert callable(node_format_output)
+
+
 class TestLLMModule:
     def test_extract_json_array(self):
         from backend.llm import _extract_json

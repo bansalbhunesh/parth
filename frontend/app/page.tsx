@@ -22,6 +22,7 @@ import AnalyzePanel from "../components/AnalyzePanel";
 import ComplianceScore from "../components/ComplianceScore";
 import DocumentDiff from "../components/DocumentDiff";
 import MultiProjectDashboard from "../components/MultiProjectDashboard";
+import ErrorBoundary from "../components/ErrorBoundary";
 
 function Sentinel({ d }: { d: Deviation }) {
   const span = 52;
@@ -207,6 +208,7 @@ export default async function Page() {
       : 0;
 
   return (
+    <ErrorBoundary>
     <main className="wrap">
       <NavBar />
 
@@ -382,5 +384,6 @@ export default async function Page() {
         </div>
       </div>
     </main>
+    </ErrorBoundary>
   );
 }

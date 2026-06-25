@@ -19,7 +19,7 @@
   <img src="https://img.shields.io/badge/precision-1.000-35c98b?style=flat-square&labelColor=0d1a14" alt="Precision 1.000">
   <img src="https://img.shields.io/badge/recall-1.000-35c98b?style=flat-square&labelColor=0d1a14" alt="Recall 1.000">
   <img src="https://img.shields.io/badge/false_positives-0-35c98b?style=flat-square&labelColor=0d1a14" alt="0 false positives">
-  <img src="https://img.shields.io/badge/tests-131-5b8cff?style=flat-square&labelColor=111820" alt="131 tests">
+  <img src="https://img.shields.io/badge/tests-141-5b8cff?style=flat-square&labelColor=111820" alt="141 tests">
   <img src="https://img.shields.io/badge/agents-5-5b8cff?style=flat-square&labelColor=111820" alt="5 agents">
   <img src="https://img.shields.io/badge/countries-5-ffb020?style=flat-square&labelColor=1a1508" alt="5 countries">
 </p>
@@ -67,20 +67,23 @@ In a **40 MW Tier IV data centre** build (Project Meghdoot, Navi Mumbai), the de
 Pramaan is a **multi-agent AI system** that cross-references every requirement against every submittal against every governing standard — and catches deviations the day the document is uploaded.
 
 ```
-                    ┌─────────────────────────────────────────────────────────┐
-                    │              LangGraph Agent Orchestrator                │
-                    │                                                         │
-  Design Basis ───▶ │  ┌───────────┐   ┌──────────────┐   ┌──────────────┐  │
-  Submittals   ───▶ │  │ Extraction│──▶│Reconciliation│──▶│     Cx       │  │ ──▶ Deviation Register
-  Standards    ───▶ │  │   Agent   │   │ Agent (BRAIN)│   │  Predictor   │  │     + Citation Chain
-                    │  └───────────┘   └──────────────┘   └──────────────┘  │     + Lead Time
-                    │                         ▲                              │
-                    │                   Standards KB                         │
-                    │                      (RAG)          ┌──────────────┐  │
-                    │                                     │ RFI Copilot  │  │ ──▶ Copilot Q&A
-                    │                                     └──────────────┘  │
-                    └─────────────────────────────────────────────────────────┘
+              ┌──────────────────────────────────────────────────────────────────────┐
+              │                   LangGraph Agent Orchestrator                       │
+              │                                                                      │
+              │  ┌───────────┐   ┌──────────────┐   ┌──────────┐                    │
+  Design  ───▶│  │ Ingestion │──▶│    Validate   │──▶│Reconcile │──▶ Cx Predict ──▶ │──▶ Deviation Register
+  Basis       │  │   Agent   │   │    Gate ◆     │   │  (BRAIN) │   │               │    + Citation Chain
+              │  └───────────┘   └──────┬───────┘   └──────────┘   │               │    + Lead Time
+  Standards ──│──▶ Load Standards ──────┘                          ▼               │
+              │                    ◆ = conditional:          Format Output          │
+  Submittals ─│─────────┘          skip reconciliation                              │
+              │                    if docs missing    ┌──────────────┐              │
+              │                                       │ RFI Copilot  │              │──▶ Copilot Q&A
+              │                                       └──────────────┘              │
+              └──────────────────────────────────────────────────────────────────────┘
 ```
+
+**LangGraph features used:** `StateGraph`, `add_conditional_edges` (validation gate skips reconciliation for missing documents), `TypedDict` state schema, compiled graph with `END` sentinel.
 
 **5 agents, narratable in 60 seconds:**
 
@@ -168,8 +171,8 @@ python3 eval/multi_project_eval.py --json
 python3 data/generate_corpus.py                    # Project Meghdoot (primary)
 python3 data/generate_projects.py                  # 5 additional projects
 
-# 2. Run the 131-test suite (no API key needed)
-python3 -m pytest tests/ -q                       # → 131 passed
+# 2. Run the 141-test suite (no API key needed)
+python3 -m pytest tests/ -q                       # → 141 passed
 
 # 3. Prove the pipeline + eval harness
 python3 eval/run_eval.py --detector baseline      # → P/R/F1 = 1.000, 267 weeks saved
@@ -184,17 +187,21 @@ python3 eval/run_eval.py --detector llm           # the score that matters
 uvicorn backend.main:app --reload                 # → localhost:8000
 cd frontend && npm install && npm run dev          # → localhost:3000
 
-# 6. Export evidence pack
+# 6. Try live analysis with demo files
+# Upload data/demo/sample_spec.md + data/demo/sample_submittal.md in the dashboard
+# → 4 deviations detected (battery runtime, efficiency, start time, fire rating)
+
+# 7. Export evidence pack
 curl http://localhost:8000/export/audit/html > evidence.html
 ```
 
-> **No API key?** The dashboard runs fully with ground-truth fallback data. All 22 API endpoints return 200. The eval harness, corpus, and frontend work offline. 131 tests pass without any external dependencies.
+> **No API key?** The dashboard runs fully with ground-truth fallback data. All 22 API endpoints return 200. The eval harness, corpus, and frontend work offline. 141 tests pass without any external dependencies.
 
 ---
 
 ## Frontend — 19-Section Dashboard
 
-The dashboard is a single-page application designed for a **60-second demo narrative**, built with **23 React components**:
+The dashboard is a single-page application designed for a **60-second demo narrative**, built with **24 React components** (including `ErrorBoundary` for graceful failure recovery):
 
 | # | Section | What judges see |
 |---|---------|----------------|
@@ -279,7 +286,7 @@ pramaan/
 │   ├── main.py                    # FastAPI — 22 endpoints, SSE streaming, graceful fallback
 │   ├── analyze.py                 # Shared analysis logic (sync + streaming)
 │   ├── paths.py                   # Single source of truth for data paths
-│   ├── orchestrator.py            # LangGraph pipeline wiring
+│   ├── orchestrator.py            # LangGraph pipeline with conditional routing
 │   ├── llm.py                     # LLM provider abstraction (Gemini / Claude) + streaming
 │   ├── requirements.txt
 │   └── agents/
@@ -307,6 +314,9 @@ pramaan/
 │   │   ├── cascade/              # 30 MW Tier IV, Oregon (US EPA/IBC/NFPA)
 │   │   ├── yangtze/              # 50 MW GB 50174, Shanghai (Chinese standards)
 │   │   └── manifest.json         # Project registry
+│   ├── demo/                      # Sample files for live analysis demo
+│   │   ├── sample_spec.md         # Demo spec (10 MW Tier III, 11 parameters)
+│   │   └── sample_submittal.md    # Demo submittal (4 seeded deviations)
 │   └── scraped/                   # Supplementary scraped standards data
 ├── eval/
 │   ├── run_eval.py                # P/R/F1 + Cx accuracy + citation faithfulness
@@ -350,7 +360,7 @@ pramaan/
     └── test_multi_project.py      # Multi-project dataset + eval tests
 ```
 
-**40+ source files · 7,300+ lines of code · 131 tests · 6 projects · 22 endpoints**
+**40+ source files · 7,300+ lines of code · 141 tests · 6 projects · 22 endpoints**
 
 ---
 
@@ -414,7 +424,7 @@ python3 eval/run_eval.py --detector llm
 |------------------|-----------------|----------|
 | **Innovation** | Cross-document AI reasoning across spec + submittal + standard — no commercial tool does this | 5 specialized agents, LangGraph orchestration, citation chain |
 | **Business Impact** | 691 weeks of early detection across 33 findings in 6 projects prevents seven-figure schedule slips | Interactive ROI calculator, cost-of-delay timeline, before/after comparison |
-| **Technical Excellence** | Eval harness with P/R/F1 = 1.000 across 6 projects, 131-test suite, multi-project eval | Reproducible eval, 5 countries, 15+ standards, 0 false positives |
+| **Technical Excellence** | Eval harness with P/R/F1 = 1.000 across 6 projects, 141-test suite, multi-project eval | Reproducible eval, 5 countries, 15+ standards, 0 false positives |
 | **Scalability** | 6 projects → enterprise portfolio via multi-project eval + batch ingest + vector store | Multi-project dashboard, architecture diagram, scale story |
 | **UX** | 19-section dashboard with 60-second demo narrative, 23 components, streaming AI | Scroll animations, dark theme, responsive, live PDF upload, multi-project grid |
 
@@ -478,5 +488,5 @@ python3 eval/run_eval.py --detector llm
 <p align="center">
   <strong>PRA<span style="color:#36d6e7">MAAN</span></strong><br>
   <em>EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4</em><br>
-  <sub>5 AI Agents &middot; 6 Projects &middot; 5 Countries &middot; 22 Endpoints &middot; 33 Deviations &middot; 691 Weeks Saved &middot; 131 Tests &middot; F1 = 1.000</sub>
+  <sub>5 AI Agents &middot; 6 Projects &middot; 5 Countries &middot; 22 Endpoints &middot; 33 Deviations &middot; 691 Weeks Saved &middot; 141 Tests &middot; F1 = 1.000</sub>
 </p>

@@ -1,12 +1,13 @@
 """
-Orchestrator — LangGraph pipeline:
-  ingest -> load_standards -> reconcile -> cx_predict -> format_output
+Orchestrator — LangGraph pipeline with conditional routing:
+  [ingest, load_standards] -> validate -> reconcile -> cx_predict -> format_output
+                                       └─(no docs)─> END (skip reconciliation)
 Falls back to sequential runner if langgraph is not installed.
 """
 
 import logging
 import time
-from typing import List, Optional, TypedDict
+from typing import List, Literal, Optional, TypedDict
 
 from backend.agents.ingestion import ingest_system
 from backend.agents.reconciliation import reconcile_system, _all_standards_text
@@ -49,6 +50,18 @@ def node_load_standards(state: PipelineState) -> PipelineState:
     return state
 
 
+def node_validate(state: PipelineState) -> PipelineState:
+    return state
+
+
+def route_after_validate(state: PipelineState) -> Literal["reconcile", "format_output"]:
+    if not state.get("spec_text") or not state.get("submittal_text"):
+        log.warning("System %s: missing spec or submittal, skipping reconciliation",
+                    state["system_id"])
+        return "format_output"
+    return "reconcile"
+
+
 def node_reconcile(state: PipelineState) -> PipelineState:
     state["deviations"] = reconcile_system(state["system_id"],
                                            state["standards_text"])
@@ -80,12 +93,18 @@ def build_graph():
     g = StateGraph(PipelineState)
     g.add_node("ingest", node_ingest)
     g.add_node("load_standards", node_load_standards)
+    g.add_node("validate", node_validate)
     g.add_node("reconcile", node_reconcile)
     g.add_node("cx_predict", node_cx_predict)
     g.add_node("format_output", node_format_output)
+
     g.set_entry_point("ingest")
     g.add_edge("ingest", "load_standards")
-    g.add_edge("load_standards", "reconcile")
+    g.add_edge("load_standards", "validate")
+    g.add_conditional_edges("validate", route_after_validate, {
+        "reconcile": "reconcile",
+        "format_output": "format_output",
+    })
     g.add_edge("reconcile", "cx_predict")
     g.add_edge("cx_predict", "format_output")
     g.add_edge("format_output", END)
@@ -114,11 +133,12 @@ def run_pipeline(system_id: str) -> List[dict]:
         result = graph.invoke(state)
         devs = result["deviations"]
     else:
-        log.info("Running sequential 5-node pipeline for %s", system_id)
+        log.info("Running sequential pipeline for %s", system_id)
         state = node_ingest(state)
         state = node_load_standards(state)
-        state = node_reconcile(state)
-        state = node_cx_predict(state)
+        if route_after_validate(state) == "reconcile":
+            state = node_reconcile(state)
+            state = node_cx_predict(state)
         state = node_format_output(state)
         devs = state["deviations"]
     elapsed = round((time.time() - t0) * 1000)

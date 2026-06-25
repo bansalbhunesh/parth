@@ -6,7 +6,7 @@ services:
       context: .
       target: backend
     ports:
-      - "8099:8099"
+      - "8000:8000"
     environment:
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
@@ -14,7 +14,7 @@ services:
     volumes:
       - ./data:/app/data
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8099/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -26,7 +26,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API=http://backend:8099
+      - NEXT_PUBLIC_API=http://backend:8000
     depends_on:
       backend:
         condition: service_healthy

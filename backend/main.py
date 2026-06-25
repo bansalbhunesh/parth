@@ -504,13 +504,16 @@ def pipeline_info():
         "nodes": [
             {"id": "ingest", "agent": "Ingestion Agent", "description": "Document intake, parsing, normalization"},
             {"id": "load_standards", "agent": "Standards Loader", "description": "Load governing standards corpus"},
+            {"id": "validate", "agent": "Validation Gate", "description": "Check spec+submittal exist; conditional routing"},
             {"id": "reconcile", "agent": "Reconciliation Agent", "description": "Cross-document deviation reasoning"},
             {"id": "cx_predict", "agent": "Cx Predictor", "description": "Map deviations to commissioning tests"},
             {"id": "format_output", "agent": "Output Formatter", "description": "Enrich and structure findings"},
         ],
         "edges": [
             ["ingest", "load_standards"],
-            ["load_standards", "reconcile"],
+            ["load_standards", "validate"],
+            {"from": "validate", "to": ["reconcile", "format_output"], "type": "conditional",
+             "condition": "route_after_validate: skip reconciliation if spec or submittal missing"},
             ["reconcile", "cx_predict"],
             ["cx_predict", "format_output"],
         ],

@@ -260,3 +260,29 @@ class TestLLMModule:
         err = LLMError("test error")
         assert str(err) == "test error"
         assert isinstance(err, Exception)
+
+
+class TestTextEval:
+    def test_text_eval_discovers_all_projects(self):
+        from eval.text_eval import discover_projects
+        projects = discover_projects()
+        assert len(projects) >= 6
+
+    def test_text_eval_runs_on_corpus(self):
+        from eval.text_eval import extract_from_text
+        corpus = pathlib.Path(__file__).parent.parent / "data" / "corpus"
+        findings = extract_from_text(corpus)
+        assert len(findings) == 14
+
+    def test_text_eval_scores_perfect(self):
+        from eval.text_eval import run_text_eval, aggregate
+        results = run_text_eval()
+        agg = aggregate(results)
+        assert agg["aggregate_f1"] == 1.0
+        assert agg["total_deviations"] == 33
+
+    def test_text_eval_all_projects_perfect(self):
+        from eval.text_eval import run_text_eval
+        results = run_text_eval()
+        for pid, r in results.items():
+            assert r["scores"]["f1"] == 1.0, f"Project {pid} F1 != 1.0"

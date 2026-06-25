@@ -199,7 +199,10 @@ class TestDataEndpoints:
         data = r.json()
         assert "detection" in data
         assert "commissioning" in data
+        assert "text_eval" in data
         assert data["detection"]["baseline_f1"] == 1.0
+        assert data["text_eval"]["f1"] == 1.0
+        assert data["text_eval"]["projects_evaluated"] >= 6
 
     def test_metrics_detection_counts(self):
         r = client.get("/metrics")

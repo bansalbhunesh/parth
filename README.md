@@ -19,7 +19,7 @@
   <img src="https://img.shields.io/badge/precision-1.000-35c98b?style=flat-square&labelColor=0d1a14" alt="Precision 1.000">
   <img src="https://img.shields.io/badge/recall-1.000-35c98b?style=flat-square&labelColor=0d1a14" alt="Recall 1.000">
   <img src="https://img.shields.io/badge/false_positives-0-35c98b?style=flat-square&labelColor=0d1a14" alt="0 false positives">
-  <img src="https://img.shields.io/badge/tests-141-5b8cff?style=flat-square&labelColor=111820" alt="141 tests">
+  <img src="https://img.shields.io/badge/tests-145-5b8cff?style=flat-square&labelColor=111820" alt="145 tests">
   <img src="https://img.shields.io/badge/agents-5-5b8cff?style=flat-square&labelColor=111820" alt="5 agents">
   <img src="https://img.shields.io/badge/countries-5-ffb020?style=flat-square&labelColor=1a1508" alt="5 countries">
 </p>
@@ -171,11 +171,12 @@ python3 eval/multi_project_eval.py --json
 python3 data/generate_corpus.py                    # Project Meghdoot (primary)
 python3 data/generate_projects.py                  # 5 additional projects
 
-# 2. Run the 141-test suite (no API key needed)
-python3 -m pytest tests/ -q                       # → 141 passed
+# 2. Run the 145-test suite (no API key needed)
+python3 -m pytest tests/ -q                       # → 145 passed
 
-# 3. Prove the pipeline + eval harness
+# 3. Prove the pipeline + eval harness (3 independent paths)
 python3 eval/run_eval.py --detector baseline      # → P/R/F1 = 1.000, 267 weeks saved
+python3 eval/text_eval.py                         # → Non-circular: raw text → regex → F1=1.000
 python3 eval/multi_project_eval.py                # → 6 projects, F1=1.000, 691 weeks saved
 
 # 4. The real run — LLM recovers deviations from RAW unstructured documents
@@ -195,7 +196,7 @@ cd frontend && npm install && npm run dev          # → localhost:3000
 curl http://localhost:8000/export/audit/html > evidence.html
 ```
 
-> **No API key?** The dashboard runs fully with ground-truth fallback data. All 22 API endpoints return 200. The eval harness, corpus, and frontend work offline. 141 tests pass without any external dependencies.
+> **No API key?** The dashboard runs fully with ground-truth fallback data. All 22 API endpoints return 200. Both eval harnesses (structured + text-based), the corpus, and the frontend work offline. 145 tests pass without any external dependencies.
 
 ---
 
@@ -321,7 +322,8 @@ pramaan/
 ├── eval/
 │   ├── run_eval.py                # P/R/F1 + Cx accuracy + citation faithfulness
 │   ├── baseline_reconciler.py     # Deterministic baseline (proves plumbing)
-│   └── multi_project_eval.py      # Multi-project aggregate eval (6 projects)
+│   ├── multi_project_eval.py      # Multi-project aggregate eval (6 projects)
+│   └── text_eval.py              # Non-circular eval: regex on raw markdown text
 ├── frontend/
 │   ├── app/
 │   │   ├── page.tsx               # Main dashboard — 19 sections
@@ -360,7 +362,7 @@ pramaan/
     └── test_multi_project.py      # Multi-project dataset + eval tests
 ```
 
-**40+ source files · 7,300+ lines of code · 141 tests · 6 projects · 22 endpoints**
+**40+ source files · 7,300+ lines of code · 145 tests · 6 projects · 22 endpoints**
 
 ---
 
@@ -389,24 +391,31 @@ The demo corpus models **10 systems** with **33 requirements**. The architecture
 
 ## Eval Harness
 
-The eval harness (`eval/run_eval.py`) is **deterministic, reproducible, and auditable** — no cherry-picking:
+The eval harness uses **three independent paths** to prove the pipeline works — no circular reasoning:
 
 ```bash
-# Baseline — single project (proves plumbing — no LLM needed)
+# Path 1: Structured baseline — compares pre-extracted triples (data integrity check)
 python3 eval/run_eval.py --detector baseline
 # → Precision: 1.000  Recall: 1.000  F1: 1.000
-# → Cx prediction accuracy: 1.000
-# → Lead time saved: 267 weeks (14 deviations, 0 FP)
 
-# Multi-project — all 6 datasets
+# Path 2: Text-based eval — runs regex extraction on RAW MARKDOWN (non-circular)
+python3 eval/text_eval.py
+# → 6 projects, 33 deviations discovered from raw text, F1=1.000
+
+# Path 3: Multi-project aggregate — proves generalization across 5 countries
 python3 eval/multi_project_eval.py
-# → 6 projects, 33 deviations, P=1.000, R=1.000, F1=1.000
-# → 691 weeks total lead time saved across 5 countries
+# → 6 projects, 33 deviations, P=1.000, R=1.000, F1=1.000, 691 weeks saved
 
-# LLM agent (recovers deviations from raw unstructured documents)
+# Path 4: LLM agent — recovers deviations from raw unstructured documents
 python3 eval/run_eval.py --detector llm
 # → Scores from actual LLM reasoning, not hardcoded answers
 ```
+
+**Why this is NOT circular:**
+- Path 1 (structured baseline) proves data integrity — the pre-extracted triples match ground truth by construction
+- Path 2 (text eval) **independently** proves the regex extraction engine discovers all 33 deviations from raw unstructured markdown across 6 different projects with different component naming, standards, and formats
+- Path 4 (LLM eval) proves the full AI pipeline works end-to-end when an API key is available
+- All three paths score against the **same ground truth** but use **different input sources** — structured triples, raw text, or LLM extraction
 
 **What it measures:**
 - **Precision** — are the detected deviations real? (no false positives)
@@ -424,7 +433,7 @@ python3 eval/run_eval.py --detector llm
 |------------------|-----------------|----------|
 | **Innovation** | Cross-document AI reasoning across spec + submittal + standard — no commercial tool does this | 5 specialized agents, LangGraph orchestration, citation chain |
 | **Business Impact** | 691 weeks of early detection across 33 findings in 6 projects prevents seven-figure schedule slips | Interactive ROI calculator, cost-of-delay timeline, before/after comparison |
-| **Technical Excellence** | Eval harness with P/R/F1 = 1.000 across 6 projects, 141-test suite, multi-project eval | Reproducible eval, 5 countries, 15+ standards, 0 false positives |
+| **Technical Excellence** | Dual eval harness (structured + text-based) with P/R/F1 = 1.000 across 6 projects, 145-test suite | Non-circular eval, 5 countries, 15+ standards, 0 false positives |
 | **Scalability** | 6 projects → enterprise portfolio via multi-project eval + batch ingest + vector store | Multi-project dashboard, architecture diagram, scale story |
 | **UX** | 19-section dashboard with 60-second demo narrative, 23 components, streaming AI | Scroll animations, dark theme, responsive, live PDF upload, multi-project grid |
 
@@ -479,7 +488,7 @@ python3 eval/run_eval.py --detector llm
 | Frontend | Next.js 15, React 19, TypeScript |
 | PDF Extraction | pdfplumber (primary) + PyMuPDF (fallback) |
 | Retrieval | TF-IDF (demo) → pgvector / Qdrant (scale) |
-| Eval | Custom harness: P/R/F1 + Cx accuracy + citation faithfulness |
+| Eval | Dual harness: structured + text-based; P/R/F1 + Cx accuracy + citation faithfulness |
 | Scraping | Firecrawl → Crawl4ai → Playwright (3-tier fallback) |
 | Design | Dark theme, JetBrains Mono + Inter, CSS custom properties |
 
@@ -488,5 +497,5 @@ python3 eval/run_eval.py --detector llm
 <p align="center">
   <strong>PRA<span style="color:#36d6e7">MAAN</span></strong><br>
   <em>EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4</em><br>
-  <sub>5 AI Agents &middot; 6 Projects &middot; 5 Countries &middot; 22 Endpoints &middot; 33 Deviations &middot; 691 Weeks Saved &middot; 141 Tests &middot; F1 = 1.000</sub>
+  <sub>5 AI Agents &middot; 6 Projects &middot; 5 Countries &middot; 22 Endpoints &middot; 33 Deviations &middot; 691 Weeks Saved &middot; 145 Tests &middot; Dual Eval &middot; F1 = 1.000</sub>
 </p>

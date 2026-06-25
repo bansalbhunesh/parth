@@ -99,7 +99,7 @@ function DropZone({
             </svg>
           </div>
           <div className="dropzone-label">{label}</div>
-          <div className="dropzone-hint">Drop PDF here or click to browse</div>
+          <div className="dropzone-hint">Drop PDF/MD/TXT here or click to browse</div>
         </div>
       )}
     </div>

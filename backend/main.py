@@ -279,6 +279,10 @@ def metrics():
     findings = reconcile()
     r = score(findings, gt)
 
+    from eval.text_eval import run_text_eval, aggregate as text_agg
+    text_results = run_text_eval()
+    text_aggregate = text_agg(text_results)
+
     gt_json = _load_json("ground_truth.json")
     project_info = gt_json.get("project", {})
 
@@ -291,6 +295,14 @@ def metrics():
             "baseline_recall": round(r["recall"], 3),
             "baseline_f1": round(r["f1"], 3),
             "false_positive_rate": round(r["false_positive_rate"], 3),
+        },
+        "text_eval": {
+            "method": "regex extraction from raw markdown (non-circular)",
+            "projects_evaluated": text_aggregate["projects"],
+            "total_deviations": text_aggregate["total_deviations"],
+            "precision": text_aggregate["aggregate_precision"],
+            "recall": text_aggregate["aggregate_recall"],
+            "f1": text_aggregate["aggregate_f1"],
         },
         "commissioning": {
             "cx_prediction_accuracy": round(r["cx_prediction_accuracy"], 3),
@@ -504,13 +516,16 @@ def pipeline_info():
         "nodes": [
             {"id": "ingest", "agent": "Ingestion Agent", "description": "Document intake, parsing, normalization"},
             {"id": "load_standards", "agent": "Standards Loader", "description": "Load governing standards corpus"},
+            {"id": "validate", "agent": "Validation Gate", "description": "Check spec+submittal exist; conditional routing"},
             {"id": "reconcile", "agent": "Reconciliation Agent", "description": "Cross-document deviation reasoning"},
             {"id": "cx_predict", "agent": "Cx Predictor", "description": "Map deviations to commissioning tests"},
             {"id": "format_output", "agent": "Output Formatter", "description": "Enrich and structure findings"},
         ],
         "edges": [
             ["ingest", "load_standards"],
-            ["load_standards", "reconcile"],
+            ["load_standards", "validate"],
+            {"from": "validate", "to": ["reconcile", "format_output"], "type": "conditional",
+             "condition": "route_after_validate: skip reconciliation if spec or submittal missing"},
             ["reconcile", "cx_predict"],
             ["cx_predict", "format_output"],
         ],

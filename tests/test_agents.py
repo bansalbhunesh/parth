@@ -187,6 +187,46 @@ class TestReconciliationValidation:
         assert result[0]["citation_faithful"] is False
 
 
+class TestOrchestrator:
+    def test_conditional_routing_with_docs(self):
+        from backend.orchestrator import route_after_validate
+        state = {"system_id": "UPS", "spec_text": "spec", "submittal_text": "sub",
+                 "standards_text": "", "ingestion_meta": None,
+                 "extracted_triples": None, "deviations": [], "elapsed_ms": 0}
+        assert route_after_validate(state) == "reconcile"
+
+    def test_conditional_routing_missing_spec(self):
+        from backend.orchestrator import route_after_validate
+        state = {"system_id": "UPS", "spec_text": None, "submittal_text": "sub",
+                 "standards_text": "", "ingestion_meta": None,
+                 "extracted_triples": None, "deviations": [], "elapsed_ms": 0}
+        assert route_after_validate(state) == "format_output"
+
+    def test_conditional_routing_missing_submittal(self):
+        from backend.orchestrator import route_after_validate
+        state = {"system_id": "UPS", "spec_text": "spec", "submittal_text": None,
+                 "standards_text": "", "ingestion_meta": None,
+                 "extracted_triples": None, "deviations": [], "elapsed_ms": 0}
+        assert route_after_validate(state) == "format_output"
+
+    def test_build_graph_returns_compiled(self):
+        from backend.orchestrator import build_graph
+        graph = build_graph()
+        if graph is not None:
+            assert hasattr(graph, "invoke")
+
+    def test_pipeline_nodes(self):
+        from backend.orchestrator import (
+            node_ingest, node_load_standards, node_validate,
+            node_cx_predict, node_format_output,
+        )
+        assert callable(node_ingest)
+        assert callable(node_load_standards)
+        assert callable(node_validate)
+        assert callable(node_cx_predict)
+        assert callable(node_format_output)
+
+
 class TestLLMModule:
     def test_extract_json_array(self):
         from backend.llm import _extract_json
@@ -220,3 +260,29 @@ class TestLLMModule:
         err = LLMError("test error")
         assert str(err) == "test error"
         assert isinstance(err, Exception)
+
+
+class TestTextEval:
+    def test_text_eval_discovers_all_projects(self):
+        from eval.text_eval import discover_projects
+        projects = discover_projects()
+        assert len(projects) >= 6
+
+    def test_text_eval_runs_on_corpus(self):
+        from eval.text_eval import extract_from_text
+        corpus = pathlib.Path(__file__).parent.parent / "data" / "corpus"
+        findings = extract_from_text(corpus)
+        assert len(findings) == 14
+
+    def test_text_eval_scores_perfect(self):
+        from eval.text_eval import run_text_eval, aggregate
+        results = run_text_eval()
+        agg = aggregate(results)
+        assert agg["aggregate_f1"] == 1.0
+        assert agg["total_deviations"] == 33
+
+    def test_text_eval_all_projects_perfect(self):
+        from eval.text_eval import run_text_eval
+        results = run_text_eval()
+        for pid, r in results.items():
+            assert r["scores"]["f1"] == 1.0, f"Project {pid} F1 != 1.0"

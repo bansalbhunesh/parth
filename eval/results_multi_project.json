@@ -1,0 +1,71 @@
+{
+  "aggregate": {
+    "projects": 6,
+    "total_deviations": 33,
+    "total_tp": 33,
+    "total_fp": 0,
+    "total_fn": 0,
+    "aggregate_precision": 1.0,
+    "aggregate_recall": 1.0,
+    "aggregate_f1": 1.0,
+    "aggregate_cx_accuracy": 1.0,
+    "total_lead_time_weeks": 691,
+    "max_lead_time_weeks": 36
+  },
+  "per_project": {
+    "meghdoot": {
+      "name": "Project Meghdoot",
+      "deviations": 14,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "cx_accuracy": 1.0,
+      "total_lead_weeks": 267
+    },
+    "cascade": {
+      "name": "Project Cascade",
+      "deviations": 4,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "cx_accuracy": 1.0,
+      "total_lead_weeks": 80
+    },
+    "nordic": {
+      "name": "Project Nordic Edge",
+      "deviations": 5,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "cx_accuracy": 1.0,
+      "total_lead_weeks": 113
+    },
+    "sahara": {
+      "name": "Project Sahara",
+      "deviations": 3,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "cx_accuracy": 1.0,
+      "total_lead_weeks": 38
+    },
+    "vajra": {
+      "name": "Project Vajra",
+      "deviations": 4,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "cx_accuracy": 1.0,
+      "total_lead_weeks": 95
+    },
+    "yangtze": {
+      "name": "Project Yangtze",
+      "deviations": 3,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "cx_accuracy": 1.0,
+      "total_lead_weeks": 98
+    }
+  }
+}

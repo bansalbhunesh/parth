@@ -199,7 +199,10 @@ class TestDataEndpoints:
         data = r.json()
         assert "detection" in data
         assert "commissioning" in data
+        assert "text_eval" in data
         assert data["detection"]["baseline_f1"] == 1.0
+        assert data["text_eval"]["f1"] == 1.0
+        assert data["text_eval"]["projects_evaluated"] >= 6
 
     def test_metrics_detection_counts(self):
         r = client.get("/metrics")
@@ -252,18 +255,30 @@ class TestPipelineEndpoint:
         data = r.json()
         assert "nodes" in data
         assert isinstance(data["nodes"], list)
-        assert len(data["nodes"]) >= 4
+        assert len(data["nodes"]) >= 5
 
     def test_pipeline_has_edges(self):
         r = client.get("/pipeline")
         data = r.json()
         assert "edges" in data
-        assert len(data["edges"]) >= 4
+        assert len(data["edges"]) >= 5
 
     def test_pipeline_framework(self):
         r = client.get("/pipeline")
         data = r.json()
         assert data["framework"] == "LangGraph"
+
+    def test_pipeline_has_conditional_edge(self):
+        r = client.get("/pipeline")
+        data = r.json()
+        conditional = [e for e in data["edges"] if isinstance(e, dict) and e.get("type") == "conditional"]
+        assert len(conditional) >= 1
+
+    def test_pipeline_has_validate_node(self):
+        r = client.get("/pipeline")
+        data = r.json()
+        node_ids = [n["id"] for n in data["nodes"]]
+        assert "validate" in node_ids
 
 
 class TestCorpusStatsEndpoint:
@@ -279,6 +294,28 @@ class TestCorpusStatsEndpoint:
         data = r.json()
         assert "total_standards" in data
         assert data["total_standards"] >= 5
+
+
+class TestDemoFiles:
+    def test_demo_spec_exists(self):
+        demo = pathlib.Path(__file__).parent.parent / "data" / "demo"
+        assert (demo / "sample_spec.md").exists()
+
+    def test_demo_submittal_exists(self):
+        demo = pathlib.Path(__file__).parent.parent / "data" / "demo"
+        assert (demo / "sample_submittal.md").exists()
+
+    def test_demo_files_detect_deviations(self):
+        demo = pathlib.Path(__file__).parent.parent / "data" / "demo"
+        spec = (demo / "sample_spec.md").read_text()
+        submittal = (demo / "sample_submittal.md").read_text()
+        r = client.post("/analyze", json={"spec_text": spec, "submittal_text": submittal})
+        assert r.status_code == 200
+        data = r.json()
+        assert data["count"] >= 3
+        params = [d["parameter"] for d in data["deviations"]]
+        assert "battery_runtime_min" in params
+        assert "fire_rating" in params
 
 
 class TestGroundTruthDeviations:

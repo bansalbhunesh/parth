@@ -1,7 +1,14 @@
 {
-  "buildCommand": "cd frontend && npm install && npm run build",
-  "outputDirectory": "frontend/.next",
-  "installCommand": "cd frontend && npm install",
-  "framework": "nextjs",
-  "rootDirectory": "frontend"
+  "experimentalServices": {
+    "frontend": {
+      "routePrefix": "/",
+      "framework": "nextjs",
+      "rootDirectory": "frontend"
+    },
+    "backend": {
+      "routePrefix": "/_/backend",
+      "use": "@vercel/python",
+      "rootDirectory": "backend"
+    }
+  }
 }

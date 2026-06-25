@@ -1,0 +1,132 @@
+{
+  "project": "Project Meghdoot",
+  "cx_authority": "DCx International (India)",
+  "levels": {
+    "1": "Factory Acceptance Testing (FAT) \u2014 component verification at manufacturer",
+    "2": "Site Acceptance / Installation Verification \u2014 delivery, install, connections",
+    "3": "Startup Testing \u2014 individual equipment power-up and response verification",
+    "4": "Performance Testing \u2014 system validation under load, failover scenarios",
+    "5": "End-to-End Systems Testing \u2014 full facility event simulation, 72-hr sustained ops"
+  },
+  "tests": [
+    {
+      "id": "ITP-01",
+      "level": 1,
+      "name": "Equipment receipt inspection",
+      "scheduled_week": 16,
+      "acceptance": "Visual + documentation check"
+    },
+    {
+      "id": "ITP-02",
+      "level": 2,
+      "name": "Cable fire-rating / plenum compliance inspection",
+      "scheduled_week": 22,
+      "acceptance": "Cable marking matches CMP plenum requirement"
+    },
+    {
+      "id": "ITP-03",
+      "level": 2,
+      "name": "Arc flash labeling and PPE verification",
+      "scheduled_week": 20,
+      "acceptance": "Arc flash labels match incident energy calculations"
+    },
+    {
+      "id": "ITP-04",
+      "level": 2,
+      "name": "Pathway fill and cable management inspection",
+      "scheduled_week": 18,
+      "acceptance": "Bundle sizes within BICSI-002 fill limits"
+    },
+    {
+      "id": "ITP-05",
+      "level": 1,
+      "name": "Structural load test and floor deflection",
+      "scheduled_week": 19,
+      "acceptance": "Floor deflection within L/360 under design load"
+    },
+    {
+      "id": "FAT-01",
+      "level": 3,
+      "name": "UPS module load-bank test",
+      "scheduled_week": 24,
+      "acceptance": "Full load sustained 4 hours"
+    },
+    {
+      "id": "FAT-02",
+      "level": 3,
+      "name": "Generator load-bank test",
+      "scheduled_week": 26,
+      "acceptance": "110% load for 2 hours"
+    },
+    {
+      "id": "FAT-03",
+      "level": 3,
+      "name": "Protection coordination / fault-withstand verification",
+      "scheduled_week": 30,
+      "acceptance": "Fault withstand >= calculated prospective fault level"
+    },
+    {
+      "id": "IST-01",
+      "level": 4,
+      "name": "Utility failure simulation",
+      "scheduled_week": 34,
+      "acceptance": "Zero IT load impact"
+    },
+    {
+      "id": "IST-05",
+      "level": 4,
+      "name": "Single-path maintenance simulation",
+      "scheduled_week": 36,
+      "acceptance": "Full load on single path"
+    },
+    {
+      "id": "IST-07",
+      "level": 4,
+      "name": "Load transfer under maintenance (battery autonomy)",
+      "scheduled_week": 38,
+      "acceptance": "Battery sustains load during transfer window"
+    },
+    {
+      "id": "IST-09",
+      "level": 4,
+      "name": "Cooling failover under fault + maintenance",
+      "scheduled_week": 39,
+      "acceptance": "Temperature maintained within ASHRAE envelope"
+    },
+    {
+      "id": "IST-11",
+      "level": 4,
+      "name": "Sustained utility-outage run (fuel autonomy)",
+      "scheduled_week": 41,
+      "acceptance": "Generators sustain full design-duration outage"
+    },
+    {
+      "id": "IST-14",
+      "level": 4,
+      "name": "Monitoring & alarm verification",
+      "scheduled_week": 40,
+      "acceptance": "All critical alarms fire and are received by BMS/NOC"
+    },
+    {
+      "id": "IST-15",
+      "level": 4,
+      "name": "Full-facility failover drill",
+      "scheduled_week": 44,
+      "acceptance": "Zero downtime during drill"
+    },
+    {
+      "id": "IST-16",
+      "level": 4,
+      "name": "Cooling performance and thermal verification",
+      "scheduled_week": 36,
+      "acceptance": "Delta-T and flow rates meet design criteria"
+    },
+    {
+      "id": "SAT-01",
+      "level": 5,
+      "name": "72-hour sustained operations test",
+      "scheduled_week": 48,
+      "acceptance": "No critical alarms for 72 hours"
+    }
+  ]
+}

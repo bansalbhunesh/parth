@@ -1,0 +1,182 @@
+[
+  {
+    "system": "UPS",
+    "component": "UPS-N1",
+    "parameter": "battery_runtime_min",
+    "required_value": 10,
+    "unit": "min",
+    "standard_ref": "EN-50600",
+    "clause": "NE-4.1"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-N1",
+    "parameter": "redundancy",
+    "required_value": "N+1",
+    "unit": "topology",
+    "standard_ref": "EN-50600",
+    "clause": "NE-4.2"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-N1",
+    "parameter": "rated_power_kw",
+    "required_value": 500,
+    "unit": "kW",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "NE-4.3"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-N1",
+    "parameter": "battery_type",
+    "required_value": "Li-ion",
+    "unit": "type",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "NE-4.4"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-N1",
+    "parameter": "redundancy",
+    "required_value": "N+1",
+    "unit": "topology",
+    "standard_ref": "EN-50600",
+    "clause": "NE-5.1"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-N1",
+    "parameter": "rated_power_kva",
+    "required_value": 1500,
+    "unit": "kVA",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "NE-5.2"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-N1",
+    "parameter": "noise_db",
+    "required_value": 75,
+    "unit": "dB(A)",
+    "standard_ref": "NS-8175",
+    "clause": "NE-5.3"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-FUEL",
+    "parameter": "onsite_fuel_hours",
+    "required_value": 48,
+    "unit": "h",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "NE-5.4"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-N1",
+    "parameter": "free_cooling_hours",
+    "required_value": 7000,
+    "unit": "h/yr",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "NE-6.1"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-N1",
+    "parameter": "redundancy",
+    "required_value": "N+1",
+    "unit": "topology",
+    "standard_ref": "EN-50600",
+    "clause": "NE-6.2"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-N1",
+    "parameter": "pue_target",
+    "required_value": 1.15,
+    "unit": "ratio",
+    "standard_ref": "EU-COC",
+    "clause": "NE-6.3"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-N1",
+    "parameter": "fire_rating",
+    "required_value": "B2ca-s1-d0",
+    "unit": "euroclass",
+    "standard_ref": "EN-13501",
+    "clause": "NE-8.1"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-N1",
+    "parameter": "category",
+    "required_value": "Cat6A",
+    "unit": "type",
+    "standard_ref": "EN-50600",
+    "clause": "NE-8.2"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-N1",
+    "parameter": "agent",
+    "required_value": "inert_gas",
+    "unit": "type",
+    "standard_ref": "EN-15004",
+    "clause": "NE-9.1"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-N1",
+    "parameter": "hold_time_min",
+    "required_value": 10,
+    "unit": "min",
+    "standard_ref": "EN-15004",
+    "clause": "NE-9.2"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-N1",
+    "parameter": "zones",
+    "required_value": 4,
+    "unit": "count",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "NE-9.3"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS-N1",
+    "parameter": "protocol",
+    "required_value": "BACnet_IP",
+    "unit": "standard",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "NE-10.1"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS-N1",
+    "parameter": "energy_reporting",
+    "required_value": "EN_ISO_50001",
+    "unit": "standard",
+    "standard_ref": "EU-COC",
+    "clause": "NE-10.2"
+  },
+  {
+    "system": "STRUCT",
+    "component": "FLOOR-N1",
+    "parameter": "load_rating_kpa",
+    "required_value": 15,
+    "unit": "kPa",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "NE-11.1"
+  },
+  {
+    "system": "STRUCT",
+    "component": "FLOOR-N1",
+    "parameter": "height_mm",
+    "required_value": 800,
+    "unit": "mm",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "NE-11.2"
+  }
+]

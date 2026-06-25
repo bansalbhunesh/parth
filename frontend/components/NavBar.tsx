@@ -9,6 +9,8 @@ const SECTIONS = [
   { id: "architecture", label: "Architecture" },
   { id: "screenshots", label: "Screenshots" },
   { id: "systems", label: "Systems" },
+  { id: "compliance", label: "Compliance" },
+  { id: "diff", label: "Doc Diff" },
   { id: "risk", label: "Risk" },
   { id: "register", label: "Register" },
   { id: "twin", label: "Cx Twin" },
@@ -16,6 +18,7 @@ const SECTIONS = [
   { id: "eval", label: "Eval" },
   { id: "roi", label: "ROI" },
   { id: "scale", label: "Scale" },
+  { id: "analyze", label: "Analyze" },
   { id: "copilot", label: "Copilot" },
   { id: "refs", label: "Research" },
 ];

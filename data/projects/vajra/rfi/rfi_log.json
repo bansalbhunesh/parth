@@ -1,0 +1,18 @@
+[
+  {
+    "id": "RFI-V01",
+    "system": "GEN",
+    "status": "open",
+    "question": "Can generator start time of 15s be accepted with extended battery?",
+    "resolution": null,
+    "week": 5
+  },
+  {
+    "id": "RFI-V02",
+    "system": "COOL",
+    "status": "open",
+    "question": "Is 27 C supply air acceptable given Pune's mild climate?",
+    "resolution": null,
+    "week": 6
+  }
+]

@@ -1,22 +1,11 @@
 """
-Commissioning Risk Predictor.
-
-Maps a confirmed deviation to the specific commissioning test it will jeopardise
-and computes the LEAD TIME — how many weeks earlier Pramaan caught it vs when it
-would have surfaced in commissioning.
-
-v2: Added LLM fallback for unmapped deviations + risk scoring.
+Commissioning Risk Predictor — maps deviations to Cx tests and computes lead time.
 """
 
 import json
-import logging
-import pathlib
 
-from backend.llm import complete_json, LLMError
-
-log = logging.getLogger("pramaan.cx_predictor")
-
-CORPUS = pathlib.Path(__file__).parent.parent.parent / "data" / "corpus"
+from backend.llm import complete_json
+from backend.paths import CORPUS
 
 
 def _current_week():
@@ -34,6 +23,13 @@ _RULES = {
     ("CABLE-DC", "fire_rating"): ("ITP-02", 2, 22, "Major"),
     ("BMS", "critical_alarm_points"): ("IST-14", 4, 40, "Major"),
     ("FLOOR", "height_mm"): ("ITP-01", 1, 16, "Major"),
+    ("GEN-01", "start_time_sec"): ("IST-01", 4, 34, "Critical"),
+    ("COOL-LOOP", "delta_t_c"): ("IST-16", 4, 36, "Major"),
+    ("UPS-02", "efficiency_pct"): ("FAT-01", 3, 24, "Major"),
+    ("SWGR-MV", "arc_flash_rating"): ("ITP-03", 2, 20, "Major"),
+    ("CABLE-DC", "max_bundle_size"): ("ITP-04", 2, 18, "Minor"),
+    ("BMS", "monitoring_redundancy"): ("IST-15", 4, 44, "Critical"),
+    ("FLOOR", "load_rating_kpa"): ("ITP-05", 1, 19, "Critical"),
 }
 
 
@@ -84,9 +80,6 @@ Return JSON:
             if t["id"] == test_id:
                 week_fail = t.get("scheduled_week")
                 break
-        log.info("LLM Cx prediction for %s.%s → %s (week %s)",
-                 deviation.get("component"), deviation.get("parameter"),
-                 test_id, week_fail)
         return {
             "predicted_cx_test": test_id,
             "predicted_cx_level": test_level,
@@ -97,9 +90,7 @@ Return JSON:
             "severity": deviation.get("severity", "Major"),
             "cx_source": "llm",
         }
-    except (LLMError, KeyError, TypeError) as exc:
-        log.warning("Cx prediction fallback for %s.%s: %s",
-                    deviation.get("component"), deviation.get("parameter"), exc)
+    except Exception:
         return {
             "predicted_cx_test": None,
             "predicted_cx_level": None,

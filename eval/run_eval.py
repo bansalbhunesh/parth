@@ -1,21 +1,14 @@
-"""
-Eval harness — scores a detector's deviation findings against ground_truth.json.
-
-Usage:
-    python3 eval/run_eval.py                 # scores the deterministic baseline
-    python3 eval/run_eval.py --detector llm  # scores the LLM agent (needs GEMINI key)
-    python3 eval/run_eval.py --json          # output as JSON for the metrics endpoint
-
-Reports precision / recall / F1 on deviation DETECTION, plus accuracy of the
-commissioning-test PREDICTION, citation faithfulness, and lead-time stats.
-"""
+"""Eval harness — scores a detector's findings against ground_truth.json."""
 
 import argparse
 import json
 import pathlib
+import sys
 import time
 
-CORPUS = pathlib.Path(__file__).parent.parent / "data" / "corpus"
+sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))
+
+from backend.paths import CORPUS
 
 
 def load_ground_truth():
@@ -165,6 +158,4 @@ def main():
 
 
 if __name__ == "__main__":
-    import sys
-    sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))
     main()

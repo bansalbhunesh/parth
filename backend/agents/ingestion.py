@@ -1,13 +1,5 @@
 """
 Ingestion Agent — document intake, parsing, and normalization.
-
-Handles raw document ingestion (PDF, Markdown, plain text), extracts clean
-text content, and prepares it for downstream extraction and reconciliation.
-
-Supports:
-  - Markdown pass-through (specs, submittals, standards)
-  - PDF extraction via PyMuPDF (fitz)
-  - Metadata tagging (system_id, doc_type, page_count, word_count)
 """
 
 import hashlib
@@ -16,9 +8,9 @@ import pathlib
 import re
 from typing import Optional
 
-log = logging.getLogger("pramaan.ingestion")
+from backend.paths import CORPUS
 
-CORPUS = pathlib.Path(__file__).parent.parent.parent / "data" / "corpus"
+log = logging.getLogger("pramaan.ingestion")
 
 
 def _clean_text(text: str) -> str:
@@ -30,16 +22,62 @@ def _clean_text(text: str) -> str:
 
 def _extract_pdf(path: pathlib.Path) -> str:
     try:
+        import pdfplumber
+        text_pages = []
+        with pdfplumber.open(str(path)) as pdf:
+            for page in pdf.pages:
+                t = page.extract_text()
+                if t:
+                    text_pages.append(t)
+        if text_pages:
+            return "\n\n".join(text_pages)
+    except ImportError:
+        pass
+    except Exception as exc:
+        log.warning("pdfplumber failed for %s: %s, trying PyMuPDF", path.name, exc)
+
+    try:
         import fitz
         doc = fitz.open(str(path))
         pages = [page.get_text() for page in doc]
         doc.close()
         return "\n\n".join(pages)
     except ImportError:
-        log.warning("PyMuPDF not installed, cannot extract PDF: %s", path.name)
+        log.warning("No PDF library available, cannot extract: %s", path.name)
         return ""
     except Exception as exc:
         log.error("PDF extraction failed for %s: %s", path.name, exc)
+        return ""
+
+
+def extract_pdf_bytes(data: bytes, filename: str = "upload.pdf") -> str:
+    try:
+        import pdfplumber
+        import io
+        text_pages = []
+        with pdfplumber.open(io.BytesIO(data)) as pdf:
+            for page in pdf.pages:
+                t = page.extract_text()
+                if t:
+                    text_pages.append(t)
+        if text_pages:
+            return _clean_text("\n\n".join(text_pages))
+    except ImportError:
+        pass
+    except Exception as exc:
+        log.warning("pdfplumber bytes extraction failed for %s: %s", filename, exc)
+
+    try:
+        import fitz
+        doc = fitz.open(stream=data, filetype="pdf")
+        pages = [page.get_text() for page in doc]
+        doc.close()
+        return _clean_text("\n\n".join(pages))
+    except ImportError:
+        log.warning("No PDF library available for bytes extraction")
+        return ""
+    except Exception as exc:
+        log.error("PDF bytes extraction failed for %s: %s", filename, exc)
         return ""
 
 

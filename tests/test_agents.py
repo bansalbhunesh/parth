@@ -1,7 +1,3 @@
-"""
-Tests for the agent modules — validates ingestion, extraction, commissioning
-prediction, and reconciliation validation logic without requiring LLM API keys.
-"""
 
 import json
 import pathlib
@@ -95,7 +91,7 @@ class TestCommissioningAgent:
         from backend.agents.commissioning import _RULES
         assert ("UPS-02", "battery_runtime_min") in _RULES
         assert ("GEN-FUEL", "onsite_fuel_hours") in _RULES
-        assert len(_RULES) == 7
+        assert len(_RULES) == 14
 
     def test_predict_known_deviation(self):
         from backend.agents.commissioning import predict_cx_impact

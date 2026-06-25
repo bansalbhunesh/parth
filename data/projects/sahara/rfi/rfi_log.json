@@ -1,0 +1,10 @@
+[
+  {
+    "id": "RFI-S01",
+    "system": "GEN",
+    "status": "open",
+    "question": "Confirm DEWA derating requirement for generators at 50 C ambient.",
+    "resolution": null,
+    "week": 7
+  }
+]

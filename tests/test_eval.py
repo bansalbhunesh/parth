@@ -22,7 +22,7 @@ class TestGroundTruth:
     def test_ground_truth_loads(self):
         gt = load_ground_truth()
         assert isinstance(gt, list)
-        assert len(gt) == 7
+        assert len(gt) == 14
 
     def test_ground_truth_has_required_fields(self):
         gt = load_ground_truth()
@@ -57,7 +57,7 @@ class TestBaselineReconciler:
 
     def test_reconcile_finds_all_deviations(self):
         findings = reconcile()
-        assert len(findings) == 7
+        assert len(findings) == 14
 
     def test_reconcile_has_required_keys(self):
         findings = reconcile()
@@ -121,13 +121,13 @@ class TestScoring:
         gt = load_ground_truth()
         findings = reconcile()
         r = score(findings, gt)
-        assert r["total_lead_time_weeks"] == 149
+        assert r["total_lead_time_weeks"] == 267
 
     def test_max_lead_time(self):
         gt = load_ground_truth()
         findings = reconcile()
         r = score(findings, gt)
-        assert r["max_lead_time_weeks"] == 30
+        assert r["max_lead_time_weeks"] == 33
 
 
 class TestKeyFunction:

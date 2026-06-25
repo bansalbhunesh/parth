@@ -1,0 +1,156 @@
+[
+  {
+    "system": "UPS",
+    "component": "UPS-C1",
+    "parameter": "battery_runtime_min",
+    "provided_value": 10,
+    "unit": "min"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-C1",
+    "parameter": "redundancy",
+    "provided_value": "2N",
+    "unit": "topology"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-C1",
+    "parameter": "rated_power_kw",
+    "provided_value": 1000,
+    "unit": "kW"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-C1",
+    "parameter": "redundancy",
+    "provided_value": "N+1",
+    "unit": "topology"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-C1",
+    "parameter": "rated_power_kva",
+    "provided_value": 2500,
+    "unit": "kVA"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-C1",
+    "parameter": "epa_tier",
+    "provided_value": "Tier_2",
+    "unit": "class"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-FUEL",
+    "parameter": "onsite_fuel_hours",
+    "provided_value": 48,
+    "unit": "h"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-C1",
+    "parameter": "redundancy",
+    "provided_value": "N+2",
+    "unit": "topology"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-C1",
+    "parameter": "wue_target",
+    "provided_value": 0.8,
+    "unit": "L/kWh"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-C1",
+    "parameter": "capacity_tr",
+    "provided_value": 1200,
+    "unit": "TR"
+  },
+  {
+    "system": "SWGR",
+    "component": "SWGR-C1",
+    "parameter": "short_circuit_rating_ka",
+    "provided_value": 50,
+    "unit": "kA"
+  },
+  {
+    "system": "SWGR",
+    "component": "SWGR-C1",
+    "parameter": "redundancy",
+    "provided_value": "2N",
+    "unit": "topology"
+  },
+  {
+    "system": "SWGR",
+    "component": "SWGR-C1",
+    "parameter": "seismic_cert",
+    "provided_value": "none",
+    "unit": "standard"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-C1",
+    "parameter": "fire_rating",
+    "provided_value": "CMP",
+    "unit": "plenum-class"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-C1",
+    "parameter": "category",
+    "provided_value": "Cat6A",
+    "unit": "type"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-C1",
+    "parameter": "agent",
+    "provided_value": "clean_agent",
+    "unit": "type"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-C1",
+    "parameter": "epo_system",
+    "provided_value": "absent",
+    "unit": "status"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-C1",
+    "parameter": "zones",
+    "provided_value": 6,
+    "unit": "count"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS-C1",
+    "parameter": "protocol",
+    "provided_value": "BACnet_IP",
+    "unit": "standard"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS-C1",
+    "parameter": "monitoring_redundancy",
+    "provided_value": "dual",
+    "unit": "topology"
+  },
+  {
+    "system": "STRUCT",
+    "component": "FLOOR-C1",
+    "parameter": "seismic_design_cat",
+    "provided_value": "SDC_D",
+    "unit": "class"
+  },
+  {
+    "system": "STRUCT",
+    "component": "FLOOR-C1",
+    "parameter": "load_rating_kpa",
+    "provided_value": 12,
+    "unit": "kPa"
+  }
+]

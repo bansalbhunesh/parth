@@ -1,0 +1,82 @@
+{
+  "project": {
+    "name": "Project Yangtze",
+    "capacity_mw": 50,
+    "tier": "GB 50174 Grade A",
+    "location": "Shanghai, China",
+    "current_week": 12,
+    "line_items_total": 18000,
+    "active_submittals": 102,
+    "total_systems": 8,
+    "estimated_completion_week": 56,
+    "client": "Yangtze Digital Technology Co. Ltd.",
+    "epc_contractor": "China State Construction Engineering",
+    "cx_authority": "Bureau Veritas China"
+  },
+  "seeded_deviations": [
+    {
+      "id": "DEV-001",
+      "system": "UPS",
+      "component": "UPS-Y1",
+      "parameter": "battery_runtime_min",
+      "required_value": 15,
+      "provided_value": 10,
+      "unit": "min",
+      "standard_ref": "GB-50174",
+      "spec_clause": "YZ-4.1",
+      "severity": "Critical",
+      "predicted_cx_test": "IST-Y01",
+      "predicted_cx_level": 4,
+      "predicted_cx_name": "UPS battery autonomy test",
+      "week_caught": 12,
+      "week_fail": 42,
+      "lead_time_weeks": 30,
+      "rationale": "Battery runtime 10 min below GB 50174 Grade A requirement of 15 min for >10 MW facilities."
+    },
+    {
+      "id": "DEV-002",
+      "system": "COOL",
+      "component": "COOL-Y1",
+      "parameter": "rack_power_kw",
+      "required_value": 30,
+      "provided_value": 20,
+      "unit": "kW",
+      "standard_ref": "DESIGN-BASIS",
+      "spec_clause": "YZ-6.2",
+      "severity": "Critical",
+      "predicted_cx_test": "IST-Y02",
+      "predicted_cx_level": 4,
+      "predicted_cx_name": "Per-rack cooling capacity test",
+      "week_caught": 12,
+      "week_fail": 44,
+      "lead_time_weeks": 32,
+      "rationale": "CDU cooling capacity 20 kW/rack below 30 kW design requirement; GPU clusters will throttle."
+    },
+    {
+      "id": "DEV-003",
+      "system": "BMS",
+      "component": "BMS-Y1",
+      "parameter": "gov_fire_reporting",
+      "required_value": "connected",
+      "provided_value": "disconnected",
+      "unit": "status",
+      "standard_ref": "GB-50174",
+      "spec_clause": "YZ-9.2",
+      "severity": "Major",
+      "predicted_cx_test": "IST-Y03",
+      "predicted_cx_level": 4,
+      "predicted_cx_name": "Government fire reporting integration test",
+      "week_caught": 12,
+      "week_fail": 48,
+      "lead_time_weeks": 36,
+      "rationale": "Municipal fire bureau connection absent; facility cannot obtain occupancy permit without connected fire reporting."
+    }
+  ],
+  "true_negative_systems": [
+    "GEN",
+    "CABLE",
+    "FIRE",
+    "PDU",
+    "STRUCT"
+  ]
+}

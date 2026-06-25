@@ -1,0 +1,18 @@
+[
+  {
+    "id": "RFI-Y01",
+    "system": "UPS",
+    "status": "open",
+    "question": "Confirm 15 min battery requirement per GB 50174 Grade A for >10 MW.",
+    "resolution": null,
+    "week": 8
+  },
+  {
+    "id": "RFI-Y02",
+    "system": "BMS",
+    "status": "open",
+    "question": "What is the timeline for municipal fire bureau API access approval?",
+    "resolution": null,
+    "week": 9
+  }
+]

@@ -1,0 +1,142 @@
+[
+  {
+    "system": "UPS",
+    "component": "UPS-N1",
+    "parameter": "battery_runtime_min",
+    "provided_value": 10,
+    "unit": "min"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-N1",
+    "parameter": "redundancy",
+    "provided_value": "N+1",
+    "unit": "topology"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-N1",
+    "parameter": "rated_power_kw",
+    "provided_value": 500,
+    "unit": "kW"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-N1",
+    "parameter": "battery_type",
+    "provided_value": "VRLA",
+    "unit": "type"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-N1",
+    "parameter": "redundancy",
+    "provided_value": "N+1",
+    "unit": "topology"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-N1",
+    "parameter": "rated_power_kva",
+    "provided_value": 1500,
+    "unit": "kVA"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-N1",
+    "parameter": "noise_db",
+    "provided_value": 85,
+    "unit": "dB(A)"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-FUEL",
+    "parameter": "onsite_fuel_hours",
+    "provided_value": 48,
+    "unit": "h"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-N1",
+    "parameter": "free_cooling_hours",
+    "provided_value": 5500,
+    "unit": "h/yr"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-N1",
+    "parameter": "redundancy",
+    "provided_value": "N+1",
+    "unit": "topology"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-N1",
+    "parameter": "pue_target",
+    "provided_value": 1.25,
+    "unit": "ratio"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-N1",
+    "parameter": "fire_rating",
+    "provided_value": "Cca-s1-d1",
+    "unit": "euroclass"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-N1",
+    "parameter": "category",
+    "provided_value": "Cat6A",
+    "unit": "type"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-N1",
+    "parameter": "agent",
+    "provided_value": "inert_gas",
+    "unit": "type"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-N1",
+    "parameter": "hold_time_min",
+    "provided_value": 10,
+    "unit": "min"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-N1",
+    "parameter": "zones",
+    "provided_value": 4,
+    "unit": "count"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS-N1",
+    "parameter": "protocol",
+    "provided_value": "BACnet_IP",
+    "unit": "standard"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS-N1",
+    "parameter": "energy_reporting",
+    "provided_value": "EN_ISO_50001",
+    "unit": "standard"
+  },
+  {
+    "system": "STRUCT",
+    "component": "FLOOR-N1",
+    "parameter": "load_rating_kpa",
+    "provided_value": 15,
+    "unit": "kPa"
+  },
+  {
+    "system": "STRUCT",
+    "component": "FLOOR-N1",
+    "parameter": "height_mm",
+    "provided_value": 800,
+    "unit": "mm"
+  }
+]

@@ -1,0 +1,182 @@
+[
+  {
+    "system": "UPS",
+    "component": "UPS-Y1",
+    "parameter": "battery_runtime_min",
+    "required_value": 15,
+    "unit": "min",
+    "standard_ref": "GB-50174",
+    "clause": "YZ-4.1"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-Y1",
+    "parameter": "redundancy",
+    "required_value": "2N",
+    "unit": "topology",
+    "standard_ref": "GB-50174",
+    "clause": "YZ-4.2"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-Y1",
+    "parameter": "rated_power_kw",
+    "required_value": 1500,
+    "unit": "kW",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "YZ-4.3"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-Y1",
+    "parameter": "redundancy",
+    "required_value": "N+1",
+    "unit": "topology",
+    "standard_ref": "GB-50174",
+    "clause": "YZ-5.1"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-Y1",
+    "parameter": "rated_power_kva",
+    "required_value": 3000,
+    "unit": "kVA",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "YZ-5.2"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-FUEL",
+    "parameter": "onsite_fuel_hours",
+    "required_value": 24,
+    "unit": "h",
+    "standard_ref": "GB-50174",
+    "clause": "YZ-5.4"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-Y1",
+    "parameter": "redundancy",
+    "required_value": "N+2",
+    "unit": "topology",
+    "standard_ref": "GB-50174",
+    "clause": "YZ-6.1"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-Y1",
+    "parameter": "rack_power_kw",
+    "required_value": 30,
+    "unit": "kW",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "YZ-6.2"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-Y1",
+    "parameter": "liquid_cooling_pct",
+    "required_value": 60,
+    "unit": "%",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "YZ-6.3"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-Y1",
+    "parameter": "fire_rating",
+    "required_value": "B1_class",
+    "unit": "GB-standard",
+    "standard_ref": "GB-31247",
+    "clause": "YZ-8.1"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-Y1",
+    "parameter": "category",
+    "required_value": "Cat6A",
+    "unit": "type",
+    "standard_ref": "GB-50174",
+    "clause": "YZ-8.2"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS-Y1",
+    "parameter": "protocol",
+    "required_value": "BACnet_IP",
+    "unit": "standard",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "YZ-9.1"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS-Y1",
+    "parameter": "gov_fire_reporting",
+    "required_value": "connected",
+    "unit": "status",
+    "standard_ref": "GB-50174",
+    "clause": "YZ-9.2"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS-Y1",
+    "parameter": "pue_reporting",
+    "required_value": "real_time",
+    "unit": "type",
+    "standard_ref": "MIIT-REG",
+    "clause": "YZ-9.3"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-Y1",
+    "parameter": "agent",
+    "required_value": "clean_agent",
+    "unit": "type",
+    "standard_ref": "GB-50174",
+    "clause": "YZ-10.1"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-Y1",
+    "parameter": "zones",
+    "required_value": 10,
+    "unit": "count",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "YZ-10.2"
+  },
+  {
+    "system": "PDU",
+    "component": "PDU-Y1",
+    "parameter": "metering",
+    "required_value": "per_outlet",
+    "unit": "type",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "YZ-11.1"
+  },
+  {
+    "system": "PDU",
+    "component": "PDU-Y1",
+    "parameter": "redundancy",
+    "required_value": "A+B",
+    "unit": "topology",
+    "standard_ref": "GB-50174",
+    "clause": "YZ-11.2"
+  },
+  {
+    "system": "STRUCT",
+    "component": "FLOOR-Y1",
+    "parameter": "load_rating_kpa",
+    "required_value": 16,
+    "unit": "kPa",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "YZ-12.1"
+  },
+  {
+    "system": "STRUCT",
+    "component": "FLOOR-Y1",
+    "parameter": "seismic_intensity",
+    "required_value": "VII",
+    "unit": "class",
+    "standard_ref": "GB-50011",
+    "clause": "YZ-12.2"
+  }
+]

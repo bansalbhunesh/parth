@@ -1,20 +1,12 @@
-"""
-Baseline reconciler (deterministic).
-
-Compares perfectly-extracted requirement triples against submittal triples and
-flags mismatches, attaching the commissioning-test prediction. This is:
-  (a) a correctness proof for the eval harness + register schema, and
-  (b) an honest BASELINE for the Technical Excellence rubric ("vs baseline").
-
-The REAL product (backend/agents/reconciliation.py) replaces this with an LLM
-agent that recovers the same deviations from RAW, unstructured documents and
-reasons against the standards corpus — a far harder task this baseline cannot do.
-"""
+"""Baseline reconciler (deterministic) — structured triple comparison."""
 
 import json
 import pathlib
+import sys
 
-CORPUS = pathlib.Path(__file__).parent.parent / "data" / "corpus"
+sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))
+
+from backend.paths import CORPUS
 
 
 def _load(p):

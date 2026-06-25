@@ -1,0 +1,18 @@
+[
+  {
+    "id": "RFI-C01",
+    "system": "GEN",
+    "status": "open",
+    "question": "Will facility operate >100 h/yr in non-emergency mode (maintenance testing)?",
+    "resolution": null,
+    "week": 10
+  },
+  {
+    "id": "RFI-C02",
+    "system": "FIRE",
+    "status": "open",
+    "question": "Confirm EPO scope responsibility \u2014 fire suppression or electrical contractor?",
+    "resolution": null,
+    "week": 11
+  }
+]

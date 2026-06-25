@@ -16,11 +16,10 @@ PROVIDER = os.getenv("PRAMAAN_LLM", "gemini")  # "gemini" | "claude"
 
 
 class LLMError(Exception):
-    """Raised when an LLM call fails after exhausting retries."""
+    pass
 
 
 def _extract_json(text: str):
-    """Tolerant JSON extraction — strips code fences / prose."""
     text = text.strip()
     text = re.sub(r"^```(?:json)?", "", text).strip()
     text = re.sub(r"```$", "", text).strip()
@@ -109,3 +108,66 @@ def _claude(prompt, system, json_mode):
     except Exception as exc:
         log.error("Claude API error: %s", exc)
         raise LLMError(f"Claude API call failed: {exc}") from exc
+
+
+def complete_stream(prompt: str, system: str = ""):
+    if PROVIDER == "gemini":
+        yield from _gemini_stream(prompt, system)
+    else:
+        yield from _claude_stream(prompt, system)
+
+
+def _gemini_stream(prompt, system):
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        raise LLMError("GEMINI_API_KEY not set")
+    model_name = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+    log.info("Gemini stream: model=%s, prompt_len=%d", model_name, len(prompt))
+    try:
+        from google import genai
+        client = genai.Client(api_key=api_key)
+        config = genai.types.GenerateContentConfig(
+            temperature=0.1,
+            system_instruction=system or None,
+            response_mime_type="text/plain",
+        )
+        for chunk in client.models.generate_content_stream(
+            model=model_name, contents=prompt, config=config,
+        ):
+            if chunk.text:
+                yield chunk.text
+    except ImportError:
+        import google.generativeai as genai
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel(
+            model_name,
+            system_instruction=system or None,
+            generation_config={"temperature": 0.1, "response_mime_type": "text/plain"},
+        )
+        for chunk in model.generate_content(prompt, stream=True):
+            if chunk.text:
+                yield chunk.text
+    except Exception as exc:
+        log.error("Gemini stream error: %s", exc)
+        raise LLMError(f"Gemini streaming failed: {exc}") from exc
+
+
+def _claude_stream(prompt, system):
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise LLMError("ANTHROPIC_API_KEY not set")
+    log.info("Claude stream: prompt_len=%d", len(prompt))
+    try:
+        import anthropic
+        client = anthropic.Anthropic()
+        with client.messages.stream(
+            model=os.getenv("CLAUDE_MODEL", "claude-opus-4-8"),
+            max_tokens=2000,
+            temperature=0.1,
+            system=system or None,
+            messages=[{"role": "user", "content": prompt}],
+        ) as stream:
+            for text in stream.text_stream:
+                yield text
+    except Exception as exc:
+        log.error("Claude stream error: %s", exc)
+        raise LLMError(f"Claude streaming failed: {exc}") from exc

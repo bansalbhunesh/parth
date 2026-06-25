@@ -11,7 +11,7 @@ export default function HeroIntro() {
       <p className="hero-intro-body">
         In EPC data-centre projects, deviations between design specs, vendor submittals, and governing standards
         hide in thousands of pages of unstructured documents. Today, they surface during commissioning —
-        <strong> 30 weeks too late</strong>, causing seven-figure rework.
+        <strong> 33 weeks too late</strong>, causing seven-figure rework.
       </p>
       <p className="hero-intro-body">
         <strong>Pramaan</strong> deploys 5 AI agents to cross-reference every requirement against every submittal

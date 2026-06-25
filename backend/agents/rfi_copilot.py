@@ -1,25 +1,12 @@
-"""
-RFI / Project Copilot — conversational RAG over the full project corpus.
-
-Answers operational/contractual queries with citations and surfaces prior
-similar RFIs to cut re-work.
-
-v2: Improved TF-IDF-style retriever, deviation-aware context, and structured
-    response format with prior-RFI matching.
-"""
+"""RFI / Project Copilot — conversational RAG over the full project corpus."""
 
 import json
-import logging
 import math
-import pathlib
 import re
 from collections import Counter
 
-from backend.llm import complete
-
-log = logging.getLogger("pramaan.copilot")
-
-CORPUS = pathlib.Path(__file__).parent.parent.parent / "data" / "corpus"
+from backend.llm import complete, complete_stream
+from backend.paths import CORPUS
 
 
 def _tokenize(text: str):
@@ -118,9 +105,7 @@ def _retrieve(query: str, k: int = 6):
 
 
 def ask(query: str):
-    log.info("Copilot query: %s", query[:120])
     ctx = _retrieve(query)
-    log.info("Retrieved %d context chunks", len(ctx))
     context = "\n\n".join(f"[{c['source']}]\n{c['text']}" for c in ctx)
     prompt = (
         f"Answer the project question using ONLY the context provided below. "
@@ -142,3 +127,49 @@ def ask(query: str):
         "sources": [c["source"] for c in ctx],
         "prior_rfis": prior_rfis,
     }
+
+
+def ask_fallback(query: str, devs: list[dict]) -> dict:
+    relevant = [d for d in devs if any(
+        term in query.lower()
+        for term in [d.get("system", "").lower(), d.get("component", "").lower(),
+                     d.get("parameter", "").replace("_", " ").lower()]
+    )]
+    if not relevant:
+        relevant = devs[:3]
+    return {
+        "answer": f"Based on the deviation register, {len(relevant)} relevant finding(s) found. "
+                  + " ".join(
+                      f"{d['component']}.{d['parameter']}: provided {d.get('provided_value','')} "
+                      f"vs required {d.get('required_value','')} ({d.get('severity','')}, "
+                      f"{d.get('lead_time_weeks', 0)}w lead time)."
+                      for d in relevant
+                  ),
+        "sources": [d.get("spec_clause", "") for d in relevant],
+        "prior_rfis": [],
+    }
+
+
+def ask_stream(query: str):
+    import json as _json
+    ctx = _retrieve(query)
+    context = "\n\n".join(f"[{c['source']}]\n{c['text']}" for c in ctx)
+    prompt = (
+        f"Answer the project question using ONLY the context provided below. "
+        f"Cite sources in square brackets like [specs/UPS.md] or [rfi/RFI-014]. "
+        f"If a prior RFI is relevant to the question, explicitly mention it and "
+        f"quote its resolution. If a known deviation is relevant, mention it.\n\n"
+        f"Be specific and technical. Include exact values and clause references.\n\n"
+        f"=== CONTEXT ===\n{context}\n\n=== QUESTION ===\n{query}"
+    )
+
+    sources = [c["source"] for c in ctx]
+    prior_rfis = [c["rfi"] for c in ctx if "rfi" in c]
+    yield ("meta", _json.dumps({"sources": sources, "prior_rfis": prior_rfis}))
+
+    for chunk in complete_stream(
+        prompt,
+        system="You are a precise EPC project copilot for a Tier IV data centre. "
+               "Cite every claim. Be concise but thorough.",
+    ):
+        yield ("token", chunk)

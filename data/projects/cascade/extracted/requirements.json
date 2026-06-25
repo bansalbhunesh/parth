@@ -1,0 +1,200 @@
+[
+  {
+    "system": "UPS",
+    "component": "UPS-C1",
+    "parameter": "battery_runtime_min",
+    "required_value": 10,
+    "unit": "min",
+    "standard_ref": "UPTIME-TIER4",
+    "clause": "CS-4.1"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-C1",
+    "parameter": "redundancy",
+    "required_value": "2N",
+    "unit": "topology",
+    "standard_ref": "UPTIME-TIER4",
+    "clause": "CS-4.2"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-C1",
+    "parameter": "rated_power_kw",
+    "required_value": 1000,
+    "unit": "kW",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "CS-4.3"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-C1",
+    "parameter": "redundancy",
+    "required_value": "N+1",
+    "unit": "topology",
+    "standard_ref": "UPTIME-TIER4",
+    "clause": "CS-5.1"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-C1",
+    "parameter": "rated_power_kva",
+    "required_value": 2500,
+    "unit": "kVA",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "CS-5.2"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-C1",
+    "parameter": "epa_tier",
+    "required_value": "Tier_4",
+    "unit": "class",
+    "standard_ref": "EPA-40CFR60",
+    "clause": "CS-5.3"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-FUEL",
+    "parameter": "onsite_fuel_hours",
+    "required_value": 48,
+    "unit": "h",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "CS-5.4"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-C1",
+    "parameter": "redundancy",
+    "required_value": "N+2",
+    "unit": "topology",
+    "standard_ref": "UPTIME-TIER4",
+    "clause": "CS-6.1"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-C1",
+    "parameter": "wue_target",
+    "required_value": 0.4,
+    "unit": "L/kWh",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "CS-6.2"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-C1",
+    "parameter": "capacity_tr",
+    "required_value": 1200,
+    "unit": "TR",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "CS-6.3"
+  },
+  {
+    "system": "SWGR",
+    "component": "SWGR-C1",
+    "parameter": "short_circuit_rating_ka",
+    "required_value": 50,
+    "unit": "kA",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "CS-7.1"
+  },
+  {
+    "system": "SWGR",
+    "component": "SWGR-C1",
+    "parameter": "redundancy",
+    "required_value": "2N",
+    "unit": "topology",
+    "standard_ref": "UPTIME-TIER4",
+    "clause": "CS-7.2"
+  },
+  {
+    "system": "SWGR",
+    "component": "SWGR-C1",
+    "parameter": "seismic_cert",
+    "required_value": "ICC_ESR",
+    "unit": "standard",
+    "standard_ref": "IBC-2021",
+    "clause": "CS-7.3"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-C1",
+    "parameter": "fire_rating",
+    "required_value": "CMP",
+    "unit": "plenum-class",
+    "standard_ref": "NFPA-75",
+    "clause": "CS-8.1"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-C1",
+    "parameter": "category",
+    "required_value": "Cat6A",
+    "unit": "type",
+    "standard_ref": "TIA-942",
+    "clause": "CS-8.2"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-C1",
+    "parameter": "agent",
+    "required_value": "clean_agent",
+    "unit": "type",
+    "standard_ref": "NFPA-75",
+    "clause": "CS-9.1"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-C1",
+    "parameter": "epo_system",
+    "required_value": "present",
+    "unit": "status",
+    "standard_ref": "NFPA-75",
+    "clause": "CS-9.2"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-C1",
+    "parameter": "zones",
+    "required_value": 6,
+    "unit": "count",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "CS-9.3"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS-C1",
+    "parameter": "protocol",
+    "required_value": "BACnet_IP",
+    "unit": "standard",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "CS-10.1"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS-C1",
+    "parameter": "monitoring_redundancy",
+    "required_value": "dual",
+    "unit": "topology",
+    "standard_ref": "UPTIME-TIER4",
+    "clause": "CS-10.2"
+  },
+  {
+    "system": "STRUCT",
+    "component": "FLOOR-C1",
+    "parameter": "seismic_design_cat",
+    "required_value": "SDC_D",
+    "unit": "class",
+    "standard_ref": "IBC-2021",
+    "clause": "CS-11.1"
+  },
+  {
+    "system": "STRUCT",
+    "component": "FLOOR-C1",
+    "parameter": "load_rating_kpa",
+    "required_value": 12,
+    "unit": "kPa",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "CS-11.2"
+  }
+]

@@ -1,34 +1,19 @@
-"""
-Pramaan API — FastAPI.
-
-Endpoints:
-  GET  /health
-  GET  /systems                 list modelled systems
-  POST /ingest/{system_id}      run the pipeline for one system -> deviations
-  GET  /deviations              full deviation register (all systems)
-  POST /copilot                 RFI/project copilot Q&A  {"query": "..."}
-  GET  /export/audit            deviation register as compliance evidence pack
-  GET  /metrics                 live eval metrics for the deck
-  GET  /cx-plan                 commissioning plan with test schedule
-  GET  /rfi-log                 full RFI log
-  GET  /project                 project metadata
-
-Run: uvicorn backend.main:app --reload
-"""
+"""Pramaan API — uvicorn backend.main:app --reload"""
 
 import json
 import logging
-import pathlib
 import time
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
+from backend.paths import CORPUS, PROJECTS_DIR
 from backend.orchestrator import run_pipeline, run_full_pipeline
-from backend.agents.rfi_copilot import ask
-from backend.agents.ingestion import ingest_corpus
+from backend.agents.rfi_copilot import ask, ask_stream, ask_fallback
+from backend.agents.ingestion import ingest_corpus, extract_pdf_bytes
+from backend.analyze import run_analysis, run_streaming_analysis
 
 logging.basicConfig(
     level=logging.INFO,
@@ -37,9 +22,8 @@ logging.basicConfig(
 )
 log = logging.getLogger("pramaan.api")
 
-CORPUS = pathlib.Path(__file__).parent.parent / "data" / "corpus"
-
 VALID_SYSTEMS: set[str] | None = None
+
 
 def _get_valid_systems() -> set[str]:
     global VALID_SYSTEMS
@@ -47,6 +31,7 @@ def _get_valid_systems() -> set[str]:
         specs_dir = CORPUS / "specs"
         VALID_SYSTEMS = {p.stem for p in specs_dir.glob("*.md")} if specs_dir.exists() else set()
     return VALID_SYSTEMS
+
 
 app = FastAPI(
     title="Pramaan — EPC Deviation Intelligence",
@@ -61,12 +46,121 @@ class CopilotQuery(BaseModel):
     query: str = Field(..., min_length=1, max_length=2000)
 
 
-def _load_json(path):
+class AnalyzeRequest(BaseModel):
+    spec_text: str = Field(..., min_length=10, max_length=50000)
+    submittal_text: str = Field(..., min_length=10, max_length=50000)
+    system_id: str = Field(default="CUSTOM", max_length=50)
+
+
+def _load_json(path: str) -> dict:
     full = CORPUS / path
     if full.exists():
         return json.loads(full.read_text())
     return {}
 
+
+def _sse_response(generator):
+    return StreamingResponse(
+        generator,
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
+def _extract_upload_text(file: UploadFile) -> str:
+    data = file.file.read()
+    name = file.filename or "upload"
+    if name.lower().endswith(".pdf") or file.content_type == "application/pdf":
+        text = extract_pdf_bytes(data, name)
+        if not text:
+            raise HTTPException(400, f"Could not extract text from PDF: {name}")
+        return text
+    return data.decode("utf-8", errors="replace")
+
+
+# ── Analysis endpoints ──────────────────────────────────────────────
+
+@app.post("/analyze")
+def analyze(req: AnalyzeRequest):
+    result = run_analysis(req.spec_text, req.submittal_text, req.system_id)
+    return {
+        "system": req.system_id,
+        "deviations": result.deviations,
+        "count": len(result.deviations),
+        "elapsed_ms": result.elapsed_ms,
+        "mode": result.mode,
+    }
+
+
+@app.post("/analyze/stream")
+def analyze_stream(req: AnalyzeRequest):
+    def generate():
+        t0 = time.time()
+        yield f"event: status\ndata: Loading standards knowledge base...\n\n"
+        yield from run_streaming_analysis(req.spec_text, req.submittal_text, req.system_id)
+
+    return _sse_response(generate())
+
+
+@app.post("/analyze/upload")
+def analyze_upload(
+    spec_file: UploadFile = File(...),
+    submittal_file: UploadFile = File(...),
+    system_id: str = "CUSTOM",
+):
+    spec_text = _extract_upload_text(spec_file)
+    submittal_text = _extract_upload_text(submittal_file)
+    result = run_analysis(spec_text, submittal_text, system_id)
+    return {
+        "system": system_id,
+        "spec_filename": spec_file.filename,
+        "submittal_filename": submittal_file.filename,
+        "spec_preview": spec_text[:500],
+        "submittal_preview": submittal_text[:500],
+        "deviations": result.deviations,
+        "count": len(result.deviations),
+        "elapsed_ms": result.elapsed_ms,
+        "mode": result.mode,
+    }
+
+
+@app.post("/analyze/upload/stream")
+def analyze_upload_stream(
+    spec_file: UploadFile = File(...),
+    submittal_file: UploadFile = File(...),
+    system_id: str = "CUSTOM",
+):
+    spec_data = spec_file.file.read()
+    spec_name = spec_file.filename or "spec"
+    sub_data = submittal_file.file.read()
+    sub_name = submittal_file.filename or "submittal"
+
+    def generate():
+        yield f"event: status\ndata: Extracting text from {spec_name}...\n\n"
+        if spec_name.lower().endswith(".pdf"):
+            spec_text = extract_pdf_bytes(spec_data, spec_name)
+        else:
+            spec_text = spec_data.decode("utf-8", errors="replace")
+
+        yield f"event: status\ndata: Extracting text from {sub_name}...\n\n"
+        if sub_name.lower().endswith(".pdf"):
+            submittal_text = extract_pdf_bytes(sub_data, sub_name)
+        else:
+            submittal_text = sub_data.decode("utf-8", errors="replace")
+
+        if not spec_text or not submittal_text:
+            yield f"event: error\ndata: Could not extract text from uploaded files.\n\n"
+            yield "event: done\ndata: {}\n\n"
+            return
+
+        yield f"event: preview\ndata: {json.dumps({'spec': spec_text[:500], 'submittal': submittal_text[:500]})}\n\n"
+        yield f"event: status\ndata: Loading standards knowledge base...\n\n"
+        yield from run_streaming_analysis(spec_text, submittal_text, system_id)
+
+    return _sse_response(generate())
+
+
+# ── Core data endpoints ─────────────────────────────────────────────
 
 @app.get("/health")
 def health():
@@ -104,15 +198,10 @@ def ingest(system_id: str):
     }
 
 
-def _deviations_from_ground_truth():
-    gt = _load_json("ground_truth.json")
-    return gt.get("seeded_deviations", [])
-
-
-def _build_register(devs):
+def _build_register(devs: list[dict]) -> dict:
     critical = sum(1 for d in devs if d.get("severity") == "Critical")
     major = sum(1 for d in devs if d.get("severity") == "Major")
-    lead_times = [d["lead_time_weeks"] for d in devs if d.get("lead_time_weeks")]
+    lead_times = [d["lead_time_weeks"] for d in devs if d.get("lead_time_weeks") is not None]
     return {
         "count": len(devs),
         "critical": critical,
@@ -135,8 +224,11 @@ def deviations():
         return _build_register(out)
     except Exception as exc:
         log.warning("Pipeline failed, using ground-truth fallback: %s", exc)
-        return _build_register(_deviations_from_ground_truth())
+        gt = _load_json("ground_truth.json")
+        return _build_register(gt.get("seeded_deviations", []))
 
+
+# ── Copilot endpoints ───────────────────────────────────────────────
 
 @app.post("/copilot")
 def copilot(q: CopilotQuery):
@@ -144,27 +236,29 @@ def copilot(q: CopilotQuery):
         return ask(q.query)
     except Exception as exc:
         log.warning("Copilot LLM failed, using fallback: %s", exc)
-        gt = _load_json("ground_truth.json")
-        devs = gt.get("seeded_deviations", [])
-        relevant = [d for d in devs if any(
-            term in q.query.lower()
-            for term in [d.get("system", "").lower(), d.get("component", "").lower(),
-                         d.get("parameter", "").replace("_", " ").lower()]
-        )]
-        if not relevant:
-            relevant = devs[:3]
-        return {
-            "answer": f"Based on the deviation register, {len(relevant)} relevant finding(s) found. "
-                      + " ".join(
-                          f"{d['component']}.{d['parameter']}: provided {d.get('provided_value','')} "
-                          f"vs required {d.get('required_value','')} ({d.get('severity','')}, "
-                          f"{d.get('lead_time_weeks',0)}w lead time)."
-                          for d in relevant
-                      ),
-            "sources": [d.get("spec_clause", "") for d in relevant],
-            "prior_rfis": [],
-        }
+        devs = _load_json("ground_truth.json").get("seeded_deviations", [])
+        return ask_fallback(q.query, devs)
 
+
+@app.post("/copilot/stream")
+def copilot_stream(q: CopilotQuery):
+    def generate():
+        try:
+            for event_type, data in ask_stream(q.query):
+                yield f"event: {event_type}\ndata: {data}\n\n"
+            yield "event: done\ndata: {}\n\n"
+        except Exception as exc:
+            log.warning("Copilot stream failed, sending fallback: %s", exc)
+            devs = _load_json("ground_truth.json").get("seeded_deviations", [])
+            fb = ask_fallback(q.query, devs)
+            yield f"event: meta\ndata: {json.dumps({'sources': fb['sources'], 'prior_rfis': fb['prior_rfis']})}\n\n"
+            yield f"event: token\ndata: {fb['answer']}\n\n"
+            yield "event: done\ndata: {}\n\n"
+
+    return _sse_response(generate())
+
+
+# ── Reference data endpoints ────────────────────────────────────────
 
 @app.get("/cx-plan")
 def cx_plan():
@@ -186,7 +280,7 @@ def metrics():
     r = score(findings, gt)
 
     gt_json = _load_json("ground_truth.json")
-    project = gt_json.get("project", {})
+    project_info = gt_json.get("project", {})
 
     return {
         "detection": {
@@ -206,13 +300,15 @@ def metrics():
         },
         "corpus": {
             "systems": len(set(d["system"] for d in gt)),
-            "total_requirements": project.get("line_items_total", 0),
-            "active_submittals": project.get("active_submittals", 0),
+            "total_requirements": project_info.get("line_items_total", 0),
+            "active_submittals": project_info.get("active_submittals", 0),
             "true_negative_systems": r["true_negative_systems"],
         },
         "citation_faithfulness": round(r["citation_faithfulness"], 3),
     }
 
+
+# ── Export endpoints ─────────────────────────────────────────────────
 
 @app.get("/export/audit")
 def export_audit():
@@ -398,6 +494,8 @@ tr:hover td {{ background: #f0f4ff; }}
 </body></html>"""
 
 
+# ── Pipeline info endpoint ───────────────────────────────────────────
+
 @app.get("/pipeline")
 def pipeline_info():
     return {
@@ -423,6 +521,16 @@ def pipeline_info():
     }
 
 
+@app.get("/corpus/doc/{doc_type}/{system_id}")
+def corpus_doc(doc_type: str, system_id: str):
+    if doc_type not in ("specs", "submittals"):
+        raise HTTPException(400, "doc_type must be 'specs' or 'submittals'")
+    path = CORPUS / doc_type / f"{system_id}.md"
+    if not path.exists():
+        raise HTTPException(404, f"Document not found: {doc_type}/{system_id}")
+    return {"system": system_id, "doc_type": doc_type, "text": path.read_text(encoding="utf-8")}
+
+
 @app.get("/corpus/stats")
 def corpus_stats():
     result = ingest_corpus()
@@ -437,3 +545,89 @@ def corpus_stats():
         "total_documents": result["total_documents"],
         "standards_lines": total_lines,
     }
+
+
+# ── Multi-project endpoints ─────────────────────────────────────────
+
+def _project_summary(gt: dict, project_id: str) -> dict:
+    proj = gt.get("project", {})
+    devs = gt.get("seeded_deviations", [])
+    return {
+        "id": project_id,
+        "name": proj.get("name", project_id),
+        "tier": proj.get("tier", ""),
+        "location": proj.get("location", ""),
+        "capacity_mw": proj.get("capacity_mw", 0),
+        "deviations": len(devs),
+        "systems": proj.get("total_systems", 0),
+    }
+
+
+@app.get("/projects")
+def list_projects():
+    projects = []
+    gt = _load_json("ground_truth.json")
+    if gt:
+        projects.append(_project_summary(gt, "meghdoot"))
+
+    if PROJECTS_DIR.exists():
+        for p in sorted(PROJECTS_DIR.iterdir()):
+            gt_path = p / "ground_truth.json"
+            if p.is_dir() and gt_path.exists():
+                pgt = json.loads(gt_path.read_text())
+                projects.append(_project_summary(pgt, p.name))
+
+    return {"projects": projects, "count": len(projects)}
+
+
+@app.get("/projects/{project_id}")
+def project_detail(project_id: str):
+    ppath = CORPUS if project_id == "meghdoot" else PROJECTS_DIR / project_id
+
+    gt_path = ppath / "ground_truth.json"
+    if not gt_path.exists():
+        raise HTTPException(404, f"Project '{project_id}' not found")
+
+    gt = json.loads(gt_path.read_text())
+    cx_path = ppath / "commissioning" / "cx_plan.json"
+    cx = json.loads(cx_path.read_text()) if cx_path.exists() else {}
+
+    devs = gt.get("seeded_deviations", [])
+    lead_times = [d["lead_time_weeks"] for d in devs if d.get("lead_time_weeks") is not None]
+
+    return {
+        "project": gt.get("project", {}),
+        "deviations": devs,
+        "deviation_summary": {
+            "count": len(devs),
+            "critical": sum(1 for d in devs if d.get("severity") == "Critical"),
+            "major": sum(1 for d in devs if d.get("severity") == "Major"),
+            "total_lead_time_weeks": sum(lead_times),
+            "max_lead_time_weeks": max(lead_times) if lead_times else 0,
+        },
+        "cx_plan": cx,
+        "true_negative_systems": gt.get("true_negative_systems", []),
+    }
+
+
+@app.get("/projects/eval/aggregate")
+def projects_eval_aggregate():
+    from eval.multi_project_eval import run_all, aggregate
+    results = run_all()
+    agg = aggregate(results)
+    per_project = {
+        pid: {
+            "name": r["name"],
+            "tier": r["tier"],
+            "location": r["location"],
+            "capacity_mw": r["capacity_mw"],
+            "deviations": r["deviations"],
+            "precision": round(r["scores"]["precision"], 3),
+            "recall": round(r["scores"]["recall"], 3),
+            "f1": round(r["scores"]["f1"], 3),
+            "cx_accuracy": round(r["scores"]["cx_prediction_accuracy"], 3),
+            "total_lead_weeks": r["scores"]["total_lead_time_weeks"],
+        }
+        for pid, r in results.items()
+    }
+    return {"aggregate": agg, "per_project": per_project}

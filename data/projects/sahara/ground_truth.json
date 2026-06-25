@@ -1,0 +1,80 @@
+{
+  "project": {
+    "name": "Project Sahara",
+    "capacity_mw": 5,
+    "tier": "Uptime Tier II",
+    "location": "Dubai, UAE",
+    "current_week": 10,
+    "line_items_total": 4800,
+    "active_submittals": 29,
+    "total_systems": 6,
+    "estimated_completion_week": 36,
+    "client": "Sahara Digital FZCO",
+    "epc_contractor": "Al Jaber Engineering",
+    "cx_authority": "Aurecon Middle East"
+  },
+  "seeded_deviations": [
+    {
+      "id": "DEV-001",
+      "system": "GEN",
+      "component": "GEN-S1",
+      "parameter": "derating_pct",
+      "required_value": 10,
+      "provided_value": 0,
+      "unit": "%",
+      "standard_ref": "DEWA-REG",
+      "spec_clause": "SH-5.3",
+      "severity": "Critical",
+      "predicted_cx_test": "FAT-S01",
+      "predicted_cx_level": 3,
+      "predicted_cx_name": "Generator high-ambient load test",
+      "week_caught": 10,
+      "week_fail": 24,
+      "lead_time_weeks": 14,
+      "rationale": "Generator not derated for 50 C ambient; will fail to deliver rated power in UAE summer, risking load shedding."
+    },
+    {
+      "id": "DEV-002",
+      "system": "COOL",
+      "component": "COOL-S1",
+      "parameter": "design_ambient_c",
+      "required_value": 50,
+      "provided_value": 46,
+      "unit": "C",
+      "standard_ref": "DEWA-REG",
+      "spec_clause": "SH-6.2",
+      "severity": "Critical",
+      "predicted_cx_test": "IST-S01",
+      "predicted_cx_level": 4,
+      "predicted_cx_name": "Cooling peak-ambient stress test",
+      "week_caught": 10,
+      "week_fail": 28,
+      "lead_time_weeks": 18,
+      "rationale": "Chiller rated for 46 C but DEWA requires 50 C design ambient; capacity insufficient during peak summer."
+    },
+    {
+      "id": "DEV-003",
+      "system": "CABLE",
+      "component": "CABLE-S1",
+      "parameter": "temp_rating_c",
+      "required_value": 90,
+      "provided_value": 70,
+      "unit": "C",
+      "standard_ref": "DEWA-REG",
+      "spec_clause": "SH-8.1",
+      "severity": "Major",
+      "predicted_cx_test": "ITP-S01",
+      "predicted_cx_level": 2,
+      "predicted_cx_name": "Cable temperature rating verification",
+      "week_caught": 10,
+      "week_fail": 16,
+      "lead_time_weeks": 6,
+      "rationale": "70 C cable rating insufficient for 90 C requirement; accelerated insulation degradation in high-ambient conditions."
+    }
+  ],
+  "true_negative_systems": [
+    "UPS",
+    "FIRE",
+    "STRUCT"
+  ]
+}

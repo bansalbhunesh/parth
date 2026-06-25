@@ -1,25 +1,19 @@
 """
-Orchestrator — LangGraph state machine wiring all 5 agents into one pipeline:
-
-  ingest -> load_standards -> reconcile (brain) -> cx_predict -> format_output
-
-v4: Full 5-node pipeline with ingestion, standards loading, reconciliation,
-cx prediction, and output formatting. Falls back to sequential runner
-if langgraph is not installed.
+Orchestrator — LangGraph pipeline:
+  ingest -> load_standards -> reconcile -> cx_predict -> format_output
+Falls back to sequential runner if langgraph is not installed.
 """
 
 import logging
-import pathlib
 import time
 from typing import List, Optional, TypedDict
 
 from backend.agents.ingestion import ingest_system
 from backend.agents.reconciliation import reconcile_system, _all_standards_text
 from backend.agents.commissioning import predict_cx_impact, compute_risk_score
+from backend.paths import CORPUS
 
 log = logging.getLogger("pramaan.orchestrator")
-
-CORPUS = pathlib.Path(__file__).parent.parent / "data" / "corpus"
 
 
 class PipelineState(TypedDict):
@@ -133,7 +127,6 @@ def run_pipeline(system_id: str) -> List[dict]:
 
 
 def run_full_pipeline() -> dict:
-    """Run the pipeline across all systems and return summary stats."""
     t0 = time.time()
     specs_dir = CORPUS / "specs"
     if not specs_dir.exists():

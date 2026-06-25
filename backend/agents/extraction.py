@@ -1,19 +1,12 @@
 """
-Extraction Agent — raw document -> structured triples.
-
-Turns an unstructured spec or submittal into machine-readable triples
-(component, parameter, value, unit, [clause]).
-
-v2: Added batch extraction, accuracy scoring vs reference, and support for
-    both spec and submittal document types.
+Extraction Agent — raw document -> structured triples
+(component, parameter, value, unit, clause).
 """
 
 import json
-import pathlib
 
 from backend.llm import complete_json
-
-CORPUS = pathlib.Path(__file__).parent.parent.parent / "data" / "corpus"
+from backend.paths import CORPUS
 
 EXTRACT_PROMPT = """\
 Extract every engineering requirement/value from the document below as triples.

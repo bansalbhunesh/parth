@@ -35,6 +35,33 @@
 
 ---
 
+<details>
+<summary><strong>Table of Contents</strong></summary>
+
+- [The Headline](#the-headline)
+- [The Problem](#the-problem)
+- [The Solution](#the-solution)
+- [Screenshots](#screenshots)
+- [Key Metrics](#key-metrics)
+- [Multi-Project Generalisation](#multi-project-generalisation)
+- [Quick Start](#quick-start)
+- [One-Command Setup](#one-command-setup)
+- [Frontend — 19-Section Dashboard](#frontend--19-section-dashboard)
+- [Standards Corpus](#standards-corpus)
+- [API Reference](#api-reference)
+- [Project Structure](#project-structure)
+- [Scale Story](#scale-story)
+- [Eval Harness](#eval-harness)
+- [Hackathon Rubric Mapping](#hackathon-rubric-mapping)
+- [Academic References](#academic-references)
+- [Demo Script (60 seconds)](#demo-script-60-seconds)
+- [Guardrails](#guardrails)
+- [Tech Stack](#tech-stack)
+
+</details>
+
+---
+
 ## The Headline
 
 > **Pramaan caught a critical BMS monitoring single-point-of-failure 33 weeks before it would have failed the full-facility failover drill.**
@@ -75,22 +102,9 @@ In a **40 MW Tier IV data centre** build (Project Meghdoot, Navi Mumbai), the de
 
 Pramaan is a **multi-agent AI system** that cross-references every requirement against every submittal against every governing standard — and catches deviations the day the document is uploaded.
 
-```
-              ┌──────────────────────────────────────────────────────────────────────┐
-              │                   LangGraph Agent Orchestrator                       │
-              │                                                                      │
-              │  ┌───────────┐   ┌──────────────┐   ┌──────────┐                    │
-  Design  ───▶│  │ Ingestion │──▶│    Validate   │──▶│Reconcile │──▶ Cx Predict ──▶ │──▶ Deviation Register
-  Basis       │  │   Agent   │   │    Gate ◆     │   │  (BRAIN) │   │               │    + Citation Chain
-              │  └───────────┘   └──────┬───────┘   └──────────┘   │               │    + Lead Time
-  Standards ──│──▶ Load Standards ──────┘                          ▼               │
-              │                    ◆ = conditional:          Format Output          │
-  Submittals ─│─────────┘          skip reconciliation                              │
-              │                    if docs missing    ┌──────────────┐              │
-              │                                       │ RFI Copilot  │              │──▶ Copilot Q&A
-              │                                       └──────────────┘              │
-              └──────────────────────────────────────────────────────────────────────┘
-```
+<p align="center">
+  <img src="docs/pipeline-diagram.svg" alt="Pramaan Pipeline — 5 AI Agents" width="100%">
+</p>
 
 **LangGraph features used:** `StateGraph`, `add_conditional_edges` (validation gate skips reconciliation for missing documents), `TypedDict` state schema, compiled graph with `END` sentinel.
 
@@ -103,6 +117,36 @@ Pramaan is a **multi-agent AI system** that cross-references every requirement a
 | 3 | **Reconciliation** | Cross-document deviation detection — the brain | Gemini + confidence scoring |
 | 4 | **Cx Predictor** | Deviation → commissioning test (L1–L5) + week + lead time | Rule table + LLM fallback |
 | 5 | **RFI Copilot** | RAG over project corpus with citation + prior-RFI matching | TF-IDF retrieval + streaming |
+
+---
+
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/01-hero.png" alt="Hero — Problem Statement" width="100%">
+</p>
+
+<details>
+<summary><strong>View all dashboard sections</strong></summary>
+
+| Section | Screenshot |
+|---------|-----------|
+| Sentinel Alert + 267-Week Savings | <img src="docs/screenshots/02-sentinel.png" width="600"> |
+| Before / After Comparison | <img src="docs/screenshots/04-before-after.png" width="600"> |
+| 5-Agent Pipeline | <img src="docs/screenshots/05-pipeline.png" width="600"> |
+| Architecture Diagram | <img src="docs/screenshots/06-architecture.png" width="600"> |
+| System Health Grid | <img src="docs/screenshots/07-systems.png" width="600"> |
+| Compliance Score | <img src="docs/screenshots/08-compliance.png" width="600"> |
+| Deviation Register | <img src="docs/screenshots/09-register.png" width="600"> |
+| Risk Matrix | <img src="docs/screenshots/10-risk-matrix.png" width="600"> |
+| Cx Risk Twin (Gantt) | <img src="docs/screenshots/11-cx-twin.png" width="600"> |
+| Standards Knowledge Base | <img src="docs/screenshots/12-standards.png" width="600"> |
+| Eval Dashboard | <img src="docs/screenshots/13-eval.png" width="600"> |
+| Live Analysis + Upload | <img src="docs/screenshots/14-analyze.png" width="600"> |
+| ROI Calculator | <img src="docs/screenshots/15-roi.png" width="600"> |
+| Scale Story | <img src="docs/screenshots/16-scale.png" width="600"> |
+
+</details>
 
 ---
 

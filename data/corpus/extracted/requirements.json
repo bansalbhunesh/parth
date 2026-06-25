@@ -68,7 +68,7 @@
     "parameter": "start_time_sec",
     "required_value": 10,
     "unit": "s",
-    "standard_ref": "UPTIME-TIER4",
+    "standard_ref": "DESIGN-BASIS",
     "clause": "DB-5.3"
   },
   {
@@ -104,7 +104,7 @@
     "parameter": "delta_t_c",
     "required_value": 10,
     "unit": "C",
-    "standard_ref": "ASHRAE-TC9.9",
+    "standard_ref": "DESIGN-BASIS",
     "clause": "DB-6.4"
   },
   {
@@ -275,7 +275,7 @@
     "parameter": "load_rating_kpa",
     "required_value": 12,
     "unit": "kPa",
-    "standard_ref": "IS-1893",
+    "standard_ref": "DESIGN-BASIS",
     "clause": "DB-13.1"
   },
   {

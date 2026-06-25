@@ -5,7 +5,8 @@ _Project: Project Meghdoot · Submittal rev B_
 
 Vendor: Cummins QSK60-G23 2500 kVA, 50 Hz, prime-rated.
 Fuel: Dual belly-tank configuration, total capacity 15,000 litres.
-The proposed fuel capacity provides approximately 12 hours of autonomy at rated load based on the manufacturer's specific fuel consumption data of 214 g/kWh. The vendor notes that fuel delivery contracts can supplement on-site storage for extended outages. Engine cranking and start sequence completes in 15 seconds per the standard controller calibration; the vendor notes that 10-second start requires a premium fast-start option with pre-lube and jacket water heater upgrades.
+The proposed fuel capacity provides approximately 12 hours of autonomy at rated load based on the manufacturer's specific fuel consumption data of 214 g/kWh. The vendor notes that fuel delivery contracts can supplement on-site storage for extended outages.
+Start-up time: 15 seconds to rated speed (cranking, ignition, and governor stabilisation). The vendor states this is within their standard performance envelope for this frame size.
 
 ## Provided values
 

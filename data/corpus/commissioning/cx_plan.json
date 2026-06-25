@@ -28,21 +28,21 @@
       "level": 2,
       "name": "Arc flash labeling and PPE verification",
       "scheduled_week": 20,
-      "acceptance": "Arc flash labels match incident energy calculations"
+      "acceptance": "Arc flash classification meets Type 2B requirement"
     },
     {
       "id": "ITP-04",
       "level": 2,
       "name": "Pathway fill and cable management inspection",
       "scheduled_week": 18,
-      "acceptance": "Bundle sizes within BICSI-002 fill limits"
+      "acceptance": "Bundle size within BICSI-002 limit of 48 cables"
     },
     {
       "id": "ITP-05",
       "level": 1,
       "name": "Structural load test and floor deflection",
       "scheduled_week": 19,
-      "acceptance": "Floor deflection within L/360 under design load"
+      "acceptance": "Concentrated load rating >= 12 kPa per design basis"
     },
     {
       "id": "FAT-01",
@@ -108,18 +108,18 @@
       "acceptance": "All critical alarms fire and are received by BMS/NOC"
     },
     {
+      "id": "IST-16",
+      "level": 4,
+      "name": "Cooling performance and thermal verification",
+      "scheduled_week": 36,
+      "acceptance": "Chilled water delta-T within design envelope"
+    },
+    {
       "id": "IST-15",
       "level": 4,
       "name": "Full-facility failover drill",
       "scheduled_week": 44,
       "acceptance": "Zero downtime during drill"
-    },
-    {
-      "id": "IST-16",
-      "level": 4,
-      "name": "Cooling performance and thermal verification",
-      "scheduled_week": 36,
-      "acceptance": "Delta-T and flow rates meet design criteria"
     },
     {
       "id": "SAT-01",

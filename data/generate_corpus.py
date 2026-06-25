@@ -47,7 +47,7 @@ SYSTEMS = {
             "battery_runtime_min": 7,
             "redundancy": "2N",
             "rated_power_kw": 1200,
-            "efficiency_pct": 96,
+            "efficiency_pct": 93,
         },
         "prose": {
             "spec_intro": (
@@ -65,7 +65,10 @@ SYSTEMS = {
                 "at a discharge rate that accounts for standard temperature corrections. "
                 "Runtime at full rated load is 7 minutes based on the vendor's sizing "
                 "tool at 25 deg C ambient, which the vendor considers adequate for "
-                "generator start-up overlap in a 2N topology."
+                "generator start-up overlap in a 2N topology.\n"
+                "Measured efficiency: 93% at rated load per factory test report. The "
+                "vendor notes this is the catalogue efficiency for the standard IGBT "
+                "module and that higher efficiency requires the optional SiC module."
             ),
         },
     },
@@ -81,7 +84,7 @@ SYSTEMS = {
             "onsite_fuel_hours": 12,
             "redundancy": "N+1",
             "rated_power_kva": 2500,
-            "start_time_sec": 10,
+            "start_time_sec": 15,
         },
         "prose": {
             "spec_intro": (
@@ -97,7 +100,10 @@ SYSTEMS = {
                 "The proposed fuel capacity provides approximately 12 hours of "
                 "autonomy at rated load based on the manufacturer's specific fuel "
                 "consumption data of 214 g/kWh. The vendor notes that fuel delivery "
-                "contracts can supplement on-site storage for extended outages."
+                "contracts can supplement on-site storage for extended outages.\n"
+                "Start-up time: 15 seconds to rated speed (cranking, ignition, and "
+                "governor stabilisation). The vendor states this is within their "
+                "standard performance envelope for this frame size."
             ),
         },
     },
@@ -113,7 +119,7 @@ SYSTEMS = {
             "redundancy": "N+1",
             "supply_air_temp_c": 24,
             "capacity_tr": 1500,
-            "delta_t_c": 10,
+            "delta_t_c": 7,
         },
         "prose": {
             "spec_intro": (
@@ -128,7 +134,10 @@ SYSTEMS = {
                 "Configuration: 4 x 1500 TR chillers in N+1 arrangement.\n"
                 "The chiller plant is proposed as 3 duty + 1 standby (N+1) which "
                 "the vendor notes provides 33% excess capacity above the N requirement. "
-                "The P&ID shows a common header with isolation valves per chiller."
+                "The P&ID shows a common header with isolation valves per chiller.\n"
+                "Chilled water design delta-T: 7 deg C (12/5 deg C supply/return). "
+                "The vendor sizing is based on the standard catalogue selection for "
+                "this chiller frame and notes higher delta-T requires custom coils."
             ),
         },
     },
@@ -142,7 +151,7 @@ SYSTEMS = {
         "submittal": {
             "short_circuit_rating_ka": 40,
             "redundancy": "2N",
-            "arc_flash_rating": "Type_2B",
+            "arc_flash_rating": "Type_2",
         },
         "prose": {
             "spec_intro": (
@@ -156,7 +165,10 @@ SYSTEMS = {
                 "The switchgear is offered with a fault withstand rating of 40 kA "
                 "for 1 second, which is the standard catalogue rating for this "
                 "product range. ABB notes that 50 kA ratings are available as a "
-                "special order with extended lead times."
+                "special order with extended lead times.\n"
+                "Arc flash classification: Type 2 (internal arc tested per "
+                "IEC 62271-200). The vendor notes Type 2B classification requires "
+                "additional arc-absorber modules not included in the base offering."
             ),
         },
     },
@@ -170,7 +182,7 @@ SYSTEMS = {
         "submittal": {
             "fire_rating": "CMR",
             "category": "Cat6A",
-            "max_bundle_size": 48,
+            "max_bundle_size": 72,
         },
         "prose": {
             "spec_intro": (
@@ -184,7 +196,10 @@ SYSTEMS = {
                 "Fire rating: CMR (Communications Multipurpose Riser).\n"
                 "The vendor has proposed CMR-rated cable which meets the riser "
                 "classification. The vendor states this is the standard offering "
-                "for data centre deployments in their product line."
+                "for data centre deployments in their product line.\n"
+                "Bundle configuration: 72 cables per bundle as per the vendor's "
+                "standard tray layout. The vendor notes this maximises tray "
+                "utilisation and reduces installation labour."
             ),
         },
     },
@@ -197,7 +212,7 @@ SYSTEMS = {
         ],
         "submittal": {
             "critical_alarm_points": "missing:leak_detection",
-            "monitoring_redundancy": "dual",
+            "monitoring_redundancy": "single",
             "protocol": "BACnet_IP",
         },
         "prose": {
@@ -215,7 +230,11 @@ SYSTEMS = {
                 "The proposed alarm point list covers 847 points across all major "
                 "systems. Note: the leak-detection subsystem interface is pending "
                 "coordination with the leak-detection vendor and is not included "
-                "in this revision of the points list."
+                "in this revision of the points list.\n"
+                "Monitoring architecture: single BMS server with application-level "
+                "redundancy via database replication. The vendor notes that a "
+                "dual-server hot-standby configuration is available as an upgrade "
+                "option but is not included in the current scope."
             ),
         },
     },
@@ -266,7 +285,7 @@ SYSTEMS = {
             ("FLOOR", "height_mm", 900, "mm", "DESIGN-BASIS", "DB-13.3"),
         ],
         "submittal": {
-            "load_rating_kpa": 12,
+            "load_rating_kpa": 8,
             "seismic_zone": "Zone_IV",
             "height_mm": 600,
         },
@@ -287,7 +306,11 @@ SYSTEMS = {
                 "minimum recommended height per BICSI-002 and is adequate for "
                 "conventional under-floor air distribution. The project specification "
                 "of 900 mm has been noted but the vendor recommends the lower height "
-                "to reduce cost and pedestal count."
+                "to reduce cost and pedestal count.\n"
+                "Concentrated load rating: 8 kPa per CISCA testing. The vendor "
+                "states this is the standard panel rating for 600 mm pedestal height "
+                "and notes that 12 kPa panels require a heavier core and are "
+                "available on special order."
             ),
         },
     },
@@ -343,6 +366,61 @@ DEVIATION_TO_CX = {
         "reason": "Raised floor height 600 mm vs required 900 mm; insufficient "
                   "clearance for under-floor chilled-air distribution, power "
                   "cabling, and fire suppression piping per design basis DB-13.3.",
+    },
+    ("GEN-01", "start_time_sec"): {
+        "cx_test": "IST-01", "cx_level": 4,
+        "cx_name": "Utility failure simulation",
+        "week_fail": 34, "severity": "Critical",
+        "reason": "Generator start time exceeds Tier IV 10-second requirement; "
+                  "during utility failure, the additional 5-second delay risks "
+                  "UPS battery depletion on the concurrent maintenance path.",
+    },
+    ("COOL-LOOP", "delta_t_c"): {
+        "cx_test": "IST-16", "cx_level": 4,
+        "cx_name": "Cooling performance and thermal verification",
+        "week_fail": 36, "severity": "Major",
+        "reason": "Chilled water delta-T of 7 C vs required 10 C indicates low "
+                  "delta-T syndrome; pumps must increase flow 43% to meet heat "
+                  "rejection.",
+    },
+    ("UPS-02", "efficiency_pct"): {
+        "cx_test": "FAT-01", "cx_level": 3,
+        "cx_name": "UPS module load-bank test",
+        "week_fail": 24, "severity": "Major",
+        "reason": "UPS efficiency 93% vs required 96% adds 36 kW heat load per "
+                  "module at rated load; cooling plant not sized for additional "
+                  "heat rejection.",
+    },
+    ("SWGR-MV", "arc_flash_rating"): {
+        "cx_test": "ITP-03", "cx_level": 2,
+        "cx_name": "Arc flash labeling and PPE verification",
+        "week_fail": 20, "severity": "Major",
+        "reason": "Switchgear Type 2 vs required Type 2B exposes operators to "
+                  "incident energy above 40 cal/cm2; PPE category exceeds safe "
+                  "working practice limits.",
+    },
+    ("CABLE-DC", "max_bundle_size"): {
+        "cx_test": "ITP-04", "cx_level": 2,
+        "cx_name": "Pathway fill and cable management inspection",
+        "week_fail": 18, "severity": "Minor",
+        "reason": "Bundle size of 72 exceeds BICSI-002 pathway fill limit of 48; "
+                  "thermal derating reduces current capacity.",
+    },
+    ("BMS", "monitoring_redundancy"): {
+        "cx_test": "IST-15", "cx_level": 4,
+        "cx_name": "Full-facility failover drill",
+        "week_fail": 44, "severity": "Critical",
+        "reason": "Single monitoring path creates single point of failure; "
+                  "Tier IV requires concurrent maintainability of all monitoring "
+                  "systems.",
+    },
+    ("FLOOR", "load_rating_kpa"): {
+        "cx_test": "ITP-05", "cx_level": 1,
+        "cx_name": "Structural load test and floor deflection",
+        "week_fail": 19, "severity": "Critical",
+        "reason": "Floor load capacity 8 kPa vs required 12 kPa; high-density "
+                  "racks will exceed floor bearing capacity under seismic Zone IV "
+                  "conditions.",
     },
 }
 
@@ -802,6 +880,18 @@ def build():
              "name": "Cable fire-rating / plenum compliance inspection",
              "scheduled_week": 22,
              "acceptance": "Cable marking matches CMP plenum requirement"},
+            {"id": "ITP-03", "level": 2,
+             "name": "Arc flash labeling and PPE verification",
+             "scheduled_week": 20,
+             "acceptance": "Arc flash classification meets Type 2B requirement"},
+            {"id": "ITP-04", "level": 2,
+             "name": "Pathway fill and cable management inspection",
+             "scheduled_week": 18,
+             "acceptance": "Bundle size within BICSI-002 limit of 48 cables"},
+            {"id": "ITP-05", "level": 1,
+             "name": "Structural load test and floor deflection",
+             "scheduled_week": 19,
+             "acceptance": "Concentrated load rating >= 12 kPa per design basis"},
             {"id": "FAT-01", "level": 3, "name": "UPS module load-bank test",
              "scheduled_week": 24, "acceptance": "Full load sustained 4 hours"},
             {"id": "FAT-02", "level": 3, "name": "Generator load-bank test",
@@ -831,6 +921,10 @@ def build():
              "name": "Monitoring & alarm verification",
              "scheduled_week": 40,
              "acceptance": "All critical alarms fire and are received by BMS/NOC"},
+            {"id": "IST-16", "level": 4,
+             "name": "Cooling performance and thermal verification",
+             "scheduled_week": 36,
+             "acceptance": "Chilled water delta-T within design envelope"},
             {"id": "IST-15", "level": 4, "name": "Full-facility failover drill",
              "scheduled_week": 44, "acceptance": "Zero downtime during drill"},
             {"id": "SAT-01", "level": 5,

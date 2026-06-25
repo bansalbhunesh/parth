@@ -1,0 +1,66 @@
+[
+  {
+    "id": "RFI-003",
+    "system": "STRUCT",
+    "status": "resolved",
+    "question": "Confirm raised-floor height requirement for cable routing below floor in data halls 1-4.",
+    "resolution": "900 mm minimum confirmed per design basis DB-13.3. Vendor shall provide 900 mm clear height.",
+    "week": 3
+  },
+  {
+    "id": "RFI-009",
+    "system": "SWGR",
+    "status": "resolved",
+    "question": "Confirm prospective fault level for MV switchgear sizing.",
+    "resolution": "Fault study returned 47.6 kA; specify >=50 kA withstand.",
+    "week": 4
+  },
+  {
+    "id": "RFI-014",
+    "system": "UPS",
+    "status": "resolved",
+    "question": "Confirm UPS battery autonomy target for Tier IV during concurrent maintenance.",
+    "resolution": "Owner confirmed 10 min minimum autonomy at full load; vendor to resize battery string accordingly.",
+    "week": 6
+  },
+  {
+    "id": "RFI-015",
+    "system": "CABLE",
+    "status": "resolved",
+    "question": "Are all data cabling areas classified as plenum spaces requiring CMP-rated cable?",
+    "resolution": "Yes \u2014 all IT white-space areas and cable distribution areas are plenum-classified per NFPA 75.",
+    "week": 7
+  },
+  {
+    "id": "RFI-017",
+    "system": "GEN",
+    "status": "open",
+    "question": "Clarify on-site fuel autonomy hours for Tier IV \u2014 is 12h with a fuel delivery contract acceptable?",
+    "resolution": null,
+    "week": 8
+  },
+  {
+    "id": "RFI-019",
+    "system": "BMS",
+    "status": "open",
+    "question": "The BMS points list revision C is missing the leak-detection interface. When will it be included?",
+    "resolution": null,
+    "week": 9
+  },
+  {
+    "id": "RFI-021",
+    "system": "COOL",
+    "status": "open",
+    "question": "Is N+1 acceptable for the chilled-water loop or is N+2 required for fault tolerance?",
+    "resolution": null,
+    "week": 9
+  },
+  {
+    "id": "RFI-024",
+    "system": "FIRE",
+    "status": "resolved",
+    "question": "Confirm clean-agent suppression is required for all 8 IT zones or only the high-density zones.",
+    "resolution": "All 8 zones require clean-agent suppression per DB-10.2.",
+    "week": 10
+  }
+]

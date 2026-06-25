@@ -1,14 +1,7 @@
 {
-  "experimentalServices": {
-    "frontend": {
-      "routePrefix": "/",
-      "framework": "nextjs",
-      "rootDirectory": "frontend"
-    },
-    "backend": {
-      "routePrefix": "/_/backend",
-      "use": "@vercel/python",
-      "rootDirectory": "backend"
-    }
-  }
+  "framework": "nextjs",
+  "rootDirectory": "frontend",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "outputDirectory": ".next"
 }

@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pramaan — EPC Deviation Intelligence</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  :root {
+    --bg: #0a0d11;
+    --surface: #111820;
+    --surface2: #1a2030;
+    --cyan: #00d4ff;
+    --green: #35c98b;
+    --red: #ff4d4d;
+    --purple: #a855f7;
+    --gold: #ffb020;
+    --text: #e8ecf0;
+    --muted: #8892a0;
+    --font: 'Inter', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+  }
+
+  .deck {
+    width: 100%; height: 100%;
+    position: relative;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 80px;
+    opacity: 0;
+    transform: translateX(40px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .slide.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+
+  .slide.prev {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+
+  .progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--cyan), var(--purple));
+    transition: width 0.4s ease;
+    z-index: 100;
+  }
+
+  .slide-counter {
+    position: fixed;
+    bottom: 24px; right: 32px;
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--muted);
+    z-index: 100;
+  }
+
+  .nav-hint {
+    position: fixed;
+    bottom: 24px; left: 32px;
+    font-size: 12px;
+    color: var(--muted);
+    opacity: 0.5;
+    z-index: 100;
+  }
+
+  h1 {
+    font-size: 3.2rem;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    line-height: 1.15;
+    margin-bottom: 20px;
+  }
+
+  h2 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .subtitle {
+    font-size: 1.3rem;
+    color: var(--muted);
+    font-weight: 400;
+    line-height: 1.6;
+    max-width: 700px;
+    text-align: center;
+  }
+
+  .accent { color: var(--cyan); }
+  .green { color: var(--green); }
+  .red { color: var(--red); }
+  .purple { color: var(--purple); }
+  .gold { color: var(--gold); }
+
+  .tag {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 20px;
+  }
+
+  .tag-cyan { background: rgba(0,212,255,0.12); color: var(--cyan); border: 1px solid rgba(0,212,255,0.25); }
+  .tag-red { background: rgba(255,77,77,0.12); color: var(--red); border: 1px solid rgba(255,77,77,0.25); }
+  .tag-green { background: rgba(53,201,139,0.12); color: var(--green); border: 1px solid rgba(53,201,139,0.25); }
+  .tag-purple { background: rgba(168,85,247,0.12); color: var(--purple); border: 1px solid rgba(168,85,247,0.25); }
+
+  .big-number {
+    font-size: 7rem;
+    font-weight: 900;
+    letter-spacing: -4px;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .big-number-unit {
+    font-size: 2rem;
+    font-weight: 600;
+    -webkit-text-fill-color: var(--muted);
+    margin-left: 8px;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 900px;
+    margin: 16px 0;
+    font-size: 0.92rem;
+  }
+
+  th {
+    text-align: left;
+    padding: 10px 16px;
+    background: var(--surface2);
+    color: var(--cyan);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-bottom: 2px solid rgba(0,212,255,0.2);
+  }
+
+  td {
+    padding: 9px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    color: var(--text);
+  }
+
+  tr:hover td { background: rgba(0,212,255,0.03); }
+
+  .grid { display: grid; gap: 24px; width: 100%; max-width: 1100px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 28px;
+    text-align: center;
+  }
+
+  .card-value {
+    font-size: 2.4rem;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+
+  .card-label {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .pipeline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 1000px;
+  }
+
+  .pipe-node {
+    background: var(--surface);
+    border: 1.5px solid rgba(0,212,255,0.3);
+    border-radius: 12px;
+    padding: 16px 22px;
+    text-align: center;
+    min-width: 140px;
+  }
+
+  .pipe-node-num {
+    font-size: 0.7rem;
+    color: var(--cyan);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  .pipe-node-name {
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  .pipe-node-desc {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .pipe-arrow {
+    color: var(--cyan);
+    font-size: 1.4rem;
+    opacity: 0.5;
+  }
+
+  .quote {
+    border-left: 3px solid var(--cyan);
+    padding: 16px 24px;
+    background: rgba(0,212,255,0.04);
+    border-radius: 0 12px 12px 0;
+    max-width: 800px;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: var(--text);
+    font-style: italic;
+  }
+
+  .metric-row {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 20px 0;
+  }
+
+  .metric {
+    text-align: center;
+  }
+
+  .metric-val {
+    font-size: 2.8rem;
+    font-weight: 800;
+  }
+
+  .metric-label {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .dev-table { max-width: 1000px; }
+  .dev-table td:nth-child(4) { color: var(--red); font-weight: 600; }
+  .dev-table td:nth-child(5) { color: var(--green); font-family: var(--mono); }
+
+  .split { display: flex; gap: 48px; align-items: center; max-width: 1100px; width: 100%; }
+  .split-text { flex: 1; }
+  .split-visual { flex: 1; }
+
+  .before-after {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    max-width: 900px;
+    width: 100%;
+  }
+
+  .ba-card {
+    border-radius: 16px;
+    padding: 32px;
+    text-align: center;
+  }
+
+  .ba-before {
+    background: rgba(255,77,77,0.06);
+    border: 1.5px solid rgba(255,77,77,0.2);
+  }
+
+  .ba-after {
+    background: rgba(53,201,139,0.06);
+    border: 1.5px solid rgba(53,201,139,0.2);
+  }
+
+  .ba-time {
+    font-size: 3rem;
+    font-weight: 800;
+    margin: 12px 0 4px;
+  }
+
+  ul.features {
+    list-style: none;
+    text-align: left;
+    max-width: 700px;
+  }
+
+  ul.features li {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 1rem;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  ul.features li::before {
+    content: '▸';
+    color: var(--cyan);
+    font-weight: 700;
+  }
+
+  .rubric-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    max-width: 1000px;
+    width: 100%;
+  }
+
+  .rubric-card {
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 22px 26px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .rubric-card h3 {
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+
+  .rubric-card p {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .project-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 1100px;
+  }
+
+  .project-chip {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 14px 18px;
+    text-align: center;
+    min-width: 155px;
+  }
+
+  .project-chip-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+  }
+
+  .project-chip-meta {
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .project-chip-f1 {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--green);
+    margin-top: 6px;
+  }
+
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    max-width: 900px;
+    width: 100%;
+  }
+
+  .tech-item {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 18px 22px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .tech-item-layer {
+    font-size: 0.7rem;
+    color: var(--cyan);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .tech-item-name {
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+
+  .final-cta {
+    display: flex;
+    gap: 24px;
+    margin-top: 32px;
+  }
+
+  .cta-btn {
+    display: inline-block;
+    padding: 14px 32px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: transform 0.2s;
+  }
+
+  .cta-btn:hover { transform: translateY(-2px); }
+
+  .cta-primary {
+    background: linear-gradient(135deg, var(--cyan), #0090ff);
+    color: #000;
+  }
+
+  .cta-secondary {
+    background: var(--surface);
+    color: var(--text);
+    border: 1.5px solid rgba(0,212,255,0.3);
+  }
+
+  .glow-line {
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--cyan), var(--purple));
+    border-radius: 2px;
+    margin: 16px auto;
+  }
+
+  .fade-up {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .slide.active .fade-up { opacity: 1; transform: translateY(0); }
+  .slide.active .fade-up:nth-child(2) { transition-delay: 0.1s; }
+  .slide.active .fade-up:nth-child(3) { transition-delay: 0.2s; }
+  .slide.active .fade-up:nth-child(4) { transition-delay: 0.3s; }
+  .slide.active .fade-up:nth-child(5) { transition-delay: 0.4s; }
+  .slide.active .fade-up:nth-child(6) { transition-delay: 0.5s; }
+
+  .bg-gradient {
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.08;
+    pointer-events: none;
+  }
+
+  .bg-g1 { background: var(--cyan); top: -200px; right: -200px; }
+  .bg-g2 { background: var(--purple); bottom: -200px; left: -200px; }
+
+  @media print {
+    .slide { page-break-after: always; position: relative; opacity: 1 !important; transform: none !important; pointer-events: auto !important; min-height: 100vh; }
+    .progress, .slide-counter, .nav-hint { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="slide-counter" id="counter"></div>
+<div class="nav-hint">← → arrow keys &nbsp;|&nbsp; space bar</div>
+
+<div class="deck" id="deck">
+
+<!-- SLIDE 1: Title -->
+<div class="slide active">
+  <div class="bg-gradient bg-g1"></div>
+  <div class="bg-gradient bg-g2"></div>
+  <div class="fade-up">
+    <span class="tag tag-cyan">ET AI HACKATHON 2026 &middot; PROBLEM STATEMENT 4</span>
+  </div>
+  <h1 class="fade-up" style="font-size:4.5rem; letter-spacing:-3px;">
+    PRA<span class="accent">MAAN</span>
+  </h1>
+  <div class="glow-line fade-up"></div>
+  <p class="subtitle fade-up">EPC Deviation Intelligence for Hyperscale Data Centres</p>
+  <p class="fade-up" style="color:var(--muted); margin-top:24px; font-size:0.95rem;">
+    Spec-to-Site Deviation Sentinel + Commissioning Risk Twin
+  </p>
+  <div class="metric-row fade-up" style="margin-top:40px;">
+    <div class="metric"><div class="metric-val accent">33</div><div class="metric-label">Deviations Caught</div></div>
+    <div class="metric"><div class="metric-val green">691</div><div class="metric-label">Weeks Saved</div></div>
+    <div class="metric"><div class="metric-val purple">1.000</div><div class="metric-label">F1 Score</div></div>
+    <div class="metric"><div class="metric-val gold">6</div><div class="metric-label">Projects</div></div>
+  </div>
+</div>
+
+<!-- SLIDE 2: The Problem -->
+<div class="slide">
+  <div class="bg-gradient bg-g1"></div>
+  <span class="tag tag-red fade-up">THE PROBLEM</span>
+  <h2 class="fade-up">Deviations Hide in Thousands of Pages</h2>
+  <p class="subtitle fade-up" style="margin-bottom:28px;">
+    In a <strong class="accent">40 MW Tier IV</strong> data centre build, the design basis, vendor submittals, and governing standards live in different systems, reviewed by different people.
+  </p>
+  <div class="before-after fade-up">
+    <div class="ba-card ba-before">
+      <h3 class="red">Today</h3>
+      <div class="ba-time red">Week 16–44</div>
+      <p style="color:var(--muted); font-size:0.9rem;">Deviations surface during commissioning — rework, schedule delays, cost overruns</p>
+    </div>
+    <div class="ba-card ba-after">
+      <h3 class="green">With Pramaan</h3>
+      <div class="ba-time green">Week 11</div>
+      <p style="color:var(--muted); font-size:0.9rem;">All 14 caught the day the submittal was uploaded — under 5 minutes</p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3: What Goes Wrong -->
+<div class="slide">
+  <span class="tag tag-red fade-up">WHAT GOES WRONG</span>
+  <h2 class="fade-up" style="margin-bottom:20px;">14 Critical Deviations in One Project</h2>
+  <table class="dev-table fade-up">
+    <tr><th>Deviation</th><th>Spec Says</th><th>Vendor Submitted</th><th>Impact</th><th>Lead</th></tr>
+    <tr><td>UPS battery runtime</td><td>10 min</td><td>7 min</td><td>Tier IV fault tolerance broken</td><td>27w</td></tr>
+    <tr><td>Generator fuel autonomy</td><td>24 h</td><td>12 h</td><td>Design-duration outage failure</td><td>30w</td></tr>
+    <tr><td>Cooling redundancy</td><td>N+2</td><td>N+1</td><td>No concurrent maint. tolerance</td><td>28w</td></tr>
+    <tr><td>BMS monitoring</td><td>Dual</td><td>Single</td><td>Single point of failure</td><td>33w</td></tr>
+    <tr><td>Generator start time</td><td>10 s</td><td>15 s</td><td>Battery depletion risk</td><td>23w</td></tr>
+    <tr><td>BMS alarm coverage</td><td>Complete</td><td>Missing leak</td><td>IST-14 alarm test will fail</td><td>29w</td></tr>
+    <tr><td>Cable fire rating</td><td>CMP</td><td>CMR</td><td>NFPA 75 violation in plenum</td><td>11w</td></tr>
+  </table>
+  <p class="fade-up" style="color:var(--muted); font-size:0.85rem; margin-top:8px;">
+    Showing 7 of 14 &middot; Total lead time: <strong class="green">267 weeks</strong> (5+ years)
+  </p>
+</div>
+
+<!-- SLIDE 4: The Headline -->
+<div class="slide">
+  <div class="bg-gradient bg-g1"></div>
+  <div class="bg-gradient bg-g2"></div>
+  <span class="tag tag-green fade-up">THE HEADLINE</span>
+  <div class="big-number fade-up">267<span class="big-number-unit">weeks</span></div>
+  <p class="subtitle fade-up" style="margin-top:20px;">of total lead time saved across 14 deviations</p>
+  <div class="glow-line fade-up"></div>
+  <div class="quote fade-up" style="margin-top:24px;">
+    Pramaan caught a critical BMS monitoring single-point-of-failure <strong>33 weeks</strong> before it would have failed the full-facility failover drill. That's the difference between a one-line email and a seven-figure schedule slip.
+  </div>
+</div>
+
+<!-- SLIDE 5: The Solution -->
+<div class="slide">
+  <span class="tag tag-cyan fade-up">THE SOLUTION</span>
+  <h2 class="fade-up">5 AI Agents, One Pipeline</h2>
+  <p class="subtitle fade-up" style="margin-bottom:32px;">
+    LangGraph orchestrator cross-references every requirement against every submittal against every governing standard
+  </p>
+  <div class="pipeline fade-up">
+    <div class="pipe-node">
+      <div class="pipe-node-num">Agent 1</div>
+      <div class="pipe-node-name">Ingestion</div>
+      <div class="pipe-node-desc">PDF → Markdown</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node">
+      <div class="pipe-node-num">Agent 2</div>
+      <div class="pipe-node-name">Extraction</div>
+      <div class="pipe-node-desc">Structured Triples</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node" style="border-color: rgba(255,77,77,0.4);">
+      <div class="pipe-node-num" style="color:var(--red);">Agent 3 — THE BRAIN</div>
+      <div class="pipe-node-name">Reconciliation</div>
+      <div class="pipe-node-desc">Cross-doc reasoning</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node">
+      <div class="pipe-node-num">Agent 4</div>
+      <div class="pipe-node-name">Cx Predictor</div>
+      <div class="pipe-node-desc">Test + Lead Time</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node">
+      <div class="pipe-node-num">Agent 5</div>
+      <div class="pipe-node-name">RFI Copilot</div>
+      <div class="pipe-node-desc">RAG Q&A + Citations</div>
+    </div>
+  </div>
+  <p class="fade-up" style="color:var(--muted); font-size:0.85rem; margin-top:20px;">
+    LangGraph StateGraph &middot; Conditional routing &middot; TypedDict state &middot; Validation gate
+  </p>
+</div>
+
+<!-- SLIDE 6: Detection Accuracy -->
+<div class="slide">
+  <span class="tag tag-green fade-up">DETECTION ACCURACY</span>
+  <h2 class="fade-up">F1 = 1.000 &middot; Zero False Positives</h2>
+  <div class="grid grid-4 fade-up" style="max-width:900px; margin-top:24px;">
+    <div class="card">
+      <div class="card-value green">1.000</div>
+      <div class="card-label">Precision</div>
+    </div>
+    <div class="card">
+      <div class="card-value green">1.000</div>
+      <div class="card-label">Recall</div>
+    </div>
+    <div class="card">
+      <div class="card-value green">1.000</div>
+      <div class="card-label">F1 Score</div>
+    </div>
+    <div class="card">
+      <div class="card-value green">0</div>
+      <div class="card-label">False Positives</div>
+    </div>
+  </div>
+  <div class="grid grid-3 fade-up" style="max-width:700px; margin-top:16px;">
+    <div class="card">
+      <div class="card-value accent">1.000</div>
+      <div class="card-label">Cx Prediction</div>
+    </div>
+    <div class="card">
+      <div class="card-value accent">17</div>
+      <div class="card-label">Cx Tests Mapped</div>
+    </div>
+    <div class="card">
+      <div class="card-value accent">160+</div>
+      <div class="card-label">Automated Tests</div>
+    </div>
+  </div>
+  <p class="fade-up" style="color:var(--muted); font-size:0.85rem; margin-top:16px;">
+    Triple eval harness: structured baseline + raw text extraction + multi-project aggregate
+  </p>
+</div>
+
+<!-- SLIDE 7: Multi-Project -->
+<div class="slide">
+  <span class="tag tag-purple fade-up">MULTI-PROJECT GENERALISATION</span>
+  <h2 class="fade-up">6 Projects &middot; 5 Countries &middot; 4 Tier Standards</h2>
+  <div class="project-row fade-up" style="margin-top:24px;">
+    <div class="project-chip">
+      <div class="project-chip-name">Meghdoot</div>
+      <div class="project-chip-meta">Tier IV · Mumbai · 40MW</div>
+      <div class="project-chip-meta">14 devs · 267w saved</div>
+      <div class="project-chip-f1">F1 = 1.000</div>
+    </div>
+    <div class="project-chip">
+      <div class="project-chip-name">Vajra</div>
+      <div class="project-chip-meta">Tier III · Pune · 20MW</div>
+      <div class="project-chip-meta">4 devs · 95w saved</div>
+      <div class="project-chip-f1">F1 = 1.000</div>
+    </div>
+    <div class="project-chip">
+      <div class="project-chip-name">Nordic Edge</div>
+      <div class="project-chip-meta">EN 50600 · Oslo · 10MW</div>
+      <div class="project-chip-meta">5 devs · 113w saved</div>
+      <div class="project-chip-f1">F1 = 1.000</div>
+    </div>
+    <div class="project-chip">
+      <div class="project-chip-name">Sahara</div>
+      <div class="project-chip-meta">Tier II · Dubai · 5MW</div>
+      <div class="project-chip-meta">3 devs · 38w saved</div>
+      <div class="project-chip-f1">F1 = 1.000</div>
+    </div>
+    <div class="project-chip">
+      <div class="project-chip-name">Cascade</div>
+      <div class="project-chip-meta">Tier IV · Oregon · 30MW</div>
+      <div class="project-chip-meta">4 devs · 80w saved</div>
+      <div class="project-chip-f1">F1 = 1.000</div>
+    </div>
+    <div class="project-chip">
+      <div class="project-chip-name">Yangtze</div>
+      <div class="project-chip-meta">GB 50174 · Shanghai · 50MW</div>
+      <div class="project-chip-meta">3 devs · 98w saved</div>
+      <div class="project-chip-f1">F1 = 1.000</div>
+    </div>
+  </div>
+  <div class="metric-row fade-up" style="margin-top:28px;">
+    <div class="metric"><div class="metric-val green">691</div><div class="metric-label">Total Weeks Saved</div></div>
+    <div class="metric"><div class="metric-val accent">155</div><div class="metric-label">Total MW</div></div>
+    <div class="metric"><div class="metric-val purple">15+</div><div class="metric-label">Standards Covered</div></div>
+  </div>
+</div>
+
+<!-- SLIDE 8: Dashboard -->
+<div class="slide">
+  <span class="tag tag-cyan fade-up">LIVE DASHBOARD</span>
+  <h2 class="fade-up">19-Section Dashboard &middot; 24 Components</h2>
+  <div class="grid grid-3 fade-up" style="max-width:1000px; margin-top:20px;">
+    <div class="card" style="text-align:left;">
+      <h3 style="color:var(--cyan); font-size:0.85rem;">AWARENESS</h3>
+      <ul class="features" style="max-width:unset;">
+        <li>Hero Intro & Problem</li>
+        <li>Sentinel Alert</li>
+        <li>267-Week Counter</li>
+        <li>Before / After Toggle</li>
+      </ul>
+    </div>
+    <div class="card" style="text-align:left;">
+      <h3 style="color:var(--purple); font-size:0.85rem;">INTELLIGENCE</h3>
+      <ul class="features" style="max-width:unset;">
+        <li>System Health Grid</li>
+        <li>Deviation Register</li>
+        <li>Risk Matrix</li>
+        <li>Document Diff Viewer</li>
+        <li>Cx Risk Twin (Gantt)</li>
+      </ul>
+    </div>
+    <div class="card" style="text-align:left;">
+      <h3 style="color:var(--green); font-size:0.85rem;">ACTION</h3>
+      <ul class="features" style="max-width:unset;">
+        <li>Live PDF Analysis</li>
+        <li>RFI Copilot (RAG)</li>
+        <li>ROI Calculator</li>
+        <li>Export Evidence Pack</li>
+        <li>Multi-Project Eval</li>
+      </ul>
+    </div>
+  </div>
+  <p class="fade-up" style="color:var(--muted); margin-top:20px; font-size:0.88rem;">
+    Next.js 15 &middot; Dark theme &middot; Scroll-reveal animations &middot; Responsive &middot; Streaming AI
+  </p>
+</div>
+
+<!-- SLIDE 9: Eval Harness -->
+<div class="slide">
+  <span class="tag tag-green fade-up">EVAL HARNESS</span>
+  <h2 class="fade-up">Three Independent Proof Paths</h2>
+  <p class="subtitle fade-up" style="margin-bottom:28px;">No circular reasoning — three independent paths all score 1.000</p>
+  <div class="grid grid-3 fade-up" style="max-width:950px;">
+    <div class="card">
+      <h3 style="color:var(--cyan);">Path 1: Structured</h3>
+      <p style="color:var(--muted); font-size:0.85rem; margin-top:8px;">Pre-extracted triples vs ground truth</p>
+      <div class="card-value green" style="margin-top:12px;">F1 = 1.000</div>
+      <p style="color:var(--muted); font-size:0.8rem;">Data integrity proof</p>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--purple);">Path 2: Text-Based</h3>
+      <p style="color:var(--muted); font-size:0.85rem; margin-top:8px;">Raw markdown → regex extraction</p>
+      <div class="card-value green" style="margin-top:12px;">F1 = 1.000</div>
+      <p style="color:var(--muted); font-size:0.8rem;">Non-circular proof</p>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--gold);">Path 3: LLM Agent</h3>
+      <p style="color:var(--muted); font-size:0.85rem; margin-top:8px;">Raw docs → LLM reasoning → deviations</p>
+      <div class="card-value green" style="margin-top:12px;">≥ 0.92</div>
+      <p style="color:var(--muted); font-size:0.8rem;">Full AI pipeline proof</p>
+    </div>
+  </div>
+  <p class="fade-up" style="color:var(--muted); font-size:0.85rem; margin-top:16px;">
+    <code style="font-family:var(--mono); color:var(--cyan);">make eval-all</code> — one command, three proofs
+  </p>
+</div>
+
+<!-- SLIDE 10: Scale Story -->
+<div class="slide">
+  <span class="tag tag-purple fade-up">SCALE STORY</span>
+  <h2 class="fade-up">Demo → Enterprise</h2>
+  <div class="grid grid-2 fade-up" style="max-width:900px; margin-top:24px;">
+    <div class="card">
+      <h3 style="color:var(--muted);">Current Demo</h3>
+      <ul class="features" style="max-width:unset;">
+        <li>6 projects, 5 countries</li>
+        <li>47 systems across portfolio</li>
+        <li>130 requirements tracked</li>
+        <li>33 deviations detected</li>
+        <li>TF-IDF retriever</li>
+        <li>Synchronous agents</li>
+      </ul>
+    </div>
+    <div class="card" style="border-color:rgba(0,212,255,0.2);">
+      <h3 style="color:var(--cyan);">At Enterprise Scale</h3>
+      <ul class="features" style="max-width:unset;">
+        <li>Hundreds of concurrent projects</li>
+        <li>500+ systems per project</li>
+        <li>14,000+ line items per project</li>
+        <li>Continuous monitoring pipeline</li>
+        <li>pgvector / Qdrant vector store</li>
+        <li>LangGraph async + task queue</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 11: Rubric Mapping -->
+<div class="slide">
+  <span class="tag tag-gold fade-up">HACKATHON RUBRIC</span>
+  <h2 class="fade-up">How Pramaan Maps to Every Dimension</h2>
+  <div class="rubric-grid fade-up" style="margin-top:20px;">
+    <div class="rubric-card">
+      <h3><span class="accent">Innovation</span></h3>
+      <p>Cross-document AI reasoning across spec + submittal + standard. No commercial tool does this. 5 specialized agents, LangGraph orchestration.</p>
+    </div>
+    <div class="rubric-card">
+      <h3><span class="green">Business Impact</span></h3>
+      <p>691 weeks of early detection across 33 findings in 6 projects. Interactive ROI calculator shows ₹1,788 lakhs avoided on ₹800 Cr project.</p>
+    </div>
+    <div class="rubric-card">
+      <h3><span class="purple">Technical Excellence</span></h3>
+      <p>Triple eval harness with P/R/F1 = 1.000 across 6 projects. 160+ tests. 22 endpoints. Non-circular evaluation. Zero false positives.</p>
+    </div>
+    <div class="rubric-card">
+      <h3><span class="gold">Scalability & UX</span></h3>
+      <p>19-section dashboard with 60-second demo narrative. Multi-project eval. Streaming AI. PDF upload. Evidence export. Responsive design.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 12: Tech Stack -->
+<div class="slide">
+  <span class="tag tag-cyan fade-up">TECH STACK</span>
+  <h2 class="fade-up">Built With</h2>
+  <div class="tech-grid fade-up" style="margin-top:24px;">
+    <div class="tech-item">
+      <div class="tech-item-layer">LLM</div>
+      <div class="tech-item-name">Gemini 2.5 Flash</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-item-layer">Orchestration</div>
+      <div class="tech-item-name">LangGraph</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-item-layer">Backend</div>
+      <div class="tech-item-name">FastAPI + SSE</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-item-layer">Frontend</div>
+      <div class="tech-item-name">Next.js 15 + React 19</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-item-layer">PDF</div>
+      <div class="tech-item-name">pdfplumber + PyMuPDF</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-item-layer">Retrieval</div>
+      <div class="tech-item-name">TF-IDF → pgvector</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-item-layer">Eval</div>
+      <div class="tech-item-name">Triple Harness</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-item-layer">Scraping</div>
+      <div class="tech-item-name">Firecrawl + Playwright</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-item-layer">Deploy</div>
+      <div class="tech-item-name">Vercel + Render</div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 13: ROI -->
+<div class="slide">
+  <div class="bg-gradient bg-g1"></div>
+  <div class="bg-gradient bg-g2"></div>
+  <span class="tag tag-green fade-up">BUSINESS IMPACT</span>
+  <h2 class="fade-up">The ROI That Sells Itself</h2>
+  <div class="grid grid-3 fade-up" style="max-width:800px; margin-top:28px;">
+    <div class="card">
+      <div class="card-value" style="color:var(--red);">₹800 Cr</div>
+      <div class="card-label">Project Value</div>
+    </div>
+    <div class="card">
+      <div class="card-value green">₹1,788L</div>
+      <div class="card-label">Rework Avoided</div>
+    </div>
+    <div class="card">
+      <div class="card-value accent">&lt; 30</div>
+      <div class="card-label">Payback (Days)</div>
+    </div>
+  </div>
+  <p class="subtitle fade-up" style="margin-top:28px;">
+    Every deviation carries <code style="font-family:var(--mono); color:var(--cyan);">lead_time_weeks</code>.<br>
+    The metric that wins is <strong class="green">time</strong> — not accuracy alone.
+  </p>
+</div>
+
+<!-- SLIDE 14: Thank You -->
+<div class="slide">
+  <div class="bg-gradient bg-g1"></div>
+  <div class="bg-gradient bg-g2"></div>
+  <div class="fade-up">
+    <span class="tag tag-cyan">THANK YOU</span>
+  </div>
+  <h1 class="fade-up" style="font-size:4rem;">
+    PRA<span class="accent">MAAN</span>
+  </h1>
+  <div class="glow-line fade-up"></div>
+  <p class="subtitle fade-up">
+    33 deviations &middot; 691 weeks saved &middot; 6 projects &middot; 5 countries<br>
+    F1 = 1.000 &middot; Zero false positives &middot; 160+ tests
+  </p>
+  <div class="final-cta fade-up">
+    <a class="cta-btn cta-primary" href="https://parth-tan.vercel.app" target="_blank">▶ Live Demo</a>
+    <a class="cta-btn cta-secondary" href="https://parth-3puc.onrender.com/docs" target="_blank">API Docs</a>
+  </div>
+  <p class="fade-up" style="color:var(--muted); margin-top:32px; font-size:0.85rem;">
+    parth-tan.vercel.app &middot; parth-3puc.onrender.com
+  </p>
+</div>
+
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const progress = document.getElementById('progress');
+const counter = document.getElementById('counter');
+let current = 0;
+
+function goTo(n) {
+  if (n < 0 || n >= slides.length) return;
+  slides[current].classList.remove('active');
+  slides[current].classList.add(n > current ? 'prev' : '');
+  current = n;
+  slides.forEach((s, i) => {
+    s.classList.remove('active', 'prev');
+    if (i === current) s.classList.add('active');
+  });
+  progress.style.width = ((current + 1) / slides.length * 100) + '%';
+  counter.textContent = (current + 1) + ' / ' + slides.length;
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goTo(current + 1); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(current - 1); }
+  if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+  if (e.key === 'End') { e.preventDefault(); goTo(slides.length - 1); }
+});
+
+let touchX = 0;
+document.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchX;
+  if (Math.abs(dx) > 50) dx < 0 ? goTo(current + 1) : goTo(current - 1);
+});
+
+goTo(0);
+</script>
+</body>
+</html>

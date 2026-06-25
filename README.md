@@ -24,6 +24,12 @@
   <img src="https://img.shields.io/badge/countries-5-ffb020?style=flat-square&labelColor=1a1508" alt="5 countries">
 </p>
 
+<p align="center">
+  <a href="https://parth-tan.vercel.app"><img src="https://img.shields.io/badge/▶_LIVE_DEMO-parth--tan.vercel.app-00d4ff?style=for-the-badge&labelColor=0a0d11" alt="Live Demo"></a>
+  <a href="https://parth-3puc.onrender.com/health"><img src="https://img.shields.io/badge/API-parth--3puc.onrender.com-35c98b?style=for-the-badge&labelColor=0d1a14" alt="API"></a>
+  <a href="presentation.html"><img src="https://img.shields.io/badge/📊_PRESENTATION-14_slides-a855f7?style=for-the-badge&labelColor=1a1020" alt="Presentation"></a>
+</p>
+
 ---
 
 ## The Headline

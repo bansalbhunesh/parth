@@ -119,3 +119,58 @@ class TestStandardsCorpus:
         for f in (CORPUS / "standards").glob("*.md"):
             total += f.read_text().count("\n")
         assert total >= 500, f"Standards corpus only {total} lines — expected >=500"
+
+
+class TestCorpusIntegrity:
+    def test_all_specs_are_valid_markdown(self):
+        """All .md files in specs/ should be non-empty and contain headers."""
+        specs_dir = CORPUS / "specs"
+        files = list(specs_dir.glob("*.md"))
+        assert len(files) > 0
+        for f in files:
+            text = f.read_text()
+            assert len(text) > 0, f"Spec {f.name} is empty"
+            assert "#" in text, f"Spec {f.name} has no markdown headers"
+
+    def test_all_submittals_reference_system(self):
+        """Each submittal filename should match a spec filename."""
+        spec_stems = {p.stem for p in (CORPUS / "specs").glob("*.md")}
+        sub_stems = {p.stem for p in (CORPUS / "submittals").glob("*.md")}
+        for sub in sub_stems:
+            assert sub in spec_stems, \
+                f"Submittal '{sub}' has no matching spec file"
+
+    def test_standards_are_non_empty(self):
+        """All standards .md files should be non-empty."""
+        stds_dir = CORPUS / "standards"
+        files = list(stds_dir.glob("*.md"))
+        assert len(files) > 0
+        for f in files:
+            text = f.read_text()
+            assert len(text.strip()) > 0, f"Standard {f.name} is empty"
+
+    def test_rfi_log_entries_have_required_fields(self):
+        """Each RFI should have id, system, subject/question, status."""
+        rfis = json.loads((CORPUS / "rfi" / "rfi_log.json").read_text())
+        assert len(rfis) > 0
+        for rfi in rfis:
+            assert "id" in rfi, f"RFI missing 'id' field"
+            assert "system" in rfi, f"RFI {rfi.get('id')} missing 'system' field"
+            assert "question" in rfi or "subject" in rfi, \
+                f"RFI {rfi.get('id')} missing 'question'/'subject' field"
+            assert "status" in rfi, f"RFI {rfi.get('id')} missing 'status' field"
+
+    def test_ground_truth_deviation_ids_unique(self):
+        """No duplicate deviation IDs in ground truth."""
+        gt = json.loads((CORPUS / "ground_truth.json").read_text())
+        ids = [d["id"] for d in gt["seeded_deviations"]]
+        assert len(ids) == len(set(ids)), \
+            f"Duplicate deviation IDs found: {[x for x in ids if ids.count(x) > 1]}"
+
+    def test_extracted_requirements_count_matches_specs(self):
+        """Number of unique systems in extracted requirements should match spec systems."""
+        reqs = json.loads((CORPUS / "extracted" / "requirements.json").read_text())
+        spec_systems = {p.stem for p in (CORPUS / "specs").glob("*.md")}
+        req_systems = {r["system"] for r in reqs}
+        assert req_systems.issubset(spec_systems), \
+            f"Extracted requirements reference unknown systems: {req_systems - spec_systems}"

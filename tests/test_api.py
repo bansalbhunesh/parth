@@ -362,3 +362,76 @@ class TestGroundTruthDeviations:
         )
         total = sum(d["lead_time_weeks"] for d in gt["seeded_deviations"])
         assert total == 267
+
+
+class TestApiEdgeCases:
+    def test_ingest_invalid_system(self):
+        """POST /ingest/INVALID_SYSTEM should return 404."""
+        r = client.post("/ingest/INVALID_SYSTEM")
+        assert r.status_code == 404
+
+    def test_analyze_empty_input(self):
+        """POST /analyze with empty spec_text and sub_text should return 422 (validation)."""
+        r = client.post("/analyze", json={"spec_text": "", "submittal_text": ""})
+        assert r.status_code == 422
+
+    def test_corpus_doc_invalid_type(self):
+        """GET /corpus/doc/invalid_type/UPS should return 400."""
+        r = client.get("/corpus/doc/invalid_type/UPS")
+        assert r.status_code == 400
+
+    def test_corpus_doc_invalid_id(self):
+        """GET /corpus/doc/specs/NONEXISTENT should return 404."""
+        r = client.get("/corpus/doc/specs/NONEXISTENT")
+        assert r.status_code == 404
+
+    def test_project_invalid_id(self):
+        """GET /projects/nonexistent should return 404."""
+        r = client.get("/projects/nonexistent")
+        assert r.status_code == 404
+
+    def test_health_response_fields(self):
+        """GET /health should have 'ok' and 'version' fields."""
+        r = client.get("/health")
+        assert r.status_code == 200
+        data = r.json()
+        assert "ok" in data
+        assert "version" in data
+        assert isinstance(data["ok"], bool)
+        assert isinstance(data["version"], str)
+
+    def test_metrics_has_all_fields(self):
+        """GET /metrics should have precision, recall, f1, lead_time fields."""
+        r = client.get("/metrics")
+        assert r.status_code == 200
+        data = r.json()
+        detection = data["detection"]
+        assert "baseline_precision" in detection
+        assert "baseline_recall" in detection
+        assert "baseline_f1" in detection
+        cx = data["commissioning"]
+        assert "total_lead_time_weeks" in cx
+        assert "max_lead_time_weeks" in cx
+        assert "mean_lead_time_weeks" in cx
+
+    def test_deviations_severity_values(self):
+        """Each deviation's severity should be one of Critical/Major/Minor."""
+        import json
+        gt = json.loads(
+            (pathlib.Path(__file__).parent.parent / "data" / "corpus" / "ground_truth.json")
+            .read_text()
+        )
+        valid_severities = {"Critical", "Major", "Minor"}
+        for d in gt["seeded_deviations"]:
+            assert d["severity"] in valid_severities, \
+                f"Deviation {d['id']} has invalid severity '{d['severity']}'"
+
+    def test_systems_have_required_fields(self):
+        """GET /systems should return a list; each system is a string id."""
+        r = client.get("/systems")
+        assert r.status_code == 200
+        data = r.json()
+        assert "systems" in data
+        for sys_id in data["systems"]:
+            assert isinstance(sys_id, str)
+            assert len(sys_id) > 0

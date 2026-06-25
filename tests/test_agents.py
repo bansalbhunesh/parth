@@ -286,3 +286,45 @@ class TestTextEval:
         results = run_text_eval()
         for pid, r in results.items():
             assert r["scores"]["f1"] == 1.0, f"Project {pid} F1 != 1.0"
+
+
+class TestDeterministicCompare:
+    def test_deterministic_compare_no_deviations(self):
+        """Comparing identical spec and submittal text should return empty list."""
+        from backend.analyze import _deterministic_compare
+        text = """# Design Basis
+- **UPS-02** — battery runtime min: shall be **10 min** (ref: DESIGN-BASIS; clause DB-4.3)
+- **UPS-02** — efficiency: shall be **96 %** (ref: DESIGN-BASIS; clause DB-4.5)"""
+        sub = """# Vendor Submittal
+- **UPS-02** — battery runtime min: **10 min** (vendor)
+- **UPS-02** — efficiency: **96 %** (vendor)"""
+        devs = _deterministic_compare(text, sub)
+        assert isinstance(devs, list)
+        assert len(devs) == 0, f"Expected 0 deviations for matching values, got {len(devs)}"
+
+    def test_deterministic_compare_detects_numeric_diff(self):
+        """Texts with numeric differences should produce deviations."""
+        from backend.analyze import _deterministic_compare
+        spec = """# Design Basis
+- **TEST-01** — voltage: shall be **400 V** (ref: DESIGN-BASIS; clause DB-1.1)"""
+        sub = """# Vendor Submittal
+- **TEST-01** — voltage: **380 V** (vendor)"""
+        devs = _deterministic_compare(spec, sub)
+        assert isinstance(devs, list)
+        assert len(devs) >= 1, "Should detect at least one numeric deviation"
+        assert any(d["component"] == "TEST-01" for d in devs)
+
+
+class TestCxPredictorMapping:
+    def test_cx_predictor_maps_all_deviations(self):
+        """Every deviation in ground truth should map to a cx test."""
+        gt = json.loads((CORPUS / "ground_truth.json").read_text())
+        from backend.agents.commissioning import predict_cx_impact
+        for d in gt["seeded_deviations"]:
+            result = predict_cx_impact(d)
+            assert result["predicted_cx_test"] is not None, \
+                f"Deviation {d['id']} ({d['component']}.{d['parameter']}) " \
+                f"has no predicted cx test"
+            assert result["predicted_cx_test"].startswith(("IST-", "FAT-", "ITP-")), \
+                f"Deviation {d['id']} has unexpected cx test format: " \
+                f"{result['predicted_cx_test']}"

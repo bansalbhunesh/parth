@@ -19,7 +19,7 @@
   <img src="https://img.shields.io/badge/precision-1.000-35c98b?style=flat-square&labelColor=0d1a14" alt="Precision 1.000">
   <img src="https://img.shields.io/badge/recall-1.000-35c98b?style=flat-square&labelColor=0d1a14" alt="Recall 1.000">
   <img src="https://img.shields.io/badge/false_positives-0-35c98b?style=flat-square&labelColor=0d1a14" alt="0 false positives">
-  <img src="https://img.shields.io/badge/tests-126-5b8cff?style=flat-square&labelColor=111820" alt="126 tests">
+  <img src="https://img.shields.io/badge/tests-131-5b8cff?style=flat-square&labelColor=111820" alt="131 tests">
   <img src="https://img.shields.io/badge/agents-5-5b8cff?style=flat-square&labelColor=111820" alt="5 agents">
   <img src="https://img.shields.io/badge/countries-5-ffb020?style=flat-square&labelColor=1a1508" alt="5 countries">
 </p>
@@ -86,11 +86,11 @@ Pramaan is a **multi-agent AI system** that cross-references every requirement a
 
 | # | Agent | What it does | Tech |
 |---|-------|-------------|------|
-| 1 | **Ingestion** | PDF/DOCX → normalized markdown per system | Gemini multimodal |
+| 1 | **Ingestion** | PDF/DOCX → normalized markdown per system | pdfplumber + PyMuPDF + Gemini multimodal |
 | 2 | **Extraction** | Raw documents → structured triples (parameter, value, unit, clause) | Gemini + accuracy scoring |
 | 3 | **Reconciliation** | Cross-document deviation detection — the brain | Gemini + confidence scoring |
 | 4 | **Cx Predictor** | Deviation → commissioning test (L1–L5) + week + lead time | Rule table + LLM fallback |
-| 5 | **RFI Copilot** | RAG over project corpus with citation + prior-RFI matching | TF-IDF / pgvector retrieval |
+| 5 | **RFI Copilot** | RAG over project corpus with citation + prior-RFI matching | TF-IDF retrieval + streaming |
 
 ---
 
@@ -148,11 +148,9 @@ Pramaan is evaluated across **6 project datasets** spanning different tiers, geo
 | **TOTAL** | **4 tiers** | **5 countries** | **155** | **15+ standards** | **33** | **691w** | **1.000** |
 
 ```bash
-# Run multi-project eval
 python3 eval/multi_project_eval.py
 # → 6 projects, 33 deviations, P=1.000 R=1.000 F1=1.000, 691 weeks saved
 
-# JSON output for API integration
 python3 eval/multi_project_eval.py --json
 ```
 
@@ -170,8 +168,8 @@ python3 eval/multi_project_eval.py --json
 python3 data/generate_corpus.py                    # Project Meghdoot (primary)
 python3 data/generate_projects.py                  # 5 additional projects
 
-# 2. Run the 126-test suite (no API key needed)
-python3 -m pytest tests/ -q                       # → 126 passed
+# 2. Run the 131-test suite (no API key needed)
+python3 -m pytest tests/ -q                       # → 131 passed
 
 # 3. Prove the pipeline + eval harness
 python3 eval/run_eval.py --detector baseline      # → P/R/F1 = 1.000, 267 weeks saved
@@ -190,7 +188,7 @@ cd frontend && npm install && npm run dev          # → localhost:3000
 curl http://localhost:8000/export/audit/html > evidence.html
 ```
 
-> **No API key?** The dashboard runs fully with ground-truth fallback data. All 18+ API endpoints return 200. The eval harness, corpus, and frontend work offline. 126 tests pass without any external dependencies.
+> **No API key?** The dashboard runs fully with ground-truth fallback data. All 22 API endpoints return 200. The eval harness, corpus, and frontend work offline. 131 tests pass without any external dependencies.
 
 ---
 
@@ -216,11 +214,11 @@ The dashboard is a single-page application designed for a **60-second demo narra
 | 14 | **Standards KB** | 7 color-coded standard cards with finding counts |
 | 15 | **Multi-Project Eval** | 6 project cards with per-project P/R/F1, aggregate metrics |
 | 16 | **Eval Dashboard** | Animated P/R/F1 counters + baseline vs LLM comparison table |
-| 17 | **ROI Calculator** | Interactive slider: project value → rework avoided → payback days |
-| 18 | **Scale Story** | 10 → 33 → 87 → 14K animated progression + architecture details |
-| 19 | **Live Analysis** | Paste any spec + submittal — live deviation detection with results |
+| 17 | **Live Analysis** | Upload PDFs or paste text for end-to-end deviation detection with streaming AI reasoning |
+| 18 | **ROI Calculator** | Interactive slider: project value → rework avoided → payback days |
+| 19 | **Scale Story** | 10 → 33 → 87 → 14K animated progression + architecture details |
 
-Plus: **Copilot panel** (RAG Q&A with preset queries), **Academic References** (4 peer-reviewed papers), **Export button** (HTML evidence pack download).
+Plus: **Copilot panel** (streaming RAG Q&A with preset queries), **Academic References** (4 peer-reviewed papers), **Export button** (HTML evidence pack download).
 
 Built with **Next.js 15**, dark theme, scroll-reveal animations, responsive down to 600px.
 
@@ -252,7 +250,11 @@ Pramaan cross-references against **7 governing standards** — all content is pa
 | `POST` | `/ingest/{system_id}` | Run full pipeline for one system |
 | `GET` | `/deviations` | Complete deviation register with citations |
 | `POST` | `/analyze` | Live analysis: paste any spec + submittal text |
+| `POST` | `/analyze/stream` | Streaming analysis with token-by-token AI reasoning |
+| `POST` | `/analyze/upload` | PDF upload: end-to-end document-to-deviation |
+| `POST` | `/analyze/upload/stream` | Streaming PDF upload with text extraction preview |
 | `POST` | `/copilot` | RAG-powered project Q&A with prior-RFI matching |
+| `POST` | `/copilot/stream` | Streaming copilot with token-by-token response |
 | `GET` | `/cx-plan` | Commissioning plan with 17 L1–L5 tests |
 | `GET` | `/rfi-log` | Full RFI log (12 historical RFIs) |
 | `GET` | `/metrics` | Live eval metrics (P/R/F1, lead time, confidence) |
@@ -265,7 +267,7 @@ Pramaan cross-references against **7 governing standards** — all content is pa
 | `GET` | `/projects/{id}` | Full project detail — deviations, cx plan, true negatives |
 | `GET` | `/projects/eval/aggregate` | Multi-project eval — aggregate P/R/F1 across all projects |
 
-18 endpoints. All return 200 with graceful fallback to ground-truth data when no LLM key is configured.
+22 endpoints. All return 200 with graceful fallback to ground-truth data when no LLM key is configured. Streaming endpoints use Server-Sent Events (SSE) for real-time token delivery.
 
 ---
 
@@ -274,15 +276,18 @@ Pramaan cross-references against **7 governing standards** — all content is pa
 ```
 pramaan/
 ├── backend/
-│   ├── main.py                    # FastAPI — 15 endpoints, graceful fallback
+│   ├── main.py                    # FastAPI — 22 endpoints, SSE streaming, graceful fallback
+│   ├── analyze.py                 # Shared analysis logic (sync + streaming)
+│   ├── paths.py                   # Single source of truth for data paths
 │   ├── orchestrator.py            # LangGraph pipeline wiring
-│   ├── llm.py                     # LLM provider abstraction (Gemini / Claude)
+│   ├── llm.py                     # LLM provider abstraction (Gemini / Claude) + streaming
 │   ├── requirements.txt
 │   └── agents/
+│       ├── ingestion.py           # PDF/Markdown intake (pdfplumber + PyMuPDF)
 │       ├── extraction.py          # Raw doc → structured triples
 │       ├── reconciliation.py      # Cross-document deviation detection (THE BRAIN)
 │       ├── commissioning.py       # Deviation → Cx test + lead time
-│       └── rfi_copilot.py         # RAG copilot + prior-RFI matching
+│       └── rfi_copilot.py         # RAG copilot + prior-RFI matching + streaming
 ├── data/
 │   ├── generate_corpus.py         # Deterministic corpus generator (Project Meghdoot)
 │   ├── generate_projects.py       # Multi-project generator (5 additional projects)
@@ -309,10 +314,10 @@ pramaan/
 │   └── multi_project_eval.py      # Multi-project aggregate eval (6 projects)
 ├── frontend/
 │   ├── app/
-│   │   ├── page.tsx               # Main dashboard — 18 sections
+│   │   ├── page.tsx               # Main dashboard — 19 sections
 │   │   ├── layout.tsx             # Root layout with fonts
 │   │   └── globals.css            # Full design system (~1100 lines)
-│   ├── components/                # 22 React components
+│   ├── components/                # 23 React components
 │   │   ├── HeroIntro.tsx          # Problem statement for judges
 │   │   ├── NavBar.tsx             # 19-section sticky nav
 │   │   ├── SectionIndex.tsx       # Interactive section directory
@@ -330,19 +335,22 @@ pramaan/
 │   │   ├── EvalDashboard.tsx      # Animated metrics + comparison table
 │   │   ├── ROICalculator.tsx      # Interactive business impact
 │   │   ├── ScaleStory.tsx         # Scale progression + architecture
-│   │   ├── AnalyzePanel.tsx       # Live paste-and-analyze panel
+│   │   ├── AnalyzePanel.tsx       # PDF upload + text paste — streaming deviation detection
 │   │   ├── BeforeAfter.tsx        # Manual vs Pramaan comparison
-│   │   ├── CopilotPanel.tsx       # RAG Q&A with presets
+│   │   ├── CopilotPanel.tsx       # Streaming RAG Q&A with presets
 │   │   ├── AcademicRefs.tsx       # 4 peer-reviewed references
 │   │   ├── ExportButton.tsx       # Evidence pack download
 │   │   └── ScrollReveal.tsx       # Intersection observer animations
 │   └── lib/
-│       └── api.ts                 # API client + fallback data
-└── .claude/
-    └── hooks/                     # Session-start auto-setup
+│       └── api.ts                 # API client + SSE parser + fallback data
+└── tests/
+    ├── test_api.py                # 22 API endpoint tests (sync + streaming + upload)
+    ├── test_agents.py             # Agent unit tests (ingestion, extraction, cx, reconciliation)
+    ├── test_corpus.py             # Corpus integrity tests (JSON/Markdown validation)
+    └── test_multi_project.py      # Multi-project dataset + eval tests
 ```
 
-**50+ source files · 8,000+ lines of code · 126 tests · 6 projects**
+**40+ source files · 7,300+ lines of code · 131 tests · 6 projects · 22 endpoints**
 
 ---
 
@@ -406,9 +414,9 @@ python3 eval/run_eval.py --detector llm
 |------------------|-----------------|----------|
 | **Innovation** | Cross-document AI reasoning across spec + submittal + standard — no commercial tool does this | 5 specialized agents, LangGraph orchestration, citation chain |
 | **Business Impact** | 691 weeks of early detection across 33 findings in 6 projects prevents seven-figure schedule slips | Interactive ROI calculator, cost-of-delay timeline, before/after comparison |
-| **Technical Excellence** | Eval harness with P/R/F1 = 1.000 across 6 projects, 126-test suite, multi-project eval | Reproducible eval, 5 countries, 15+ standards, 0 false positives |
+| **Technical Excellence** | Eval harness with P/R/F1 = 1.000 across 6 projects, 131-test suite, multi-project eval | Reproducible eval, 5 countries, 15+ standards, 0 false positives |
 | **Scalability** | 6 projects → enterprise portfolio via multi-project eval + batch ingest + vector store | Multi-project dashboard, architecture diagram, scale story |
-| **UX** | 19-section dashboard with 60-second demo narrative, 23 components | Scroll animations, dark theme, responsive, live analysis, multi-project grid |
+| **UX** | 19-section dashboard with 60-second demo narrative, 23 components, streaming AI | Scroll animations, dark theme, responsive, live PDF upload, multi-project grid |
 
 ---
 
@@ -457,8 +465,9 @@ python3 eval/run_eval.py --detector llm
 |-------|-----------|
 | LLM | Gemini 2.5 Flash (multimodal) — swappable to Claude |
 | Orchestration | LangGraph (agent state graph) |
-| Backend | FastAPI (Python 3.11+) |
+| Backend | FastAPI (Python 3.11+), SSE streaming |
 | Frontend | Next.js 15, React 19, TypeScript |
+| PDF Extraction | pdfplumber (primary) + PyMuPDF (fallback) |
 | Retrieval | TF-IDF (demo) → pgvector / Qdrant (scale) |
 | Eval | Custom harness: P/R/F1 + Cx accuracy + citation faithfulness |
 | Scraping | Firecrawl → Crawl4ai → Playwright (3-tier fallback) |
@@ -469,5 +478,5 @@ python3 eval/run_eval.py --detector llm
 <p align="center">
   <strong>PRA<span style="color:#36d6e7">MAAN</span></strong><br>
   <em>EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4</em><br>
-  <sub>5 AI Agents &middot; 10 Systems &middot; 7 Standards &middot; 33 Requirements &middot; 14 Deviations &middot; 267 Weeks Saved &middot; 0 False Positives &middot; 105 Tests</sub>
+  <sub>5 AI Agents &middot; 6 Projects &middot; 5 Countries &middot; 22 Endpoints &middot; 33 Deviations &middot; 691 Weeks Saved &middot; 131 Tests &middot; F1 = 1.000</sub>
 </p>

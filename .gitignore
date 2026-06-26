@@ -14,3 +14,4 @@ node_modules/
 tsconfig.tsbuildinfo
 # data artifacts (regenerate via data/generate_corpus.py)
 data/corpus/
+.coverage

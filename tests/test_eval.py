@@ -165,3 +165,70 @@ class TestScoreEdgeCases:
         assert r["precision"] == 0.0
         assert r["recall"] == 0.0
         assert r["f1"] == 0.0
+
+
+class TestSemanticMatching:
+    """Semantic scoring credits a detection regardless of the label the model
+    chose, while strict scoring still reports exact-label divergence."""
+
+    def _gt_by_key(self):
+        gt = load_ground_truth()
+        return gt, {(d["component"], d["parameter"]): d for d in gt}
+
+    def test_renamed_parameter_still_counts(self):
+        # "delta_t_c" reported as "delta t c" — same system, same transition.
+        gt, by_key = self._gt_by_key()
+        findings = [dict(d) for d in gt]
+        for f in findings:
+            if f["parameter"] == "delta_t_c":
+                f["parameter"] = "delta t c"
+        r = score(findings, gt)
+        assert r["recall"] == 1.0
+        assert r["f1"] == 1.0
+        # strict penalizes the rename
+        assert r["strict_f1"] < 1.0
+        assert ("COOL-LOOP", "delta_t_c") in r["strict_fn"]
+
+    def test_renamed_component_still_counts(self):
+        # "FLOOR/height_mm" reported as "Raised Floor System/finished_floor_height"
+        gt, by_key = self._gt_by_key()
+        findings = [dict(d) for d in gt]
+        for f in findings:
+            if (f["component"], f["parameter"]) == ("FLOOR", "height_mm"):
+                f["component"] = "Raised Floor System"
+                f["parameter"] = "finished_floor_height"
+        r = score(findings, gt)
+        assert r["recall"] == 1.0
+        assert r["strict_recall"] < 1.0
+
+    def test_hallucination_is_still_false_positive(self):
+        # A finding with a value transition that exists in NO ground-truth
+        # deviation must remain a false positive — semantic match is not lenient.
+        gt, by_key = self._gt_by_key()
+        findings = [dict(d) for d in gt]
+        findings.append({
+            "component": "MADE-UP", "parameter": "imaginary_param",
+            "required_value": "999", "provided_value": "111",
+        })
+        r = score(findings, gt)
+        assert r["recall"] == 1.0
+        assert r["precision"] < 1.0
+        assert ("MADE-UP", "imaginary_param") in r["fp"]
+
+    def test_value_collision_disambiguated_by_system(self):
+        # Two deviations share the 10->7 transition (UPS battery, COOL delta).
+        # A 10->7 finding on UPS must NOT be credited as the COOL deviation.
+        gt, by_key = self._gt_by_key()
+        ups = by_key[("UPS-02", "battery_runtime_min")]
+        # Only report the UPS one; COOL/delta_t_c should remain a miss.
+        findings = [dict(d) for d in gt
+                    if (d["component"], d["parameter"]) != ("COOL-LOOP", "delta_t_c")]
+        r = score(findings, gt)
+        assert ("COOL-LOOP", "delta_t_c") in r["fn"]
+        assert r["recall"] < 1.0
+
+    def test_baseline_perfect_in_both_modes(self):
+        gt = load_ground_truth()
+        r = score(reconcile(), gt)
+        assert r["f1"] == 1.0
+        assert r["strict_f1"] == 1.0

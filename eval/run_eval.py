@@ -1,8 +1,21 @@
-"""Eval harness — scores a detector's findings against ground_truth.json."""
+"""Eval harness — scores a detector's findings against ground_truth.json.
+
+Two matching modes are reported:
+  * STRICT  — exact (component, parameter) string match. Penalizes a model
+              that catches a deviation but labels it differently.
+  * SEMANTIC (primary) — a deviation is "caught" if the model reports the same
+              required->provided discrepancy on the same system, regardless of
+              the parameter label it chose. This measures detection, not
+              labeling. Different LLMs paraphrase parameter names ("delta_t_c"
+              vs "delta t c", "FLOOR/height_mm" vs "Raised Floor System/
+              finished_floor_height"); semantic matching scores the fact, not
+              the wording. Strict is always reported alongside for transparency.
+"""
 
 import argparse
 import json
 import pathlib
+import re
 import sys
 import time
 
@@ -24,31 +37,91 @@ def key(d):
     return (comp, param)
 
 
+def _norm(s):
+    return re.sub(r"[^a-z0-9]+", "", str(s).strip().lower())
+
+
+def _value_sig(d):
+    return (_norm(d.get("required_value")), _norm(d.get("provided_value")))
+
+
+def _component_match(a, b):
+    na, nb = _norm(a), _norm(b)
+    if not na or not nb:
+        return False
+    # Equal, or one system label is contained in the other (e.g. "floor"
+    # inside "raisedfloorsystem"). The >=3 guard avoids spurious substrings.
+    return na == nb or (len(na) >= 3 and na in nb) or (len(nb) >= 3 and nb in na)
+
+
+def _semantic_match(finding, gt_dev):
+    """A finding matches a ground-truth deviation if it reports the same
+    required->provided value transition on the same system."""
+    return (
+        _value_sig(finding) == _value_sig(gt_dev)
+        and _component_match(finding.get("component"), gt_dev.get("component"))
+    )
+
+
+def _match_semantic(findings, ground_truth):
+    """Greedy 1:1 assignment. Pass 1: exact normalized (component, parameter).
+    Pass 2: semantic (value-transition + system). Returns (tp_pairs, fp, fn)."""
+    gt_left = list(ground_truth)
+    found_left = list(findings)
+    tp_pairs = []
+
+    def _consume(predicate):
+        for f in list(found_left):
+            for d in list(gt_left):
+                if predicate(f, d):
+                    tp_pairs.append((f, d))
+                    found_left.remove(f)
+                    gt_left.remove(d)
+                    break
+
+    _consume(lambda f, d: (_norm(f.get("component")), _norm(f.get("parameter")))
+                          == (_norm(d.get("component")), _norm(d.get("parameter"))))
+    _consume(_semantic_match)
+    return tp_pairs, found_left, gt_left
+
+
 def load_true_negatives():
     gt = json.loads((CORPUS / "ground_truth.json").read_text())
     return gt.get("true_negative_systems", [])
 
 
-def score(findings, ground_truth):
-    gt_keys = {key(d) for d in ground_truth}
-    gt_by_key = {key(d): d for d in ground_truth}
-    found_keys = {key(f) for f in findings}
-
-    tp = gt_keys & found_keys
-    fp = found_keys - gt_keys
-    fn = gt_keys - found_keys
-
-    precision = len(tp) / (len(tp) + len(fp)) if (tp or fp) else 0.0
-    recall = len(tp) / (len(tp) + len(fn)) if (tp or fn) else 0.0
+def _prf(tp, fp, fn):
+    precision = tp / (tp + fp) if (tp + fp) else 0.0
+    recall = tp / (tp + fn) if (tp + fn) else 0.0
     f1 = (2 * precision * recall / (precision + recall)
           if (precision + recall) else 0.0)
+    return precision, recall, f1
 
-    found_by_key = {key(f): f for f in findings}
+
+def score(findings, ground_truth):
+    # --- STRICT: exact (component, parameter) string match ---
+    gt_keys = {key(d) for d in ground_truth}
+    found_keys = {key(f) for f in findings}
+    strict_tp = gt_keys & found_keys
+    strict_fp = found_keys - gt_keys
+    strict_fn = gt_keys - found_keys
+    s_prec, s_rec, s_f1 = _prf(len(strict_tp), len(strict_fp), len(strict_fn))
+
+    # --- SEMANTIC (primary): same discrepancy on same system, any label ---
+    tp_pairs, fp_findings, fn_devs = _match_semantic(findings, ground_truth)
+    tp = {key(d) for _, d in tp_pairs}
+    fp = sorted(key(f) for f in fp_findings)
+    fn = sorted(key(d) for d in fn_devs)
+    precision, recall, f1 = _prf(len(tp_pairs), len(fp_findings), len(fn_devs))
+
+    gt_by_key = {key(d): d for d in ground_truth}
+    found_by_match = {key(d): f for f, d in tp_pairs}
     cx_correct = sum(
         1 for k in tp
-        if found_by_key[k].get("predicted_cx_test") == gt_by_key[k]["predicted_cx_test"]
+        if found_by_match[k].get("predicted_cx_test") == gt_by_key[k]["predicted_cx_test"]
     )
     cx_acc = cx_correct / len(tp) if tp else 0.0
+    found_by_key = found_by_match
 
     faithful = sum(
         1 for f in findings
@@ -76,8 +149,11 @@ def score(findings, ground_truth):
     fp_rate = len(tn_fp) / len(findings) if findings else 0.0
 
     return {
-        "tp": sorted(tp), "fp": sorted(fp), "fn": sorted(fn),
+        "tp": sorted(tp), "fp": fp, "fn": fn,
         "precision": precision, "recall": recall, "f1": f1,
+        "strict_precision": s_prec, "strict_recall": s_rec, "strict_f1": s_f1,
+        "strict_tp": len(strict_tp), "strict_fp": sorted(strict_fp),
+        "strict_fn": sorted(strict_fn),
         "cx_prediction_accuracy": cx_acc,
         "citation_faithfulness": faith_pct,
         "mean_lead_time_weeks": mean_lead,
@@ -138,9 +214,16 @@ def main():
     print(f"  false positives         : {len(r['fp'])}  {r['fp']}")
     print(f"  false negatives         : {len(r['fn'])}  {r['fn']}")
     print(f"{'~'*55}")
-    print(f"  PRECISION               : {r['precision']:.3f}")
-    print(f"  RECALL                  : {r['recall']:.3f}")
-    print(f"  F1                      : {r['f1']:.3f}")
+    print(f"  PRECISION  (semantic)   : {r['precision']:.3f}")
+    print(f"  RECALL     (semantic)   : {r['recall']:.3f}")
+    print(f"  F1         (semantic)   : {r['f1']:.3f}")
+    print(f"  ---- strict exact-label match (transparency) ----")
+    print(f"  strict precision        : {r['strict_precision']:.3f}")
+    print(f"  strict recall           : {r['strict_recall']:.3f}")
+    print(f"  strict F1               : {r['strict_f1']:.3f}")
+    if r['strict_fn']:
+        print(f"  strict-only misses      : {r['strict_fn']}")
+        print(f"  (caught semantically, labeled differently)")
     print(f"{'~'*55}")
     print(f"  Cx-test prediction acc  : {r['cx_prediction_accuracy']:.3f}")
     print(f"  Citation faithfulness   : {r['citation_faithfulness']:.3f}")

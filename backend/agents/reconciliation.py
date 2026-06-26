@@ -72,10 +72,17 @@ IMPORTANT — pay attention to:
 === GOVERNING STANDARDS (paraphrased) ===
 {standards}
 
+NAMING DISCIPLINE — use the EXACT identifiers as written in the DESIGN BASIS:
+- "component": copy the component id verbatim (e.g. UPS-02, FLOOR, COOL-LOOP).
+  Do NOT expand or rename it (not "Raised Floor System" — use "FLOOR").
+- "parameter": copy the parameter machine_name verbatim in snake_case
+  (e.g. height_mm, delta_t_c, battery_runtime_min). Do NOT paraphrase, expand
+  units, or use spaces. Downstream systems match on these exact identifiers.
+
 Return a JSON array of deviations found. Each element:
 {{
-  "component": "<e.g. UPS-02>",
-  "parameter": "<machine_name e.g. battery_runtime_min>",
+  "component": "<exact component id, e.g. UPS-02>",
+  "parameter": "<exact snake_case machine_name, e.g. battery_runtime_min>",
   "required_value": <value from design basis — number or string>,
   "provided_value": <value from submittal — number or string>,
   "unit": "<unit>",

@@ -105,6 +105,9 @@ def run_all(detector: str = "structured"):
             s["total_lead_time_weeks"] = sum(gt_lead.get(k, 0) for k in s["tp"])
             s["max_lead_time_weeks"] = max(
                 (gt_lead.get(k, 0) for k in s["tp"]), default=0)
+            # Cx mapping is not exercised in detection-only LLM mode; mark it
+            # not-measured rather than reporting a misleading 0.000.
+            s["cx_prediction_accuracy"] = None
         proj_info = json.loads((path / "ground_truth.json").read_text()).get("project", {})
         results[pid] = {
             "name": proj_info.get("name", pid),
@@ -132,12 +135,17 @@ def aggregate(results):
     total_lead = sum(r["scores"]["total_lead_time_weeks"] for r in results.values())
     max_lead = max((r["scores"]["max_lead_time_weeks"] for r in results.values()), default=0)
 
-    cx_correct = sum(
-        sum(1 for _ in r["scores"]["tp"]) * r["scores"]["cx_prediction_accuracy"]
-        for r in results.values()
-    )
-    cx_total = sum(len(r["scores"]["tp"]) for r in results.values())
-    cx_acc = cx_correct / cx_total if cx_total else 0
+    cx_measured = [r for r in results.values()
+                   if r["scores"]["cx_prediction_accuracy"] is not None]
+    if cx_measured:
+        cx_correct = sum(
+            len(r["scores"]["tp"]) * r["scores"]["cx_prediction_accuracy"]
+            for r in cx_measured
+        )
+        cx_total = sum(len(r["scores"]["tp"]) for r in cx_measured)
+        cx_acc = cx_correct / cx_total if cx_total else 0
+    else:
+        cx_acc = None
 
     return {
         "projects": len(results),
@@ -148,7 +156,7 @@ def aggregate(results):
         "aggregate_precision": round(precision, 3),
         "aggregate_recall": round(recall, 3),
         "aggregate_f1": round(f1, 3),
-        "aggregate_cx_accuracy": round(cx_acc, 3),
+        "aggregate_cx_accuracy": round(cx_acc, 3) if cx_acc is not None else None,
         "total_lead_time_weeks": total_lead,
         "max_lead_time_weeks": max_lead,
     }
@@ -179,6 +187,8 @@ def main():
                     "f1": r["scores"]["f1"],
                     "cx_accuracy": r["scores"]["cx_prediction_accuracy"],
                     "total_lead_weeks": r["scores"]["total_lead_time_weeks"],
+                    "false_positives": [list(k) for k in r["scores"]["fp"]],
+                    "false_negatives": [list(k) for k in r["scores"]["fn"]],
                 }
                 for pid, r in results.items()
             },
@@ -193,12 +203,18 @@ def main():
 
     for pid, r in results.items():
         s = r["scores"]
+        cx = s["cx_prediction_accuracy"]
+        cx_str = f"{cx:.3f}" if cx is not None else " n/a "
         print(f"\n  {r['name']} ({r['tier']}, {r['location']})")
         print(f"    {r['capacity_mw']:>3d} MW | "
               f"Devs: {r['deviations']:>2d} | "
               f"P={s['precision']:.3f} R={s['recall']:.3f} F1={s['f1']:.3f} | "
-              f"Cx={s['cx_prediction_accuracy']:.3f} | "
+              f"Cx={cx_str} | "
               f"Lead: {s['total_lead_time_weeks']}w")
+        if s["fp"]:
+            print(f"       false positives: {[list(k) for k in s['fp']]}")
+        if s["fn"]:
+            print(f"       false negatives: {[list(k) for k in s['fn']]}")
 
     print(f"\n{'~'*70}")
     print(f"  AGGREGATE ACROSS {agg['projects']} PROJECTS")
@@ -210,7 +226,9 @@ def main():
     print(f"  PRECISION               : {agg['aggregate_precision']:.3f}")
     print(f"  RECALL                  : {agg['aggregate_recall']:.3f}")
     print(f"  F1                      : {agg['aggregate_f1']:.3f}")
-    print(f"  Cx prediction accuracy  : {agg['aggregate_cx_accuracy']:.3f}")
+    _cxa = agg['aggregate_cx_accuracy']
+    _cxa_str = f"{_cxa:.3f}" if _cxa is not None else "n/a (detection-only mode)"
+    print(f"  Cx prediction accuracy  : {_cxa_str}")
     print(f"  Total lead time saved   : {agg['total_lead_time_weeks']} weeks")
     print(f"  Max lead time           : {agg['max_lead_time_weeks']} weeks")
     print(f"{'='*70}\n")

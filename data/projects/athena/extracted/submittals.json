@@ -1,0 +1,135 @@
+[
+  {
+    "system": "UPS",
+    "component": "UPS-01",
+    "parameter": "battery_runtime_min",
+    "provided_value": 10,
+    "unit": "min"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-01",
+    "parameter": "redundancy",
+    "provided_value": "2N",
+    "unit": "topology"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-01",
+    "parameter": "rated_power_kw",
+    "provided_value": 900,
+    "unit": "kW"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-01",
+    "parameter": "redundancy",
+    "provided_value": "N+1",
+    "unit": "topology"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-01",
+    "parameter": "rated_power_kva",
+    "provided_value": 2000,
+    "unit": "kVA"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-01",
+    "parameter": "emission_class",
+    "provided_value": "Stage_IIIA",
+    "unit": "class"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-01",
+    "parameter": "redundancy",
+    "provided_value": "N+2",
+    "unit": "topology"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-01",
+    "parameter": "refrigerant_gwp",
+    "provided_value": 675,
+    "unit": "max"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-01",
+    "parameter": "capacity_tr",
+    "provided_value": 600,
+    "unit": "TR"
+  },
+  {
+    "system": "SWGR",
+    "component": "SWGR-01",
+    "parameter": "short_circuit_rating_ka",
+    "provided_value": 50,
+    "unit": "kA"
+  },
+  {
+    "system": "SWGR",
+    "component": "SWGR-01",
+    "parameter": "insulation",
+    "provided_value": "SF6",
+    "unit": "type"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-01",
+    "parameter": "fire_rating",
+    "provided_value": "Cca",
+    "unit": "euroclass"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-01",
+    "parameter": "category",
+    "provided_value": "Cat6A",
+    "unit": "type"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS-01",
+    "parameter": "protocol",
+    "provided_value": "BACnet_IP",
+    "unit": "standard"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS-01",
+    "parameter": "monitoring_redundancy",
+    "provided_value": "dual",
+    "unit": "topology"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-01",
+    "parameter": "agent",
+    "provided_value": "clean_agent",
+    "unit": "type"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-01",
+    "parameter": "zones",
+    "provided_value": 6,
+    "unit": "count"
+  },
+  {
+    "system": "PDU",
+    "component": "PDU-01",
+    "parameter": "metering",
+    "provided_value": "per_outlet",
+    "unit": "type"
+  },
+  {
+    "system": "PDU",
+    "component": "PDU-01",
+    "parameter": "redundancy",
+    "provided_value": "A+B",
+    "unit": "topology"
+  }
+]

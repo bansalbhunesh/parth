@@ -1,0 +1,82 @@
+{
+  "project": {
+    "name": "Project Sakura",
+    "capacity_mw": 25,
+    "tier": "JEITA Class 4",
+    "location": "Tokyo, Japan",
+    "current_week": 10,
+    "line_items_total": 11000,
+    "active_submittals": 72,
+    "total_systems": 8,
+    "estimated_completion_week": 50,
+    "client": "NTT Facilities Corp.",
+    "epc_contractor": "Obayashi Corporation",
+    "cx_authority": "Japan Data Centre Council (JDCC)"
+  },
+  "seeded_deviations": [
+    {
+      "id": "DEV-001",
+      "system": "GEN",
+      "component": "GEN-01",
+      "parameter": "seismic_class",
+      "required_value": "S_class",
+      "provided_value": "B_class",
+      "unit": "class",
+      "standard_ref": "JEAC-4601",
+      "spec_clause": "SK-5.3",
+      "severity": "Critical",
+      "predicted_cx_test": "FAT-S01",
+      "predicted_cx_level": 3,
+      "predicted_cx_name": "Seismic qualification test \u2014 generators",
+      "week_caught": 10,
+      "week_fail": 30,
+      "lead_time_weeks": 20,
+      "rationale": "B-class seismic rating (0.3g) insufficient for Tokyo zone (0.4g); generator may unseat during major earthquake."
+    },
+    {
+      "id": "DEV-002",
+      "system": "CABLE",
+      "component": "CABLE-01",
+      "parameter": "fire_rating",
+      "required_value": "EM-IT",
+      "provided_value": "IV",
+      "unit": "JIS-class",
+      "standard_ref": "JIS-C-3521",
+      "spec_clause": "SK-8.1",
+      "severity": "Major",
+      "predicted_cx_test": "ITP-S01",
+      "predicted_cx_level": 2,
+      "predicted_cx_name": "Cable fire rating inspection",
+      "week_caught": 10,
+      "week_fail": 20,
+      "lead_time_weeks": 10,
+      "rationale": "JIS Class IV below EM-IT requirement; higher smoke and halogen emission during fire."
+    },
+    {
+      "id": "DEV-003",
+      "system": "STRUCT",
+      "component": "FLOOR-01",
+      "parameter": "seismic_isolation",
+      "required_value": "base_isolated",
+      "provided_value": "fixed_base",
+      "unit": "type",
+      "standard_ref": "JEAC-4601",
+      "spec_clause": "SK-9.1",
+      "severity": "Critical",
+      "predicted_cx_test": "IST-S01",
+      "predicted_cx_level": 4,
+      "predicted_cx_name": "Seismic response verification",
+      "week_caught": 10,
+      "week_fail": 38,
+      "lead_time_weeks": 28,
+      "rationale": "Fixed-base design transmits full ground motion to IT equipment; base isolation required to reduce floor response to 0.2g."
+    }
+  ],
+  "true_negative_systems": [
+    "UPS",
+    "COOL",
+    "SWGR",
+    "BMS",
+    "FIRE"
+  ]
+}

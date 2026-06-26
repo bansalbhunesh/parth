@@ -280,17 +280,23 @@ const FALLBACK_PROJECTS: ProjectSummary[] = [
   { id: "sahara", name: "Project Sahara", tier: "Uptime Tier II", location: "Dubai, UAE", capacity_mw: 5, deviations: 3, systems: 6 },
   { id: "cascade", name: "Project Cascade", tier: "Uptime Tier IV", location: "Hillsboro, Oregon, USA", capacity_mw: 30, deviations: 4, systems: 8 },
   { id: "yangtze", name: "Project Yangtze", tier: "GB 50174 Grade A", location: "Shanghai, China", capacity_mw: 50, deviations: 3, systems: 8 },
+  { id: "athena", name: "Project Athena", tier: "EN 50600 Class 4", location: "Frankfurt, Germany", capacity_mw: 15, deviations: 4, systems: 8 },
+  { id: "sakura", name: "Project Sakura", tier: "JEITA Class 4", location: "Tokyo, Japan", capacity_mw: 25, deviations: 3, systems: 8 },
+  { id: "outback", name: "Project Outback", tier: "Uptime Tier III", location: "Sydney, Australia", capacity_mw: 8, deviations: 3, systems: 7 },
+  { id: "maple", name: "Project Maple", tier: "Uptime Tier III", location: "Toronto, Canada", capacity_mw: 12, deviations: 3, systems: 7 },
+  { id: "pampas", name: "Project Pampas", tier: "Uptime Tier II", location: "São Paulo, Brazil", capacity_mw: 6, deviations: 2, systems: 6 },
+  { id: "thames", name: "Project Thames", tier: "Uptime Tier IV", location: "London, United Kingdom", capacity_mw: 35, deviations: 2, systems: 8 },
 ];
 
 const FALLBACK_MULTI_EVAL: MultiProjectEval = {
   aggregate: {
-    projects: 6,
-    total_deviations: 33,
+    projects: 12,
+    total_deviations: 50,
     aggregate_precision: 1.0,
     aggregate_recall: 1.0,
     aggregate_f1: 1.0,
     aggregate_cx_accuracy: 1.0,
-    total_lead_time_weeks: 691,
+    total_lead_time_weeks: 1024,
     max_lead_time_weeks: 36,
   },
   per_project: {
@@ -300,6 +306,12 @@ const FALLBACK_MULTI_EVAL: MultiProjectEval = {
     sahara: { name: "Project Sahara", tier: "Uptime Tier II", location: "Dubai, UAE", capacity_mw: 5, deviations: 3, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 38 },
     cascade: { name: "Project Cascade", tier: "Uptime Tier IV", location: "Hillsboro, Oregon, USA", capacity_mw: 30, deviations: 4, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 80 },
     yangtze: { name: "Project Yangtze", tier: "GB 50174 Grade A", location: "Shanghai, China", capacity_mw: 50, deviations: 3, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 98 },
+    athena: { name: "Project Athena", tier: "EN 50600 Class 4", location: "Frankfurt, Germany", capacity_mw: 15, deviations: 4, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 80 },
+    sakura: { name: "Project Sakura", tier: "JEITA Class 4", location: "Tokyo, Japan", capacity_mw: 25, deviations: 3, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 58 },
+    outback: { name: "Project Outback", tier: "Uptime Tier III", location: "Sydney, Australia", capacity_mw: 8, deviations: 3, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 53 },
+    maple: { name: "Project Maple", tier: "Uptime Tier III", location: "Toronto, Canada", capacity_mw: 12, deviations: 3, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 58 },
+    pampas: { name: "Project Pampas", tier: "Uptime Tier II", location: "São Paulo, Brazil", capacity_mw: 6, deviations: 2, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 34 },
+    thames: { name: "Project Thames", tier: "Uptime Tier IV", location: "London, United Kingdom", capacity_mw: 35, deviations: 2, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 50 },
   },
 };
 

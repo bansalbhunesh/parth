@@ -326,7 +326,7 @@ export default async function Page() {
       </ScrollReveal>
 
       <h2 className="section" id="multiproject">
-        Multi-project eval &middot; 6 projects &middot; 5 countries &middot; 4 standards
+        Multi-project eval &middot; 12 projects &middot; 11 countries &middot; 6 standards
       </h2>
       <ScrollReveal>
         <MultiProjectDashboard />
@@ -380,7 +380,7 @@ export default async function Page() {
           EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4
         </div>
         <div className="footer-meta">
-          6 Projects &middot; 5 Countries &middot; 33 Deviations &middot; 691 Weeks Saved &middot; F1=1.000 &middot; 0 False Positives
+          12 Projects &middot; 11 Countries &middot; 50 Deviations &middot; 1,024 Weeks Saved &middot; F1=1.000 &middot; 0 False Positives
         </div>
       </div>
     </main>

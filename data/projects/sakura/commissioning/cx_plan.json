@@ -1,0 +1,48 @@
+{
+  "project": "Project Sakura",
+  "cx_authority": "Japan Data Centre Council (JDCC)",
+  "levels": {
+    "1": "Factory Acceptance Testing (FAT)",
+    "2": "Site Acceptance / Installation Verification",
+    "3": "Startup Testing",
+    "4": "Performance Testing",
+    "5": "End-to-End Systems Testing"
+  },
+  "tests": [
+    {
+      "id": "ITP-S01",
+      "level": 2,
+      "name": "Cable fire rating inspection",
+      "scheduled_week": 20,
+      "acceptance": "EM-IT grade confirmed"
+    },
+    {
+      "id": "FAT-S01",
+      "level": 3,
+      "name": "Seismic qualification test \u2014 generators",
+      "scheduled_week": 30,
+      "acceptance": "S-class certification"
+    },
+    {
+      "id": "IST-S01",
+      "level": 4,
+      "name": "Seismic response verification",
+      "scheduled_week": 38,
+      "acceptance": "Floor response <= 0.2g"
+    },
+    {
+      "id": "IST-S02",
+      "level": 4,
+      "name": "Full facility failover test",
+      "scheduled_week": 42,
+      "acceptance": "Zero IT impact"
+    },
+    {
+      "id": "SAT-S01",
+      "level": 5,
+      "name": "72-hour sustained operations",
+      "scheduled_week": 48,
+      "acceptance": "No critical alarms"
+    }
+  ]
+}

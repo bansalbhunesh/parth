@@ -1,0 +1,62 @@
+{
+  "project": {
+    "name": "Project Pampas",
+    "capacity_mw": 6,
+    "tier": "Uptime Tier II",
+    "location": "S\u00e3o Paulo, Brazil",
+    "current_week": 6,
+    "line_items_total": 4200,
+    "active_submittals": 28,
+    "total_systems": 6,
+    "estimated_completion_week": 38,
+    "client": "Scala Data Centers",
+    "epc_contractor": "Odebrecht Engenharia",
+    "cx_authority": "Bureau Veritas Brasil"
+  },
+  "seeded_deviations": [
+    {
+      "id": "DEV-001",
+      "system": "GEN",
+      "component": "GEN-01",
+      "parameter": "fuel_type",
+      "required_value": "diesel_B12",
+      "provided_value": "diesel_B7",
+      "unit": "type",
+      "standard_ref": "ABNT-NBR-15940",
+      "spec_clause": "PA-5.3",
+      "severity": "Critical",
+      "predicted_cx_test": "FAT-P01",
+      "predicted_cx_level": 3,
+      "predicted_cx_name": "Generator fuel compatibility test",
+      "week_caught": 6,
+      "week_fail": 22,
+      "lead_time_weeks": 16,
+      "rationale": "B7 fuel non-compliant with ANP Resolution 45 mandate for B12 blend; regulatory violation and potential warranty void."
+    },
+    {
+      "id": "DEV-002",
+      "system": "SWGR",
+      "component": "SWGR-01",
+      "parameter": "short_circuit_rating_ka",
+      "required_value": 25,
+      "provided_value": 20,
+      "unit": "kA",
+      "standard_ref": "DESIGN-BASIS",
+      "spec_clause": "PA-7.2",
+      "severity": "Critical",
+      "predicted_cx_test": "FAT-P02",
+      "predicted_cx_level": 3,
+      "predicted_cx_name": "Switchgear fault withstand test",
+      "week_caught": 6,
+      "week_fail": 24,
+      "lead_time_weeks": 18,
+      "rationale": "20 kA rating below 25 kA prospective fault level; equipment may fail under fault conditions."
+    }
+  ],
+  "true_negative_systems": [
+    "UPS",
+    "COOL",
+    "CABLE",
+    "FIRE"
+  ]
+}

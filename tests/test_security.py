@@ -112,10 +112,10 @@ class TestAPIContracts:
         assert r.status_code == 200
         data = r.json()
         agg = data["aggregate"]
-        assert agg["projects"] == 6
-        assert agg["total_deviations"] == 33
+        assert agg["projects"] == 12
+        assert agg["total_deviations"] == 50
         assert agg["aggregate_f1"] == 1.0
-        assert agg["total_lead_time_weeks"] == 691
+        assert agg["total_lead_time_weeks"] == 1024
 
     def test_per_project_eval_fields(self):
         r = client.get("/projects/eval/aggregate")
@@ -155,10 +155,10 @@ class TestAPIContracts:
 class TestMultiProjectAPI:
     """Verify multi-project endpoints return correct data."""
 
-    def test_six_projects_returned(self):
+    def test_twelve_projects_returned(self):
         r = client.get("/projects")
         data = r.json()
-        assert data["count"] == 6
+        assert data["count"] == 12
 
     def test_project_countries_diversity(self):
         r = client.get("/projects")
@@ -182,7 +182,7 @@ class TestMultiProjectAPI:
             p["total_lead_weeks"] for p in data["per_project"].values()
         )
         assert per_project_sum == data["aggregate"]["total_lead_time_weeks"]
-        assert per_project_sum == 691
+        assert per_project_sum == 1024
 
     def test_aggregate_deviations_match_sum(self):
         r = client.get("/projects/eval/aggregate")
@@ -191,4 +191,4 @@ class TestMultiProjectAPI:
             p["deviations"] for p in data["per_project"].values()
         )
         assert per_project_sum == data["aggregate"]["total_deviations"]
-        assert per_project_sum == 33
+        assert per_project_sum == 50

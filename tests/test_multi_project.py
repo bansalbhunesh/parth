@@ -141,8 +141,8 @@ class TestMultiProjectEval:
         assert agg["aggregate_f1"] == 1.0
         assert agg["aggregate_precision"] == 1.0
         assert agg["aggregate_recall"] == 1.0
-        assert agg["total_deviations"] == 33
-        assert agg["total_lead_time_weeks"] > 600
+        assert agg["total_deviations"] == 50
+        assert agg["total_lead_time_weeks"] > 1000
 
     def test_project_diversity(self):
         """Verify projects span multiple tiers, countries, and standards."""

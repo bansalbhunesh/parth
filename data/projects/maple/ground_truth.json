@@ -1,0 +1,81 @@
+{
+  "project": {
+    "name": "Project Maple",
+    "capacity_mw": 12,
+    "tier": "Uptime Tier III",
+    "location": "Toronto, Canada",
+    "current_week": 8,
+    "line_items_total": 7600,
+    "active_submittals": 48,
+    "total_systems": 7,
+    "estimated_completion_week": 44,
+    "client": "Cologix Inc.",
+    "epc_contractor": "PCL Constructors Inc.",
+    "cx_authority": "Morrison Hershfield Ltd."
+  },
+  "seeded_deviations": [
+    {
+      "id": "DEV-001",
+      "system": "GEN",
+      "component": "GEN-01",
+      "parameter": "cold_start_temp_c",
+      "required_value": -40,
+      "provided_value": -25,
+      "unit": "C",
+      "standard_ref": "CSA-C282",
+      "spec_clause": "MP-5.3",
+      "severity": "Critical",
+      "predicted_cx_test": "FAT-M01",
+      "predicted_cx_level": 3,
+      "predicted_cx_name": "Cold-weather start test",
+      "week_caught": 8,
+      "week_fail": 28,
+      "lead_time_weeks": 20,
+      "rationale": "Generator rated for -25 C start, not -40 C; may fail to start in Toronto winter extremes (historical low -33 C)."
+    },
+    {
+      "id": "DEV-002",
+      "system": "COOL",
+      "component": "COOL-01",
+      "parameter": "free_cooling_hours",
+      "required_value": 4500,
+      "provided_value": 3200,
+      "unit": "h/yr",
+      "standard_ref": "DESIGN-BASIS",
+      "spec_clause": "MP-6.2",
+      "severity": "Major",
+      "predicted_cx_test": "IST-M01",
+      "predicted_cx_level": 4,
+      "predicted_cx_name": "Free cooling performance verification",
+      "week_caught": 8,
+      "week_fail": 34,
+      "lead_time_weeks": 26,
+      "rationale": "3200 free cooling hours vs 4500 target; 29% shortfall increases energy cost and PUE by ~0.1."
+    },
+    {
+      "id": "DEV-003",
+      "system": "CABLE",
+      "component": "CABLE-01",
+      "parameter": "fire_rating",
+      "required_value": "FT6",
+      "provided_value": "FT4",
+      "unit": "CEC-class",
+      "standard_ref": "CEC-2024",
+      "spec_clause": "MP-8.1",
+      "severity": "Major",
+      "predicted_cx_test": "ITP-M01",
+      "predicted_cx_level": 2,
+      "predicted_cx_name": "Cable fire rating inspection",
+      "week_caught": 8,
+      "week_fail": 20,
+      "lead_time_weeks": 12,
+      "rationale": "FT4 cable not approved for plenum spaces under CEC 2024; FT6 required."
+    }
+  ],
+  "true_negative_systems": [
+    "UPS",
+    "SWGR",
+    "BMS",
+    "FIRE"
+  ]
+}

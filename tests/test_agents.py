@@ -279,7 +279,7 @@ class TestTextEval:
         results = run_text_eval()
         agg = aggregate(results)
         assert agg["aggregate_f1"] == 1.0
-        assert agg["total_deviations"] == 33
+        assert agg["total_deviations"] == 50
 
     def test_text_eval_all_projects_perfect(self):
         from eval.text_eval import run_text_eval

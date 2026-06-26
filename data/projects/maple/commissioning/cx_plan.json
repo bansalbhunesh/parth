@@ -1,0 +1,48 @@
+{
+  "project": "Project Maple",
+  "cx_authority": "Morrison Hershfield Ltd.",
+  "levels": {
+    "1": "Factory Acceptance Testing (FAT)",
+    "2": "Site Acceptance / Installation Verification",
+    "3": "Startup Testing",
+    "4": "Performance Testing",
+    "5": "End-to-End Systems Testing"
+  },
+  "tests": [
+    {
+      "id": "ITP-M01",
+      "level": 2,
+      "name": "Cable fire rating inspection",
+      "scheduled_week": 20,
+      "acceptance": "FT6 plenum rating confirmed"
+    },
+    {
+      "id": "FAT-M01",
+      "level": 3,
+      "name": "Cold-weather start test",
+      "scheduled_week": 28,
+      "acceptance": "Start at -40 C confirmed"
+    },
+    {
+      "id": "IST-M01",
+      "level": 4,
+      "name": "Free cooling performance verification",
+      "scheduled_week": 34,
+      "acceptance": ">= 4500 h/yr free cooling"
+    },
+    {
+      "id": "IST-M02",
+      "level": 4,
+      "name": "Maintenance simulation",
+      "scheduled_week": 38,
+      "acceptance": "IT load unaffected"
+    },
+    {
+      "id": "SAT-M01",
+      "level": 5,
+      "name": "72-hour sustained operations",
+      "scheduled_week": 42,
+      "acceptance": "No critical alarms"
+    }
+  ]
+}

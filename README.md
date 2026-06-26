@@ -13,15 +13,15 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/projects-6-a855f7?style=flat-square&labelColor=1a1020" alt="6 projects">
-  <img src="https://img.shields.io/badge/deviations_caught-33-ff4d4d?style=flat-square&labelColor=1a0f12" alt="33 deviations">
-  <img src="https://img.shields.io/badge/weeks_saved-691-36d6e7?style=flat-square&labelColor=0d1a1e" alt="691 weeks">
+  <img src="https://img.shields.io/badge/projects-12-a855f7?style=flat-square&labelColor=1a1020" alt="12 projects">
+  <img src="https://img.shields.io/badge/deviations_caught-50-ff4d4d?style=flat-square&labelColor=1a0f12" alt="50 deviations">
+  <img src="https://img.shields.io/badge/weeks_saved-1024-36d6e7?style=flat-square&labelColor=0d1a1e" alt="1024 weeks">
   <img src="https://img.shields.io/badge/precision-1.000-35c98b?style=flat-square&labelColor=0d1a14" alt="Precision 1.000">
   <img src="https://img.shields.io/badge/recall-1.000-35c98b?style=flat-square&labelColor=0d1a14" alt="Recall 1.000">
   <img src="https://img.shields.io/badge/false_positives-0-35c98b?style=flat-square&labelColor=0d1a14" alt="0 false positives">
   <img src="https://img.shields.io/badge/tests-205-5b8cff?style=flat-square&labelColor=111820" alt="205 tests">
   <img src="https://img.shields.io/badge/agents-5-5b8cff?style=flat-square&labelColor=111820" alt="5 agents">
-  <img src="https://img.shields.io/badge/countries-5-ffb020?style=flat-square&labelColor=1a1508" alt="5 countries">
+  <img src="https://img.shields.io/badge/countries-11-ffb020?style=flat-square&labelColor=1a1508" alt="11 countries">
   <img src="https://img.shields.io/github/actions/workflow/status/bansalbhunesh/parth/ci.yml?style=flat-square&labelColor=111820&label=CI" alt="CI">
   <img src="https://img.shields.io/badge/license-MIT-5b8cff?style=flat-square&labelColor=111820" alt="MIT License">
   <img src="https://img.shields.io/badge/docker-compose-2496ED?style=flat-square&labelColor=111820&logo=docker&logoColor=white" alt="Docker">
@@ -67,7 +67,7 @@
 > **Pramaan caught a critical BMS monitoring single-point-of-failure 33 weeks before it would have failed the full-facility failover drill.**
 > That's the difference between a one-line email and a seven-figure schedule slip.
 >
-> **Proven across 6 projects, 5 countries, 4 tier standards:** 33 deviations, **691 weeks of total lead time saved. F1 = 1.000. Zero false positives.**
+> **Proven across 12 projects, 11 countries, 6 tier standards:** 50 deviations, **1,024 weeks of total lead time saved. F1 = 1.000. Zero false positives.**
 
 ---
 
@@ -191,7 +191,7 @@ Pramaan is a **multi-agent AI system** that cross-references every requirement a
 
 ## Multi-Project Generalisation
 
-Pramaan is evaluated across **6 project datasets** spanning different tiers, geographies, climates, and governing standards — proving the pipeline generalises beyond a single dataset:
+Pramaan is evaluated across **12 project datasets** spanning different tiers, geographies, climates, and governing standards — proving the pipeline generalises beyond a single dataset:
 
 | Project | Tier | Location | MW | Standards | Deviations | Lead Saved | F1 |
 |---------|------|----------|----|-----------|------------|------------|-----|
@@ -201,28 +201,34 @@ Pramaan is evaluated across **6 project datasets** spanning different tiers, geo
 | **Sahara** | Uptime Tier II | Dubai, UAE | 5 | DEWA Regulations, TIA-942 | 3 | 38w | 1.000 |
 | **Cascade** | Uptime Tier IV | Hillsboro, Oregon | 30 | EPA 40 CFR 60, IBC 2021, NFPA 75 | 4 | 80w | 1.000 |
 | **Yangtze** | GB 50174 Grade A | Shanghai, China | 50 | GB 50174, GB 31247, GB 50011, MIIT | 3 | 98w | 1.000 |
-| **TOTAL** | **4 tiers** | **5 countries** | **155** | **15+ standards** | **33** | **691w** | **1.000** |
+| **Athena** | EN 50600 Class 4 | Frankfurt, Germany | 15 | EU 2016/1628, EU F-Gas, EN 13501-6 | 4 | 80w | 1.000 |
+| **Sakura** | JEITA Class 4 | Tokyo, Japan | 25 | JEITA, BSL Act, Building Standards Act | 3 | 58w | 1.000 |
+| **Outback** | Uptime Tier III | Sydney, Australia | 8 | AS/NZS 3000, NCC 2022 | 3 | 53w | 1.000 |
+| **Maple** | Uptime Tier III | Toronto, Canada | 12 | CSA C22.1, NBC 2020 | 3 | 58w | 1.000 |
+| **Pampas** | Uptime Tier II | São Paulo, Brazil | 6 | ABNT NBR 15751, ANP Res. 45 | 2 | 34w | 1.000 |
+| **Thames** | Uptime Tier IV | London, UK | 35 | MCPD 2018, BREEAM | 2 | 50w | 1.000 |
+| **TOTAL** | **6 tiers** | **11 countries** | **256** | **25+ standards** | **50** | **1,024w** | **1.000** |
 
 ```bash
 python3 eval/multi_project_eval.py
-# → 6 projects, 33 deviations, P=1.000 R=1.000 F1=1.000, 691 weeks saved
+# → 12 projects, 50 deviations, P=1.000 R=1.000 F1=1.000, 1024 weeks saved
 
 python3 eval/multi_project_eval.py --json
 ```
 
 **Key diversity dimensions:**
-- **Climate**: tropical (Mumbai), mild (Pune), cold (Oslo), desert (Dubai), temperate (Oregon), subtropical (Shanghai)
-- **Standards**: Uptime Institute, EN 50600 (Europe), DEWA (UAE), EPA/IBC (US), GB 50174 (China)
-- **Deviation types**: battery autonomy, generator emissions, cooling PUE, cable fire class, seismic certification, government reporting
+- **Climate**: tropical (Mumbai), mild (Pune), cold (Oslo), desert (Dubai), temperate (Oregon), subtropical (Shanghai), continental (Frankfurt, Toronto), maritime (Tokyo, London), arid (Sydney), tropical (São Paulo)
+- **Standards**: Uptime Institute, EN 50600 (Europe), DEWA (UAE), EPA/IBC (US), GB 50174 (China), JEITA (Japan), AS/NZS (Australia), CSA (Canada), ABNT (Brazil), MCPD/BREEAM (UK)
+- **Deviation types**: battery autonomy, generator emissions, cooling PUE, cable fire class, seismic certification, government reporting, F-gas compliance, noise limits, cold-start performance, fuel standards
 
 ---
 
 ## Quick Start
 
 ```bash
-# 1. Generate all project corpora (6 projects, 33 deviations)
+# 1. Generate all project corpora (12 projects, 50 deviations)
 python3 data/generate_corpus.py                    # Project Meghdoot (primary)
-python3 data/generate_projects.py                  # 5 additional projects
+python3 data/generate_projects.py                  # 11 additional projects
 
 # 2. Run the 205-test suite (no API key needed)
 python3 -m pytest tests/ -q                       # → 205 passed
@@ -230,7 +236,7 @@ python3 -m pytest tests/ -q                       # → 205 passed
 # 3. Prove the pipeline + eval harness (3 independent paths)
 python3 eval/run_eval.py --detector baseline      # → P/R/F1 = 1.000, 267 weeks saved
 python3 eval/text_eval.py                         # → Non-circular: raw text → regex → F1=1.000
-python3 eval/multi_project_eval.py                # → 6 projects, F1=1.000, 691 weeks saved
+python3 eval/multi_project_eval.py                # → 12 projects, F1=1.000, 1024 weeks saved
 
 # 4. The real run — LLM recovers deviations from RAW unstructured documents
 export GEMINI_API_KEY=your_key_here
@@ -264,7 +270,7 @@ docker compose up --build
 
 # Option 2: Makefile
 make setup          # Install all dependencies
-make corpus         # Generate 6 project datasets
+make corpus         # Generate 12 project datasets
 make test           # Run 205 tests
 make eval-all       # Run all 3 eval paths
 make verify         # One-command: tests + all evals + type check
@@ -295,7 +301,7 @@ The dashboard is a single-page application designed for a **60-second demo narra
 | 12 | **Deviation Register** | Interactive table with search, filter, sort, and expandable rationale |
 | 13 | **Cx Risk Twin** | L1–L5 Gantt chart with at-risk tests pulsing red |
 | 14 | **Standards KB** | 7 color-coded standard cards with finding counts |
-| 15 | **Multi-Project Eval** | 6 project cards with per-project P/R/F1, aggregate metrics |
+| 15 | **Multi-Project Eval** | 12 project cards with per-project P/R/F1, aggregate metrics |
 | 16 | **Eval Dashboard** | Animated P/R/F1 counters + baseline vs LLM comparison table |
 | 17 | **Live Analysis** | Upload PDFs or paste text for end-to-end deviation detection with streaming AI reasoning |
 | 18 | **ROI Calculator** | Interactive slider: project value → rework avoided → payback days |
@@ -346,7 +352,7 @@ Pramaan cross-references against **7 governing standards** — all content is pa
 | `GET` | `/corpus/stats` | Corpus statistics (systems, standards, documents) |
 | `GET` | `/export/audit` | JSON compliance evidence pack |
 | `GET` | `/export/audit/html` | Printable HTML evidence pack with full audit trail |
-| `GET` | `/projects` | List all 6 project datasets with summary stats |
+| `GET` | `/projects` | List all 12 project datasets with summary stats |
 | `GET` | `/projects/{id}` | Full project detail — deviations, cx plan, true negatives |
 | `GET` | `/projects/eval/aggregate` | Multi-project eval — aggregate P/R/F1 across all projects |
 
@@ -399,7 +405,7 @@ pramaan/
 ├── eval/
 │   ├── run_eval.py                # P/R/F1 + Cx accuracy + citation faithfulness
 │   ├── baseline_reconciler.py     # Deterministic baseline (proves plumbing)
-│   ├── multi_project_eval.py      # Multi-project aggregate eval (6 projects)
+│   ├── multi_project_eval.py      # Multi-project aggregate eval (12 projects)
 │   └── text_eval.py              # Non-circular eval: regex on raw markdown text
 ├── frontend/
 │   ├── app/
@@ -439,7 +445,7 @@ pramaan/
     └── test_multi_project.py      # Multi-project dataset + eval tests
 ```
 
-**40+ source files · 7,300+ lines of code · 205 tests · 6 projects · 22 endpoints**
+**40+ source files · 7,300+ lines of code · 205 tests · 12 projects · 22 endpoints**
 
 ---
 
@@ -449,10 +455,10 @@ The demo corpus models **10 systems** with **33 requirements**. The architecture
 
 | Current (Demo) | At Scale |
 |-----------------|----------|
-| 6 projects, 5 countries | Enterprise portfolio — hundreds of projects |
-| 47 systems across 6 projects | 500+ systems per project |
+| 12 projects, 11 countries | Enterprise portfolio — hundreds of projects |
+| 81 systems across 12 projects | 500+ systems per project |
 | 130 requirements tracked | 14,000+ line items per project |
-| 33 deviations detected | Continuous monitoring pipeline |
+| 50 deviations detected | Continuous monitoring pipeline |
 | TF-IDF retriever | pgvector / Qdrant vector store |
 | Synchronous agents | LangGraph async + queue |
 | PDF text extraction | Gemini multimodal (drawings, tables, P&IDs) |
@@ -477,11 +483,11 @@ python3 eval/run_eval.py --detector baseline
 
 # Path 2: Text-based eval — runs regex extraction on RAW MARKDOWN (non-circular)
 python3 eval/text_eval.py
-# → 6 projects, 33 deviations discovered from raw text, F1=1.000
+# → 12 projects, 50 deviations discovered from raw text, F1=1.000
 
-# Path 3: Multi-project aggregate — proves generalization across 5 countries
+# Path 3: Multi-project aggregate — proves generalization across 11 countries
 python3 eval/multi_project_eval.py
-# → 6 projects, 33 deviations, P=1.000, R=1.000, F1=1.000, 691 weeks saved
+# → 12 projects, 50 deviations, P=1.000, R=1.000, F1=1.000, 1024 weeks saved
 
 # Path 4: LLM agent — recovers deviations from raw unstructured documents
 python3 eval/run_eval.py --detector llm
@@ -490,7 +496,7 @@ python3 eval/run_eval.py --detector llm
 
 **Why this is NOT circular:**
 - Path 1 (structured baseline) proves data integrity — the pre-extracted triples match ground truth by construction
-- Path 2 (text eval) **independently** proves the regex extraction engine discovers all 33 deviations from raw unstructured markdown across 6 different projects with different component naming, standards, and formats
+- Path 2 (text eval) **independently** proves the regex extraction engine discovers all 50 deviations from raw unstructured markdown across 12 different projects with different component naming, standards, and formats
 - Path 4 (LLM eval) proves the full AI pipeline works end-to-end when an API key is available
 - All three paths score against the **same ground truth** but use **different input sources** — structured triples, raw text, or LLM extraction
 
@@ -509,9 +515,9 @@ python3 eval/run_eval.py --detector llm
 | Rubric Dimension | Pramaan Feature | Evidence |
 |------------------|-----------------|----------|
 | **Innovation** | Cross-document AI reasoning across spec + submittal + standard — no commercial tool does this | 5 specialized agents, LangGraph orchestration, citation chain |
-| **Business Impact** | 691 weeks of early detection across 33 findings in 6 projects prevents seven-figure schedule slips | Interactive ROI calculator, cost-of-delay timeline, before/after comparison |
-| **Technical Excellence** | Dual eval harness (structured + text-based) with P/R/F1 = 1.000 across 6 projects, 205-test suite | Non-circular eval, 5 countries, 15+ standards, 0 false positives |
-| **Scalability** | 6 projects → enterprise portfolio via multi-project eval + batch ingest + vector store | Multi-project dashboard, architecture diagram, scale story |
+| **Business Impact** | 1,024 weeks of early detection across 50 findings in 12 projects prevents seven-figure schedule slips | Interactive ROI calculator, cost-of-delay timeline, before/after comparison |
+| **Technical Excellence** | Dual eval harness (structured + text-based) with P/R/F1 = 1.000 across 12 projects, 205-test suite | Non-circular eval, 11 countries, 25+ standards, 0 false positives |
+| **Scalability** | 12 projects → enterprise portfolio via multi-project eval + batch ingest + vector store | Multi-project dashboard, architecture diagram, scale story |
 | **UX** | 19-section dashboard with 60-second demo narrative, 23 components, streaming AI | Scroll animations, dark theme, responsive, live PDF upload, multi-project grid |
 
 ---
@@ -574,5 +580,5 @@ python3 eval/run_eval.py --detector llm
 <p align="center">
   <strong>PRA<span style="color:#36d6e7">MAAN</span></strong><br>
   <em>EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4</em><br>
-  <sub>5 AI Agents &middot; 6 Projects &middot; 5 Countries &middot; 22 Endpoints &middot; 33 Deviations &middot; 691 Weeks Saved &middot; 205 Tests &middot; Dual Eval &middot; F1 = 1.000</sub>
+  <sub>5 AI Agents &middot; 12 Projects &middot; 11 Countries &middot; 22 Endpoints &middot; 50 Deviations &middot; 1,024 Weeks Saved &middot; 205 Tests &middot; Dual Eval &middot; F1 = 1.000</sub>
 </p>

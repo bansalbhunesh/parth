@@ -1,0 +1,173 @@
+[
+  {
+    "system": "UPS",
+    "component": "UPS-01",
+    "parameter": "battery_runtime_min",
+    "required_value": 10,
+    "unit": "min",
+    "standard_ref": "EN-50600",
+    "clause": "AT-4.1"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-01",
+    "parameter": "redundancy",
+    "required_value": "2N",
+    "unit": "topology",
+    "standard_ref": "EN-50600",
+    "clause": "AT-4.2"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-01",
+    "parameter": "rated_power_kw",
+    "required_value": 900,
+    "unit": "kW",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "AT-4.3"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-01",
+    "parameter": "redundancy",
+    "required_value": "N+1",
+    "unit": "topology",
+    "standard_ref": "EN-50600",
+    "clause": "AT-5.1"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-01",
+    "parameter": "rated_power_kva",
+    "required_value": 2000,
+    "unit": "kVA",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "AT-5.2"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-01",
+    "parameter": "emission_class",
+    "required_value": "Stage_V",
+    "unit": "class",
+    "standard_ref": "EU-2016/1628",
+    "clause": "AT-5.3"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-01",
+    "parameter": "redundancy",
+    "required_value": "N+2",
+    "unit": "topology",
+    "standard_ref": "EN-50600",
+    "clause": "AT-6.1"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-01",
+    "parameter": "refrigerant_gwp",
+    "required_value": 1,
+    "unit": "max",
+    "standard_ref": "EU-F-GAS",
+    "clause": "AT-6.2"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-01",
+    "parameter": "capacity_tr",
+    "required_value": 600,
+    "unit": "TR",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "AT-6.3"
+  },
+  {
+    "system": "SWGR",
+    "component": "SWGR-01",
+    "parameter": "short_circuit_rating_ka",
+    "required_value": 50,
+    "unit": "kA",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "AT-7.1"
+  },
+  {
+    "system": "SWGR",
+    "component": "SWGR-01",
+    "parameter": "insulation",
+    "required_value": "SF6_free",
+    "unit": "type",
+    "standard_ref": "EU-F-GAS",
+    "clause": "AT-7.2"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-01",
+    "parameter": "fire_rating",
+    "required_value": "B2ca",
+    "unit": "euroclass",
+    "standard_ref": "EN-13501-6",
+    "clause": "AT-8.1"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-01",
+    "parameter": "category",
+    "required_value": "Cat6A",
+    "unit": "type",
+    "standard_ref": "EN-50173",
+    "clause": "AT-8.2"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS-01",
+    "parameter": "protocol",
+    "required_value": "BACnet_IP",
+    "unit": "standard",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "AT-9.1"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS-01",
+    "parameter": "monitoring_redundancy",
+    "required_value": "dual",
+    "unit": "topology",
+    "standard_ref": "EN-50600",
+    "clause": "AT-9.2"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-01",
+    "parameter": "agent",
+    "required_value": "clean_agent",
+    "unit": "type",
+    "standard_ref": "VdS-2095",
+    "clause": "AT-10.1"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-01",
+    "parameter": "zones",
+    "required_value": 6,
+    "unit": "count",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "AT-10.2"
+  },
+  {
+    "system": "PDU",
+    "component": "PDU-01",
+    "parameter": "metering",
+    "required_value": "per_outlet",
+    "unit": "type",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "AT-11.1"
+  },
+  {
+    "system": "PDU",
+    "component": "PDU-01",
+    "parameter": "redundancy",
+    "required_value": "A+B",
+    "unit": "topology",
+    "standard_ref": "EN-50600",
+    "clause": "AT-11.2"
+  }
+]

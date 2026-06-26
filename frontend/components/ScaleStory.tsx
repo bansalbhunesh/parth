@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 const STAGES = [
   { items: "10", label: "Systems modelled", sub: "Demo corpus", done: true },
-  { items: "33", label: "Requirements tracked", sub: "Spec + standard pairs", done: true },
+  { items: "203", label: "Requirements tracked", sub: "Spec + standard pairs", done: true },
   { items: "87", label: "Active submittals", sub: "Vendor documents", done: true },
   { items: "14K", label: "Line items at scale", sub: "Batch ingest + vector store", done: false },
 ];

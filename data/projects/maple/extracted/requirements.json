@@ -1,0 +1,146 @@
+[
+  {
+    "system": "UPS",
+    "component": "UPS-01",
+    "parameter": "battery_runtime_min",
+    "required_value": 10,
+    "unit": "min",
+    "standard_ref": "UPTIME-TIER3",
+    "clause": "MP-4.1"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-01",
+    "parameter": "redundancy",
+    "required_value": "N+1",
+    "unit": "topology",
+    "standard_ref": "UPTIME-TIER3",
+    "clause": "MP-4.2"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-01",
+    "parameter": "rated_power_kw",
+    "required_value": 750,
+    "unit": "kW",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "MP-4.3"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-01",
+    "parameter": "redundancy",
+    "required_value": "N+1",
+    "unit": "topology",
+    "standard_ref": "UPTIME-TIER3",
+    "clause": "MP-5.1"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-01",
+    "parameter": "rated_power_kva",
+    "required_value": 1800,
+    "unit": "kVA",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "MP-5.2"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-01",
+    "parameter": "cold_start_temp_c",
+    "required_value": -40,
+    "unit": "C",
+    "standard_ref": "CSA-C282",
+    "clause": "MP-5.3"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-01",
+    "parameter": "redundancy",
+    "required_value": "N+1",
+    "unit": "topology",
+    "standard_ref": "UPTIME-TIER3",
+    "clause": "MP-6.1"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-01",
+    "parameter": "free_cooling_hours",
+    "required_value": 4500,
+    "unit": "h/yr",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "MP-6.2"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-01",
+    "parameter": "capacity_tr",
+    "required_value": 500,
+    "unit": "TR",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "MP-6.3"
+  },
+  {
+    "system": "SWGR",
+    "component": "SWGR-01",
+    "parameter": "short_circuit_rating_ka",
+    "required_value": 40,
+    "unit": "kA",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "MP-7.1"
+  },
+  {
+    "system": "SWGR",
+    "component": "SWGR-01",
+    "parameter": "csa_certification",
+    "required_value": "certified",
+    "unit": "status",
+    "standard_ref": "CSA-C22.2",
+    "clause": "MP-7.2"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-01",
+    "parameter": "fire_rating",
+    "required_value": "FT6",
+    "unit": "CEC-class",
+    "standard_ref": "CEC-2024",
+    "clause": "MP-8.1"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-01",
+    "parameter": "category",
+    "required_value": "Cat6A",
+    "unit": "type",
+    "standard_ref": "CSA-T529",
+    "clause": "MP-8.2"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS-01",
+    "parameter": "protocol",
+    "required_value": "BACnet_IP",
+    "unit": "standard",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "MP-9.1"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-01",
+    "parameter": "agent",
+    "required_value": "clean_agent",
+    "unit": "type",
+    "standard_ref": "NFPA-2001",
+    "clause": "MP-10.1"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-01",
+    "parameter": "zones",
+    "required_value": 5,
+    "unit": "count",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "MP-10.2"
+  }
+]

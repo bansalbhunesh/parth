@@ -1,0 +1,114 @@
+[
+  {
+    "system": "UPS",
+    "component": "UPS-01",
+    "parameter": "battery_runtime_min",
+    "provided_value": 10,
+    "unit": "min"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-01",
+    "parameter": "redundancy",
+    "provided_value": "N+1",
+    "unit": "topology"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-01",
+    "parameter": "rated_power_kw",
+    "provided_value": 750,
+    "unit": "kW"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-01",
+    "parameter": "redundancy",
+    "provided_value": "N+1",
+    "unit": "topology"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-01",
+    "parameter": "rated_power_kva",
+    "provided_value": 1800,
+    "unit": "kVA"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-01",
+    "parameter": "cold_start_temp_c",
+    "provided_value": -25,
+    "unit": "C"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-01",
+    "parameter": "redundancy",
+    "provided_value": "N+1",
+    "unit": "topology"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-01",
+    "parameter": "free_cooling_hours",
+    "provided_value": 3200,
+    "unit": "h/yr"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-01",
+    "parameter": "capacity_tr",
+    "provided_value": 500,
+    "unit": "TR"
+  },
+  {
+    "system": "SWGR",
+    "component": "SWGR-01",
+    "parameter": "short_circuit_rating_ka",
+    "provided_value": 40,
+    "unit": "kA"
+  },
+  {
+    "system": "SWGR",
+    "component": "SWGR-01",
+    "parameter": "csa_certification",
+    "provided_value": "certified",
+    "unit": "status"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-01",
+    "parameter": "fire_rating",
+    "provided_value": "FT4",
+    "unit": "CEC-class"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-01",
+    "parameter": "category",
+    "provided_value": "Cat6A",
+    "unit": "type"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS-01",
+    "parameter": "protocol",
+    "provided_value": "BACnet_IP",
+    "unit": "standard"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-01",
+    "parameter": "agent",
+    "provided_value": "clean_agent",
+    "unit": "type"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-01",
+    "parameter": "zones",
+    "provided_value": 5,
+    "unit": "count"
+  }
+]

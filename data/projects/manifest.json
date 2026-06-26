@@ -35,6 +35,48 @@
       "systems": 8,
       "requirements": 20,
       "deviations": 3
+    },
+    "athena": {
+      "name": "Project Athena",
+      "path": "data/projects/athena",
+      "systems": 8,
+      "requirements": 19,
+      "deviations": 4
+    },
+    "sakura": {
+      "name": "Project Sakura",
+      "path": "data/projects/sakura",
+      "systems": 8,
+      "requirements": 19,
+      "deviations": 3
+    },
+    "outback": {
+      "name": "Project Outback",
+      "path": "data/projects/outback",
+      "systems": 7,
+      "requirements": 18,
+      "deviations": 3
+    },
+    "maple": {
+      "name": "Project Maple",
+      "path": "data/projects/maple",
+      "systems": 7,
+      "requirements": 16,
+      "deviations": 3
+    },
+    "pampas": {
+      "name": "Project Pampas",
+      "path": "data/projects/pampas",
+      "systems": 6,
+      "requirements": 15,
+      "deviations": 2
+    },
+    "thames": {
+      "name": "Project Thames",
+      "path": "data/projects/thames",
+      "systems": 8,
+      "requirements": 19,
+      "deviations": 2
     }
   },
   "meghdoot": {

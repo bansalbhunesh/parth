@@ -1,0 +1,173 @@
+[
+  {
+    "system": "UPS",
+    "component": "UPS-01",
+    "parameter": "battery_runtime_min",
+    "required_value": 10,
+    "unit": "min",
+    "standard_ref": "UPTIME-TIER4",
+    "clause": "TH-4.1"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-01",
+    "parameter": "redundancy",
+    "required_value": "2N",
+    "unit": "topology",
+    "standard_ref": "UPTIME-TIER4",
+    "clause": "TH-4.2"
+  },
+  {
+    "system": "UPS",
+    "component": "UPS-01",
+    "parameter": "rated_power_kw",
+    "required_value": 1100,
+    "unit": "kW",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "TH-4.3"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-01",
+    "parameter": "redundancy",
+    "required_value": "N+1",
+    "unit": "topology",
+    "standard_ref": "UPTIME-TIER4",
+    "clause": "TH-5.1"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-01",
+    "parameter": "rated_power_kva",
+    "required_value": 2750,
+    "unit": "kVA",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "TH-5.2"
+  },
+  {
+    "system": "GEN",
+    "component": "GEN-01",
+    "parameter": "emission_nox_gkwh",
+    "required_value": 0.4,
+    "unit": "g/kWh",
+    "standard_ref": "MCPD-2015/2193",
+    "clause": "TH-5.3"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-01",
+    "parameter": "redundancy",
+    "required_value": "N+2",
+    "unit": "topology",
+    "standard_ref": "UPTIME-TIER4",
+    "clause": "TH-6.1"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-01",
+    "parameter": "pue_target",
+    "required_value": 1.3,
+    "unit": "ratio",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "TH-6.2"
+  },
+  {
+    "system": "COOL",
+    "component": "COOL-01",
+    "parameter": "capacity_tr",
+    "required_value": 1400,
+    "unit": "TR",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "TH-6.3"
+  },
+  {
+    "system": "SWGR",
+    "component": "SWGR-01",
+    "parameter": "short_circuit_rating_ka",
+    "required_value": 50,
+    "unit": "kA",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "TH-7.1"
+  },
+  {
+    "system": "SWGR",
+    "component": "SWGR-01",
+    "parameter": "redundancy",
+    "required_value": "2N",
+    "unit": "topology",
+    "standard_ref": "UPTIME-TIER4",
+    "clause": "TH-7.2"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-01",
+    "parameter": "fire_rating",
+    "required_value": "B2ca",
+    "unit": "euroclass",
+    "standard_ref": "BS-7671",
+    "clause": "TH-8.1"
+  },
+  {
+    "system": "CABLE",
+    "component": "CABLE-01",
+    "parameter": "category",
+    "required_value": "Cat6A",
+    "unit": "type",
+    "standard_ref": "BS-EN-50173",
+    "clause": "TH-8.2"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS-01",
+    "parameter": "protocol",
+    "required_value": "BACnet_IP",
+    "unit": "standard",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "TH-9.1"
+  },
+  {
+    "system": "BMS",
+    "component": "BMS-01",
+    "parameter": "monitoring_redundancy",
+    "required_value": "dual",
+    "unit": "topology",
+    "standard_ref": "UPTIME-TIER4",
+    "clause": "TH-9.2"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-01",
+    "parameter": "agent",
+    "required_value": "clean_agent",
+    "unit": "type",
+    "standard_ref": "BS-EN-15004",
+    "clause": "TH-10.1"
+  },
+  {
+    "system": "FIRE",
+    "component": "FIRE-01",
+    "parameter": "zones",
+    "required_value": 10,
+    "unit": "count",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "TH-10.2"
+  },
+  {
+    "system": "PDU",
+    "component": "PDU-01",
+    "parameter": "metering",
+    "required_value": "per_outlet",
+    "unit": "type",
+    "standard_ref": "DESIGN-BASIS",
+    "clause": "TH-11.1"
+  },
+  {
+    "system": "PDU",
+    "component": "PDU-01",
+    "parameter": "redundancy",
+    "required_value": "A+B",
+    "unit": "topology",
+    "standard_ref": "UPTIME-TIER4",
+    "clause": "TH-11.2"
+  }
+]

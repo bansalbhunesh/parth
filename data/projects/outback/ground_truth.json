@@ -1,0 +1,81 @@
+{
+  "project": {
+    "name": "Project Outback",
+    "capacity_mw": 8,
+    "tier": "Uptime Tier III",
+    "location": "Sydney, Australia",
+    "current_week": 7,
+    "line_items_total": 5800,
+    "active_submittals": 38,
+    "total_systems": 7,
+    "estimated_completion_week": 42,
+    "client": "Equinix Australia Pty Ltd",
+    "epc_contractor": "Lendlease Engineering",
+    "cx_authority": "WSP Australia"
+  },
+  "seeded_deviations": [
+    {
+      "id": "DEV-001",
+      "system": "GEN",
+      "component": "GEN-01",
+      "parameter": "noise_dba",
+      "required_value": 75,
+      "provided_value": 85,
+      "unit": "dBA",
+      "standard_ref": "AS-1055",
+      "spec_clause": "OB-5.3",
+      "severity": "Critical",
+      "predicted_cx_test": "FAT-O01",
+      "predicted_cx_level": 3,
+      "predicted_cx_name": "Generator noise emission test",
+      "week_caught": 7,
+      "week_fail": 24,
+      "lead_time_weeks": 17,
+      "rationale": "85 dBA exceeds 75 dBA council limit; generator cannot operate without acoustic attenuation."
+    },
+    {
+      "id": "DEV-002",
+      "system": "COOL",
+      "component": "COOL-01",
+      "parameter": "water_efficiency",
+      "required_value": 3.0,
+      "provided_value": 5.2,
+      "unit": "L/kWh",
+      "standard_ref": "NABERS-DC",
+      "spec_clause": "OB-6.2",
+      "severity": "Major",
+      "predicted_cx_test": "IST-O01",
+      "predicted_cx_level": 4,
+      "predicted_cx_name": "Water efficiency measurement",
+      "week_caught": 7,
+      "week_fail": 32,
+      "lead_time_weeks": 25,
+      "rationale": "5.2 L/kWh exceeds NABERS 5-star target of 3.0 L/kWh; prevents NABERS certification."
+    },
+    {
+      "id": "DEV-003",
+      "system": "PDU",
+      "component": "PDU-01",
+      "parameter": "rcd_type",
+      "required_value": "Type_B",
+      "provided_value": "Type_A",
+      "unit": "class",
+      "standard_ref": "AS-3000",
+      "spec_clause": "OB-11.3",
+      "severity": "Major",
+      "predicted_cx_test": "ITP-O01",
+      "predicted_cx_level": 2,
+      "predicted_cx_name": "RCD type verification",
+      "week_caught": 7,
+      "week_fail": 18,
+      "lead_time_weeks": 11,
+      "rationale": "Type A RCD cannot detect DC leakage from switch-mode PSUs; AS/NZS 3000 requires Type B for IT loads."
+    }
+  ],
+  "true_negative_systems": [
+    "UPS",
+    "CABLE",
+    "BMS",
+    "FIRE"
+  ]
+}

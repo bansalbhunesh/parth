@@ -1188,12 +1188,937 @@ YANGTZE = {
 }
 
 
+
+# ---------------------------------------------------------------------------
+# Project 7: Athena — 15 MW EN 50600 Class 4, Frankfurt, Germany
+# ---------------------------------------------------------------------------
+ATHENA = {
+    "project": {
+        "name": "Project Athena",
+        "capacity_mw": 15,
+        "tier": "EN 50600 Class 4",
+        "location": "Frankfurt, Germany",
+        "current_week": 9,
+        "line_items_total": 9200,
+        "active_submittals": 61,
+        "total_systems": 8,
+        "estimated_completion_week": 48,
+        "client": "Rhein Digital GmbH",
+        "epc_contractor": "Hochtief PPP Solutions",
+        "cx_authority": "TÜV Rheinland AG",
+    },
+    "systems": {
+        "UPS": {
+            "title": "Uninterruptible Power Supply",
+            "requirements": [
+                ("UPS-01", "battery_runtime_min", 10, "min", "EN-50600", "AT-4.1"),
+                ("UPS-01", "redundancy", "2N", "topology", "EN-50600", "AT-4.2"),
+                ("UPS-01", "rated_power_kw", 900, "kW", "DESIGN-BASIS", "AT-4.3"),
+            ],
+            "submittal": {
+                "battery_runtime_min": 10,
+                "redundancy": "2N",
+                "rated_power_kw": 900,
+            },
+        },
+        "GEN": {
+            "title": "Diesel Generators",
+            "requirements": [
+                ("GEN-01", "redundancy", "N+1", "topology", "EN-50600", "AT-5.1"),
+                ("GEN-01", "rated_power_kva", 2000, "kVA", "DESIGN-BASIS", "AT-5.2"),
+                ("GEN-01", "emission_class", "Stage_V", "class", "EU-2016/1628", "AT-5.3"),
+            ],
+            "submittal": {
+                "redundancy": "N+1",
+                "rated_power_kva": 2000,
+                "emission_class": "Stage_IIIA",
+            },
+            "spec_intro": "Generators shall comply with EU Stage V emission limits per Regulation 2016/1628 for non-road mobile machinery.",
+            "submittal_intro": "Vendor: MTU 16V2000 DS2000. Emission certification: Stage IIIA. Vendor notes Stage V aftertreatment kit available as retrofit.",
+        },
+        "COOL": {
+            "title": "Cooling Plant",
+            "requirements": [
+                ("COOL-01", "redundancy", "N+2", "topology", "EN-50600", "AT-6.1"),
+                ("COOL-01", "refrigerant_gwp", 1, "max", "EU-F-GAS", "AT-6.2"),
+                ("COOL-01", "capacity_tr", 600, "TR", "DESIGN-BASIS", "AT-6.3"),
+            ],
+            "submittal": {
+                "redundancy": "N+2",
+                "refrigerant_gwp": 675,
+                "capacity_tr": 600,
+            },
+            "spec_intro": "Cooling systems shall use refrigerants with GWP <= 1 per EU F-Gas Regulation phase-down schedule for 2027 compliance.",
+            "submittal_intro": "Vendor: Stulz CyberAir 3PRO. Refrigerant: R-32 (GWP 675). Vendor states R-290 (GWP 3) units available Q3 2027.",
+        },
+        "SWGR": {
+            "title": "MV Switchgear",
+            "requirements": [
+                ("SWGR-01", "short_circuit_rating_ka", 50, "kA", "DESIGN-BASIS", "AT-7.1"),
+                ("SWGR-01", "insulation", "SF6_free", "type", "EU-F-GAS", "AT-7.2"),
+            ],
+            "submittal": {
+                "short_circuit_rating_ka": 50,
+                "insulation": "SF6",
+            },
+            "spec_intro": "MV switchgear shall be SF6-free per EU F-Gas phase-down. Alternatives: dry air, solid insulation, or vacuum.",
+            "submittal_intro": "Vendor: Siemens 8DJH. Insulation medium: SF6. Vendor notes SF6-free 8DJH Blue GIS available at 12% cost premium.",
+        },
+        "CABLE": {
+            "title": "Cabling Infrastructure",
+            "requirements": [
+                ("CABLE-01", "fire_rating", "B2ca", "euroclass", "EN-13501-6", "AT-8.1"),
+                ("CABLE-01", "category", "Cat6A", "type", "EN-50173", "AT-8.2"),
+            ],
+            "submittal": {
+                "fire_rating": "Cca",
+                "category": "Cat6A",
+            },
+            "spec_intro": "Data cables in plenum and riser spaces shall achieve Euroclass B2ca-s1a,d1,a1 per EN 13501-6 for reduced fire load.",
+            "submittal_intro": "Vendor: Nexans LANmark-6A. Fire rating: Euroclass Cca-s1b,d1,a1. Vendor notes B2ca cables available as LSZH variant.",
+        },
+        "BMS": {
+            "title": "Building Management System",
+            "requirements": [
+                ("BMS-01", "protocol", "BACnet_IP", "standard", "DESIGN-BASIS", "AT-9.1"),
+                ("BMS-01", "monitoring_redundancy", "dual", "topology", "EN-50600", "AT-9.2"),
+            ],
+            "submittal": {
+                "protocol": "BACnet_IP",
+                "monitoring_redundancy": "dual",
+            },
+        },
+        "FIRE": {
+            "title": "Fire Suppression",
+            "requirements": [
+                ("FIRE-01", "agent", "clean_agent", "type", "VdS-2095", "AT-10.1"),
+                ("FIRE-01", "zones", 6, "count", "DESIGN-BASIS", "AT-10.2"),
+            ],
+            "submittal": {
+                "agent": "clean_agent",
+                "zones": 6,
+            },
+        },
+        "PDU": {
+            "title": "Power Distribution Units",
+            "requirements": [
+                ("PDU-01", "metering", "per_outlet", "type", "DESIGN-BASIS", "AT-11.1"),
+                ("PDU-01", "redundancy", "A+B", "topology", "EN-50600", "AT-11.2"),
+            ],
+            "submittal": {
+                "metering": "per_outlet",
+                "redundancy": "A+B",
+            },
+        },
+    },
+    "deviation_cx": {
+        ("GEN-01", "emission_class"): {
+            "cx_test": "FAT-A01", "cx_level": 3,
+            "cx_name": "Generator emission compliance test",
+            "week_fail": 28, "severity": "Critical",
+            "reason": "Stage IIIA emissions exceed Stage V limits; generator cannot operate under EU 2016/1628 without aftertreatment.",
+        },
+        ("COOL-01", "refrigerant_gwp"): {
+            "cx_test": "IST-A01", "cx_level": 4,
+            "cx_name": "Refrigerant compliance verification",
+            "week_fail": 36, "severity": "Critical",
+            "reason": "R-32 (GWP 675) exceeds GWP 1 limit under EU F-Gas phase-down; system faces regulatory non-compliance by 2027.",
+        },
+        ("SWGR-01", "insulation"): {
+            "cx_test": "FAT-A02", "cx_level": 3,
+            "cx_name": "Switchgear insulation medium verification",
+            "week_fail": 30, "severity": "Major",
+            "reason": "SF6 insulated switchgear conflicts with EU F-Gas phase-down; long-term compliance risk.",
+        },
+        ("CABLE-01", "fire_rating"): {
+            "cx_test": "ITP-A01", "cx_level": 2,
+            "cx_name": "Cable Euroclass fire rating inspection",
+            "week_fail": 22, "severity": "Major",
+            "reason": "Cca Euroclass below required B2ca; higher fire load in IT spaces.",
+        },
+    },
+    "true_negative_systems": ["UPS", "BMS", "FIRE", "PDU"],
+    "standards": {
+        "EN-50600": "# EN 50600 — Data Centre Infrastructure (paraphrased)\n\nEuropean standard for data centre design.\n## Availability classes\n- Class 1: basic\n- Class 2: redundant components\n- Class 3: concurrently maintainable\n- Class 4: fault tolerant (2N distribution)\n",
+        "EU-2016/1628": "# EU Regulation 2016/1628 — NRMM Emissions (paraphrased)\n\nStage V emission limits for non-road mobile machinery including standby generators.\n- PM: 0.015 g/kWh\n- NOx: 0.4 g/kWh\n- Stage IIIA limits are significantly higher and non-compliant.\n",
+        "EU-F-GAS": "# EU F-Gas Regulation 517/2014 (paraphrased)\n\nPhase-down of high-GWP fluorinated gases.\n- 2027: new equipment GWP limit reductions\n- SF6 in MV switchgear to be phased out\n- Refrigerant selection must target lowest available GWP\n",
+        "DESIGN-BASIS": "# Project Athena — Design Basis\n\n15 MW EN 50600 Class 4 data centre, Frankfurt, Germany.\n",
+    },
+    "cx_tests": [
+        {"id": "ITP-A01", "level": 2, "name": "Cable Euroclass fire rating inspection", "scheduled_week": 22, "acceptance": "Euroclass B2ca or higher"},
+        {"id": "FAT-A01", "level": 3, "name": "Generator emission compliance test", "scheduled_week": 28, "acceptance": "Stage V limits met"},
+        {"id": "FAT-A02", "level": 3, "name": "Switchgear insulation medium verification", "scheduled_week": 30, "acceptance": "SF6-free confirmed"},
+        {"id": "IST-A01", "level": 4, "name": "Refrigerant compliance verification", "scheduled_week": 36, "acceptance": "GWP <= 1"},
+        {"id": "IST-A02", "level": 4, "name": "Full facility failover test", "scheduled_week": 40, "acceptance": "Zero IT impact"},
+        {"id": "SAT-A01", "level": 5, "name": "72-hour sustained operations", "scheduled_week": 46, "acceptance": "No critical alarms"},
+    ],
+    "rfi_log": [
+        {"id": "RFI-A01", "system": "GEN", "status": "open",
+         "question": "Confirm Stage V aftertreatment retrofit availability and lead time.",
+         "resolution": None, "week": 7},
+    ],
+}
+
+
+# ---------------------------------------------------------------------------
+# Project 8: Sakura — 25 MW JEITA Class 4, Tokyo, Japan
+# ---------------------------------------------------------------------------
+SAKURA = {
+    "project": {
+        "name": "Project Sakura",
+        "capacity_mw": 25,
+        "tier": "JEITA Class 4",
+        "location": "Tokyo, Japan",
+        "current_week": 10,
+        "line_items_total": 11000,
+        "active_submittals": 72,
+        "total_systems": 8,
+        "estimated_completion_week": 50,
+        "client": "NTT Facilities Corp.",
+        "epc_contractor": "Obayashi Corporation",
+        "cx_authority": "Japan Data Centre Council (JDCC)",
+    },
+    "systems": {
+        "UPS": {
+            "title": "Uninterruptible Power Supply",
+            "requirements": [
+                ("UPS-01", "battery_runtime_min", 10, "min", "JEITA-DC", "SK-4.1"),
+                ("UPS-01", "redundancy", "2N", "topology", "JEITA-DC", "SK-4.2"),
+                ("UPS-01", "rated_power_kw", 1000, "kW", "DESIGN-BASIS", "SK-4.3"),
+            ],
+            "submittal": {
+                "battery_runtime_min": 10,
+                "redundancy": "2N",
+                "rated_power_kw": 1000,
+            },
+        },
+        "GEN": {
+            "title": "Diesel Generators",
+            "requirements": [
+                ("GEN-01", "redundancy", "N+1", "topology", "JEITA-DC", "SK-5.1"),
+                ("GEN-01", "rated_power_kva", 2500, "kVA", "DESIGN-BASIS", "SK-5.2"),
+                ("GEN-01", "seismic_class", "S_class", "class", "JEAC-4601", "SK-5.3"),
+            ],
+            "submittal": {
+                "redundancy": "N+1",
+                "rated_power_kva": 2500,
+                "seismic_class": "B_class",
+            },
+            "spec_intro": "Generators shall be S-class seismically rated per JEAC 4601 for Tokyo seismic zone (peak ground acceleration 0.4g).",
+            "submittal_intro": "Vendor: Mitsubishi MGS2500. Seismic rating: B-class (0.3g). Vendor states S-class anchoring kit available.",
+        },
+        "COOL": {
+            "title": "Cooling Plant",
+            "requirements": [
+                ("COOL-01", "redundancy", "N+2", "topology", "JEITA-DC", "SK-6.1"),
+                ("COOL-01", "supply_air_temp_c", 24, "C", "ASHRAE-TC9.9", "SK-6.2"),
+                ("COOL-01", "capacity_tr", 1000, "TR", "DESIGN-BASIS", "SK-6.3"),
+            ],
+            "submittal": {
+                "redundancy": "N+2",
+                "supply_air_temp_c": 24,
+                "capacity_tr": 1000,
+            },
+        },
+        "SWGR": {
+            "title": "MV Switchgear",
+            "requirements": [
+                ("SWGR-01", "short_circuit_rating_ka", 50, "kA", "DESIGN-BASIS", "SK-7.1"),
+                ("SWGR-01", "seismic_class", "S_class", "class", "JEAC-4601", "SK-7.2"),
+            ],
+            "submittal": {
+                "short_circuit_rating_ka": 50,
+                "seismic_class": "S_class",
+            },
+        },
+        "CABLE": {
+            "title": "Cabling Infrastructure",
+            "requirements": [
+                ("CABLE-01", "fire_rating", "EM-IT", "JIS-class", "JIS-C-3521", "SK-8.1"),
+                ("CABLE-01", "category", "Cat6A", "type", "JIS-X-5150", "SK-8.2"),
+            ],
+            "submittal": {
+                "fire_rating": "IV",
+                "category": "Cat6A",
+            },
+            "spec_intro": "Data cables shall be EM-IT rated (eco-material, IT grade) per JIS C 3521 for low smoke and halogen-free performance.",
+            "submittal_intro": "Vendor: Furukawa FITELNET Cat6A. Fire rating: JIS Class IV. Vendor notes EM-IT grade available at 15% premium.",
+        },
+        "STRUCT": {
+            "title": "Structural — Seismic Isolation",
+            "requirements": [
+                ("FLOOR-01", "seismic_isolation", "base_isolated", "type", "JEAC-4601", "SK-9.1"),
+                ("FLOOR-01", "load_rating_kpa", 15, "kPa", "DESIGN-BASIS", "SK-9.2"),
+            ],
+            "submittal": {
+                "seismic_isolation": "fixed_base",
+                "load_rating_kpa": 15,
+            },
+            "spec_intro": "Data hall structure shall incorporate base isolation per JEAC 4601 to achieve 0.2g floor response for seismic zone Tokyo.",
+            "submittal_intro": "Vendor: Bridgestone seismic isolators. Proposed: fixed-base with braced frames. Vendor states base isolation retrofit possible before fit-out.",
+        },
+        "BMS": {
+            "title": "Building Management System",
+            "requirements": [
+                ("BMS-01", "protocol", "BACnet_IP", "standard", "DESIGN-BASIS", "SK-10.1"),
+                ("BMS-01", "monitoring_redundancy", "dual", "topology", "JEITA-DC", "SK-10.2"),
+            ],
+            "submittal": {
+                "protocol": "BACnet_IP",
+                "monitoring_redundancy": "dual",
+            },
+        },
+        "FIRE": {
+            "title": "Fire Suppression",
+            "requirements": [
+                ("FIRE-01", "agent", "clean_agent", "type", "NFPA-75", "SK-11.1"),
+                ("FIRE-01", "zones", 8, "count", "DESIGN-BASIS", "SK-11.2"),
+            ],
+            "submittal": {
+                "agent": "clean_agent",
+                "zones": 8,
+            },
+        },
+    },
+    "deviation_cx": {
+        ("GEN-01", "seismic_class"): {
+            "cx_test": "FAT-S01", "cx_level": 3,
+            "cx_name": "Seismic qualification test — generators",
+            "week_fail": 30, "severity": "Critical",
+            "reason": "B-class seismic rating (0.3g) insufficient for Tokyo zone (0.4g); generator may unseat during major earthquake.",
+        },
+        ("CABLE-01", "fire_rating"): {
+            "cx_test": "ITP-S01", "cx_level": 2,
+            "cx_name": "Cable fire rating inspection",
+            "week_fail": 20, "severity": "Major",
+            "reason": "JIS Class IV below EM-IT requirement; higher smoke and halogen emission during fire.",
+        },
+        ("FLOOR-01", "seismic_isolation"): {
+            "cx_test": "IST-S01", "cx_level": 4,
+            "cx_name": "Seismic response verification",
+            "week_fail": 38, "severity": "Critical",
+            "reason": "Fixed-base design transmits full ground motion to IT equipment; base isolation required to reduce floor response to 0.2g.",
+        },
+    },
+    "true_negative_systems": ["UPS", "COOL", "SWGR", "BMS", "FIRE"],
+    "standards": {
+        "JEITA-DC": "# JEITA Data Centre Facility Standard (paraphrased)\n\nJapanese standard for data centre infrastructure.\n## Classes\n- Class 1-2: basic/redundant\n- Class 3: concurrently maintainable\n- Class 4: fault tolerant, 2N, base-isolated in seismic zones\n",
+        "JEAC-4601": "# JEAC 4601 — Seismic Design for Electrical Facilities (paraphrased)\n\n- S-class: critical facilities, 0.4g design acceleration\n- B-class: standard facilities, 0.3g\n- A-class: non-critical, 0.2g\n- Base isolation recommended for Class 4 DC in seismic zone Tokyo.\n",
+        "DESIGN-BASIS": "# Project Sakura — Design Basis\n\n25 MW JEITA Class 4 data centre, Tokyo, Japan.\nSeismic zone: Tokyo (peak ground acceleration 0.4g).\n",
+    },
+    "cx_tests": [
+        {"id": "ITP-S01", "level": 2, "name": "Cable fire rating inspection", "scheduled_week": 20, "acceptance": "EM-IT grade confirmed"},
+        {"id": "FAT-S01", "level": 3, "name": "Seismic qualification test — generators", "scheduled_week": 30, "acceptance": "S-class certification"},
+        {"id": "IST-S01", "level": 4, "name": "Seismic response verification", "scheduled_week": 38, "acceptance": "Floor response <= 0.2g"},
+        {"id": "IST-S02", "level": 4, "name": "Full facility failover test", "scheduled_week": 42, "acceptance": "Zero IT impact"},
+        {"id": "SAT-S01", "level": 5, "name": "72-hour sustained operations", "scheduled_week": 48, "acceptance": "No critical alarms"},
+    ],
+    "rfi_log": [
+        {"id": "RFI-S01", "system": "STRUCT", "status": "open",
+         "question": "Confirm base isolation lead time and impact on construction schedule.",
+         "resolution": None, "week": 8},
+    ],
+}
+
+
+# ---------------------------------------------------------------------------
+# Project 9: Outback — 8 MW Tier III, Sydney, Australia
+# ---------------------------------------------------------------------------
+OUTBACK = {
+    "project": {
+        "name": "Project Outback",
+        "capacity_mw": 8,
+        "tier": "Uptime Tier III",
+        "location": "Sydney, Australia",
+        "current_week": 7,
+        "line_items_total": 5800,
+        "active_submittals": 38,
+        "total_systems": 7,
+        "estimated_completion_week": 42,
+        "client": "Equinix Australia Pty Ltd",
+        "epc_contractor": "Lendlease Engineering",
+        "cx_authority": "WSP Australia",
+    },
+    "systems": {
+        "UPS": {
+            "title": "Uninterruptible Power Supply",
+            "requirements": [
+                ("UPS-01", "battery_runtime_min", 10, "min", "UPTIME-TIER3", "OB-4.1"),
+                ("UPS-01", "redundancy", "N+1", "topology", "UPTIME-TIER3", "OB-4.2"),
+                ("UPS-01", "rated_power_kw", 600, "kW", "DESIGN-BASIS", "OB-4.3"),
+            ],
+            "submittal": {
+                "battery_runtime_min": 10,
+                "redundancy": "N+1",
+                "rated_power_kw": 600,
+            },
+        },
+        "GEN": {
+            "title": "Diesel Generators",
+            "requirements": [
+                ("GEN-01", "redundancy", "N+1", "topology", "UPTIME-TIER3", "OB-5.1"),
+                ("GEN-01", "rated_power_kva", 1500, "kVA", "DESIGN-BASIS", "OB-5.2"),
+                ("GEN-01", "noise_dba", 75, "dBA", "AS-1055", "OB-5.3"),
+            ],
+            "submittal": {
+                "redundancy": "N+1",
+                "rated_power_kva": 1500,
+                "noise_dba": 85,
+            },
+            "spec_intro": "Generator noise emissions shall not exceed 75 dBA at 1m per AS 1055 and local council DA conditions.",
+            "submittal_intro": "Vendor: Cummins C1500D5. Noise at 1m: 85 dBA (standard enclosure). Attenuated enclosure available reducing to 72 dBA.",
+        },
+        "COOL": {
+            "title": "Cooling Plant",
+            "requirements": [
+                ("COOL-01", "redundancy", "N+1", "topology", "UPTIME-TIER3", "OB-6.1"),
+                ("COOL-01", "water_efficiency", 3.0, "L/kWh", "NABERS-DC", "OB-6.2"),
+                ("COOL-01", "capacity_tr", 400, "TR", "DESIGN-BASIS", "OB-6.3"),
+            ],
+            "submittal": {
+                "redundancy": "N+1",
+                "water_efficiency": 5.2,
+                "capacity_tr": 400,
+            },
+            "spec_intro": "Cooling water efficiency shall achieve NABERS 5-star target of <= 3.0 L/kWh for Australian water conservation.",
+            "submittal_intro": "Vendor: Carrier AquaForce 30XAV. Water efficiency: 5.2 L/kWh (open cooling tower). Vendor notes adiabatic coolers achieve 1.5 L/kWh.",
+        },
+        "CABLE": {
+            "title": "Cabling Infrastructure",
+            "requirements": [
+                ("CABLE-01", "fire_rating", "CMP", "plenum-class", "AS-3013", "OB-8.1"),
+                ("CABLE-01", "category", "Cat6A", "type", "AS-ISO-11801", "OB-8.2"),
+            ],
+            "submittal": {
+                "fire_rating": "CMP",
+                "category": "Cat6A",
+            },
+        },
+        "BMS": {
+            "title": "Building Management System",
+            "requirements": [
+                ("BMS-01", "protocol", "BACnet_IP", "standard", "DESIGN-BASIS", "OB-9.1"),
+                ("BMS-01", "nabers_reporting", "enabled", "feature", "NABERS-DC", "OB-9.2"),
+            ],
+            "submittal": {
+                "protocol": "BACnet_IP",
+                "nabers_reporting": "enabled",
+            },
+        },
+        "FIRE": {
+            "title": "Fire Suppression",
+            "requirements": [
+                ("FIRE-01", "agent", "clean_agent", "type", "AS-4214", "OB-10.1"),
+                ("FIRE-01", "zones", 4, "count", "DESIGN-BASIS", "OB-10.2"),
+            ],
+            "submittal": {
+                "agent": "clean_agent",
+                "zones": 4,
+            },
+        },
+        "PDU": {
+            "title": "Power Distribution Units",
+            "requirements": [
+                ("PDU-01", "metering", "per_outlet", "type", "DESIGN-BASIS", "OB-11.1"),
+                ("PDU-01", "rated_current_a", 32, "A", "AS-3000", "OB-11.2"),
+                ("PDU-01", "rcd_type", "Type_B", "class", "AS-3000", "OB-11.3"),
+            ],
+            "submittal": {
+                "metering": "per_outlet",
+                "rated_current_a": 32,
+                "rcd_type": "Type_A",
+            },
+            "spec_intro": "PDU residual current devices shall be Type B per AS/NZS 3000 amendment for DC leakage detection from modern server PSUs.",
+            "submittal_intro": "Vendor: Raritan PX3-5800. RCD: Type A (AC fault detection only). Vendor notes Type B RCDs available as option.",
+        },
+    },
+    "deviation_cx": {
+        ("GEN-01", "noise_dba"): {
+            "cx_test": "FAT-O01", "cx_level": 3,
+            "cx_name": "Generator noise emission test",
+            "week_fail": 24, "severity": "Critical",
+            "reason": "85 dBA exceeds 75 dBA council limit; generator cannot operate without acoustic attenuation.",
+        },
+        ("COOL-01", "water_efficiency"): {
+            "cx_test": "IST-O01", "cx_level": 4,
+            "cx_name": "Water efficiency measurement",
+            "week_fail": 32, "severity": "Major",
+            "reason": "5.2 L/kWh exceeds NABERS 5-star target of 3.0 L/kWh; prevents NABERS certification.",
+        },
+        ("PDU-01", "rcd_type"): {
+            "cx_test": "ITP-O01", "cx_level": 2,
+            "cx_name": "RCD type verification",
+            "week_fail": 18, "severity": "Major",
+            "reason": "Type A RCD cannot detect DC leakage from switch-mode PSUs; AS/NZS 3000 requires Type B for IT loads.",
+        },
+    },
+    "true_negative_systems": ["UPS", "CABLE", "BMS", "FIRE"],
+    "standards": {
+        "UPTIME-TIER3": "# Uptime Tier III (paraphrased)\n\nConcurrently maintainable. N+1 power/cooling.\n",
+        "NABERS-DC": "# NABERS Data Centre Rating (paraphrased)\n\nAustralian energy/water efficiency rating.\n- 5-star: water <= 3.0 L/kWh, PUE <= 1.4\n- Mandatory reporting for facilities > 2000 m2\n",
+        "AS-3000": "# AS/NZS 3000 — Wiring Rules (paraphrased)\n\nAustralian/NZ electrical installation standard.\n- Type B RCD required for circuits supplying IT equipment with DC components\n- Generator noise per AS 1055\n",
+        "DESIGN-BASIS": "# Project Outback — Design Basis\n\n8 MW Tier III data centre, Sydney, Australia.\n",
+    },
+    "cx_tests": [
+        {"id": "ITP-O01", "level": 2, "name": "RCD type verification", "scheduled_week": 18, "acceptance": "Type B RCD confirmed"},
+        {"id": "FAT-O01", "level": 3, "name": "Generator noise emission test", "scheduled_week": 24, "acceptance": "<= 75 dBA at 1m"},
+        {"id": "IST-O01", "level": 4, "name": "Water efficiency measurement", "scheduled_week": 32, "acceptance": "<= 3.0 L/kWh"},
+        {"id": "IST-O02", "level": 4, "name": "Maintenance simulation", "scheduled_week": 36, "acceptance": "IT load unaffected"},
+        {"id": "SAT-O01", "level": 5, "name": "72-hour sustained operations", "scheduled_week": 40, "acceptance": "No critical alarms"},
+    ],
+    "rfi_log": [
+        {"id": "RFI-O01", "system": "GEN", "status": "open",
+         "question": "Confirm attenuated enclosure lead time for noise compliance.",
+         "resolution": None, "week": 5},
+    ],
+}
+
+
+# ---------------------------------------------------------------------------
+# Project 10: Maple — 12 MW Tier III, Toronto, Canada
+# ---------------------------------------------------------------------------
+MAPLE = {
+    "project": {
+        "name": "Project Maple",
+        "capacity_mw": 12,
+        "tier": "Uptime Tier III",
+        "location": "Toronto, Canada",
+        "current_week": 8,
+        "line_items_total": 7600,
+        "active_submittals": 48,
+        "total_systems": 7,
+        "estimated_completion_week": 44,
+        "client": "Cologix Inc.",
+        "epc_contractor": "PCL Constructors Inc.",
+        "cx_authority": "Morrison Hershfield Ltd.",
+    },
+    "systems": {
+        "UPS": {
+            "title": "Uninterruptible Power Supply",
+            "requirements": [
+                ("UPS-01", "battery_runtime_min", 10, "min", "UPTIME-TIER3", "MP-4.1"),
+                ("UPS-01", "redundancy", "N+1", "topology", "UPTIME-TIER3", "MP-4.2"),
+                ("UPS-01", "rated_power_kw", 750, "kW", "DESIGN-BASIS", "MP-4.3"),
+            ],
+            "submittal": {
+                "battery_runtime_min": 10,
+                "redundancy": "N+1",
+                "rated_power_kw": 750,
+            },
+        },
+        "GEN": {
+            "title": "Diesel Generators",
+            "requirements": [
+                ("GEN-01", "redundancy", "N+1", "topology", "UPTIME-TIER3", "MP-5.1"),
+                ("GEN-01", "rated_power_kva", 1800, "kVA", "DESIGN-BASIS", "MP-5.2"),
+                ("GEN-01", "cold_start_temp_c", -40, "C", "CSA-C282", "MP-5.3"),
+            ],
+            "submittal": {
+                "redundancy": "N+1",
+                "rated_power_kva": 1800,
+                "cold_start_temp_c": -25,
+            },
+            "spec_intro": "Generators shall achieve reliable cold start at -40 C per CSA C282 for Canadian winter extremes.",
+            "submittal_intro": "Vendor: CAT C32. Block heater rating for -25 C start. Vendor notes -40 C arctic package available with dual block heaters.",
+        },
+        "COOL": {
+            "title": "Cooling Plant",
+            "requirements": [
+                ("COOL-01", "redundancy", "N+1", "topology", "UPTIME-TIER3", "MP-6.1"),
+                ("COOL-01", "free_cooling_hours", 4500, "h/yr", "DESIGN-BASIS", "MP-6.2"),
+                ("COOL-01", "capacity_tr", 500, "TR", "DESIGN-BASIS", "MP-6.3"),
+            ],
+            "submittal": {
+                "redundancy": "N+1",
+                "free_cooling_hours": 3200,
+                "capacity_tr": 500,
+            },
+            "spec_intro": "Cooling plant shall maximize free cooling with economizer designed for Toronto climate: target >= 4500 hours/year.",
+            "submittal_intro": "Vendor: Munters Oasis indirect evaporative. Free cooling hours: 3200 h/yr based on Toronto TMY data. Vendor notes dry cooler sidecar adds 1500 h/yr.",
+        },
+        "SWGR": {
+            "title": "MV Switchgear",
+            "requirements": [
+                ("SWGR-01", "short_circuit_rating_ka", 40, "kA", "DESIGN-BASIS", "MP-7.1"),
+                ("SWGR-01", "csa_certification", "certified", "status", "CSA-C22.2", "MP-7.2"),
+            ],
+            "submittal": {
+                "short_circuit_rating_ka": 40,
+                "csa_certification": "certified",
+            },
+        },
+        "CABLE": {
+            "title": "Cabling Infrastructure",
+            "requirements": [
+                ("CABLE-01", "fire_rating", "FT6", "CEC-class", "CEC-2024", "MP-8.1"),
+                ("CABLE-01", "category", "Cat6A", "type", "CSA-T529", "MP-8.2"),
+            ],
+            "submittal": {
+                "fire_rating": "FT4",
+                "category": "Cat6A",
+            },
+            "spec_intro": "Data cables in plenum spaces shall be FT6 rated per Canadian Electrical Code 2024 for plenum use.",
+            "submittal_intro": "Vendor: Belden 10GXS Cat6A. Fire rating: FT4 (riser/tray). Vendor notes FT6 plenum version available.",
+        },
+        "BMS": {
+            "title": "Building Management System",
+            "requirements": [
+                ("BMS-01", "protocol", "BACnet_IP", "standard", "DESIGN-BASIS", "MP-9.1"),
+            ],
+            "submittal": {
+                "protocol": "BACnet_IP",
+            },
+        },
+        "FIRE": {
+            "title": "Fire Suppression",
+            "requirements": [
+                ("FIRE-01", "agent", "clean_agent", "type", "NFPA-2001", "MP-10.1"),
+                ("FIRE-01", "zones", 5, "count", "DESIGN-BASIS", "MP-10.2"),
+            ],
+            "submittal": {
+                "agent": "clean_agent",
+                "zones": 5,
+            },
+        },
+    },
+    "deviation_cx": {
+        ("GEN-01", "cold_start_temp_c"): {
+            "cx_test": "FAT-M01", "cx_level": 3,
+            "cx_name": "Cold-weather start test",
+            "week_fail": 28, "severity": "Critical",
+            "reason": "Generator rated for -25 C start, not -40 C; may fail to start in Toronto winter extremes (historical low -33 C).",
+        },
+        ("COOL-01", "free_cooling_hours"): {
+            "cx_test": "IST-M01", "cx_level": 4,
+            "cx_name": "Free cooling performance verification",
+            "week_fail": 34, "severity": "Major",
+            "reason": "3200 free cooling hours vs 4500 target; 29% shortfall increases energy cost and PUE by ~0.1.",
+        },
+        ("CABLE-01", "fire_rating"): {
+            "cx_test": "ITP-M01", "cx_level": 2,
+            "cx_name": "Cable fire rating inspection",
+            "week_fail": 20, "severity": "Major",
+            "reason": "FT4 cable not approved for plenum spaces under CEC 2024; FT6 required.",
+        },
+    },
+    "true_negative_systems": ["UPS", "SWGR", "BMS", "FIRE"],
+    "standards": {
+        "UPTIME-TIER3": "# Uptime Tier III (paraphrased)\n\nConcurrently maintainable. N+1 power/cooling.\n",
+        "CSA-C282": "# CSA C282 — Emergency Electrical Power Supply (paraphrased)\n\nCanadian standard for standby generators.\n- Cold-start rating must cover site design temperature\n- Toronto design temp: -40 C (extreme)\n",
+        "CEC-2024": "# Canadian Electrical Code 2024 (paraphrased)\n\n- FT6: plenum-rated cable (equivalent to CMP)\n- FT4: riser/tray cable (equivalent to CMR)\n- Plenum spaces require FT6 minimum\n",
+        "DESIGN-BASIS": "# Project Maple — Design Basis\n\n12 MW Tier III data centre, Toronto, Canada.\nDesign winter temperature: -40 C.\n",
+    },
+    "cx_tests": [
+        {"id": "ITP-M01", "level": 2, "name": "Cable fire rating inspection", "scheduled_week": 20, "acceptance": "FT6 plenum rating confirmed"},
+        {"id": "FAT-M01", "level": 3, "name": "Cold-weather start test", "scheduled_week": 28, "acceptance": "Start at -40 C confirmed"},
+        {"id": "IST-M01", "level": 4, "name": "Free cooling performance verification", "scheduled_week": 34, "acceptance": ">= 4500 h/yr free cooling"},
+        {"id": "IST-M02", "level": 4, "name": "Maintenance simulation", "scheduled_week": 38, "acceptance": "IT load unaffected"},
+        {"id": "SAT-M01", "level": 5, "name": "72-hour sustained operations", "scheduled_week": 42, "acceptance": "No critical alarms"},
+    ],
+    "rfi_log": [
+        {"id": "RFI-M01", "system": "GEN", "status": "open",
+         "question": "Confirm -40 C arctic package availability for CAT C32.",
+         "resolution": None, "week": 6},
+    ],
+}
+
+
+# ---------------------------------------------------------------------------
+# Project 11: Pampas — 6 MW Tier II, São Paulo, Brazil
+# ---------------------------------------------------------------------------
+PAMPAS = {
+    "project": {
+        "name": "Project Pampas",
+        "capacity_mw": 6,
+        "tier": "Uptime Tier II",
+        "location": "São Paulo, Brazil",
+        "current_week": 6,
+        "line_items_total": 4200,
+        "active_submittals": 28,
+        "total_systems": 6,
+        "estimated_completion_week": 38,
+        "client": "Scala Data Centers",
+        "epc_contractor": "Odebrecht Engenharia",
+        "cx_authority": "Bureau Veritas Brasil",
+    },
+    "systems": {
+        "UPS": {
+            "title": "Uninterruptible Power Supply",
+            "requirements": [
+                ("UPS-01", "battery_runtime_min", 10, "min", "UPTIME-TIER2", "PA-4.1"),
+                ("UPS-01", "redundancy", "N+1", "topology", "UPTIME-TIER2", "PA-4.2"),
+                ("UPS-01", "rated_power_kw", 500, "kW", "DESIGN-BASIS", "PA-4.3"),
+            ],
+            "submittal": {
+                "battery_runtime_min": 10,
+                "redundancy": "N+1",
+                "rated_power_kw": 500,
+            },
+        },
+        "GEN": {
+            "title": "Diesel Generators",
+            "requirements": [
+                ("GEN-01", "redundancy", "N+1", "topology", "UPTIME-TIER2", "PA-5.1"),
+                ("GEN-01", "rated_power_kva", 1200, "kVA", "DESIGN-BASIS", "PA-5.2"),
+                ("GEN-01", "fuel_type", "diesel_B12", "type", "ABNT-NBR-15940", "PA-5.3"),
+            ],
+            "submittal": {
+                "redundancy": "N+1",
+                "rated_power_kva": 1200,
+                "fuel_type": "diesel_B7",
+            },
+            "spec_intro": "Generators shall operate on diesel B12 blend (12% biodiesel) per ABNT NBR 15940 and ANP Resolution 45.",
+            "submittal_intro": "Vendor: Stemac SG-1200. Fuel compatibility: diesel B7. Vendor notes B12 operation requires injector upgrade.",
+        },
+        "COOL": {
+            "title": "Cooling Plant",
+            "requirements": [
+                ("COOL-01", "redundancy", "N+1", "topology", "UPTIME-TIER2", "PA-6.1"),
+                ("COOL-01", "supply_air_temp_c", 24, "C", "ASHRAE-TC9.9", "PA-6.2"),
+                ("COOL-01", "capacity_tr", 300, "TR", "DESIGN-BASIS", "PA-6.3"),
+            ],
+            "submittal": {
+                "redundancy": "N+1",
+                "supply_air_temp_c": 24,
+                "capacity_tr": 300,
+            },
+        },
+        "SWGR": {
+            "title": "MV Switchgear",
+            "requirements": [
+                ("SWGR-01", "voltage_kv", 13.8, "kV", "ABNT-NBR-14039", "PA-7.1"),
+                ("SWGR-01", "short_circuit_rating_ka", 25, "kA", "DESIGN-BASIS", "PA-7.2"),
+            ],
+            "submittal": {
+                "voltage_kv": 13.8,
+                "short_circuit_rating_ka": 20,
+            },
+            "spec_intro": "MV switchgear rated for 13.8 kV distribution per ABNT NBR 14039 with fault withstand per utility coordination study.",
+            "submittal_intro": "Vendor: WEG MSW 13.8 kV. Short-circuit: 20 kA. Vendor notes 25 kA version available with reinforced bus.",
+        },
+        "CABLE": {
+            "title": "Cabling Infrastructure",
+            "requirements": [
+                ("CABLE-01", "fire_rating", "CMP", "plenum-class", "NFPA-75", "PA-8.1"),
+                ("CABLE-01", "category", "Cat6A", "type", "ABNT-NBR-14565", "PA-8.2"),
+            ],
+            "submittal": {
+                "fire_rating": "CMP",
+                "category": "Cat6A",
+            },
+        },
+        "FIRE": {
+            "title": "Fire Suppression",
+            "requirements": [
+                ("FIRE-01", "agent", "clean_agent", "type", "NFPA-75", "PA-9.1"),
+                ("FIRE-01", "zones", 3, "count", "DESIGN-BASIS", "PA-9.2"),
+            ],
+            "submittal": {
+                "agent": "clean_agent",
+                "zones": 3,
+            },
+        },
+    },
+    "deviation_cx": {
+        ("GEN-01", "fuel_type"): {
+            "cx_test": "FAT-P01", "cx_level": 3,
+            "cx_name": "Generator fuel compatibility test",
+            "week_fail": 22, "severity": "Critical",
+            "reason": "B7 fuel non-compliant with ANP Resolution 45 mandate for B12 blend; regulatory violation and potential warranty void.",
+        },
+        ("SWGR-01", "short_circuit_rating_ka"): {
+            "cx_test": "FAT-P02", "cx_level": 3,
+            "cx_name": "Switchgear fault withstand test",
+            "week_fail": 24, "severity": "Critical",
+            "reason": "20 kA rating below 25 kA prospective fault level; equipment may fail under fault conditions.",
+        },
+    },
+    "true_negative_systems": ["UPS", "COOL", "CABLE", "FIRE"],
+    "standards": {
+        "UPTIME-TIER2": "# Uptime Tier II — Redundant Components (paraphrased)\n\nN+1 component redundancy, single distribution path.\n",
+        "ABNT-NBR-15940": "# ABNT NBR 15940 — Diesel Fuel (paraphrased)\n\nBrazilian standard for diesel fuel specifications.\n- B12: 12% biodiesel blend (mandatory from 2025)\n- B7: 7% biodiesel (previous mandate, phased out)\n",
+        "DESIGN-BASIS": "# Project Pampas — Design Basis\n\n6 MW Tier II data centre, São Paulo, Brazil.\nMV distribution: 13.8 kV per local utility (CPFL).\n",
+    },
+    "cx_tests": [
+        {"id": "FAT-P01", "level": 3, "name": "Generator fuel compatibility test", "scheduled_week": 22, "acceptance": "B12 operation confirmed"},
+        {"id": "FAT-P02", "level": 3, "name": "Switchgear fault withstand test", "scheduled_week": 24, "acceptance": ">= 25 kA withstand"},
+        {"id": "IST-P01", "level": 4, "name": "Utility transfer test", "scheduled_week": 30, "acceptance": "Zero IT impact"},
+        {"id": "SAT-P01", "level": 5, "name": "72-hour sustained operations", "scheduled_week": 36, "acceptance": "No critical alarms"},
+    ],
+    "rfi_log": [
+        {"id": "RFI-P01", "system": "GEN", "status": "open",
+         "question": "Confirm B12 injector upgrade lead time and cost impact.",
+         "resolution": None, "week": 4},
+    ],
+}
+
+
+# ---------------------------------------------------------------------------
+# Project 12: Thames — 35 MW Tier IV, London, UK
+# ---------------------------------------------------------------------------
+THAMES = {
+    "project": {
+        "name": "Project Thames",
+        "capacity_mw": 35,
+        "tier": "Uptime Tier IV",
+        "location": "London, United Kingdom",
+        "current_week": 12,
+        "line_items_total": 13500,
+        "active_submittals": 85,
+        "total_systems": 8,
+        "estimated_completion_week": 52,
+        "client": "Virtus Data Centres Ltd",
+        "epc_contractor": "Wates Construction",
+        "cx_authority": "Hurley Palmer Flatt",
+    },
+    "systems": {
+        "UPS": {
+            "title": "Uninterruptible Power Supply",
+            "requirements": [
+                ("UPS-01", "battery_runtime_min", 10, "min", "UPTIME-TIER4", "TH-4.1"),
+                ("UPS-01", "redundancy", "2N", "topology", "UPTIME-TIER4", "TH-4.2"),
+                ("UPS-01", "rated_power_kw", 1100, "kW", "DESIGN-BASIS", "TH-4.3"),
+            ],
+            "submittal": {
+                "battery_runtime_min": 10,
+                "redundancy": "2N",
+                "rated_power_kw": 1100,
+            },
+        },
+        "GEN": {
+            "title": "Diesel Generators",
+            "requirements": [
+                ("GEN-01", "redundancy", "N+1", "topology", "UPTIME-TIER4", "TH-5.1"),
+                ("GEN-01", "rated_power_kva", 2750, "kVA", "DESIGN-BASIS", "TH-5.2"),
+                ("GEN-01", "emission_nox_gkwh", 0.4, "g/kWh", "MCPD-2015/2193", "TH-5.3"),
+            ],
+            "submittal": {
+                "redundancy": "N+1",
+                "rated_power_kva": 2750,
+                "emission_nox_gkwh": 1.8,
+            },
+            "spec_intro": "Generators shall comply with Medium Combustion Plant Directive 2015/2193 NOx limits for urban London site.",
+            "submittal_intro": "Vendor: Perkins 4016-TAG2A. NOx: 1.8 g/kWh (standard). SCR aftertreatment achieves 0.4 g/kWh but adds 8-week lead time.",
+        },
+        "COOL": {
+            "title": "Cooling Plant",
+            "requirements": [
+                ("COOL-01", "redundancy", "N+2", "topology", "UPTIME-TIER4", "TH-6.1"),
+                ("COOL-01", "pue_target", 1.3, "ratio", "DESIGN-BASIS", "TH-6.2"),
+                ("COOL-01", "capacity_tr", 1400, "TR", "DESIGN-BASIS", "TH-6.3"),
+            ],
+            "submittal": {
+                "redundancy": "N+2",
+                "pue_target": 1.5,
+                "capacity_tr": 1400,
+            },
+            "spec_intro": "Cooling plant PUE target 1.3 using London's mild climate for extensive free cooling via indirect adiabatic economisers.",
+            "submittal_intro": "Vendor: Excool hybrid adiabatic coolers. Predicted annual PUE: 1.5 based on conservative cooling tower sizing. Vendor notes additional economiser modules can reduce to 1.3.",
+        },
+        "SWGR": {
+            "title": "MV Switchgear",
+            "requirements": [
+                ("SWGR-01", "short_circuit_rating_ka", 50, "kA", "DESIGN-BASIS", "TH-7.1"),
+                ("SWGR-01", "redundancy", "2N", "topology", "UPTIME-TIER4", "TH-7.2"),
+            ],
+            "submittal": {
+                "short_circuit_rating_ka": 50,
+                "redundancy": "2N",
+            },
+        },
+        "CABLE": {
+            "title": "Cabling Infrastructure",
+            "requirements": [
+                ("CABLE-01", "fire_rating", "B2ca", "euroclass", "BS-7671", "TH-8.1"),
+                ("CABLE-01", "category", "Cat6A", "type", "BS-EN-50173", "TH-8.2"),
+            ],
+            "submittal": {
+                "fire_rating": "B2ca",
+                "category": "Cat6A",
+            },
+        },
+        "BMS": {
+            "title": "Building Management System",
+            "requirements": [
+                ("BMS-01", "protocol", "BACnet_IP", "standard", "DESIGN-BASIS", "TH-9.1"),
+                ("BMS-01", "monitoring_redundancy", "dual", "topology", "UPTIME-TIER4", "TH-9.2"),
+            ],
+            "submittal": {
+                "protocol": "BACnet_IP",
+                "monitoring_redundancy": "dual",
+            },
+        },
+        "FIRE": {
+            "title": "Fire Suppression",
+            "requirements": [
+                ("FIRE-01", "agent", "clean_agent", "type", "BS-EN-15004", "TH-10.1"),
+                ("FIRE-01", "zones", 10, "count", "DESIGN-BASIS", "TH-10.2"),
+            ],
+            "submittal": {
+                "agent": "clean_agent",
+                "zones": 10,
+            },
+        },
+        "PDU": {
+            "title": "Power Distribution Units",
+            "requirements": [
+                ("PDU-01", "metering", "per_outlet", "type", "DESIGN-BASIS", "TH-11.1"),
+                ("PDU-01", "redundancy", "A+B", "topology", "UPTIME-TIER4", "TH-11.2"),
+            ],
+            "submittal": {
+                "metering": "per_outlet",
+                "redundancy": "A+B",
+            },
+        },
+    },
+    "deviation_cx": {
+        ("GEN-01", "emission_nox_gkwh"): {
+            "cx_test": "FAT-T01", "cx_level": 3,
+            "cx_name": "Generator emission compliance test",
+            "week_fail": 32, "severity": "Critical",
+            "reason": "NOx 1.8 g/kWh exceeds MCPD limit of 0.4 g/kWh; generator cannot operate at London site without SCR aftertreatment.",
+        },
+        ("COOL-01", "pue_target"): {
+            "cx_test": "IST-T01", "cx_level": 4,
+            "cx_name": "PUE performance measurement",
+            "week_fail": 42, "severity": "Major",
+            "reason": "PUE 1.5 vs target 1.3; 15% excess energy cost and increased carbon reporting under SECR.",
+        },
+    },
+    "true_negative_systems": ["UPS", "SWGR", "CABLE", "BMS", "FIRE", "PDU"],
+    "standards": {
+        "UPTIME-TIER4": "# Uptime Tier IV — Fault Tolerant (paraphrased)\n\n2N distribution, fault tolerant. 99.995% availability.\n",
+        "MCPD-2015/2193": "# Medium Combustion Plant Directive 2015/2193 (paraphrased)\n\nEU/UK directive for combustion plants 1-50 MW thermal.\n- NOx: 0.4 g/kWh for new plant > 5 MW (diesel)\n- Applies to standby generators operating > 500 h/yr in aggregate\n- UK retained via Environmental Permitting Regulations\n",
+        "BS-7671": "# BS 7671 — IET Wiring Regulations (paraphrased)\n\n18th edition. Cable fire ratings per Euroclass system.\n- B2ca minimum for data centre plenum/riser spaces.\n",
+        "DESIGN-BASIS": "# Project Thames — Design Basis\n\n35 MW Tier IV data centre, London, UK.\nEmissions: MCPD compliant. PUE target: 1.3.\n",
+    },
+    "cx_tests": [
+        {"id": "ITP-T01", "level": 1, "name": "Equipment receipt inspection", "scheduled_week": 18, "acceptance": "Documentation and visual check"},
+        {"id": "FAT-T01", "level": 3, "name": "Generator emission compliance test", "scheduled_week": 32, "acceptance": "NOx <= 0.4 g/kWh"},
+        {"id": "IST-T01", "level": 4, "name": "PUE performance measurement", "scheduled_week": 42, "acceptance": "PUE <= 1.3"},
+        {"id": "IST-T02", "level": 4, "name": "Tier IV fault tolerance test", "scheduled_week": 44, "acceptance": "Zero IT impact under single fault"},
+        {"id": "SAT-T01", "level": 5, "name": "72-hour sustained operations", "scheduled_week": 50, "acceptance": "No critical alarms"},
+    ],
+    "rfi_log": [
+        {"id": "RFI-T01", "system": "GEN", "status": "open",
+         "question": "Confirm SCR aftertreatment lead time and spatial requirements.",
+         "resolution": None, "week": 10},
+    ],
+}
+
+
 ALL_PROJECTS = {
     "vajra": VAJRA,
     "nordic": NORDIC,
     "sahara": SAHARA,
     "cascade": CASCADE,
     "yangtze": YANGTZE,
+    "athena": ATHENA,
+    "sakura": SAKURA,
+    "outback": OUTBACK,
+    "maple": MAPLE,
+    "pampas": PAMPAS,
+    "thames": THAMES,
 }
 
 

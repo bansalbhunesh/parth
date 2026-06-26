@@ -8,7 +8,7 @@ setup:  ## Install all dependencies
 	pip install pytest pytest-cov
 	cd frontend && npm install
 
-corpus:  ## Generate all project corpora (6 projects, 33 deviations)
+corpus:  ## Generate all project corpora (12 projects, 50 deviations)
 	python3 data/generate_corpus.py
 	python3 data/generate_projects.py
 

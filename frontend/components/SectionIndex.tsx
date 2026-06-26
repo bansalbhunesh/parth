@@ -13,7 +13,7 @@ const SECTIONS = [
   { id: "register", num: "10", label: "Deviation Register", desc: "Full evidence table with citation chains", color: "#ff4d4d" },
   { id: "twin", num: "11", label: "Cx Risk Twin", desc: "Commissioning timeline with at-risk tests", color: "#5b8cff" },
   { id: "standards", num: "12", label: "Standards KB", desc: "7 governing standards with 1,580 lines", color: "#5b8cff" },
-  { id: "multiproject", num: "13", label: "Multi-Project Eval", desc: "6 projects, 5 countries, 33 deviations, F1=1.000", color: "#a855f7" },
+  { id: "multiproject", num: "13", label: "Multi-Project Eval", desc: "12 projects, 11 countries, 50 deviations, F1=1.000", color: "#a855f7" },
   { id: "eval", num: "14", label: "Eval Harness", desc: "P/R/F1 = 1.000 with FP rate testing", color: "#35c98b" },
   { id: "roi", num: "15", label: "ROI Calculator", desc: "Interactive business impact model", color: "#ffb020" },
   { id: "scale", num: "16", label: "Scale Story", desc: "10 systems today, 14,000 line items tomorrow", color: "#36d6e7" },

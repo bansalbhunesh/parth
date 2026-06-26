@@ -1,0 +1,64 @@
+{
+  "project": {
+    "name": "Project Thames",
+    "capacity_mw": 35,
+    "tier": "Uptime Tier IV",
+    "location": "London, United Kingdom",
+    "current_week": 12,
+    "line_items_total": 13500,
+    "active_submittals": 85,
+    "total_systems": 8,
+    "estimated_completion_week": 52,
+    "client": "Virtus Data Centres Ltd",
+    "epc_contractor": "Wates Construction",
+    "cx_authority": "Hurley Palmer Flatt"
+  },
+  "seeded_deviations": [
+    {
+      "id": "DEV-001",
+      "system": "GEN",
+      "component": "GEN-01",
+      "parameter": "emission_nox_gkwh",
+      "required_value": 0.4,
+      "provided_value": 1.8,
+      "unit": "g/kWh",
+      "standard_ref": "MCPD-2015/2193",
+      "spec_clause": "TH-5.3",
+      "severity": "Critical",
+      "predicted_cx_test": "FAT-T01",
+      "predicted_cx_level": 3,
+      "predicted_cx_name": "Generator emission compliance test",
+      "week_caught": 12,
+      "week_fail": 32,
+      "lead_time_weeks": 20,
+      "rationale": "NOx 1.8 g/kWh exceeds MCPD limit of 0.4 g/kWh; generator cannot operate at London site without SCR aftertreatment."
+    },
+    {
+      "id": "DEV-002",
+      "system": "COOL",
+      "component": "COOL-01",
+      "parameter": "pue_target",
+      "required_value": 1.3,
+      "provided_value": 1.5,
+      "unit": "ratio",
+      "standard_ref": "DESIGN-BASIS",
+      "spec_clause": "TH-6.2",
+      "severity": "Major",
+      "predicted_cx_test": "IST-T01",
+      "predicted_cx_level": 4,
+      "predicted_cx_name": "PUE performance measurement",
+      "week_caught": 12,
+      "week_fail": 42,
+      "lead_time_weeks": 30,
+      "rationale": "PUE 1.5 vs target 1.3; 15% excess energy cost and increased carbon reporting under SECR."
+    }
+  ],
+  "true_negative_systems": [
+    "UPS",
+    "SWGR",
+    "CABLE",
+    "BMS",
+    "FIRE",
+    "PDU"
+  ]
+}

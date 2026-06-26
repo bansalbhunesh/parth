@@ -123,11 +123,11 @@ class TestGeneratorReproducibility:
 class TestMultiProjectGenerator:
     """Verify generate_projects.py output matches committed data."""
 
-    def test_5_additional_projects_exist(self):
+    def test_11_additional_projects_exist(self):
         projects_dir = ROOT / "data" / "projects"
         project_dirs = [p for p in projects_dir.iterdir()
                         if p.is_dir() and p.name != "__pycache__"]
-        assert len(project_dirs) == 5
+        assert len(project_dirs) == 11
 
     def test_manifest_matches_directories(self):
         manifest = json.loads(
@@ -152,7 +152,7 @@ class TestMultiProjectGenerator:
                 assert (proj / rf).exists(), \
                     f"{proj.name} missing {rf}"
 
-    def test_aggregate_deviations_equal_33(self):
+    def test_aggregate_deviations_equal_50(self):
         meghdoot = json.loads(
             (ROOT / "data" / "corpus" / "ground_truth.json").read_text()
         )
@@ -163,9 +163,9 @@ class TestMultiProjectGenerator:
             if proj.is_dir() and gt_path.exists():
                 gt = json.loads(gt_path.read_text())
                 total += len(gt["seeded_deviations"])
-        assert total == 33
+        assert total == 50
 
-    def test_aggregate_weeks_equal_691(self):
+    def test_aggregate_weeks_equal_1024(self):
         meghdoot = json.loads(
             (ROOT / "data" / "corpus" / "ground_truth.json").read_text()
         )
@@ -176,9 +176,9 @@ class TestMultiProjectGenerator:
             if proj.is_dir() and gt_path.exists():
                 gt = json.loads(gt_path.read_text())
                 total += sum(d["lead_time_weeks"] for d in gt["seeded_deviations"])
-        assert total == 691
+        assert total == 1024
 
-    def test_projects_span_5_countries(self):
+    def test_projects_span_11_countries(self):
         all_locations = []
         meghdoot = json.loads(
             (ROOT / "data" / "corpus" / "ground_truth.json").read_text()
@@ -191,4 +191,4 @@ class TestMultiProjectGenerator:
                 gt = json.loads(gt_path.read_text())
                 all_locations.append(gt["project"]["location"])
         countries = {loc.split(",")[-1].strip() for loc in all_locations}
-        assert len(countries) >= 5
+        assert len(countries) >= 11

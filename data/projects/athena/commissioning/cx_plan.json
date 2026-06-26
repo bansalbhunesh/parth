@@ -1,0 +1,55 @@
+{
+  "project": "Project Athena",
+  "cx_authority": "T\u00dcV Rheinland AG",
+  "levels": {
+    "1": "Factory Acceptance Testing (FAT)",
+    "2": "Site Acceptance / Installation Verification",
+    "3": "Startup Testing",
+    "4": "Performance Testing",
+    "5": "End-to-End Systems Testing"
+  },
+  "tests": [
+    {
+      "id": "ITP-A01",
+      "level": 2,
+      "name": "Cable Euroclass fire rating inspection",
+      "scheduled_week": 22,
+      "acceptance": "Euroclass B2ca or higher"
+    },
+    {
+      "id": "FAT-A01",
+      "level": 3,
+      "name": "Generator emission compliance test",
+      "scheduled_week": 28,
+      "acceptance": "Stage V limits met"
+    },
+    {
+      "id": "FAT-A02",
+      "level": 3,
+      "name": "Switchgear insulation medium verification",
+      "scheduled_week": 30,
+      "acceptance": "SF6-free confirmed"
+    },
+    {
+      "id": "IST-A01",
+      "level": 4,
+      "name": "Refrigerant compliance verification",
+      "scheduled_week": 36,
+      "acceptance": "GWP <= 1"
+    },
+    {
+      "id": "IST-A02",
+      "level": 4,
+      "name": "Full facility failover test",
+      "scheduled_week": 40,
+      "acceptance": "Zero IT impact"
+    },
+    {
+      "id": "SAT-A01",
+      "level": 5,
+      "name": "72-hour sustained operations",
+      "scheduled_week": 46,
+      "acceptance": "No critical alarms"
+    }
+  ]
+}

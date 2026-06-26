@@ -12,7 +12,7 @@ const SCREENS = [
   { id: "eval", label: "Eval Dashboard", desc: "P/R/F1 = 1.000, Cx accuracy 1.000, 267 weeks lead time", color: "#35c98b", icon: "✓" },
   { id: "copilot", label: "RFI Copilot", desc: "Streaming RAG over specs, submittals, standards & RFIs", color: "#36d6e7", icon: "❖" },
   { id: "analyze", label: "Live Analysis", desc: "Upload PDFs or paste text for real-time deviation detection", color: "#a855f7", icon: "▶" },
-  { id: "multiproject", label: "Multi-Project Eval", desc: "6 projects, 5 countries, 33 deviations, F1=1.000", color: "#ffb020", icon: "★" },
+  { id: "multiproject", label: "Multi-Project Eval", desc: "12 projects, 11 countries, 50 deviations, F1=1.000", color: "#ffb020", icon: "★" },
 ];
 
 export default function ScreenshotShowcase() {

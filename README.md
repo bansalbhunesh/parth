@@ -19,7 +19,7 @@
   <img src="https://img.shields.io/badge/precision-1.000-35c98b?style=flat-square&labelColor=0d1a14" alt="Precision 1.000">
   <img src="https://img.shields.io/badge/recall-1.000-35c98b?style=flat-square&labelColor=0d1a14" alt="Recall 1.000">
   <img src="https://img.shields.io/badge/false_positives-0-35c98b?style=flat-square&labelColor=0d1a14" alt="0 false positives">
-  <img src="https://img.shields.io/badge/tests-160%2B-5b8cff?style=flat-square&labelColor=111820" alt="160+ tests">
+  <img src="https://img.shields.io/badge/tests-163-5b8cff?style=flat-square&labelColor=111820" alt="163 tests">
   <img src="https://img.shields.io/badge/agents-5-5b8cff?style=flat-square&labelColor=111820" alt="5 agents">
   <img src="https://img.shields.io/badge/countries-5-ffb020?style=flat-square&labelColor=1a1508" alt="5 countries">
   <img src="https://img.shields.io/github/actions/workflow/status/bansalbhunesh/parth/ci.yml?style=flat-square&labelColor=111820&label=CI" alt="CI">
@@ -30,7 +30,7 @@
 <p align="center">
   <a href="https://parth-tan.vercel.app"><img src="https://img.shields.io/badge/▶_LIVE_DEMO-parth--tan.vercel.app-00d4ff?style=for-the-badge&labelColor=0a0d11" alt="Live Demo"></a>
   <a href="https://parth-3puc.onrender.com/health"><img src="https://img.shields.io/badge/API-parth--3puc.onrender.com-35c98b?style=for-the-badge&labelColor=0d1a14" alt="API"></a>
-  <a href="presentation.html"><img src="https://img.shields.io/badge/📊_PRESENTATION-14_slides-a855f7?style=for-the-badge&labelColor=1a1020" alt="Presentation"></a>
+  <a href="presentation.html"><img src="https://img.shields.io/badge/📊_PRESENTATION-13_slides-a855f7?style=for-the-badge&labelColor=1a1020" alt="Presentation"></a>
 </p>
 
 ---
@@ -224,8 +224,8 @@ python3 eval/multi_project_eval.py --json
 python3 data/generate_corpus.py                    # Project Meghdoot (primary)
 python3 data/generate_projects.py                  # 5 additional projects
 
-# 2. Run the 160+-test suite (no API key needed)
-python3 -m pytest tests/ -q                       # → 160+ passed
+# 2. Run the 163-test suite (no API key needed)
+python3 -m pytest tests/ -q                       # → 163 passed
 
 # 3. Prove the pipeline + eval harness (3 independent paths)
 python3 eval/run_eval.py --detector baseline      # → P/R/F1 = 1.000, 267 weeks saved
@@ -249,7 +249,7 @@ cd frontend && npm install && npm run dev          # → localhost:3000
 curl http://localhost:8000/export/audit/html > evidence.html
 ```
 
-> **No API key?** The dashboard runs fully with ground-truth fallback data. All 22 API endpoints return 200. Both eval harnesses (structured + text-based), the corpus, and the frontend work offline. 160+ tests pass without any external dependencies.
+> **No API key?** The dashboard runs fully with ground-truth fallback data. All 22 API endpoints return 200. Both eval harnesses (structured + text-based), the corpus, and the frontend work offline. 163 tests pass without any external dependencies.
 >
 > **Or just open the live demo:** [parth-tan.vercel.app](https://parth-tan.vercel.app) (frontend) · [parth-3puc.onrender.com](https://parth-3puc.onrender.com/health) (API)
 
@@ -265,7 +265,7 @@ docker compose up --build
 # Option 2: Makefile
 make setup          # Install all dependencies
 make corpus         # Generate 6 project datasets
-make test           # Run 160+ tests
+make test           # Run 163 tests
 make eval-all       # Run all 3 eval paths
 make run            # Start backend API
 
@@ -438,7 +438,7 @@ pramaan/
     └── test_multi_project.py      # Multi-project dataset + eval tests
 ```
 
-**40+ source files · 7,300+ lines of code · 160+ tests · 6 projects · 22 endpoints**
+**40+ source files · 7,300+ lines of code · 163 tests · 6 projects · 22 endpoints**
 
 ---
 
@@ -509,7 +509,7 @@ python3 eval/run_eval.py --detector llm
 |------------------|-----------------|----------|
 | **Innovation** | Cross-document AI reasoning across spec + submittal + standard — no commercial tool does this | 5 specialized agents, LangGraph orchestration, citation chain |
 | **Business Impact** | 691 weeks of early detection across 33 findings in 6 projects prevents seven-figure schedule slips | Interactive ROI calculator, cost-of-delay timeline, before/after comparison |
-| **Technical Excellence** | Dual eval harness (structured + text-based) with P/R/F1 = 1.000 across 6 projects, 160+-test suite | Non-circular eval, 5 countries, 15+ standards, 0 false positives |
+| **Technical Excellence** | Dual eval harness (structured + text-based) with P/R/F1 = 1.000 across 6 projects, 163-test suite | Non-circular eval, 5 countries, 15+ standards, 0 false positives |
 | **Scalability** | 6 projects → enterprise portfolio via multi-project eval + batch ingest + vector store | Multi-project dashboard, architecture diagram, scale story |
 | **UX** | 19-section dashboard with 60-second demo narrative, 23 components, streaming AI | Scroll animations, dark theme, responsive, live PDF upload, multi-project grid |
 
@@ -573,5 +573,5 @@ python3 eval/run_eval.py --detector llm
 <p align="center">
   <strong>PRA<span style="color:#36d6e7">MAAN</span></strong><br>
   <em>EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4</em><br>
-  <sub>5 AI Agents &middot; 6 Projects &middot; 5 Countries &middot; 22 Endpoints &middot; 33 Deviations &middot; 691 Weeks Saved &middot; 160+ Tests &middot; Dual Eval &middot; F1 = 1.000</sub>
+  <sub>5 AI Agents &middot; 6 Projects &middot; 5 Countries &middot; 22 Endpoints &middot; 33 Deviations &middot; 691 Weeks Saved &middot; 163 Tests &middot; Dual Eval &middot; F1 = 1.000</sub>
 </p>

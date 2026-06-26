@@ -1,21 +1,44 @@
 # Pramaan — Execution Brief
 
-## Status: Competition-Ready (v2)
+## Status: Competition-Ready (v3)
 
 All components implemented, tested, and polished:
 
-- [x] Corpus generation (10 systems, 33 requirements, 7 seeded deviations)
-- [x] LLM reconciliation brain with confidence scoring
+- [x] Corpus generation (10 systems, 33 requirements, 14 seeded deviations per project)
+- [x] Multi-project support (6 projects, 5 countries, 33 total deviations, 691 weeks saved)
+- [x] LLM reconciliation brain with confidence scoring + citation faithfulness
 - [x] Extraction agent with accuracy scoring
 - [x] Commissioning twin with L1–L5 timeline + LLM fallback
 - [x] RFI copilot with TF-IDF retrieval + prior-RFI matching
 - [x] Evidence pack (JSON + printable HTML) + /metrics endpoint
-- [x] Baseline eval: P/R/F1 = 1.000, Cx prediction = 1.000
-- [x] Backend graceful fallback (all 11 endpoints return 200 without API key)
-- [x] 14-section frontend dashboard with scroll animations
+- [x] Baseline eval: P/R/F1 = 1.000, Cx prediction = 1.000 (all 6 projects)
+- [x] Backend graceful fallback (all 22 endpoints return 200 without API key)
+- [x] 19-section frontend dashboard with scroll animations + 24 components
 - [x] Hero intro, architecture diagram, ROI calculator, before/after comparison
 - [x] Standards KB, eval dashboard, scale story, academic references
 - [x] Standards scraper v2 (3-tier: Firecrawl → Crawl4ai → Playwright)
+- [x] Docker Compose one-command setup with health checks
+- [x] GitHub Actions CI (backend tests, frontend build, Docker smoke test)
+- [x] 163 tests across API, agents, corpus, and multi-project eval
+
+## Reproduce the Numbers
+
+```bash
+# Run 163 tests
+python3 -m pytest tests/ -v
+
+# Single project eval (14 devs, 267 weeks, F1=1.000)
+python3 eval/run_eval.py
+
+# Multi-project eval (33 devs, 691 weeks, F1=1.000)
+python3 eval/multi_project_eval.py
+
+# Text-based eval (non-circular, NLP extraction)
+python3 eval/text_eval.py
+
+# Docker one-command
+docker compose up --build
+```
 
 ## To Run with LLM Key
 
@@ -28,12 +51,12 @@ python3 eval/run_eval.py --detector llm
 
 1. **Open** → Hero intro frames the problem. Sentinel fires: UPS-02 battery 7 min vs 10 min.
 2. **Lead time** → 27 weeks early. Point to timeline strip.
-3. **149 weeks** → Giant animated counter. Total savings across all 7 deviations.
+3. **691 weeks** → Giant animated counter. Total savings across 6 projects, 5 countries.
 4. **Before/After** → Toggle: manual review (10–15 weeks) vs Pramaan (< 5 minutes).
 5. **Pipeline** → 5 agents animate in sequence. Architecture diagram shows full stack.
-6. **System health** → 10 systems grid. 4 critical, 3 major.
+6. **System health** → 10 systems grid. 7 critical, 7 major deviations flagged.
 7. **Cx Twin** → IST-07, IST-09, IST-11 pulsing red. These tests WILL fail.
-8. **ROI** → Slide project value. ₹1,788L rework avoided on ₹800 Cr project.
+8. **Multi-project** → 6 projects across India, Norway, UAE, USA, China. F1=1.000 everywhere.
 9. **Copilot** → "Has UPS battery runtime come up before?" → RFI-014 cited.
 10. **Eval** → P/R/F1 = 1.000. Zero false positives. Reproducible harness.
 11. **Export** → One click → HTML evidence pack with full audit trail.

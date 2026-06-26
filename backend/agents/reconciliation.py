@@ -102,11 +102,15 @@ def _read(p):
     return (CORPUS / p).read_text(encoding="utf-8")
 
 
-def _all_standards_text():
+def _standards_text_at(base):
     parts = []
-    for f in sorted((CORPUS / "standards").glob("*.md")):
+    for f in sorted((base / "standards").glob("*.md")):
         parts.append(f.read_text(encoding="utf-8"))
     return "\n\n".join(parts)
+
+
+def _all_standards_text():
+    return _standards_text_at(CORPUS)
 
 
 def _check_citation_faithfulness(devs, spec_text, submittal_text, standards_text):
@@ -148,9 +152,12 @@ def _validate_deviations(raw) -> list[dict]:
     return valid
 
 
-def reconcile_system(sys_id: str, standards_text: str):
-    spec_path = CORPUS / "specs" / f"{sys_id}.md"
-    sub_path = CORPUS / "submittals" / f"{sys_id}.md"
+def reconcile_system_at(base, sys_id: str, standards_text: str, with_cx: bool = False):
+    """Path-agnostic LLM reconciliation for a single system under `base`
+    (a project corpus root with specs/ and submittals/). Set with_cx=True to
+    attach commissioning predictions (rule table is Meghdoot-specific)."""
+    spec_path = base / "specs" / f"{sys_id}.md"
+    sub_path = base / "submittals" / f"{sys_id}.md"
     if not spec_path.exists() or not sub_path.exists():
         log.warning("Missing spec or submittal for %s", sys_id)
         return []
@@ -168,8 +175,14 @@ def reconcile_system(sys_id: str, standards_text: str):
     devs = _check_citation_faithfulness(devs, spec, submittal, standards_text)
     log.info("System %s: %d deviations found", sys_id, len(devs))
     for d in devs:
-        d.update(predict_cx_impact(d))
+        d["system"] = sys_id
+        if with_cx:
+            d.update(predict_cx_impact(d))
     return devs
+
+
+def reconcile_system(sys_id: str, standards_text: str):
+    return reconcile_system_at(CORPUS, sys_id, standards_text, with_cx=True)
 
 
 def run_reconciliation_over_corpus():

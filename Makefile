@@ -12,7 +12,7 @@ corpus:  ## Generate all project corpora (12 projects, 50 deviations)
 	python3 data/generate_corpus.py
 	python3 data/generate_projects.py
 
-test:  ## Run 255-test suite
+test:  ## Run 258-test suite
 	python3 -m pytest tests/ -q
 
 test-cov:  ## Run tests with coverage report
@@ -24,8 +24,11 @@ eval:  ## Run baseline eval (P/R/F1)
 eval-text:  ## Run non-circular text eval (raw markdown → regex)
 	python3 eval/text_eval.py
 
-eval-multi:  ## Run multi-project eval (6 projects, 5 countries)
+eval-multi:  ## Run multi-project eval (12 projects, 11 countries)
 	python3 eval/multi_project_eval.py
+
+eval-multi-llm:  ## Run REAL LLM eval across all 12 projects (needs API key)
+	python3 eval/multi_project_eval.py --detector llm
 
 eval-all:  ## Run all three eval paths
 	@echo "=== Baseline Eval ===" && python3 eval/run_eval.py --detector baseline
@@ -55,7 +58,7 @@ verify:  ## One-command verification: tests + all evals + frontend type check
 	@echo "║  PRAMAAN — Full Verification Suite                         ║"
 	@echo "╚══════════════════════════════════════════════════════════════╝"
 	@echo ""
-	@echo "▸ [1/5] Running 255-test suite..."
+	@echo "▸ [1/5] Running 258-test suite..."
 	python3 -m pytest tests/ -q --tb=short
 	@echo ""
 	@echo "▸ [2/5] Baseline eval (Meghdoot, 14 devs)..."

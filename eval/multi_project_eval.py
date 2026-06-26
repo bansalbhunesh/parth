@@ -64,6 +64,18 @@ def reconcile_project(corpus_path: pathlib.Path):
     return findings
 
 
+def reconcile_project_llm(corpus_path: pathlib.Path):
+    """Real LLM reconciliation: the model reads each system's raw spec +
+    submittal + standards and reasons out deviations from scratch. Requires an
+    LLM key (GEMINI_API_KEY, or PRAMAAN_LLM=openai with a /v1 gateway)."""
+    from backend.agents.reconciliation import reconcile_system_at, _standards_text_at
+    standards = _standards_text_at(corpus_path)
+    findings = []
+    for spec in sorted((corpus_path / "specs").glob("*.md")):
+        findings.extend(reconcile_system_at(corpus_path, spec.stem, standards))
+    return findings
+
+
 def score_project(findings, ground_truth):
     from eval.run_eval import score
     return score(findings, ground_truth)
@@ -74,14 +86,25 @@ def load_gt(corpus_path):
     return gt["seeded_deviations"], gt.get("true_negative_systems", [])
 
 
-def run_all():
+def run_all(detector: str = "structured"):
     projects = discover_projects()
     results = {}
 
     for pid, path in projects.items():
         gt_devs, tn_systems = load_gt(path)
-        findings = reconcile_project(path)
+        if detector == "llm":
+            findings = reconcile_project_llm(path)
+        else:
+            findings = reconcile_project(path)
         s = score_project(findings, gt_devs)
+        if detector == "llm":
+            # LLM findings don't re-derive lead time; weeks saved = sum of the
+            # ground-truth lead times for the deviations actually caught (TPs).
+            gt_lead = {(d["component"], d["parameter"]): d.get("lead_time_weeks", 0)
+                       for d in gt_devs}
+            s["total_lead_time_weeks"] = sum(gt_lead.get(k, 0) for k in s["tp"])
+            s["max_lead_time_weeks"] = max(
+                (gt_lead.get(k, 0) for k in s["tp"]), default=0)
         proj_info = json.loads((path / "ground_truth.json").read_text()).get("project", {})
         results[pid] = {
             "name": proj_info.get("name", pid),
@@ -134,9 +157,14 @@ def aggregate(results):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--detector", default="structured",
+                    choices=["structured", "llm"],
+                    help="structured = pre-extracted triples (offline, always "
+                         "1.000); llm = real model reasoning over raw docs "
+                         "(needs an API key)")
     args = ap.parse_args()
 
-    results = run_all()
+    results = run_all(detector=args.detector)
     agg = aggregate(results)
 
     if args.json:
@@ -159,7 +187,8 @@ def main():
         return
 
     print(f"\n{'='*70}")
-    print(f"  PRAMAAN MULTI-PROJECT EVAL — {agg['projects']} PROJECTS")
+    print(f"  PRAMAAN MULTI-PROJECT EVAL — {agg['projects']} PROJECTS "
+          f"[{args.detector.upper()}]")
     print(f"{'='*70}")
 
     for pid, r in results.items():

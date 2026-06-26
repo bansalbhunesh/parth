@@ -152,3 +152,34 @@ class TestMultiProjectEval:
         locations = {r["location"] for r in results.values()}
         assert len(tiers) >= 4, f"Only {len(tiers)} tiers: {tiers}"
         assert len(locations) >= 5, f"Only {len(locations)} locations: {locations}"
+
+
+class TestLLMDetectorWiring:
+    """The multi-project eval exposes a real LLM detector that degrades
+    gracefully when no API key is present (the offline/CI path)."""
+
+    def test_llm_detector_runs_without_key(self):
+        import os
+        os.environ.pop("GEMINI_API_KEY", None)
+        os.environ.pop("OPENAI_API_KEY", None)
+        from eval.multi_project_eval import reconcile_project_llm
+        # No key -> every system raises LLMError internally -> empty, no crash.
+        findings = reconcile_project_llm(CORPUS)
+        assert findings == []
+
+    def test_run_all_accepts_llm_detector(self):
+        import os
+        os.environ.pop("GEMINI_API_KEY", None)
+        os.environ.pop("OPENAI_API_KEY", None)
+        from eval.multi_project_eval import run_all, aggregate
+        # Without a key the LLM detector finds nothing, but the harness still
+        # produces a well-formed aggregate (recall 0, no exceptions).
+        results = run_all(detector="llm")
+        agg = aggregate(results)
+        assert agg["projects"] == 12
+        assert agg["total_fp"] == 0
+
+    def test_structured_detector_still_default(self):
+        from eval.multi_project_eval import run_all, aggregate
+        agg = aggregate(run_all())
+        assert agg["aggregate_f1"] == 1.0

@@ -50,5 +50,29 @@ lint:  ## Run Python linting
 	python3 -m py_compile eval/multi_project_eval.py
 	@echo "All Python files compile clean"
 
+verify:  ## One-command verification: tests + all evals + frontend type check
+	@echo "╔══════════════════════════════════════════════════════════════╗"
+	@echo "║  PRAMAAN — Full Verification Suite                         ║"
+	@echo "╚══════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@echo "▸ [1/5] Running 163-test suite..."
+	python3 -m pytest tests/ -q --tb=short
+	@echo ""
+	@echo "▸ [2/5] Baseline eval (Meghdoot, 14 devs)..."
+	python3 eval/run_eval.py
+	@echo ""
+	@echo "▸ [3/5] Text-based eval (non-circular)..."
+	python3 eval/text_eval.py
+	@echo ""
+	@echo "▸ [4/5] Multi-project eval (6 projects, 33 devs)..."
+	python3 eval/multi_project_eval.py
+	@echo ""
+	@echo "▸ [5/5] Frontend type check..."
+	cd frontend && npx tsc --noEmit
+	@echo ""
+	@echo "╔══════════════════════════════════════════════════════════════╗"
+	@echo "║  ✓ ALL CHECKS PASSED                                      ║"
+	@echo "╚══════════════════════════════════════════════════════════════╝"
+
 build:  ## Build frontend for production
 	cd frontend && npm run build

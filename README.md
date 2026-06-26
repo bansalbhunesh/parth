@@ -267,6 +267,7 @@ make setup          # Install all dependencies
 make corpus         # Generate 6 project datasets
 make test           # Run 163 tests
 make eval-all       # Run all 3 eval paths
+make verify         # One-command: tests + all evals + type check
 make run            # Start backend API
 
 # Option 3: See Quick Start above for manual setup

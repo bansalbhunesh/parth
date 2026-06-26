@@ -12,7 +12,7 @@ import re
 
 log = logging.getLogger("pramaan.llm")
 
-PROVIDER = os.getenv("PRAMAAN_LLM", "gemini")  # "gemini" | "claude"
+PROVIDER = os.getenv("PRAMAAN_LLM", "gemini")  # "gemini" | "claude" | "openai"
 
 
 class LLMError(Exception):
@@ -42,6 +42,8 @@ def _extract_json(text: str):
 def complete(prompt: str, system: str = "", json_mode: bool = True) -> str:
     if PROVIDER == "gemini":
         return _gemini(prompt, system, json_mode)
+    if PROVIDER == "openai":
+        return _openai(prompt, system, json_mode)
     return _claude(prompt, system, json_mode)
 
 
@@ -90,6 +92,34 @@ def _gemini(prompt, system, json_mode):
         raise LLMError(f"Gemini API call failed: {exc}") from exc
 
 
+def _openai(prompt, system, json_mode):
+    """OpenAI-compatible provider — works with any /v1 gateway (e.g. an
+    aggregator that proxies Gemini/Claude). Set OPENAI_API_KEY, OPENAI_BASE_URL
+    (the gateway's /v1 root), and OPENAI_MODEL (e.g. gemini-2.0-flash)."""
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        raise LLMError("OPENAI_API_KEY not set")
+    base_url = os.getenv("OPENAI_BASE_URL") or None
+    model_name = os.getenv("OPENAI_MODEL", "gemini-2.0-flash")
+    log.info("OpenAI-compat call: model=%s, base=%s, json_mode=%s, prompt_len=%d",
+             model_name, base_url, json_mode, len(prompt))
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key, base_url=base_url)
+        messages = []
+        if system:
+            messages.append({"role": "system", "content": system})
+        messages.append({"role": "user", "content": prompt})
+        kwargs = {"model": model_name, "messages": messages, "temperature": 0.1}
+        if json_mode and os.getenv("OPENAI_JSON_MODE", "0") == "1":
+            kwargs["response_format"] = {"type": "json_object"}
+        resp = client.chat.completions.create(**kwargs)
+        return resp.choices[0].message.content
+    except Exception as exc:
+        log.error("OpenAI-compat API error: %s", exc)
+        raise LLMError(f"OpenAI-compatible API call failed: {exc}") from exc
+
+
 def _claude(prompt, system, json_mode):
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise LLMError("ANTHROPIC_API_KEY not set")
@@ -113,8 +143,37 @@ def _claude(prompt, system, json_mode):
 def complete_stream(prompt: str, system: str = ""):
     if PROVIDER == "gemini":
         yield from _gemini_stream(prompt, system)
+    elif PROVIDER == "openai":
+        yield from _openai_stream(prompt, system)
     else:
         yield from _claude_stream(prompt, system)
+
+
+def _openai_stream(prompt, system):
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        raise LLMError("OPENAI_API_KEY not set")
+    base_url = os.getenv("OPENAI_BASE_URL") or None
+    model_name = os.getenv("OPENAI_MODEL", "gemini-2.0-flash")
+    log.info("OpenAI-compat stream: model=%s, base=%s, prompt_len=%d",
+             model_name, base_url, len(prompt))
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key, base_url=base_url)
+        messages = []
+        if system:
+            messages.append({"role": "system", "content": system})
+        messages.append({"role": "user", "content": prompt})
+        stream = client.chat.completions.create(
+            model=model_name, messages=messages, temperature=0.1, stream=True,
+        )
+        for chunk in stream:
+            delta = chunk.choices[0].delta.content
+            if delta:
+                yield delta
+    except Exception as exc:
+        log.error("OpenAI-compat stream error: %s", exc)
+        raise LLMError(f"OpenAI-compatible streaming failed: {exc}") from exc
 
 
 def _gemini_stream(prompt, system):

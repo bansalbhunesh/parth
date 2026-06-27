@@ -193,6 +193,11 @@ function TotalSavingsHero() {
   );
 }
 
+// Demo data changes rarely; serve the page from Vercel's edge cache and
+// revalidate in the background every 10 min. Reloads are instant instead of
+// re-rendering against a (possibly cold) backend on every request.
+export const revalidate = 600;
+
 export default async function Page() {
   const [rows, cxPlan] = await Promise.all([getRegister(), getCxPlan()]);
   const hero = rows.find((r) => r.component === "UPS-02") ?? rows[0];

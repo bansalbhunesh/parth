@@ -20,11 +20,15 @@ SYSTEM_PROMPT = (
     "humans miss because the spec, the submittal, and the standard live in "
     "three different documents and are often written by three different parties.\n\n"
     "Your task: CROSS-REFERENCE each requirement in the design basis against "
-    "the corresponding value in the vendor submittal. Apply the governing "
-    "standard as the authoritative interpretation when there is ambiguity.\n\n"
+    "the corresponding value in the vendor submittal. The DESIGN BASIS is the "
+    "authoritative source of REQUIRED values; use governing standards only to "
+    "INTERPRET ambiguous design-basis requirements, never to override them.\n\n"
     "RULES:\n"
-    "1. A DEVIATION exists when the submittal value FAILS to meet the design "
-    "   basis requirement OR violates a governing standard.\n"
+    "1. A DEVIATION exists ONLY when the SUBMITTAL value FAILS to meet the "
+    "   DESIGN BASIS requirement. If the submittal MATCHES the design-basis "
+    "   value, it is COMPLIANT — do NOT flag it, even if you personally believe "
+    "   the design basis itself is below a standard. Second-guessing the design "
+    "   (when the submittal meets it) is OUT OF SCOPE and a false positive.\n"
     "2. NUMERIC thresholds: if the spec says 'shall be X' and the submittal "
     "   provides a value LESS than X (for minimums) or MORE than X (for maximums), "
     "   that is a deviation. Example: spec says '10 min' and submittal says '7 min' "
@@ -45,16 +49,19 @@ SYSTEM_PROMPT = (
 )
 
 PROMPT_TEMPLATE = """\
-TASK: Compare the VENDOR SUBMITTAL against the DESIGN BASIS document, using the
-GOVERNING STANDARDS as authoritative interpretation. Identify EVERY requirement
-where the submittal FAILS to meet the design basis or a governing standard.
+TASK: Compare the VENDOR SUBMITTAL against the DESIGN BASIS document. Identify
+EVERY requirement where the SUBMITTAL FAILS to meet the DESIGN BASIS value. Use
+the GOVERNING STANDARDS only to interpret ambiguous design-basis requirements.
 
 STEP-BY-STEP APPROACH:
 1. Read the design basis and list each requirement with its required value.
 2. For each requirement, find the corresponding value in the submittal.
-3. Compare: does the submittal value MEET OR EXCEED the requirement?
-4. If not, classify the deviation and assess severity.
-5. Cross-check against the governing standards for additional context.
+3. Compare: does the submittal value MEET OR EXCEED the DESIGN-BASIS requirement?
+4. If the submittal meets the design basis, it is COMPLIANT — do NOT flag it,
+   even if the design-basis value itself looks below a standard. You are
+   reviewing the SUBMITTAL against the DESIGN BASIS, not auditing the design.
+5. If the submittal falls short of the design basis, classify the deviation
+   and assess severity.
 
 IMPORTANT — pay attention to:
 - Numeric values below specified minimums (e.g. 7 < 10, 12 < 24, 40 < 50)
@@ -102,15 +109,24 @@ def _read(p):
     return (CORPUS / p).read_text(encoding="utf-8")
 
 
-def _standards_text_at(base):
+def _standards_text_at(base, max_chars_per=None):
+    """Concatenate the governing standards. `max_chars_per` caps each standard
+    to its first N chars — the headline thresholds (availability, topology,
+    autonomy, ratings) live at the top of each paraphrased summary, so a cap
+    keeps what the reconciler needs while cutting prompt tokens (and cost) on
+    the high-volume /analyze path. Eval keeps full fidelity (no cap)."""
     parts = []
     for f in sorted((base / "standards").glob("*.md")):
-        parts.append(f.read_text(encoding="utf-8"))
+        text = f.read_text(encoding="utf-8")
+        if max_chars_per and len(text) > max_chars_per:
+            text = (text[:max_chars_per].rstrip()
+                    + "\n…[truncated — key requirements above]")
+        parts.append(text)
     return "\n\n".join(parts)
 
 
-def _all_standards_text():
-    return _standards_text_at(CORPUS)
+def _all_standards_text(max_chars_per=None):
+    return _standards_text_at(CORPUS, max_chars_per=max_chars_per)
 
 
 def _check_citation_faithfulness(devs, spec_text, submittal_text, standards_text):

@@ -8,5 +8,20 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: "3.11"
+      # --- LLM via OpenAI-compatible gateway (Gemini reseller) ---
+      # Non-secret config is baked in; the ONLY thing to set by hand in the
+      # Render dashboard is OPENAI_API_KEY (the sk-... key). Once set, Render
+      # redeploys and the live "Load real document" demo runs real reasoning.
+      # Swap OPENAI_MODEL to google/gemini-3.5-flash for snappier demo latency.
+      - key: PRAMAAN_LLM
+        value: openai
+      - key: OPENAI_BASE_URL
+        value: https://aicredits.in/v1
+      - key: OPENAI_MODEL
+        value: google/gemini-2.5-pro
+      - key: OPENAI_API_KEY
+        sync: false   # set this secret in the Render dashboard
+      # Alternative — native Google: unset PRAMAAN_LLM and the OPENAI_* vars,
+      # then set GEMINI_API_KEY (AIza...) instead.
       - key: GEMINI_API_KEY
         sync: false

@@ -1652,3 +1652,152 @@ table.reg .row-critical { border-left: 2px solid var(--fault); }
 @media (max-width: 700px) {
   .analyze-preview-grid { grid-template-columns: 1fr; }
 }
+
+/* ============================================================
+   JUDGE MODE — focused, elegant single-view pitch surface
+   ============================================================ */
+.jm-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+.jm-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 4px;
+  position: sticky;
+  top: 0;
+  background: linear-gradient(var(--bg) 70%, transparent);
+  z-index: 20;
+}
+.jm-brand {
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  font-size: 1.05rem;
+}
+.jm-brand span { color: var(--lead); }
+.jm-brand em {
+  font-style: normal;
+  margin-left: 10px;
+  font-size: 0.62rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 3px 10px;
+  vertical-align: middle;
+}
+.jm-link, .jm-foot-cta {
+  color: var(--lead);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.92rem;
+  border: 1px solid rgba(54, 214, 231, 0.3);
+  padding: 8px 16px;
+  border-radius: 10px;
+  transition: background 0.2s, border-color 0.2s;
+}
+.jm-link:hover, .jm-foot-cta:hover {
+  background: var(--lead-glow);
+  border-color: var(--lead);
+}
+.jm-hero {
+  text-align: center;
+  padding: 56px 0 36px;
+}
+.jm-eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 22px;
+}
+.jm-hero h1 {
+  font-size: clamp(1.8rem, 4.2vw, 3rem);
+  line-height: 1.12;
+  letter-spacing: -1.2px;
+  font-weight: 800;
+  max-width: 920px;
+  margin: 0 auto;
+}
+.jm-hero h1 span { color: var(--muted); font-weight: 700; }
+.jm-sub {
+  margin: 26px auto 0;
+  max-width: 760px;
+  color: var(--ink);
+  font-size: 1.02rem;
+  line-height: 1.7;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--lead);
+  border-radius: 0 12px 12px 0;
+  padding: 16px 22px;
+  text-align: left;
+}
+.jm-sub .bad { color: var(--fault); }
+.jm-sub .good { color: var(--lead); }
+.jm-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin: 12px 0 8px;
+}
+.jm-metric {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 28px 18px;
+  text-align: center;
+}
+.jm-metric-val {
+  font-family: var(--mono);
+  font-size: 2.6rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+.jm-metric-val.lead { color: var(--lead); }
+.jm-metric-val.ok { color: var(--ok); }
+.jm-metric-val.accent { color: var(--accent); }
+.jm-metric-label {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  letter-spacing: 0.3px;
+}
+.jm-section { margin-top: 64px; }
+.jm-section-head { text-align: center; max-width: 720px; margin: 0 auto 28px; }
+.jm-section-head h2 {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  letter-spacing: -0.6px;
+  font-weight: 800;
+}
+.jm-section-head p { margin-top: 12px; color: var(--muted); line-height: 1.65; }
+.jm-foot {
+  margin-top: 72px;
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.jm-foot-links { display: flex; gap: 10px; color: var(--muted); font-size: 0.9rem; }
+.jm-foot-links a { color: var(--muted); text-decoration: none; }
+.jm-foot-links a:hover { color: var(--lead); }
+@media (max-width: 760px) {
+  .jm-metrics { grid-template-columns: repeat(2, 1fr); }
+  .jm-hero { padding: 32px 0 24px; }
+}
+
+.nav-judge {
+  color: var(--lead) !important;
+  font-weight: 700;
+  border: 1px solid rgba(54, 214, 231, 0.35);
+  border-radius: 8px;
+  margin-right: 4px;
+}
+.nav-judge:hover { background: var(--lead-glow); }

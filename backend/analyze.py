@@ -69,7 +69,7 @@ def run_analysis(
     system_id: str = "CUSTOM",
 ) -> AnalysisResult:
     t0 = time.time()
-    standards = _all_standards_text()
+    standards = _all_standards_text(max_chars_per=1800)
     prompt = PROMPT_TEMPLATE.format(
         spec=spec_text, submittal=submittal_text, standards=standards,
     )
@@ -97,7 +97,7 @@ def run_streaming_analysis(
 ):
     import json
 
-    standards = _all_standards_text()
+    standards = _all_standards_text(max_chars_per=1800)
     prompt = PROMPT_TEMPLATE.format(
         spec=spec_text, submittal=submittal_text, standards=standards,
     )

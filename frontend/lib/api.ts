@@ -83,6 +83,19 @@ export interface MultiProjectEval {
 
 const API = process.env.NEXT_PUBLIC_API ?? "http://localhost:8000";
 
+// Time-box server-rendered data fetches. A cold Render free-tier backend can
+// take 30s+ to wake; without a timeout the page render blocks on it. With one,
+// we render instantly from the bundled fallback data if the API is slow.
+const FETCH_TIMEOUT_MS = 2500;
+
+function fetchOpts(opts: RequestInit = {}): RequestInit {
+  try {
+    return { ...opts, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) };
+  } catch {
+    return opts; // AbortSignal.timeout unavailable (very old runtime) — skip
+  }
+}
+
 
 async function consumeSSE(
   response: Response,
@@ -115,7 +128,9 @@ async function consumeSSE(
 
 export async function getRegister(): Promise<Deviation[]> {
   try {
-    const r = await fetch(`${API}/deviations`, { cache: "no-store" });
+    // Cacheable so the page can be ISR-rendered (instant reloads); refreshed
+    // in the background every 10 min. Timeout still guards the background fetch.
+    const r = await fetch(`${API}/deviations`, fetchOpts({ next: { revalidate: 600 } }));
     if (!r.ok) throw new Error(String(r.status));
     const data = await r.json();
     return data.register as Deviation[];
@@ -126,7 +141,7 @@ export async function getRegister(): Promise<Deviation[]> {
 
 export async function getCxPlan(): Promise<CxPlan | null> {
   try {
-    const r = await fetch(`${API}/cx-plan`, { cache: "no-store" });
+    const r = await fetch(`${API}/cx-plan`, fetchOpts({ next: { revalidate: 600 } }));
     if (!r.ok) throw new Error(String(r.status));
     return await r.json();
   } catch {
@@ -244,7 +259,7 @@ export async function streamUploadAnalyze(
 
 export async function getMetrics(): Promise<Record<string, unknown> | null> {
   try {
-    const r = await fetch(`${API}/metrics`, { cache: "no-store" });
+    const r = await fetch(`${API}/metrics`, fetchOpts({ cache: "no-store" }));
     if (!r.ok) throw new Error(String(r.status));
     return await r.json();
   } catch {
@@ -254,7 +269,7 @@ export async function getMetrics(): Promise<Record<string, unknown> | null> {
 
 export async function getProjects(): Promise<ProjectSummary[]> {
   try {
-    const r = await fetch(`${API}/projects`, { cache: "no-store" });
+    const r = await fetch(`${API}/projects`, fetchOpts({ cache: "no-store" }));
     if (!r.ok) throw new Error(String(r.status));
     const data = await r.json();
     return data.projects as ProjectSummary[];
@@ -265,7 +280,7 @@ export async function getProjects(): Promise<ProjectSummary[]> {
 
 export async function getMultiProjectEval(): Promise<MultiProjectEval | null> {
   try {
-    const r = await fetch(`${API}/projects/eval/aggregate`, { cache: "no-store" });
+    const r = await fetch(`${API}/projects/eval/aggregate`, fetchOpts({ cache: "no-store" }));
     if (!r.ok) throw new Error(String(r.status));
     return await r.json();
   } catch {

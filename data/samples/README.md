@@ -46,6 +46,27 @@ curl -X POST $API/analyze -H "Content-Type: application/json" \
 > documents. For judging, set the key on the deployed backend, or run locally
 > with the key exported.
 
+## Pair 2 — REAL vendor datasheet vs `design_basis_edge.md`
+
+For the strongest "is this real data?" answer, pair an **actual downloaded
+vendor UPS datasheet** (the submittal) against `design_basis_edge.md` (the spec).
+`design_basis_edge.md` is scaled for an edge / network-room UPS (≤ 6 kW,
+single-phase), so a real compact UPS datasheet pairs cleanly without a
+scale mismatch. The deviations Pramaan flags are then **genuinely real** — the
+product's own published specs fall short of the requirement.
+
+Typical real shortfalls a compact UPS datasheet will trigger against this basis:
+- **Topology / mode (2.1, 2.4):** headline efficiency quoted in ECO or line-
+  interactive mode, not online double-conversion.
+- **Efficiency (2.4):** online efficiency below 96%.
+- **Autonomy (2.5):** internal-battery runtime under 10 min at full load.
+- **Redundancy (2.7):** a single tower unit is not N+1.
+
+Download a real datasheet (e.g. Vertiv Liebert GXT MT+ / MTX+ / ITA), drop it in
+as the **submittal**, use `design_basis_edge.md` as the **spec**, and Analyze.
+Open the datasheet's own spec table first and note which one or two numbers you
+want to highlight — then the demo is verifiably real, end to end.
+
 ## Why this matters for judging
 
 - The corpus benchmark proves *breadth and reproducibility* (12 projects, F1=1.000).

@@ -153,7 +153,25 @@ and the MNS capability envelope being the cited real facts.
 
 ---
 
-**Together, the three real pairs give 11 genuine deviations + 5 true negatives**
-across UPS, generator, cooling, and LV switchgear — sourced to Vertiv, Cummins,
-STULZ, ABB, NFPA 110, EPA 40 CFR 60, ASHRAE TC9.9, EU F-Gas, IEC 61439, IEC 61641,
-and Uptime Tier IV. None seeded.
+## Pairs 4–6 — Fire suppression · Chiller · Battery (LLM-verified)
+
+Three more pairs widen system coverage. Each headline value is a **published,
+fixed property** the model recalled from the agent/refrigerant/battery class
+named in the submittal — it was *not* written in the document.
+
+| Pair | Files | Real fact | Deviation (LLM-verified) |
+|------|-------|-----------|--------------------------|
+| **4 Fire suppression** | `design_basis_fire.md` + `submittal_fm200.md` | FM-200 (HFC-227ea) **GWP 3,220** (Novec 1230 = 1) — NFPA 2001; EU F-Gas / US AIM Act phase-down | `agent_gwp: 750 → 3220` **[Critical]** |
+| **5 Chiller** | `design_basis_chiller.md` + `submittal_chiller_r134a.md` | **R-134a GWP 1,430** — EU F-Gas; ASHRAE 90.1 | `refrigerant_gwp: 750 → 1430` **[Major]** |
+| **6 Battery** | `design_basis_battery.md` + `submittal_vrla.md` | EUROBAT standard-commercial VRLA = **3–5 yr** design life (High-Performance/Long-Life = 10–12 yr); IEEE 1188 monitoring | `design_life_years: 10 → 3–5` **[Major]**; `monitoring: 3 params → voltage only` **[Major]** (omission) |
+
+The model **recalled GWP values (FM-200 = 3,220; R-134a = 1,430)** the datasheets
+never stated — genuine domain knowledge, not string-matching.
+
+---
+
+**Together, the six real pairs give 15 genuine deviations + 5 true negatives**
+across UPS, generator, cooling, LV switchgear, fire suppression, chiller plant,
+and battery — sourced to Vertiv, Cummins, STULZ, ABB, FM-200/Novec, Carrier-class,
+EUROBAT, and the standards Uptime Tier IV, NFPA 110/2001, EPA 40 CFR 60, ASHRAE
+90.1/TC9.9, EU F-Gas, US AIM Act, IEC 61439/61641, IEEE 1188. **None seeded.**

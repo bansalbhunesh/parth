@@ -80,7 +80,7 @@
 
 > **$30 billion is flowing into Indian data centres on the way to 2 GW by 2026 — and 9 in 10 large builds slip schedule, most expensively at commissioning.** One undetected vendor deviation can mean **$10–40M a month** of delay on a 50 MW build. Pramaan catches it **the day the submittal lands** — when the fix is a one-line RFI, not a seven-figure slip. → [`docs/BUSINESS.md`](docs/BUSINESS.md)
 >
-> **It reasons over real documents — not keywords.** On real **Vertiv, Cummins, STULZ, and ABB** datasheets against real standards (Uptime, NFPA, EPA, ASHRAE, IEC), it recovered **11 genuine deviations + 5 true negatives — none seeded** — including arithmetic it did itself (4,000 gal ÷ 103 GPH = **38.8 h** vs 48 required), a refrigerant's GWP it **recalled from domain knowledge** (R410A = 2,088), and value omissions it flagged as non-conforming. Every value sourced → [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md)
+> **It reasons over real documents — not keywords.** On real **Vertiv, Cummins, STULZ, and ABB** datasheets against real standards (Uptime, NFPA, EPA, ASHRAE, IEC), it recovered **15 genuine deviations + 5 true negatives across six systems — none seeded** — including arithmetic it did itself (4,000 gal ÷ 103 GPH = **38.8 h** vs 48 required) and refrigerant/agent GWPs it **recalled from domain knowledge** (R-410A = 2,088, R-134a = 1,430, FM-200 = 3,220) — values the datasheets never stated. Every value sourced → [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md)
 >
 > **And it's production-grade.** Each finding cites the standard, predicts the commissioning test it will fail, and the weeks of lead time. When the AI is rate-limited, a rule-based engine still catches the headline shortfalls — **no silent zeros.** Benchmarked across 12 projects / 11 countries for breadth · 263 tests · CI green.
 
@@ -264,7 +264,7 @@ python3 eval/multi_project_eval.py --json
 > distinction (88% vs 96%), and a missing-value omission (THD not stated). Full
 > result + screenshots: [`data/samples/REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md).
 >
-> **Three fully-sourced real pairs (every value citable):**
+> **Six fully-sourced real pairs (every value citable):**
 > 1. **Power** — a **Vertiv Liebert GXT5** UPS (7-min full-load runtime, 95.9%
 >    online efficiency) and a **Cummins QSK60** genset (EPA Tier 2, 103 GPH) vs
 >    Uptime Tier IV / NFPA 110 / EPA 40 CFR 60. Offline the rule-based engine
@@ -282,8 +282,13 @@ python3 eval/multi_project_eval.py --json
 >    missing IEC 61641 arc test — while clearing IP54 (which *exceeds* the IP42
 >    requirement), proving it doesn't false-positive on a compliant value.
 >
-> **11 genuine deviations + 5 true negatives, none seeded** — sources for every
-> number in [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md).
+> 4. **Fire · Chiller · Battery** — vs NFPA 2001 / ASHRAE 90.1 / EUROBAT / IEEE 1188.
+>    It **recalled the GWPs** of FM-200 (3,220) and R-134a (1,430) to flag them
+>    against the ≤750 cap, and caught a VRLA battery's 3–5-yr life vs a 10-yr
+>    requirement plus a missing-monitoring omission.
+>
+> **15 genuine deviations + 5 true negatives across six systems, none seeded** —
+> sources for every number in [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md).
 
 **Key diversity dimensions:**
 - **Climate**: tropical (Mumbai), mild (Pune), cold (Oslo), desert (Dubai), temperate (Oregon), subtropical (Shanghai), continental (Frankfurt, Toronto), maritime (Tokyo, London), arid (Sydney), tropical (São Paulo)

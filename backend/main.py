@@ -162,9 +162,38 @@ def analyze_upload_stream(
 
 # ── Core data endpoints ─────────────────────────────────────────────
 
+def _llm_status() -> dict:
+    """Non-sensitive view of LLM wiring — never returns the key itself, only
+    whether one is present, so the live demo can be verified at a glance."""
+    import os
+    provider = os.getenv("PRAMAAN_LLM", "gemini").lower()
+    if provider == "openai":
+        key_set = bool(os.getenv("OPENAI_API_KEY"))
+        return {
+            "provider": "openai",
+            "key_set": key_set,
+            "model": os.getenv("OPENAI_MODEL", "gemini-2.0-flash"),
+            "base_url_set": bool(os.getenv("OPENAI_BASE_URL")),
+            "ready": key_set,
+        }
+    if provider == "claude":
+        key_set = bool(os.getenv("ANTHROPIC_API_KEY"))
+        return {"provider": "claude", "key_set": key_set, "ready": key_set}
+    key_set = bool(os.getenv("GEMINI_API_KEY"))
+    return {"provider": "gemini", "key_set": key_set,
+            "model": os.getenv("GEMINI_MODEL", "gemini-2.0-flash"), "ready": key_set}
+
+
 @app.get("/health")
 def health():
-    return {"ok": True, "project": "Project Meghdoot", "version": "2.0.0"}
+    llm = _llm_status()
+    return {
+        "ok": True,
+        "project": "Project Meghdoot",
+        "version": "2.0.0",
+        "llm": llm,
+        "analysis_mode": "llm" if llm["ready"] else "deterministic-fallback",
+    }
 
 
 @app.get("/project")

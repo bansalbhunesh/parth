@@ -33,7 +33,7 @@ python3 eval/run_eval.py
 # Multi-project eval (50 devs, 1024 weeks, F1=1.000)
 python3 eval/multi_project_eval.py
 
-# Text-based eval (non-circular, NLP extraction)
+# Text-based eval (independent input path, NLP extraction)
 python3 eval/text_eval.py
 
 # Docker one-command

@@ -102,6 +102,14 @@ No secrets in the repo (env-only keys); request validation (`Field` length caps)
 | Retrieval | TF-IDF (demo) → pgvector / Qdrant (scale) |
 | Eval / CI | 4 eval paths · 263 tests · GitHub Actions |
 
+## Scale — demonstrated
+
+`eval/scale_benchmark.py` runs the deterministic detection layer over a large
+synthetic portfolio: **665 systems/sec** (2,000 systems in ~3 s) → a **500-system
+enterprise project in <1 s**, a **50,000-system (100-project) portfolio in ~75 s**.
+The LLM layer scales horizontally (per-system, parallelisable, response-cached;
+delta ingest re-checks only changed submittals).
+
 ## Scale path
 
 `POST /ingest/{system}` is per-system and parallelisable → async + task queue;

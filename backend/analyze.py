@@ -21,7 +21,7 @@ log = logging.getLogger("pramaan.analyze")
 # Hard ceiling on how long the live /analyze path waits for the LLM before it
 # degrades to the instant rule-based detector. Free-tier models can 503-retry
 # for 40s+; a judge will not wait. Tune with PRAMAAN_LLM_TIMEOUT (seconds).
-_LLM_TIMEOUT_S = float(os.getenv("PRAMAAN_LLM_TIMEOUT", "18"))
+_LLM_TIMEOUT_S = float(os.getenv("PRAMAAN_LLM_TIMEOUT", "60"))
 
 # Module-level pool so a timed-out call is abandoned (left to finish in the
 # background) rather than blocking the response — a `with` executor would wait

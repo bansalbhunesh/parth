@@ -19,7 +19,7 @@ services:
       - key: GEMINI_MODEL
         value: gemini-2.5-flash
       - key: PRAMAAN_LLM_TIMEOUT
-        value: "18"
+        value: "60"
       - key: GEMINI_API_KEY
         sync: false   # set this secret in the Render dashboard
       # --- Alternative: OpenAI-compatible gateway (paid reseller) ---

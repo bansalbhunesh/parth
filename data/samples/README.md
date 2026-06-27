@@ -67,6 +67,25 @@ as the **submittal**, use `design_basis_edge.md` as the **spec**, and Analyze.
 Open the datasheet's own spec table first and note which one or two numbers you
 want to highlight — then the demo is verifiably real, end to end.
 
+## Pair 3 — Standby Diesel Generator (`design_basis_generator` vs `vendor_submittal_generator`)
+
+A second self-contained demo pair (markdown + PDF), different domain, same idea:
+a realistic design basis vs a vendor datasheet that stamps itself "fully
+compliant" while burying real shortfalls.
+
+| # | Buried deviation | Design basis | Vendor offered |
+|---|------------------|-------------|----------------|
+| 1 | **Emissions tier** | EPA Tier 4 Final / Stage V | EPA Tier 2 |
+| 2 | **On-site fuel autonomy** | ≥ 24 hours @ 100% | 8 hours (sub-base tank) |
+| 3 | **Start / load acceptance** | ≤ 10 seconds | 30 seconds |
+| 4 | **Redundancy** | N+1 | Single set (N) |
+
+**Compliant rows (must NOT be flagged):** rated power 2000 kW, 11 kV / 50 Hz,
+acoustic 82 ≤ 85 dB(A), governor ±0.25%.
+
+Expected: **4 deviations, 0 false positives.** Upload the two PDFs (or paste the
+two markdown files) into Live Analysis → Analyze.
+
 ## Why this matters for judging
 
 - The corpus benchmark proves *breadth and reproducibility* (12 projects, F1=1.000).

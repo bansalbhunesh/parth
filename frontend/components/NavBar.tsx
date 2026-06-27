@@ -46,6 +46,7 @@ export default function NavBar() {
 
   return (
     <nav className="nav-bar">
+      <a href="/judge" className="nav-link nav-judge">★ Judge Mode</a>
       {SECTIONS.map((s) => (
         <a
           key={s.id}

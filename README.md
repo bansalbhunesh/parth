@@ -86,7 +86,7 @@
 2. In **Live Analysis**, click **“Load real document ★”** — or upload your own spec + submittal PDFs.
 3. Hit **Analyze**. Watch it stream the reasoning, then list each deviation with its severity, the standard it cites, the commissioning test it predicts will fail, and the lead time.
 
-Three ready-made demo pairs ship in [`data/samples/`](data/samples/): a UPS edge pair, a **real Vertiv datasheet**, and a standby-generator pair. Drop any pair into the analyzer.
+Ready-made demo pairs ship in [`data/samples/`](data/samples/): a UPS edge pair, a **real Vertiv datasheet**, a standby-generator pair, and a **fully-sourced real pair** (Vertiv GXT5 + Cummins QSK60, every value citable in [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md)). Drop any pair into the analyzer.
 
 > Health at a glance: **[`/health`](https://parth-3puc.onrender.com/health)** shows whether the LLM is wired (`"ready": true`); **[`/llm-check`](https://parth-3puc.onrender.com/llm-check)** makes a real call and reports the exact status. The app **degrades gracefully** — every endpoint returns 200 and the dashboard renders from bundled data even with no API key.
 
@@ -255,6 +255,15 @@ python3 eval/multi_project_eval.py --json
 > power math (3 kVA × 0.8 PF → 2.4 kW vs 6 kW), an online-vs-ECO efficiency
 > distinction (88% vs 96%), and a missing-value omission (THD not stated). Full
 > result + screenshots: [`data/samples/REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md).
+>
+> **Fully-sourced real pair (every value citable):** a **Vertiv Liebert GXT5**
+> UPS (7-min full-load runtime, 95.9% online efficiency) and a **Cummins QSK60**
+> genset (EPA Tier 2, 103 GPH) vs Uptime Tier IV / NFPA 110 / EPA 40 CFR 60
+> requirements — **5 genuine deviations + 1 true negative, none seeded.** Offline
+> the rule-based engine flags the battery (10→7 min) and the sub-1% efficiency
+> (96→95.9%) shortfalls; the LLM adds the emissions tier, THD omission, and the
+> derived fuel autonomy (4,000 gal ÷ 103 GPH = 38.8 h < 48 h). Sources for every
+> number: [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md).
 
 **Key diversity dimensions:**
 - **Climate**: tropical (Mumbai), mild (Pune), cold (Oslo), desert (Dubai), temperate (Oregon), subtropical (Shanghai), continental (Frankfurt, Toronto), maritime (Tokyo, London), arid (Sydney), tropical (São Paulo)

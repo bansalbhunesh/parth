@@ -109,15 +109,24 @@ def _read(p):
     return (CORPUS / p).read_text(encoding="utf-8")
 
 
-def _standards_text_at(base):
+def _standards_text_at(base, max_chars_per=None):
+    """Concatenate the governing standards. `max_chars_per` caps each standard
+    to its first N chars — the headline thresholds (availability, topology,
+    autonomy, ratings) live at the top of each paraphrased summary, so a cap
+    keeps what the reconciler needs while cutting prompt tokens (and cost) on
+    the high-volume /analyze path. Eval keeps full fidelity (no cap)."""
     parts = []
     for f in sorted((base / "standards").glob("*.md")):
-        parts.append(f.read_text(encoding="utf-8"))
+        text = f.read_text(encoding="utf-8")
+        if max_chars_per and len(text) > max_chars_per:
+            text = (text[:max_chars_per].rstrip()
+                    + "\n…[truncated — key requirements above]")
+        parts.append(text)
     return "\n\n".join(parts)
 
 
-def _all_standards_text():
-    return _standards_text_at(CORPUS)
+def _all_standards_text(max_chars_per=None):
+    return _standards_text_at(CORPUS, max_chars_per=max_chars_per)
 
 
 def _check_citation_faithfulness(devs, spec_text, submittal_text, standards_text):

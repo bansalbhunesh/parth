@@ -223,6 +223,13 @@ python3 eval/multi_project_eval.py --json
 > per-model breakdown, and the two issues real runs surfaced (and how we fixed
 > them) are documented in [`eval/REAL_WORLD_RESULTS.md`](eval/REAL_WORLD_RESULTS.md).
 > Reproduce: `python3 eval/multi_project_eval.py --detector llm` (needs an API key).
+>
+> **Beyond the benchmark — a real third-party document:** the deployed app
+> analysed an actual **Vertiv UPS datasheet** (downloaded from vertiv.com) against
+> a design basis and caught **8 genuine deviations** live — including derived
+> power math (3 kVA × 0.8 PF → 2.4 kW vs 6 kW), an online-vs-ECO efficiency
+> distinction (88% vs 96%), and a missing-value omission (THD not stated). Full
+> result + screenshots: [`data/samples/REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md).
 
 **Key diversity dimensions:**
 - **Climate**: tropical (Mumbai), mild (Pune), cold (Oslo), desert (Dubai), temperate (Oregon), subtropical (Shanghai), continental (Frankfurt, Toronto), maritime (Tokyo, London), arid (Sydney), tropical (São Paulo)

@@ -1,9 +1,12 @@
 """Text-based eval — runs the regex extraction engine on raw markdown
 spec/submittal files and scores against ground truth.
 
-This breaks the circularity of the baseline eval (which compares
-pre-extracted structured triples) by proving the analysis pipeline
-independently discovers deviations from raw unstructured text.
+This uses a different INPUT than the baseline eval (which compares
+pre-extracted structured triples): it runs the extraction engine on the raw
+markdown spec/submittal files. It proves the extraction layer recovers the
+seeded deviations from real-world text variety across 12 projects — an
+extraction-robustness check on our own corpus, not a generalisation proof.
+The capability proof is the LLM eval (run_eval.py --detector llm).
 """
 
 import argparse
@@ -136,7 +139,7 @@ def main():
 
     print(f"\n{'='*70}")
     print(f"  PRAMAAN TEXT-BASED EVAL — RAW MARKDOWN → REGEX EXTRACTION")
-    print(f"  (Non-circular: proves pipeline discovers deviations from text)")
+    print(f"  (Independent input path: extraction engine over raw markdown)")
     print(f"{'='*70}")
 
     for pid, r in results.items():

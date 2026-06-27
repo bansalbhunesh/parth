@@ -59,6 +59,17 @@ def _load_json(path: str) -> dict:
     return {}
 
 
+def _count_requirements() -> int:
+    f = CORPUS / "extracted" / "requirements.json"
+    if f.exists():
+        try:
+            data = json.loads(f.read_text(encoding="utf-8"))
+            return len(data) if isinstance(data, list) else len(data.get("requirements", []))
+        except Exception:
+            pass
+    return 0
+
+
 def _sse_response(generator):
     return StreamingResponse(
         generator,
@@ -186,13 +197,17 @@ def _llm_status() -> dict:
 
 @app.get("/health")
 def health():
+    import os
     llm = _llm_status()
     return {
         "ok": True,
         "project": "Project Meghdoot",
         "version": "2.0.0",
+        # Deployed commit — lets you verify the running build at a glance.
+        # Render injects RENDER_GIT_COMMIT automatically on every deploy.
+        "commit": (os.getenv("RENDER_GIT_COMMIT") or os.getenv("GIT_COMMIT") or "dev")[:7],
         "llm": llm,
-        "analysis_mode": "llm" if llm["ready"] else "deterministic-fallback",
+        "analysis_mode": "llm" if llm["ready"] else "rule-based-fallback",
     }
 
 
@@ -370,10 +385,14 @@ def metrics():
             "total_lead_time_weeks": r["total_lead_time_weeks"],
         },
         "corpus": {
-            "systems": len(set(d["system"] for d in gt)),
-            "total_requirements": project_info.get("line_items_total", 0),
+            "systems_modeled": len(list((CORPUS / "specs").glob("*.md")))
+                               or len(set(d["system"] for d in gt)),
+            "requirements_modeled": _count_requirements(),
             "active_submittals": project_info.get("active_submittals", 0),
             "true_negative_systems": r["true_negative_systems"],
+            # Enterprise projection, not what the demo corpus models — labelled
+            # explicitly so the live number can't be mistaken for actuals.
+            "scale_target_line_items_per_project": project_info.get("line_items_total", 0),
         },
         "citation_faithfulness": round(r["citation_faithfulness"], 3),
     }

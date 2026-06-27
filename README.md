@@ -271,7 +271,7 @@ python3 -m pytest tests/ -q                       # → 258 passed
 
 # 3. Prove the pipeline + eval harness (3 independent paths)
 python3 eval/run_eval.py --detector baseline      # → P/R/F1 = 1.000, 267 weeks saved
-python3 eval/text_eval.py                         # → Non-circular: raw text → regex → F1=1.000
+python3 eval/text_eval.py                         # → Raw-markdown input path: regex extraction → F1=1.000
 python3 eval/multi_project_eval.py                # → 12 projects, F1=1.000, 1024 weeks saved
 
 # 4. The real run — LLM recovers deviations from RAW unstructured documents
@@ -443,7 +443,7 @@ pramaan/
 │   ├── run_eval.py                # P/R/F1 + Cx accuracy + citation faithfulness
 │   ├── baseline_reconciler.py     # Deterministic baseline (proves plumbing)
 │   ├── multi_project_eval.py      # Multi-project aggregate eval (12 projects)
-│   └── text_eval.py              # Non-circular eval: regex on raw markdown text
+│   └── text_eval.py              # Raw-markdown extraction eval (independent input path)
 ├── frontend/
 │   ├── app/
 │   │   ├── page.tsx               # Main dashboard — 19 sections
@@ -518,7 +518,7 @@ The eval harness uses **three independent paths** to prove the pipeline works �
 python3 eval/run_eval.py --detector baseline
 # → Precision: 1.000  Recall: 1.000  F1: 1.000
 
-# Path 2: Text-based eval — runs regex extraction on RAW MARKDOWN (non-circular)
+# Path 2: Text-based eval — runs regex extraction on RAW MARKDOWN (independent input path)
 python3 eval/text_eval.py
 # → 12 projects, 50 deviations discovered from raw text, F1=1.000
 
@@ -531,11 +531,11 @@ python3 eval/run_eval.py --detector llm
 # → Scores from actual LLM reasoning, not hardcoded answers
 ```
 
-**Why this is NOT circular:**
-- Path 1 (structured baseline) proves data integrity — the pre-extracted triples match ground truth by construction
-- Path 2 (text eval) **independently** proves the regex extraction engine discovers all 50 deviations from raw unstructured markdown across 12 different projects with different component naming, standards, and formats
-- Path 4 (LLM eval) proves the full AI pipeline works end-to-end when an API key is available
-- All three paths score against the **same ground truth** but use **different input sources** — structured triples, raw text, or LLM extraction
+**What each path proves — and its honest limits:**
+- **Path 1 (structured baseline)** is a *data-integrity check*. It compares pre-extracted triples to ground truth and is **1.000 by construction** — it proves the plumbing, not detection skill. We label it as such rather than headline it.
+- **Path 2 (text eval)** is an *extraction-layer robustness check*: it recovers all 50 deviations from raw markdown across 12 projects with different naming/standards/formats. It runs on our own corpus, so it proves the engine parses real-world variety — not that it generalises to unseen documents.
+- **Path 4 (LLM eval) is the capability proof.** A frontier model (`gemini-2.5-flash` / `2.5-pro`) reasons over the raw documents from scratch and recovers the deviations — including derived arithmetic (3 kVA × 0.8 PF → 2.4 kW) and value omissions — with semantic + strict scoring. This is the number that matters.
+- The strongest evidence is **outside the benchmark entirely**: a real third-party Vertiv datasheet the system had never seen ([`REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md)).
 
 **What it measures:**
 - **Precision** — are the detected deviations real? (no false positives)
@@ -551,9 +551,9 @@ python3 eval/run_eval.py --detector llm
 
 | Rubric Dimension | Pramaan Feature | Evidence |
 |------------------|-----------------|----------|
-| **Innovation** | Cross-document AI reasoning across spec + submittal + standard — no commercial tool does this. Proven on a **real third-party Vertiv datasheet**, not just our own data | 5 specialized agents, LangGraph orchestration, citation chain, [`REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md) |
+| **Innovation** | Goes past AI submittal review (the commercial state of the art — BuildSync, Spec-ID, InspectMind) by predicting **which commissioning test each deviation will fail, and how many weeks early** — cross-referencing spec + submittal + governing standard with a full citation chain. Proven on a **real third-party Vertiv datasheet**, not just our own data | 5 specialized agents, LangGraph orchestration, citation chain, commissioning-risk twin, [`REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md) |
 | **Business Impact** | 1,024 weeks of early detection across 50 findings in 12 projects prevents seven-figure schedule slips | Interactive ROI calculator, cost-of-delay timeline, before/after comparison |
-| **Technical Excellence** | Dual eval harness (structured + text-based) with P/R/F1 = 1.000 across 12 projects, **real-LLM verified** (`gemini-2.5-pro`, 50/50 recall), 258-test suite | Non-circular eval, semantic + strict scoring, 11 countries, 25+ standards, 0 false positives |
+| **Technical Excellence** | Dual eval harness (structured + text-based) with P/R/F1 = 1.000 across 12 projects, **real-LLM verified** (`gemini-2.5-pro`, 50/50 recall), 258-test suite | Independent text-extraction + real-LLM eval, semantic + strict scoring, 11 countries, 25+ standards, 0 false positives |
 | **Robustness** | Graceful degradation everywhere — no API key, malformed PDFs, cold backend all return 200; `/llm-check` surfaces the true LLM status | 45-test resilience suite, ISR-cached frontend, deterministic fallback |
 | **Scalability** | 12 projects → enterprise portfolio via multi-project eval + batch ingest + vector store | Multi-project dashboard, architecture diagram, scale story |
 | **UX** | Two surfaces: a focused **Judge Mode** (90-second proof) and a 19-section deep-dive dashboard, both ISR-cached for instant loads, streaming AI | `/judge` + full dashboard, live PDF upload, dark theme, responsive |

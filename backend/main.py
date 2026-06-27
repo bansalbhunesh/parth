@@ -78,9 +78,18 @@ def _sse_response(generator):
     )
 
 
+MAX_UPLOAD_BYTES = 15 * 1024 * 1024  # 15 MB — generous for datasheets, caps DoS
+
+
+def _check_size(data: bytes, name: str):
+    if len(data) > MAX_UPLOAD_BYTES:
+        raise HTTPException(413, f"{name} exceeds the {MAX_UPLOAD_BYTES // (1024*1024)} MB upload limit")
+
+
 def _extract_upload_text(file: UploadFile) -> str:
     data = file.file.read()
     name = file.filename or "upload"
+    _check_size(data, name)
     if name.lower().endswith(".pdf") or file.content_type == "application/pdf":
         text = extract_pdf_bytes(data, name)
         if not text:
@@ -145,6 +154,8 @@ def analyze_upload_stream(
     spec_name = spec_file.filename or "spec"
     sub_data = submittal_file.file.read()
     sub_name = submittal_file.filename or "submittal"
+    _check_size(spec_data, spec_name)
+    _check_size(sub_data, sub_name)
 
     def generate():
         yield f"event: status\ndata: Extracting text from {spec_name}...\n\n"

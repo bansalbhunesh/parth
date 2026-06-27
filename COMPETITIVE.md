@@ -58,3 +58,27 @@ are. Judges reward that honesty.
 - *"Does it work without your API key / under load?"* Yes — `/llm-check` reports
   true status, and the rule-based fallback returns Cx-mapped deviations in <1s
   when the model is rate-limited (free-tier reality), instead of a silent zero.
+
+## 5. Feature teardown — the four things only Pramaan does
+
+Submittal-review tools extract product data and check it against the spec. None
+of the following is in their public feature set — and together they are the moat:
+
+1. **Commissioning-failure prediction.** Each deviation maps to the *specific*
+   L1–L5 commissioning test it will fail (e.g. battery shortfall → IST-07).
+   Commercial tools tell you *that* it deviates; Pramaan tells you *what breaks,
+   and when*.
+2. **Lead-time-to-failure.** A quantified "you caught this N weeks before the test
+   fails" — the number that converts a finding into a dated, prioritised action
+   and a board-level schedule-risk metric.
+3. **Open, reproducible eval + real-world result.** A public test harness, a
+   263-test suite, and a **15/15-recall result on real third-party datasheets**
+   ([`eval/REAL_PAIRS_EVAL.md`](eval/REAL_PAIRS_EVAL.md)). Closed SaaS asks you to
+   trust the marketing; we ship the proof.
+4. **No-silent-zero resilience.** A deterministic detector that still returns the
+   headline deviations when the LLM is rate-limited or absent — a property a
+   cloud-only black box cannot offer on-prem or air-gapped sites.
+
+The category proves the *demand* is real and buyers already pay for adjacent
+tooling. Pramaan's wedge is the **commissioning-risk layer on top** — the part
+that ties a document deviation to a dated, costed schedule event.

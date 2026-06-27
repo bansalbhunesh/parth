@@ -86,31 +86,31 @@ def _deterministic_compare(spec_text: str, submittal_text: str) -> list[dict]:
 _FREEFORM_PARAMS = [
     dict(component="UPS-02", parameter="battery_runtime_min", severity="Critical",
          direction="min", unit_rx=r"(?:min|minute)", unit="min",
-         kw=[r"battery\s+(?:autonomy|runtime)", r"autonomy", r"runtime"]),
+         kw=[r"battery\s+(?:autonomy|runtime)", r"autonomy", r"battery", r"runtime"]),
     dict(component="UPS-02", parameter="efficiency_pct", severity="Major",
          direction="min", unit_rx=r"(?:%|percent)", unit="%",
-         kw=[r"(?:online|double[-\s]?conversion)[^.\n]{0,40}efficiency",
-             r"efficiency[^.\n]{0,40}(?:online|double[-\s]?conversion)",
+         kw=[r"(?:online|double[-\s]?conversion)[^.]{0,40}efficiency",
+             r"efficiency[^.]{0,40}(?:online|double[-\s]?conversion)",
              r"efficiency"]),
     dict(component="UPS-02", parameter="input_thd_pct", severity="Major",
          direction="max", unit_rx=r"(?:%|percent)", unit="%",
          kw=[r"(?:input\s+)?(?:thd|harmonic\s+distortion)"]),
     dict(component="GEN-FUEL", parameter="onsite_fuel_hours", severity="Critical",
          direction="min", unit_rx=r"(?:h|hr|hour)", unit="h",
-         kw=[r"fuel[^.\n]{0,30}(?:autonomy|hours|storage)", r"fuel\s+autonomy"]),
+         kw=[r"fuel[^.]{0,30}(?:autonomy|hours|storage)", r"fuel\s+autonomy"]),
     dict(component="GEN-01", parameter="start_time_sec", severity="Critical",
          direction="max", unit_rx=r"(?:s|sec|second)", unit="s",
-         kw=[r"start[^.\n]{0,20}time", r"start\s+time"]),
+         kw=[r"start[^.]{0,20}time", r"start\s+time"]),
     dict(component="SWGR-MV", parameter="short_circuit_rating_ka", severity="Critical",
          direction="min", unit_rx=r"kA", unit="kA",
-         kw=[r"(?:fault|short[-\s]?circuit)[^.\n]{0,30}rating",
+         kw=[r"(?:fault|short[-\s]?circuit)[^.]{0,30}rating",
              r"(?:fault|short[-\s]?circuit)"]),
     dict(component="COOL-LOOP", parameter="delta_t_c", severity="Major",
          direction="ne", unit_rx=r"(?:°?C|degrees?\s*C)", unit="C",
          kw=[r"delta[-\s]?t", r"temperature\s+(?:rise|difference)"]),
     dict(component="FLOOR", parameter="load_rating_kpa", severity="Critical",
          direction="min", unit_rx=r"kPa", unit="kPa",
-         kw=[r"(?:floor\s+)?load[^.\n]{0,20}(?:rating|capacity)", r"load\s+rating"]),
+         kw=[r"(?:floor\s+)?load[^.]{0,20}(?:rating|capacity)", r"load\s+rating"]),
 ]
 
 _OMISSION_RX = re.compile(
@@ -120,11 +120,11 @@ _OMISSION_RX = re.compile(
 
 def _num_near(text: str, kw: str, unit_rx: str, window: int = 50):
     """First number+unit AFTER the keyword (preferred), else BEFORE it."""
-    fwd = re.search(kw + r"[^.\n]{0,%d}?(\d+(?:\.\d+)?)\s*%s" % (window, unit_rx),
+    fwd = re.search(kw + r"[^.]{0,%d}?(\d+(?:\.\d+)?)\s*%s" % (window, unit_rx),
                     text, re.I)
     if fwd:
         return float(fwd.group(1))
-    bwd = re.search(r"(\d+(?:\.\d+)?)\s*%s[^.\n]{0,%d}?%s" % (unit_rx, window, kw),
+    bwd = re.search(r"(\d+(?:\.\d+)?)\s*%s[^.]{0,%d}?%s" % (unit_rx, window, kw),
                     text, re.I)
     if bwd:
         return float(bwd.group(1))
@@ -132,7 +132,7 @@ def _num_near(text: str, kw: str, unit_rx: str, window: int = 50):
 
 
 def _omission_near(text: str, kw: str) -> bool:
-    m = re.search(kw + r"[^.\n]{0,60}", text, re.I)
+    m = re.search(kw + r"[^.]{0,60}", text, re.I)
     return bool(m and _OMISSION_RX.search(m.group(0)))
 
 

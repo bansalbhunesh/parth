@@ -13,11 +13,11 @@
 - **Speaker note:** name + one-line value prop. Don't over-explain; move to stakes.
 
 ### Slide 2 — The stakes (lead with money)
-- India: **gigawatts** of new data-centre capacity, **billions in capex**
-- One missed deviation → **multi-month delay + seven-figure overrun**
-- Happens on *every* large build
-- **Visual:** a rising data-centre capex curve; a red "₹" delay marker at Week 38.
-- **Speaker note:** make a business judge feel the money in 15 seconds.
+- **$30B** into Indian data centres → **2 GW by 2026**
+- **9 in 10** large builds slip schedule (Oxford megaproject data)
+- One month of delay on a 50 MW build = **$10–40M**
+- **Visual:** rising capex curve; a red delay marker at commissioning.
+- **Speaker note:** make a business judge feel the money in 15 seconds. (Sources: `docs/BUSINESS.md`.)
 
 ### Slide 3 — Why it's hard
 - Spec · Submittal · Standard = **3 documents, 3 parties**
@@ -61,12 +61,12 @@
 - **Visual:** the comparison table from `COMPETITIVE.md`.
 - **Speaker note:** honest positioning earns trust; name the competitors first.
 
-### Slide 9 — Business impact
-- Manual review: **weeks** of one engineer → Pramaan: **minutes**
-- **Crores** of rework avoided per project; every delayed week = revenue lost
-- Full audit trail → hand straight to the Cx authority
-- **Visual:** the ROI calculator screenshot; before/after timeline.
-- **Speaker note:** tie back to Slide 2's money.
+### Slide 9 — Business impact (the asymmetry)
+- One missed deviation: **$4–25M** delay → fix on submittal day = **one RFI**
+- Analysis costs **~paise** → **10–100× ROI** on a single prevented slip
+- Manual review **weeks** → Pramaan **minutes**, full audit trail to the CxA
+- **Visual:** the millions-vs-paise asymmetry; ROI calculator; before/after timeline.
+- **Speaker note:** the asymmetry *is* the business case → `docs/BUSINESS.md`.
 
 ### Slide 10 — Production-grade
 - **No silent zeros** — rule-based fallback when the AI is rate-limited

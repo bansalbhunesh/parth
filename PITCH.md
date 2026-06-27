@@ -20,12 +20,13 @@
 
 ## [0:00–0:20] — The stakes (make a business judge feel it)
 
-> "India is adding **gigawatts** of data-centre capacity — billions of dollars of
-> capex this decade. On a single 40-megawatt build, one spec deviation that slips
-> through review surfaces months later, during commissioning — and turns into a
-> **multi-month delay and a seven-figure overrun.** This happens on *every* large
-> build. It's the most expensive question in construction: *did the vendor actually
-> deliver what we specified?*"
+> "**Thirty billion dollars** is pouring into Indian data centres on the way to
+> **two gigawatts by 2026** — and **nine out of ten** large builds slip schedule.
+> The most expensive slips happen at **commissioning**: on a 50-megawatt build, a
+> single month of delay runs **ten to forty million dollars** in lost revenue,
+> financing, and penalties. One of the most common — and most avoidable — triggers
+> is a vendor submittal that quietly fails the spec. It's the most expensive
+> question in construction: *did the vendor actually deliver what we specified?*"
 
 ## [0:20–0:40] — Why it's hard
 

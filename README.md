@@ -37,6 +37,7 @@
 <p align="center">
   <sub>
     Submission artifacts:
+    <a href="docs/BUSINESS.md">Business case &amp; impact model</a> ·
     <a href="docs/ARCHITECTURE.md">Architecture one-pager</a> ·
     <a href="docs/DECK.md">Pitch deck outline</a> ·
     <a href="PITCH.md">3-min video script</a> ·
@@ -77,15 +78,11 @@
 
 ## The Headline
 
-> **Pramaan caught a critical BMS monitoring single-point-of-failure 33 weeks before it would have failed the full-facility failover drill.**
-> That's the difference between a one-line email and a seven-figure schedule slip.
+> **$30 billion is flowing into Indian data centres on the way to 2 GW by 2026 — and 9 in 10 large builds slip schedule, most expensively at commissioning.** One undetected vendor deviation can mean **$10–40M a month** of delay on a 50 MW build. Pramaan catches it **the day the submittal lands** — when the fix is a one-line RFI, not a seven-figure slip. → [`docs/BUSINESS.md`](docs/BUSINESS.md)
 >
-> **Proven across 12 projects, 11 countries, 6 tier standards:** 50 deviations, **1,024 weeks of total lead time saved. F1 = 1.000. Zero false positives.**
+> **It reasons over real documents — not keywords.** On real **Vertiv, Cummins, STULZ, and ABB** datasheets against real standards (Uptime, NFPA, EPA, ASHRAE, IEC), it recovered **11 genuine deviations + 5 true negatives — none seeded** — including arithmetic it did itself (4,000 gal ÷ 103 GPH = **38.8 h** vs 48 required), a refrigerant's GWP it **recalled from domain knowledge** (R410A = 2,088), and value omissions it flagged as non-conforming. Every value sourced → [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md)
 >
-> **And it works on documents it has never seen.** Fed a **real Vertiv UPS datasheet** (downloaded from vertiv.com) against a design basis, the deployed app caught **8 genuine non-compliances live** — including power-math it derived itself (3 kVA × 0.8 PF → 2.4 kW vs 6 kW required) and a *missing* value it flagged as non-conforming. → [`REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md)
-
-> ### Same documents. Regex finds 0. Reasoning finds 8.
-> The cleanest proof this isn't keyword-matching: on the **identical** pair of PDFs, the deterministic fallback (no LLM) finds **zero** — it can't parse real prose — while the LLM reasons out **eight** real deviations. That gap *is* the product.
+> **And it's production-grade.** Each finding cites the standard, predicts the commissioning test it will fail, and the weeks of lead time. When the AI is rate-limited, a rule-based engine still catches the headline shortfalls — **no silent zeros.** Benchmarked across 12 projects / 11 countries for breadth · 263 tests · CI green.
 
 ---
 

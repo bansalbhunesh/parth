@@ -8,5 +8,20 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: "3.11"
+      # --- LLM credentials (set in the Render dashboard; never commit) ---
+      # Option A — native Google: set GEMINI_API_KEY to an AIza... key.
       - key: GEMINI_API_KEY
+        sync: false
+      # Option B — any OpenAI-compatible gateway (e.g. a Gemini reseller):
+      #   set PRAMAAN_LLM=openai and fill the three OPENAI_* vars below.
+      # The app falls back to a deterministic, key-free mode if none are set,
+      # so the dashboard still serves 200s — but the live "Load real document"
+      # demo needs real reasoning, so set one of these for judging.
+      - key: PRAMAAN_LLM
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_BASE_URL
+        sync: false
+      - key: OPENAI_MODEL
         sync: false

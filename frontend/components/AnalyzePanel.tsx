@@ -12,6 +12,56 @@ const EXAMPLE_SUBMITTAL = `# Vendor Submittal: UPS System
 - **UPS-02** — redundancy: **2N topology** (vendor datasheet)
 - **UPS-02** — efficiency pct: **93 %** (vendor datasheet)`;
 
+// A realistic design basis + vendor datasheet written in natural prose + tables
+// (nothing like the structured corpus). Proves the reasoning generalises to a
+// document a vendor would actually send. Buried deviations: redundancy (2N
+// required vs N+1 offered) and battery autonomy (10 min EoL required vs 8 min
+// BoL offered). Compliant rows (efficiency, THD, noise) must NOT be flagged.
+const REAL_SPEC = `SECTION 26 33 53 — STATIC UPS · Project Helios (Tier IV) · Issued for Construction
+
+2. PERFORMANCE REQUIREMENTS
+The Contractor shall provide a double-conversion UPS meeting these minimums.
+A proposal differing from these values is non-conforming unless a formal
+deviation is approved in writing.
+
+  2.1 System configuration ......... Distributed redundant, 2N across two paths
+  2.2 Module rated power ........... 1000 kW per module, minimum
+  2.3 Battery autonomy at full load  Not less than 10 minutes, at END OF LIFE,
+                                     minimum design temperature, one string out
+  2.4 Efficiency at 100% load ...... >= 96.0%
+  2.5 Input THDi at full load ...... <= 3%
+  2.6 Acoustic noise at 1 m ........ <= 72 dB(A)
+
+3. REDUNDANCY
+Any single module, static switch or path must be removable for maintenance
+without dropping the critical load. A 2N topology is mandatory; N+1 does not
+satisfy this requirement. Runtime quoted at beginning of life only shall not
+be accepted as evidence of compliance.`;
+
+const REAL_SUBMITTAL = `TECHNICAL SUBMITTAL — PowerGuard ePX-1000 UPS
+Submitted by Apex Critical Power · Submittal APX-EL-0241 · For Approval
+
+The ePX-1000 is a field-proven transformer-free double-conversion system trusted
+by leading hyperscale operators.
+
+1. System Overview
+Modular UPS units arranged in an N+1 redundant configuration on each power bus,
+delivering excellent availability while optimising capital cost for the client.
+
+2. Guaranteed Technical Particulars
+  2.1 Topology ......................... Double conversion (VFI-SS-111)
+  2.2 Module rated active power ........ 1000 kW
+  2.3 System redundancy (per bus) ...... N+1
+  2.4 Battery autonomy at full load .... 8 minutes (VRLA, beginning of life @ 25C)
+  2.5 Online efficiency at 100% load ... 96.5%
+  2.6 Input current THD ................ < 3%
+  2.7 Audible noise at 1 m ............. 71 dB(A)
+
+4. Compliance Statement
+Apex Critical Power confirms the ePX-1000 meets or exceeds all applicable
+performance requirements and is offered as fully compliant with the project
+specification.`;
+
 interface AnalyzeResult {
   system: string;
   deviations: Array<{
@@ -210,6 +260,15 @@ export default function AnalyzePanel() {
     setStreamText("");
   };
 
+  const loadRealSample = () => {
+    setMode("text");
+    setSpec(REAL_SPEC);
+    setSubmittal(REAL_SUBMITTAL);
+    setResult(null);
+    setError("");
+    setStreamText("");
+  };
+
   return (
     <div className="analyze-panel">
       <div className="analyze-header">
@@ -246,6 +305,9 @@ export default function AnalyzePanel() {
         </button>
         <button className="analyze-example-btn" onClick={loadExample} disabled={loading}>
           Load example
+        </button>
+        <button className="analyze-example-btn" onClick={loadRealSample} disabled={loading} title="A realistic vendor datasheet vs design basis — natural prose, not the structured corpus. Catches a hidden 2N→N+1 and 10min→8min non-compliance.">
+          Load real document ★
         </button>
       </div>
 

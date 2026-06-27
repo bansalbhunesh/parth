@@ -19,14 +19,22 @@ came from the seeded corpus.
 | 7 | UPS-NER-01 | redundancy | N+1 | **N (standalone)** | Critical | TIA-942 / 2.7 | IST-05 | 25w |
 | 8 | UPS-NER-01 | network management card | Included | **Optional** | Major | DB 2.9 | IST-14 | 29w |
 
-## Screenshots (live run)
+## Screenshots (live run on the deployed app)
 
-Add the three live screenshots to `data/samples/screenshots/` with these names
-and they will render here:
+A genuine **before / after** on the same two real PDFs.
 
-![8 deviations found — capacity shortfalls](screenshots/real-doc-1.png)
-![Efficiency, power factor, battery autonomy, THD omission](screenshots/real-doc-2.png)
-![Redundancy and management-card findings](screenshots/real-doc-3.png)
+**Before — no LLM key (deterministic fallback).** The regex brain can't parse a
+real prose datasheet, so it finds nothing — proof the result below is *reasoning*,
+not pattern-matching:
+
+![Deterministic mode — 0 deviations on the real PDF](../screenshots/real-doc-1.png)
+
+**After — `llm mode`.** The model reasons over the same two PDFs and surfaces
+8 real deviations with severity, cited standard, commissioning test, and lead time:
+
+![8 deviations found — capacity shortfalls: 3 kVA vs 6, derived 2.4 kW vs 6](../screenshots/real-doc-2.png)
+![Output power factor, 88% online efficiency, battery autonomy](../screenshots/real-doc-3.png)
+![Battery 4 min, THD omission, N+1 redundancy, management-card findings](../screenshots/real-doc-4.png)
 
 ## Why this result is impressive (not just a string match)
 

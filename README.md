@@ -19,7 +19,7 @@
   <img src="https://img.shields.io/badge/precision-1.000-35c98b?style=flat-square&labelColor=0d1a14" alt="Precision 1.000">
   <img src="https://img.shields.io/badge/recall-1.000-35c98b?style=flat-square&labelColor=0d1a14" alt="Recall 1.000">
   <img src="https://img.shields.io/badge/false_positives-0-35c98b?style=flat-square&labelColor=0d1a14" alt="0 false positives">
-  <img src="https://img.shields.io/badge/tests-258-5b8cff?style=flat-square&labelColor=111820" alt="258 tests">
+  <img src="https://img.shields.io/badge/tests-263-5b8cff?style=flat-square&labelColor=111820" alt="263 tests">
   <img src="https://img.shields.io/badge/agents-5-5b8cff?style=flat-square&labelColor=111820" alt="5 agents">
   <img src="https://img.shields.io/badge/countries-11-ffb020?style=flat-square&labelColor=1a1508" alt="11 countries">
   <img src="https://img.shields.io/github/actions/workflow/status/bansalbhunesh/parth/ci.yml?style=flat-square&labelColor=111820&label=CI" alt="CI">
@@ -265,8 +265,8 @@ python3 eval/multi_project_eval.py --json
 python3 data/generate_corpus.py                    # Project Meghdoot (primary)
 python3 data/generate_projects.py                  # 11 additional projects
 
-# 2. Run the 258-test suite (no API key needed)
-python3 -m pytest tests/ -q                       # → 258 passed
+# 2. Run the 263-test suite (no API key needed)
+python3 -m pytest tests/ -q                       # → 263 passed
 
 # 3. Prove the pipeline + eval harness (3 independent paths)
 python3 eval/run_eval.py --detector baseline      # → P/R/F1 = 1.000, 267 weeks saved
@@ -290,7 +290,7 @@ cd frontend && npm install && npm run dev          # → localhost:3000
 curl http://localhost:8000/export/audit/html > evidence.html
 ```
 
-> **No API key?** The dashboard runs fully with ground-truth fallback data. All 22 API endpoints return 200. Both eval harnesses (structured + text-based), the corpus, and the frontend work offline. 258 tests pass without any external dependencies.
+> **No API key?** The dashboard runs fully with ground-truth fallback data. All 22 API endpoints return 200. Both eval harnesses (structured + text-based), the corpus, and the frontend work offline. 263 tests pass without any external dependencies.
 >
 > **Or just open the live demo:** [parth-tan.vercel.app](https://parth-tan.vercel.app) (frontend) · [parth-3puc.onrender.com](https://parth-3puc.onrender.com/health) (API)
 
@@ -306,7 +306,7 @@ docker compose up --build
 # Option 2: Makefile
 make setup          # Install all dependencies
 make corpus         # Generate 12 project datasets
-make test           # Run 258 tests
+make test           # Run 263 tests
 make eval-all       # Run all 3 eval paths
 make verify         # One-command: tests + all evals + type check
 make run            # Start backend API
@@ -481,7 +481,7 @@ pramaan/
     └── test_multi_project.py      # Multi-project dataset + eval tests
 ```
 
-**40+ source files · 7,300+ lines of code · 258 tests · 12 projects · 22 endpoints**
+**40+ source files · 7,300+ lines of code · 263 tests · 12 projects · 22 endpoints**
 
 ---
 
@@ -552,7 +552,7 @@ python3 eval/run_eval.py --detector llm
 |------------------|-----------------|----------|
 | **Innovation** | Goes past AI submittal review (the commercial state of the art — BuildSync, Spec-ID, InspectMind) by predicting **which commissioning test each deviation will fail, and how many weeks early** — cross-referencing spec + submittal + governing standard with a full citation chain. Proven on a **real third-party Vertiv datasheet**, not just our own data | 5 specialized agents, LangGraph orchestration, citation chain, commissioning-risk twin, [`REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md) |
 | **Business Impact** | 1,024 weeks of early detection across 50 findings in 12 projects prevents seven-figure schedule slips | Interactive ROI calculator, cost-of-delay timeline, before/after comparison |
-| **Technical Excellence** | Dual eval harness (structured + text-based) with P/R/F1 = 1.000 across 12 projects, **real-LLM verified** (`gemini-2.5-pro`, 50/50 recall), 258-test suite | Independent text-extraction + real-LLM eval, semantic + strict scoring, 11 countries, 25+ standards, 0 false positives |
+| **Technical Excellence** | Dual eval harness (structured + text-based) with P/R/F1 = 1.000 across 12 projects, **real-LLM verified** (`gemini-2.5-pro`, 50/50 recall), 263-test suite | Independent text-extraction + real-LLM eval, semantic + strict scoring, 11 countries, 25+ standards, 0 false positives |
 | **Robustness** | Graceful degradation everywhere — no API key, malformed PDFs, cold backend all return 200; `/llm-check` surfaces the true LLM status | 45-test resilience suite, ISR-cached frontend, deterministic fallback |
 | **Scalability** | 12 projects → enterprise portfolio via multi-project eval + batch ingest + vector store | Multi-project dashboard, architecture diagram, scale story |
 | **UX** | Two surfaces: a focused **Judge Mode** (90-second proof) and a 19-section deep-dive dashboard, both ISR-cached for instant loads, streaming AI | `/judge` + full dashboard, live PDF upload, dark theme, responsive |
@@ -620,5 +620,5 @@ python3 eval/run_eval.py --detector llm
 <p align="center">
   <strong>PRA<span style="color:#36d6e7">MAAN</span></strong><br>
   <em>EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4</em><br>
-  <sub>5 AI Agents &middot; 12 Projects &middot; 11 Countries &middot; 22 Endpoints &middot; 50 Deviations &middot; 1,024 Weeks Saved &middot; 258 Tests &middot; Dual Eval &middot; F1 = 1.000</sub>
+  <sub>5 AI Agents &middot; 12 Projects &middot; 11 Countries &middot; 22 Endpoints &middot; 50 Deviations &middot; 1,024 Weeks Saved &middot; 263 Tests &middot; Dual Eval &middot; F1 = 1.000</sub>
 </p>

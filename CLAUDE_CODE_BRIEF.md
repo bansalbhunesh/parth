@@ -19,12 +19,12 @@ All components implemented, tested, and polished:
 - [x] Standards scraper v2 (3-tier: Firecrawl → Crawl4ai → Playwright)
 - [x] Docker Compose one-command setup with health checks
 - [x] GitHub Actions CI (backend tests, frontend build, Docker smoke test)
-- [x] 258 tests across API, agents, corpus, and multi-project eval
+- [x] 263 tests across API, agents, corpus, and multi-project eval
 
 ## Reproduce the Numbers
 
 ```bash
-# Run 258 tests
+# Run 263 tests
 python3 -m pytest tests/ -v
 
 # Single project eval (14 devs, 267 weeks, F1=1.000)

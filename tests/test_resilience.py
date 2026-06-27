@@ -202,6 +202,58 @@ class TestAnalyzeDeterministicFallback:
         assert "event: done" in text
 
 
+class TestFreeFormFallback:
+    """The free-form detector catches real, un-templated deviations when the LLM
+    is unavailable — the difference between a silent zero and a usable demo."""
+
+    def test_catches_freeform_deviations(self):
+        from backend.analyze import _freeform_compare
+        spec = ("Battery autonomy shall be at least 10 minutes at full load. "
+                "Online double-conversion efficiency shall be >= 96 percent. "
+                "Input THD shall not exceed 5 percent.")
+        sub = ("Vendor provides 7 minutes of battery runtime. ECO mode reaches "
+               "99 percent; online efficiency is 93 percent. THD upon request.")
+        params = {d["parameter"]: d for d in _freeform_compare(spec, sub)}
+        assert "battery_runtime_min" in params
+        assert params["battery_runtime_min"]["provided_value"] == "7"
+        assert "efficiency_pct" in params
+        assert params["efficiency_pct"]["provided_value"] == "93"  # online, not ECO 99
+
+    def test_flags_omission(self):
+        from backend.analyze import _freeform_compare
+        spec = "Input THD shall not exceed 5 percent."
+        sub = "THD figures are available upon request."
+        params = {d["parameter"]: d for d in _freeform_compare(spec, sub)}
+        assert params.get("input_thd_pct", {}).get("provided_value") == "Not stated"
+
+    def test_no_false_positive_when_compliant(self):
+        from backend.analyze import _freeform_compare
+        spec = "Battery autonomy shall be at least 10 minutes."
+        sub = "Vendor provides 10 minutes of battery runtime."
+        assert _freeform_compare(spec, sub) == []
+
+    def test_fallback_enriches_cx_without_llm(self):
+        _clear_keys()
+        from backend.analyze import _resilient_fallback
+        spec = "Battery autonomy shall be at least 10 minutes at full load."
+        sub = "Vendor provides 7 minutes of battery runtime."
+        devs = _resilient_fallback(spec, sub, "UPS")
+        bat = next(d for d in devs if d["parameter"] == "battery_runtime_min")
+        assert bat["predicted_cx_test"] == "IST-07"   # rule-table, no LLM
+        assert bat["lead_time_weeks"] == 27
+        assert bat["system"] == "UPS"
+
+    def test_run_analysis_no_longer_silent_zero(self):
+        _clear_keys()
+        from backend.analyze import run_analysis
+        spec = ("Battery autonomy shall be at least 10 minutes. Online efficiency "
+                "shall be >= 96 percent.")
+        sub = "Vendor provides 7 minutes runtime and 93 percent online efficiency."
+        result = run_analysis(spec, sub, "UPS")
+        assert result.mode == "deterministic"
+        assert len(result.deviations) >= 2  # NOT zero on free-form text
+
+
 class TestIngestionRobustness:
     """Ingestion handles bad files, missing dirs, and odd input without crashing."""
 

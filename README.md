@@ -216,6 +216,14 @@ python3 eval/multi_project_eval.py
 python3 eval/multi_project_eval.py --json
 ```
 
+> **Real-LLM verified, not just structural.** The table above is the offline
+> baseline. With a real frontier model (`gemini-2.5-pro`) reasoning over the
+> **raw documents** from scratch, Pramaan recovers **50/50 deviations across all
+> 12 projects — Recall 1.000, Precision 1.000, F1 1.000.** Full provenance,
+> per-model breakdown, and the two issues real runs surfaced (and how we fixed
+> them) are documented in [`eval/REAL_WORLD_RESULTS.md`](eval/REAL_WORLD_RESULTS.md).
+> Reproduce: `python3 eval/multi_project_eval.py --detector llm` (needs an API key).
+
 **Key diversity dimensions:**
 - **Climate**: tropical (Mumbai), mild (Pune), cold (Oslo), desert (Dubai), temperate (Oregon), subtropical (Shanghai), continental (Frankfurt, Toronto), maritime (Tokyo, London), arid (Sydney), tropical (São Paulo)
 - **Standards**: Uptime Institute, EN 50600 (Europe), DEWA (UAE), EPA/IBC (US), GB 50174 (China), JEITA (Japan), AS/NZS (Australia), CSA (Canada), ABNT (Brazil), MCPD/BREEAM (UK)

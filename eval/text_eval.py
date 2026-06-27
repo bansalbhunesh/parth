@@ -110,6 +110,11 @@ def aggregate(results):
 
 
 def main():
+    # Windows consoles default to cp1252 and choke on the unicode arrows below.
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
     ap = argparse.ArgumentParser()
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()

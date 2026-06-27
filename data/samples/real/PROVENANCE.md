@@ -118,6 +118,42 @@ a fixed datasheet maximum.
 
 ---
 
-**Together, the two real pairs give 8 genuine deviations + 3 true negatives**
-across UPS, generator, and cooling — sourced to Vertiv, Cummins, STULZ, NFPA 110,
-EPA 40 CFR 60, ASHRAE TC9.9, EU F-Gas, and Uptime Tier IV. None seeded.
+## Pair 3 — Low-Voltage Switchgear (ABB MNS vs IEC 61439-2 / IEC 61641 / Tier IV)
+
+Files: `design_basis_switchgear.md` + `submittal_abb_mns.md`. An
+electrical-distribution pair.
+
+### Real, cited facts
+- **ABB MNS** LV switchgear is design-verified to **IEC 61439-1/-2**, with rated
+  short-time withstand **Icw up to 100 kA**, **Form up to 4**, **IP up to IP54**,
+  and an **arc-proof variant type-tested to IEC 61641**. — ABB MNS system guide /
+  technical catalogue (new.abb.com, library.e.abb.com).
+- **IEC 61439-2** defines Icw and Forms 1–4 of internal separation; **IEC 61641**
+  defines internal-arc (IAC) type testing — published standards.
+
+### Standard / design-basis requirements
+- Icw ≥ **65 kA / 1 s**; **Form 4b** separation; arc-resistant **IEC 61641**
+  type-tested; **IP42** minimum; 415 V 3-phase.
+
+### Deviations — LLM-verified (gemini-2.5-flash, 18 s, 3 of 3)
+
+| # | Parameter | Required | Provided | Note |
+|---|-----------|----------|----------|------|
+| 1 | Short-circuit withstand Icw | ≥ 65 kA/1 s | **50 kA/1 s** | Below prospective fault level |
+| 2 | Internal separation | Form 4b | **Form 3b** | Lower separation |
+| 3 | Internal-arc test | IEC 61641 | **Not included** | Standard (non-arc-proof) config |
+| — | Ingress protection | ≥ IP42 | IP54 | **Compliant — exceeds (true negative)** |
+| — | Voltage | 415 V | 415 V | **Compliant — true negative** |
+
+The IP54-vs-IP42 true negative checks the system does not false-positive when the
+submittal *exceeds* a requirement. **Honesty note:** ABB MNS can reach 100 kA /
+Form 4 / arc-proof; the 50 kA / Form 3b / non-arc-proof figures are the proposal's
+stated configuration (a realistic under-spec), with the IEC 61439/61641 framework
+and the MNS capability envelope being the cited real facts.
+
+---
+
+**Together, the three real pairs give 11 genuine deviations + 5 true negatives**
+across UPS, generator, cooling, and LV switchgear — sourced to Vertiv, Cummins,
+STULZ, ABB, NFPA 110, EPA 40 CFR 60, ASHRAE TC9.9, EU F-Gas, IEC 61439, IEC 61641,
+and Uptime Tier IV. None seeded.

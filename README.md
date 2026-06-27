@@ -256,7 +256,7 @@ python3 eval/multi_project_eval.py --json
 > distinction (88% vs 96%), and a missing-value omission (THD not stated). Full
 > result + screenshots: [`data/samples/REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md).
 >
-> **Two fully-sourced real pairs (every value citable):**
+> **Three fully-sourced real pairs (every value citable):**
 > 1. **Power** — a **Vertiv Liebert GXT5** UPS (7-min full-load runtime, 95.9%
 >    online efficiency) and a **Cummins QSK60** genset (EPA Tier 2, 103 GPH) vs
 >    Uptime Tier IV / NFPA 110 / EPA 40 CFR 60. Offline the rule-based engine
@@ -269,8 +269,12 @@ python3 eval/multi_project_eval.py --json
 >    capacity shortfall, and **infers R410A's GWP (2088)** to flag it against the
 >    ≤750 requirement — while correctly clearing the compliant EC fans and 24 °C
 >    supply.
+> 3. **Switchgear** — an **ABB MNS** LV assembly vs IEC 61439-2 / IEC 61641 /
+>    Tier IV. The LLM (verified, 18 s) flags Icw 65→50 kA, Form 4b→3b, and the
+>    missing IEC 61641 arc test — while clearing IP54 (which *exceeds* the IP42
+>    requirement), proving it doesn't false-positive on a compliant value.
 >
-> **8 genuine deviations + 3 true negatives, none seeded** — sources for every
+> **11 genuine deviations + 5 true negatives, none seeded** — sources for every
 > number in [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md).
 
 **Key diversity dimensions:**

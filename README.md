@@ -95,7 +95,7 @@
 2. In **Live Analysis**, click **“Load real document ★”** — or upload your own spec + submittal PDFs.
 3. Hit **Analyze**. Watch it stream the reasoning, then list each deviation with its severity, the standard it cites, the commissioning test it predicts will fail, and the lead time.
 
-Ready-made demo pairs ship in [`data/samples/`](data/samples/): a UPS edge pair, a **real Vertiv datasheet**, a standby-generator pair, and a **fully-sourced real pair** (Vertiv GXT5 + Cummins QSK60, every value citable in [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md)). Drop any pair into the analyzer.
+Ready-made demo pairs ship in [`data/samples/`](data/samples/): a UPS edge pair, a **real Vertiv datasheet**, a standby-generator pair, and **six fully-sourced real pairs** (Vertiv, Cummins, STULZ, ABB, FM-200/Novec, Carrier-class, EUROBAT — every value citable in [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md)). Drop any pair into the analyzer.
 
 > Health at a glance: **[`/health`](https://parth-3puc.onrender.com/health)** shows whether the LLM is wired (`"ready": true`); **[`/llm-check`](https://parth-3puc.onrender.com/llm-check)** makes a real call and reports the exact status. The app **degrades gracefully** — every endpoint returns 200 and the dashboard renders from bundled data even with no API key.
 

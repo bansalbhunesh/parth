@@ -8,20 +8,23 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: "3.11"
-      # --- LLM via OpenAI-compatible gateway (Gemini reseller) ---
-      # Non-secret config is baked in; the ONLY thing to set by hand in the
-      # Render dashboard is OPENAI_API_KEY (the sk-... key). Once set, Render
-      # redeploys and the live "Load real document" demo runs real reasoning.
-      # Swap OPENAI_MODEL to google/gemini-3.5-flash for snappier demo latency.
+      # --- LLM via Google's native Gemini API (free tier) ---
+      # The ONLY thing to set by hand in the Render dashboard is GEMINI_API_KEY
+      # (an AI Studio key). gemini-2.5-flash is on the free tier; gemini-2.0-flash
+      # may return 429 on free keys, so we pin 2.5-flash. After the key is set,
+      # verify with GET /llm-check (it makes one real call and reports errors).
+      # PRAMAAN_LLM_TIMEOUT caps the wait before the rule-based fallback kicks in.
       - key: PRAMAAN_LLM
-        value: openai
-      - key: OPENAI_BASE_URL
-        value: https://aicredits.in/v1
-      - key: OPENAI_MODEL
-        value: google/gemini-2.5-pro
-      - key: OPENAI_API_KEY
-        sync: false   # set this secret in the Render dashboard
-      # Alternative — native Google: unset PRAMAAN_LLM and the OPENAI_* vars,
-      # then set GEMINI_API_KEY (AIza...) instead.
+        value: gemini
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: PRAMAAN_LLM_TIMEOUT
+        value: "18"
       - key: GEMINI_API_KEY
-        sync: false
+        sync: false   # set this secret in the Render dashboard
+      # --- Alternative: OpenAI-compatible gateway (paid reseller) ---
+      # To use a gateway instead, set PRAMAAN_LLM=openai and provide:
+      #   OPENAI_API_KEY, OPENAI_BASE_URL (the /v1 root),
+      #   OPENAI_MODEL (must be a model the gateway actually serves),
+      #   OPENAI_JSON_MODE=1  (so responses parse reliably).
+      # Confirm the model exists on that gateway before relying on it.

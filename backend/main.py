@@ -181,7 +181,7 @@ def _llm_status() -> dict:
         return {"provider": "claude", "key_set": key_set, "ready": key_set}
     key_set = bool(os.getenv("GEMINI_API_KEY"))
     return {"provider": "gemini", "key_set": key_set,
-            "model": os.getenv("GEMINI_MODEL", "gemini-2.0-flash"), "ready": key_set}
+            "model": os.getenv("GEMINI_MODEL", "gemini-2.5-flash"), "ready": key_set}
 
 
 @app.get("/health")

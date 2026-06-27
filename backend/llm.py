@@ -60,7 +60,7 @@ def _gemini(prompt, system, json_mode):
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise LLMError("GEMINI_API_KEY not set")
-    model_name = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+    model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
     log.info("Gemini call: model=%s, json_mode=%s, prompt_len=%d",
              model_name, json_mode, len(prompt))
     try:
@@ -180,7 +180,7 @@ def _gemini_stream(prompt, system):
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise LLMError("GEMINI_API_KEY not set")
-    model_name = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+    model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
     log.info("Gemini stream: model=%s, prompt_len=%d", model_name, len(prompt))
     try:
         from google import genai

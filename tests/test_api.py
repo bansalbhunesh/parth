@@ -307,8 +307,8 @@ class TestDemoFiles:
 
     def test_demo_files_detect_deviations(self):
         demo = pathlib.Path(__file__).parent.parent / "data" / "demo"
-        spec = (demo / "sample_spec.md").read_text()
-        submittal = (demo / "sample_submittal.md").read_text()
+        spec = (demo / "sample_spec.md").read_text(encoding="utf-8")
+        submittal = (demo / "sample_submittal.md").read_text(encoding="utf-8")
         r = client.post("/analyze", json={"spec_text": spec, "submittal_text": submittal})
         assert r.status_code == 200
         data = r.json()

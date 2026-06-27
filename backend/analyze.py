@@ -1,6 +1,8 @@
 """Shared analysis logic — used by all /analyze endpoints."""
 
+import concurrent.futures
 import logging
+import os
 import re
 import time
 from typing import NamedTuple
@@ -12,9 +14,19 @@ from backend.agents.reconciliation import (
     SYSTEM_PROMPT,
     PROMPT_TEMPLATE,
 )
-from backend.agents.commissioning import predict_cx_impact
+from backend.agents.commissioning import predict_cx_impact, _RULES
 
 log = logging.getLogger("pramaan.analyze")
+
+# Hard ceiling on how long the live /analyze path waits for the LLM before it
+# degrades to the instant rule-based detector. Free-tier models can 503-retry
+# for 40s+; a judge will not wait. Tune with PRAMAAN_LLM_TIMEOUT (seconds).
+_LLM_TIMEOUT_S = float(os.getenv("PRAMAAN_LLM_TIMEOUT", "18"))
+
+# Module-level pool so a timed-out call is abandoned (left to finish in the
+# background) rather than blocking the response — a `with` executor would wait
+# for the worker on exit and defeat the timeout.
+_LLM_POOL = concurrent.futures.ThreadPoolExecutor(max_workers=4)
 
 
 class AnalysisResult(NamedTuple):
@@ -63,6 +75,144 @@ def _deterministic_compare(spec_text: str, submittal_text: str) -> list[dict]:
     return devs
 
 
+# ── Free-form rule-based detector ────────────────────────────────────
+# Used ONLY by the live /analyze fallback (never by the eval harness) so the
+# product still catches the headline deviations from real, un-templated vendor
+# prose when the LLM is unavailable (rate-limited / no key) — instead of
+# silently returning zero. Conservative by design: it only fires on a confident
+# numeric mismatch or an explicit omission of a value the spec constrains.
+# direction: "min" provided<required is a deviation · "max" provided>required ·
+#            "ne" any difference.
+_FREEFORM_PARAMS = [
+    dict(component="UPS-02", parameter="battery_runtime_min", severity="Critical",
+         direction="min", unit_rx=r"(?:min|minute)", unit="min",
+         kw=[r"battery\s+(?:autonomy|runtime)", r"autonomy", r"runtime"]),
+    dict(component="UPS-02", parameter="efficiency_pct", severity="Major",
+         direction="min", unit_rx=r"(?:%|percent)", unit="%",
+         kw=[r"(?:online|double[-\s]?conversion)[^.\n]{0,40}efficiency",
+             r"efficiency[^.\n]{0,40}(?:online|double[-\s]?conversion)",
+             r"efficiency"]),
+    dict(component="UPS-02", parameter="input_thd_pct", severity="Major",
+         direction="max", unit_rx=r"(?:%|percent)", unit="%",
+         kw=[r"(?:input\s+)?(?:thd|harmonic\s+distortion)"]),
+    dict(component="GEN-FUEL", parameter="onsite_fuel_hours", severity="Critical",
+         direction="min", unit_rx=r"(?:h|hr|hour)", unit="h",
+         kw=[r"fuel[^.\n]{0,30}(?:autonomy|hours|storage)", r"fuel\s+autonomy"]),
+    dict(component="GEN-01", parameter="start_time_sec", severity="Critical",
+         direction="max", unit_rx=r"(?:s|sec|second)", unit="s",
+         kw=[r"start[^.\n]{0,20}time", r"start\s+time"]),
+    dict(component="SWGR-MV", parameter="short_circuit_rating_ka", severity="Critical",
+         direction="min", unit_rx=r"kA", unit="kA",
+         kw=[r"(?:fault|short[-\s]?circuit)[^.\n]{0,30}rating",
+             r"(?:fault|short[-\s]?circuit)"]),
+    dict(component="COOL-LOOP", parameter="delta_t_c", severity="Major",
+         direction="ne", unit_rx=r"(?:°?C|degrees?\s*C)", unit="C",
+         kw=[r"delta[-\s]?t", r"temperature\s+(?:rise|difference)"]),
+    dict(component="FLOOR", parameter="load_rating_kpa", severity="Critical",
+         direction="min", unit_rx=r"kPa", unit="kPa",
+         kw=[r"(?:floor\s+)?load[^.\n]{0,20}(?:rating|capacity)", r"load\s+rating"]),
+]
+
+_OMISSION_RX = re.compile(
+    r"(not\s+stated|upon\s+request|available\s+on\s+request|n/?a|tbd|"
+    r"to\s+be\s+(?:advised|confirmed)|pending)", re.I)
+
+
+def _num_near(text: str, kw: str, unit_rx: str, window: int = 50):
+    """First number+unit AFTER the keyword (preferred), else BEFORE it."""
+    fwd = re.search(kw + r"[^.\n]{0,%d}?(\d+(?:\.\d+)?)\s*%s" % (window, unit_rx),
+                    text, re.I)
+    if fwd:
+        return float(fwd.group(1))
+    bwd = re.search(r"(\d+(?:\.\d+)?)\s*%s[^.\n]{0,%d}?%s" % (unit_rx, window, kw),
+                    text, re.I)
+    if bwd:
+        return float(bwd.group(1))
+    return None
+
+
+def _omission_near(text: str, kw: str) -> bool:
+    m = re.search(kw + r"[^.\n]{0,60}", text, re.I)
+    return bool(m and _OMISSION_RX.search(m.group(0)))
+
+
+def _fmt_num(x: float) -> str:
+    return str(int(x)) if x == int(x) else str(x)
+
+
+def _freeform_compare(spec_text: str, submittal_text: str) -> list[dict]:
+    devs, seen = [], set()
+    for p in _FREEFORM_PARAMS:
+        ckey = (p["component"], p["parameter"])
+        if ckey in seen:
+            continue
+        req = prov = None
+        for kw in p["kw"]:
+            if req is None:
+                req = _num_near(spec_text, kw, p["unit_rx"])
+            if prov is None:
+                prov = _num_near(submittal_text, kw, p["unit_rx"])
+        if req is None:
+            continue  # spec doesn't constrain this parameter — skip
+        if prov is None:
+            if not any(_omission_near(submittal_text, kw) for kw in p["kw"]):
+                continue
+            prov_label, is_dev = "Not stated", True
+            rationale = f"Spec requires {p['parameter']} but the submittal omits it"
+        else:
+            d = p["direction"]
+            is_dev = (prov < req if d == "min"
+                      else prov > req if d == "max" else prov != req)
+            prov_label = _fmt_num(prov)
+            rationale = (f"Provided {prov_label} {p['unit']} does not satisfy "
+                         f"required {_fmt_num(req)} {p['unit']}")
+        if not is_dev:
+            continue
+        seen.add(ckey)
+        devs.append({
+            "component": p["component"], "parameter": p["parameter"],
+            "required_value": _fmt_num(req), "provided_value": prov_label,
+            "unit": p["unit"], "standard_ref": "DESIGN-BASIS", "spec_clause": "",
+            "severity": p["severity"], "rationale": rationale,
+            "confidence": 0.65, "cx_source": "rule-based",
+        })
+    return devs
+
+
+def _norm_val(s) -> str:
+    return re.sub(r"[^a-z0-9]+", "", str(s).strip().lower())
+
+
+def _enrich_cx(d: dict, system_id: str) -> dict:
+    """Attach commissioning test + lead time via the rule table only — never an
+    LLM call. (LLM-based Cx prediction for ad-hoc parameters multiplied live
+    latency by one extra call per deviation.) Unmapped parameters keep no Cx."""
+    if (d.get("component"), d.get("parameter")) in _RULES:
+        d.update(predict_cx_impact(d))
+    d.setdefault("severity", "Major")
+    d["system"] = system_id
+    return d
+
+
+def _resilient_fallback(spec_text: str, submittal_text: str,
+                        system_id: str = "CUSTOM") -> list[dict]:
+    """No-LLM detector for the live path: free-form rules (canonical, Cx-mapped)
+    plus the strict template parser, de-duplicated by value signature. Enriches
+    rule-table hits with their commissioning test + lead time WITHOUT any LLM
+    call, so the audit chain still renders during an LLM outage."""
+    devs = _freeform_compare(spec_text, submittal_text)
+    sigs = {(_norm_val(d["required_value"]), _norm_val(d["provided_value"]))
+            for d in devs}
+    for d in _deterministic_compare(spec_text, submittal_text):
+        sig = (_norm_val(d["required_value"]), _norm_val(d["provided_value"]))
+        if sig not in sigs:
+            devs.append(d)
+            sigs.add(sig)
+    for d in devs:
+        _enrich_cx(d, system_id)
+    return devs
+
+
 def run_analysis(
     spec_text: str,
     submittal_text: str,
@@ -75,16 +225,24 @@ def run_analysis(
     )
     try:
         from backend.llm import complete_json
-        raw = complete_json(prompt, system=SYSTEM_PROMPT)
+        # Bound the wait: a free-tier model that 503-retries for 40s+ would
+        # otherwise hang the demo. A timed-out call is abandoned (left running)
+        # and we degrade to the instant rule-based detector.
+        raw = _LLM_POOL.submit(complete_json, prompt, SYSTEM_PROMPT).result(
+            timeout=_LLM_TIMEOUT_S)
         devs = _validate_deviations(raw)
         devs = _check_citation_faithfulness(devs, spec_text, submittal_text, standards)
         for d in devs:
-            d.update(predict_cx_impact(d))
-            d["system"] = system_id
+            _enrich_cx(d, system_id)  # rule-table only — no extra LLM calls
         mode = "llm"
+    except concurrent.futures.TimeoutError:
+        log.warning("LLM analysis exceeded %.0fs, using rule-based fallback",
+                    _LLM_TIMEOUT_S)
+        devs = _resilient_fallback(spec_text, submittal_text, system_id)
+        mode = "deterministic"
     except Exception as exc:
-        log.warning("LLM analysis failed, running deterministic: %s", exc)
-        devs = _deterministic_compare(spec_text, submittal_text)
+        log.warning("LLM analysis failed, running rule-based fallback: %s", exc)
+        devs = _resilient_fallback(spec_text, submittal_text, system_id)
         mode = "deterministic"
     elapsed = round((time.time() - t0) * 1000)
     return AnalysisResult(deviations=devs, mode=mode, elapsed_ms=elapsed)
@@ -116,13 +274,12 @@ def run_streaming_analysis(
         devs = _validate_deviations(raw)
         devs = _check_citation_faithfulness(devs, spec_text, submittal_text, standards)
         for d in devs:
-            d.update(predict_cx_impact(d))
-            d["system"] = system_id
+            _enrich_cx(d, system_id)  # rule-table only — no extra LLM calls
         mode = "llm"
     except Exception as exc:
-        log.warning("LLM stream analysis failed, deterministic fallback: %s", exc)
-        yield f"event: status\ndata: Falling back to deterministic analysis...\n\n"
-        devs = _deterministic_compare(spec_text, submittal_text)
+        log.warning("LLM stream analysis failed, rule-based fallback: %s", exc)
+        yield f"event: status\ndata: AI engine unavailable — running rule-based detector...\n\n"
+        devs = _resilient_fallback(spec_text, submittal_text, system_id)
         mode = "deterministic"
 
     result = {

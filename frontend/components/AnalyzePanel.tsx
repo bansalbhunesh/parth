@@ -413,7 +413,11 @@ export default function AnalyzePanel() {
               {result.count} deviation{result.count !== 1 ? "s" : ""} found
             </span>
             <span className="analyze-results-meta">
-              {result.elapsed_ms}ms · {result.mode} mode
+              {result.elapsed_ms >= 1000
+                ? `${(result.elapsed_ms / 1000).toFixed(1)}s`
+                : `${result.elapsed_ms}ms`}
+              {" · "}
+              {result.mode === "llm" ? "AI reasoning" : "rule-based engine"}
             </span>
           </div>
 

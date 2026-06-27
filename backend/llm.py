@@ -9,6 +9,7 @@ import json
 import logging
 import os
 import re
+import time
 
 log = logging.getLogger("pramaan.llm")
 
@@ -17,6 +18,14 @@ PROVIDER = os.getenv("PRAMAAN_LLM", "gemini")  # "gemini" | "claude" | "openai"
 
 class LLMError(Exception):
     pass
+
+
+def _is_transient(exc) -> bool:
+    """True for transient server-side errors worth a quick retry — free-tier
+    models routinely return 503 'high demand'. NOT 429 (quota): retrying an
+    exhausted daily cap just wastes time."""
+    s = str(exc).lower()
+    return "503" in s or "unavailable" in s or "overloaded" in s or "internal" in s
 
 
 def _extract_json(text: str):
@@ -71,10 +80,19 @@ def _gemini(prompt, system, json_mode):
             system_instruction=system or None,
             response_mime_type="application/json" if json_mode else "text/plain",
         )
-        resp = client.models.generate_content(
-            model=model_name, contents=prompt, config=config,
-        )
-        return resp.text
+        for attempt in range(3):  # 1 try + 2 retries on transient 503/overload
+            try:
+                resp = client.models.generate_content(
+                    model=model_name, contents=prompt, config=config,
+                )
+                return resp.text
+            except Exception as exc:
+                if _is_transient(exc) and attempt < 2:
+                    log.warning("Gemini transient error (attempt %d/3), retrying: %s",
+                                attempt + 1, str(exc)[:100])
+                    time.sleep(1.5 * (attempt + 1))
+                    continue
+                raise
     except ImportError:
         import google.generativeai as genai
         genai.configure(api_key=api_key)

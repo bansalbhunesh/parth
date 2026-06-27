@@ -28,6 +28,7 @@
 </p>
 
 <p align="center">
+  <a href="https://parth-tan.vercel.app/judge"><img src="https://img.shields.io/badge/★_JUDGE_MODE-90--second_proof-ffb020?style=for-the-badge&labelColor=1a1508" alt="Judge Mode"></a>
   <a href="https://parth-tan.vercel.app"><img src="https://img.shields.io/badge/▶_LIVE_DEMO-parth--tan.vercel.app-00d4ff?style=for-the-badge&labelColor=0a0d11" alt="Live Demo"></a>
   <a href="https://parth-3puc.onrender.com/health"><img src="https://img.shields.io/badge/API-parth--3puc.onrender.com-35c98b?style=for-the-badge&labelColor=0d1a14" alt="API"></a>
   <a href="presentation.html"><img src="https://img.shields.io/badge/📊_PRESENTATION-13_slides-a855f7?style=for-the-badge&labelColor=1a1020" alt="Presentation"></a>
@@ -39,6 +40,7 @@
 <summary><strong>Table of Contents</strong></summary>
 
 - [The Headline](#the-headline)
+- [Try It Yourself (60 seconds)](#try-it-yourself-60-seconds)
 - [The Problem](#the-problem)
 - [The Solution](#the-solution)
 - [Screenshots](#screenshots)
@@ -54,7 +56,7 @@
 - [Eval Harness](#eval-harness)
 - [Hackathon Rubric Mapping](#hackathon-rubric-mapping)
 - [Academic References](#academic-references)
-- [Demo Script (60 seconds)](#demo-script-60-seconds)
+- [Demo Script](#demo-script)
 - [Guardrails](#guardrails)
 - [Tech Stack](#tech-stack)
 
@@ -68,6 +70,25 @@
 > That's the difference between a one-line email and a seven-figure schedule slip.
 >
 > **Proven across 12 projects, 11 countries, 6 tier standards:** 50 deviations, **1,024 weeks of total lead time saved. F1 = 1.000. Zero false positives.**
+>
+> **And it works on documents it has never seen.** Fed a **real Vertiv UPS datasheet** (downloaded from vertiv.com) against a design basis, the deployed app caught **8 genuine non-compliances live** — including power-math it derived itself (3 kVA × 0.8 PF → 2.4 kW vs 6 kW required) and a *missing* value it flagged as non-conforming. → [`REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md)
+
+> ### Same documents. Regex finds 0. Reasoning finds 8.
+> The cleanest proof this isn't keyword-matching: on the **identical** pair of PDFs, the deterministic fallback (no LLM) finds **zero** — it can't parse real prose — while the LLM reasons out **eight** real deviations. That gap *is* the product.
+
+---
+
+## Try It Yourself (60 seconds)
+
+**No setup — use the deployed app:**
+
+1. Open **[Judge Mode →](https://parth-tan.vercel.app/judge)** (the focused, 90-second view).
+2. In **Live Analysis**, click **“Load real document ★”** — or upload your own spec + submittal PDFs.
+3. Hit **Analyze**. Watch it stream the reasoning, then list each deviation with its severity, the standard it cites, the commissioning test it predicts will fail, and the lead time.
+
+Three ready-made demo pairs ship in [`data/samples/`](data/samples/): a UPS edge pair, a **real Vertiv datasheet**, and a standby-generator pair. Drop any pair into the analyzer.
+
+> Health at a glance: **[`/health`](https://parth-3puc.onrender.com/health)** shows whether the LLM is wired (`"ready": true`); **[`/llm-check`](https://parth-3puc.onrender.com/llm-check)** makes a real call and reports the exact status. The app **degrades gracefully** — every endpoint returns 200 and the dashboard renders from bundled data even with no API key.
 
 ---
 
@@ -348,7 +369,8 @@ Pramaan cross-references against **7 governing standards** — all content is pa
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/health` | Health check |
+| `GET` | `/health` | Health check + LLM readiness (`llm.ready`, `analysis_mode`) |
+| `GET` | `/llm-check` | Makes a real LLM call and reports the true status / error |
 | `GET` | `/project` | Project metadata (name, location, capacity) |
 | `GET` | `/systems` | List all 10 modelled systems |
 | `POST` | `/ingest/{system_id}` | Run full pipeline for one system |
@@ -529,11 +551,12 @@ python3 eval/run_eval.py --detector llm
 
 | Rubric Dimension | Pramaan Feature | Evidence |
 |------------------|-----------------|----------|
-| **Innovation** | Cross-document AI reasoning across spec + submittal + standard — no commercial tool does this | 5 specialized agents, LangGraph orchestration, citation chain |
+| **Innovation** | Cross-document AI reasoning across spec + submittal + standard — no commercial tool does this. Proven on a **real third-party Vertiv datasheet**, not just our own data | 5 specialized agents, LangGraph orchestration, citation chain, [`REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md) |
 | **Business Impact** | 1,024 weeks of early detection across 50 findings in 12 projects prevents seven-figure schedule slips | Interactive ROI calculator, cost-of-delay timeline, before/after comparison |
-| **Technical Excellence** | Dual eval harness (structured + text-based) with P/R/F1 = 1.000 across 12 projects, 258-test suite | Non-circular eval, 11 countries, 25+ standards, 0 false positives |
+| **Technical Excellence** | Dual eval harness (structured + text-based) with P/R/F1 = 1.000 across 12 projects, **real-LLM verified** (`gemini-2.5-pro`, 50/50 recall), 258-test suite | Non-circular eval, semantic + strict scoring, 11 countries, 25+ standards, 0 false positives |
+| **Robustness** | Graceful degradation everywhere — no API key, malformed PDFs, cold backend all return 200; `/llm-check` surfaces the true LLM status | 45-test resilience suite, ISR-cached frontend, deterministic fallback |
 | **Scalability** | 12 projects → enterprise portfolio via multi-project eval + batch ingest + vector store | Multi-project dashboard, architecture diagram, scale story |
-| **UX** | 19-section dashboard with 60-second demo narrative, 23 components, streaming AI | Scroll animations, dark theme, responsive, live PDF upload, multi-project grid |
+| **UX** | Two surfaces: a focused **Judge Mode** (90-second proof) and a 19-section deep-dive dashboard, both ISR-cached for instant loads, streaming AI | `/judge` + full dashboard, live PDF upload, dark theme, responsive |
 
 ---
 
@@ -548,21 +571,24 @@ python3 eval/run_eval.py --detector llm
 
 ---
 
-## Demo Script (60 seconds)
+## Demo Script
+
+### The 90-second money demo (open [Judge Mode](https://parth-tan.vercel.app/judge))
 
 | Time | Action | What to say |
 |------|--------|-------------|
-| 0:00 | Open dashboard | "Pramaan scans every vendor submittal against the design basis and 7 governing standards." |
-| 0:08 | Point to Sentinel | "This UPS battery was submitted at 7 minutes — the Tier IV spec requires 10. Caught at Week 11." |
-| 0:15 | Show timeline | "27 weeks before IST-07 would have failed. That's the difference between an email and a schedule slip." |
-| 0:22 | Scroll to 267 weeks | "Across all 14 deviations: 267 weeks — over 5 years — of total lead time saved." |
-| 0:28 | Before/After toggle | "Manual review takes 10–15 weeks. Pramaan does it in under 5 minutes." |
-| 0:33 | System health grid | "10 systems scanned. 7 critical, 6 major, 1 minor. Three systems fully compliant." |
-| 0:38 | Cx Twin | "These three tests — IST-07, IST-09, IST-11 — will fail if we don't act now." |
-| 0:43 | ROI calculator | "On an ₹800 Cr project, that's ₹1,788 lakhs of rework avoided." |
-| 0:48 | Copilot query | "Has the UPS runtime come up before? → RFI-014, already resolved." |
-| 0:53 | Eval metrics | "Precision 1.000, recall 1.000, zero false positives. Reproducible eval harness." |
-| 0:58 | Export button | "One click — full evidence pack with citation chain. Ship it to the Cx authority." |
+| 0:00 | Open `/judge` | "Pramaan reads vendor submittals against the design basis and catches deviations the day the document lands — not in commissioning, six months too late." |
+| 0:12 | Point to the 4 metric cards | "50 deviations across 12 projects in 11 countries. 1,024 weeks of lead time saved. F1 = 1.000 with a real LLM. Zero false positives." |
+| 0:25 | Click **Load real document ★** | "This isn't our test data. This is a real Vertiv UPS datasheet, downloaded from their website — paired with a design basis." |
+| 0:35 | Hit **Analyze** | "Watch it reason over the raw PDFs and find the non-compliances from scratch." |
+| 0:50 | Point at the results | "Eight deviations. It derived 2.4 kW from 3 kVA × 0.8 PF. It flagged 88% online efficiency — not the ECO-mode headline. It caught a *missing* THD value. And the vendor stamped this 'fully compliant.'" |
+| 1:05 | The kill shot | "Same two PDFs, no LLM key — the regex fallback finds **zero**. Pattern-matching can't do this. Reasoning can. That gap is the product." |
+| 1:20 | Scroll to portfolio | "And it's not one lucky project — 12 projects, every one F1 = 1.000." |
+| 1:30 | Close | "One click to the full dashboard if you want the eval harness, the commissioning twin, the audit export." |
+
+### The deep-dive (full dashboard, when judges want rigour)
+
+`/` → Sentinel (27 weeks early) → Before/After (10 weeks vs 5 min) → Cx Twin (IST-07/09/11 at risk) → ROI (₹1,788 lakhs avoided) → Copilot (RFI-014 cited) → Eval (P/R/F1 = 1.000, reproducible) → Export (evidence pack with citation chain).
 
 ---
 

@@ -38,6 +38,7 @@
   <sub>
     Submission artifacts:
     <a href="docs/BUSINESS.md">Business case &amp; impact model</a> ·
+    <a href="docs/VALIDATION.md">Validation dossier</a> ·
     <a href="docs/ARCHITECTURE.md">Architecture one-pager</a> ·
     <a href="docs/DECK.md">Pitch deck outline</a> ·
     <a href="PITCH.md">3-min video script</a> ·

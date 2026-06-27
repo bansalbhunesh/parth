@@ -196,6 +196,36 @@ def health():
     }
 
 
+@app.get("/llm-check")
+def llm_check():
+    """Make a real, minimal LLM call and report the actual outcome. Unlike
+    /health (which only checks the key is present), this surfaces the true
+    reason analysis falls back — e.g. out of credit, bad model, bad key —
+    without ever returning the key itself."""
+    status = _llm_status()
+    if not status.get("ready"):
+        return {"ok": False, "reason": "no_key_configured", **status}
+    try:
+        from backend.llm import complete
+        out = complete("Reply with the single word: ok", json_mode=False)
+        return {
+            "ok": True,
+            "provider": status["provider"],
+            "model": status.get("model"),
+            "sample_response": (out or "").strip()[:80],
+        }
+    except Exception as exc:  # noqa: BLE001 — we want the raw reason
+        return {
+            "ok": False,
+            "provider": status["provider"],
+            "model": status.get("model"),
+            "error": str(exc)[:400],
+            "hint": "Common causes: out of gateway credit (top up / switch to a "
+                    "free native GEMINI_API_KEY), wrong OPENAI_MODEL, or a "
+                    "revoked key.",
+        }
+
+
 @app.get("/project")
 def project():
     gt = _load_json("ground_truth.json")

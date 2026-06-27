@@ -34,6 +34,17 @@
   <a href="presentation.html"><img src="https://img.shields.io/badge/📊_PRESENTATION-13_slides-a855f7?style=for-the-badge&labelColor=1a1020" alt="Presentation"></a>
 </p>
 
+<p align="center">
+  <sub>
+    Submission artifacts:
+    <a href="docs/ARCHITECTURE.md">Architecture one-pager</a> ·
+    <a href="docs/DECK.md">Pitch deck outline</a> ·
+    <a href="PITCH.md">3-min video script</a> ·
+    <a href="COMPETITIVE.md">Competitive positioning</a> ·
+    <a href="data/samples/real/PROVENANCE.md">Real-datasheet provenance</a>
+  </sub>
+</p>
+
 ---
 
 <details>

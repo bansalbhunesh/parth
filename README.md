@@ -159,10 +159,15 @@ Pramaan is a **multi-agent AI system** that cross-references every requirement a
 | System Health Grid | <img src="docs/screenshots/07-systems.png" width="600"> |
 | Compliance Score | <img src="docs/screenshots/08-compliance.png" width="600"> |
 | Deviation Register | <img src="docs/screenshots/09-register.png" width="600"> |
+| Risk Matrix | <img src="docs/screenshots/10-risk-matrix.png" width="600"> |
+| Cx Risk Twin (Gantt) | <img src="docs/screenshots/11-cx-twin.png" width="600"> |
+| Standards Knowledge Base | <img src="docs/screenshots/12-standards.png" width="600"> |
+| Eval Dashboard | <img src="docs/screenshots/13-eval.png" width="600"> |
+| ROI Calculator | <img src="docs/screenshots/15-roi.png" width="600"> |
+| Scale Story | <img src="docs/screenshots/16-scale.png" width="600"> |
 
-The remaining sections — Risk Matrix, Cx Risk Twin (Gantt), Standards KB, Eval
-Dashboard, Live Analysis, ROI Calculator, Scale Story — are best seen live and
-animated at **[parth-tan.vercel.app](https://parth-tan.vercel.app)**, and the
+The **Live Analysis** panel streams real token-by-token AI reasoning — best seen
+live at **[parth-tan.vercel.app](https://parth-tan.vercel.app)**; the
 real-document run is captured in
 [`REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md).
 

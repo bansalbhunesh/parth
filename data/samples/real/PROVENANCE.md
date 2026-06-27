@@ -60,6 +60,10 @@ false-positive on a compliant value.
   4 → Tier 2** emissions shortfall, the **THD omission**, and the **derived fuel
   autonomy** (4,000 gal ÷ 103 GPH = 38.8 h < 48 h) — and correctly leaves the
   compliant 10-second start alone.
+  - **Verified live (gemini-2.5-flash, 17 s): all 5 recovered**, including the
+    model computing `48 → 38.83 h` on its own (4000 ÷ 103) and flagging
+    `EPA Tier 4 → Tier 2`. Run: `python3 eval/run_eval.py` style call via
+    `run_analysis` over the two files; `mode:"llm"`, count 5.
 
 Reproduce offline (no key needed):
 ```bash
@@ -73,3 +77,47 @@ for x in _resilient_fallback(spec, sub, "HELIOS"):
     print(x["parameter"], x["required_value"], "->", x["provided_value"], x["severity"])
 PY
 ```
+
+---
+
+## Pair 2 — Precision Cooling (STULZ CyberAir 3 DX vs ASHRAE / Tier IV / EU F-Gas)
+
+Files: `design_basis_cooling.md` + `submittal_stulz_cyberair.md`. A thermal-side
+pair to widen the real-evidence base beyond power.
+
+### Real, cited facts
+- **STULZ CyberAir 3** is an **EC-fan** CRAC/CRAH line, ~**20–730 kW** range, with
+  DX variants using **R410A** refrigerant. EC plug fans (backward-inclined,
+  direct-driven) are confirmed in the CyberAir CW datasheet (stulz.com / HM Cragg
+  CyberAir CRAH datasheet).
+- **R410A GWP = 2088** — a fixed, published property of the refrigerant
+  (IPCC AR4 / EU F-Gas GWP tables).
+
+### Standard / design-basis requirements
+- **N+2 cooling redundancy** — Uptime Tier IV fault tolerance + concurrent maint.
+- **Refrigerant GWP ≤ 750** — sustainability standard aligned with the EU F-Gas
+  phase-down (Regulation (EU) 517/2014 + 2024 revision).
+- **Supply air ≤ 27 °C** at rack inlet — ASHRAE TC9.9 Class A1 recommended.
+- **EC variable-speed fans** required; net sensible ≥ 200 kW per cell.
+
+### Deviations — LLM-verified (gemini-2.5-flash, 22 s, 3 of 3)
+
+| # | Parameter | Required | Provided | Note |
+|---|-----------|----------|----------|------|
+| 1 | Cooling redundancy | N+2 | **N+1** | Real Tier IV topology shortfall |
+| 2 | Refrigerant GWP | ≤ 750 | **R410A → GWP 2088** | Model *inferred* the GWP and flagged it |
+| 3 | Net sensible / cell | ≥ 200 kW | **180 kW** | Capacity shortfall |
+| — | EC fans | EC required | EC plug fans | **Compliant — true negative** |
+| — | Supply air | ≤ 27 °C | 24 °C | **Compliant — true negative** |
+
+The refrigerant catch is the standout: the submittal states only "R410A"; the
+model supplied the GWP (2088) from domain knowledge. **Honesty note:** R410A and
+the EC fans are hard product facts; the N+1 redundancy and 180 kW selection are
+realistic engineering-scenario elements (a proposal *can* under-provision), not
+a fixed datasheet maximum.
+
+---
+
+**Together, the two real pairs give 8 genuine deviations + 3 true negatives**
+across UPS, generator, and cooling — sourced to Vertiv, Cummins, STULZ, NFPA 110,
+EPA 40 CFR 60, ASHRAE TC9.9, EU F-Gas, and Uptime Tier IV. None seeded.

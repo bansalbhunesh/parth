@@ -256,14 +256,22 @@ python3 eval/multi_project_eval.py --json
 > distinction (88% vs 96%), and a missing-value omission (THD not stated). Full
 > result + screenshots: [`data/samples/REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md).
 >
-> **Fully-sourced real pair (every value citable):** a **Vertiv Liebert GXT5**
-> UPS (7-min full-load runtime, 95.9% online efficiency) and a **Cummins QSK60**
-> genset (EPA Tier 2, 103 GPH) vs Uptime Tier IV / NFPA 110 / EPA 40 CFR 60
-> requirements — **5 genuine deviations + 1 true negative, none seeded.** Offline
-> the rule-based engine flags the battery (10→7 min) and the sub-1% efficiency
-> (96→95.9%) shortfalls; the LLM adds the emissions tier, THD omission, and the
-> derived fuel autonomy (4,000 gal ÷ 103 GPH = 38.8 h < 48 h). Sources for every
-> number: [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md).
+> **Two fully-sourced real pairs (every value citable):**
+> 1. **Power** — a **Vertiv Liebert GXT5** UPS (7-min full-load runtime, 95.9%
+>    online efficiency) and a **Cummins QSK60** genset (EPA Tier 2, 103 GPH) vs
+>    Uptime Tier IV / NFPA 110 / EPA 40 CFR 60. Offline the rule-based engine
+>    flags the battery (10→7 min) and the sub-1% efficiency (96→95.9%) shortfalls;
+>    the LLM (verified, 17 s) recovers all 5 — adding the emissions tier, THD
+>    omission, and the **self-derived fuel autonomy** (4,000 gal ÷ 103 GPH =
+>    **38.83 h** < 48 h).
+> 2. **Cooling** — a **STULZ CyberAir 3 DX** CRAC vs ASHRAE TC9.9 / Tier IV / EU
+>    F-Gas. The LLM (verified, 22 s) flags N+2→N+1 redundancy, the 200→180 kW
+>    capacity shortfall, and **infers R410A's GWP (2088)** to flag it against the
+>    ≤750 requirement — while correctly clearing the compliant EC fans and 24 °C
+>    supply.
+>
+> **8 genuine deviations + 3 true negatives, none seeded** — sources for every
+> number in [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md).
 
 **Key diversity dimensions:**
 - **Climate**: tropical (Mumbai), mild (Pune), cold (Oslo), desert (Dubai), temperate (Oregon), subtropical (Shanghai), continental (Frankfurt, Toronto), maritime (Tokyo, London), arid (Sydney), tropical (São Paulo)

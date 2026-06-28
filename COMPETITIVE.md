@@ -94,10 +94,14 @@ runs, which is what makes them a moat rather than a checklist:
 
 1. **The commissioning-knowledge graph.** The proprietary asset isn't the LLM —
    it's the curated mapping of *deviation → which L1–L5 commissioning test it
-   fails → typical lead-time-to-failure*, across 25+ standards and 11 countries.
-   That graph encodes domain expertise (CxA + standards) that a generic
-   submittal-checker doesn't have and can't scrape; it deepens with every system
-   type and standard added.
+   fails → typical lead-time-to-failure*. This ships **today as a real,
+   traversable, standards-cited graph** — [`data/commissioning_graph.json`](data/commissioning_graph.json),
+   served at `/cx-graph`: 16 deviation→test edges over a 5-level Cx taxonomy,
+   each edge carrying its failure mode and governing standard (ASHRAE Guideline 0,
+   BICSI-002, Uptime Tier Cx, NFPA 110, IEC 61439, CISCA, …). It encodes domain
+   expertise a generic submittal-checker can't scrape, and **extends by one cited
+   edge per equipment class** (the real raised-floor and busway pairs were added
+   exactly this way) — it deepens with every system type and standard added.
 2. **A data flywheel.** Every analysis a customer runs — and every correction a
    commissioning engineer makes ("no, that maps to IST-09, not IST-07") — labels
    the deviation→Cx→lead-time mapping. Accuracy on *real* submittals compounds

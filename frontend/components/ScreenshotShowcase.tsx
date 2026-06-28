@@ -2,17 +2,20 @@
 
 import { useState } from "react";
 
+// Real product screenshots shipped in /public/screenshots/*.png (served at
+// /screenshots/<id>.png). These replace the earlier CSS mockups — judges in the
+// Screenshots section now see the actual app, not stylised placeholders.
 const SCREENS = [
-  { id: "sentinel", label: "Deviation Sentinel", desc: "UPS-02 battery runtime: 7 min vs 10 min required — 27 weeks early", color: "#ff4d4d", icon: "!" },
-  { id: "pipeline", label: "AI Agent Pipeline", desc: "5 agents: Ingestion, Extraction, Reconciliation, Cx Predictor, RFI Copilot", color: "#36d6e7", icon: "→" },
-  { id: "architecture", label: "System Architecture", desc: "LangGraph multi-agent orchestrator with conditional routing", color: "#a855f7", icon: "◦" },
-  { id: "systems", label: "System Health Grid", desc: "10 systems: 7 with findings (4 critical), 3 compliant", color: "#35c98b", icon: "▓" },
-  { id: "register", label: "Deviation Register", desc: "Full register with severity, lead time, Cx test mapping", color: "#ffb020", icon: "≡" },
-  { id: "twin", label: "Commissioning Twin", desc: "L1–L5 Gantt timeline with at-risk test predictions", color: "#5b8cff", icon: "▮" },
-  { id: "eval", label: "Eval Dashboard", desc: "P/R/F1 = 1.000, Cx accuracy 1.000, 267 weeks lead time", color: "#35c98b", icon: "✓" },
-  { id: "copilot", label: "RFI Copilot", desc: "Streaming RAG over specs, submittals, standards & RFIs", color: "#36d6e7", icon: "❖" },
-  { id: "analyze", label: "Live Analysis", desc: "Upload PDFs or paste text for real-time deviation detection", color: "#a855f7", icon: "▶" },
-  { id: "multiproject", label: "Multi-Project Eval", desc: "12 projects, 11 countries, 50 deviations, F1=1.000", color: "#ffb020", icon: "★" },
+  { id: "hero-full", label: "Full Dashboard", desc: "19-section deep-dive dashboard, dark theme, ISR-cached" },
+  { id: "register", label: "Deviation Register", desc: "Every finding with severity, lead time and the Cx test it will fail" },
+  { id: "risk", label: "Commissioning Risk Matrix", desc: "Deviations plotted by severity × weeks-to-failure" },
+  { id: "pipeline", label: "AI Agent Pipeline", desc: "Ingestion → Extraction → Reconciliation → Cx Predictor → RFI Copilot" },
+  { id: "architecture", label: "System Architecture", desc: "LangGraph orchestrator + standards-cited commissioning graph" },
+  { id: "eval", label: "Eval Dashboard", desc: "Real-datasheet recall + honest precision; no-key offline harness" },
+  { id: "copilot", label: "RFI Copilot", desc: "Streaming RAG over specs, submittals, standards & RFIs" },
+  { id: "roi", label: "ROI / Cost-of-Delay", desc: "Weeks-early × cost-per-week model — the asymmetry story" },
+  { id: "scale", label: "Multi-Project Portfolio", desc: "12 projects, 11 countries — the breadth (by-construction) test" },
+  { id: "refs", label: "Academic References", desc: "Peer-reviewed precedents for cross-document compliance reasoning" },
 ];
 
 export default function ScreenshotShowcase() {
@@ -29,38 +32,32 @@ export default function ScreenshotShowcase() {
               <span className="ss-dot ss-dot-y" />
               <span className="ss-dot ss-dot-g" />
             </div>
-            <div className="ss-frame-url">localhost:3000/#{s.id}</div>
+            <div className="ss-frame-url">parth-tan.vercel.app/#{s.id}</div>
           </div>
-          <div className="ss-mockup" style={{ borderColor: s.color }}>
-            <div className="ss-mockup-header">
-              <div className="ss-mockup-icon" style={{ background: s.color }}>{s.icon}</div>
-              <div className="ss-mockup-title">{s.label}</div>
-            </div>
-            <div className="ss-mockup-body">
-              <div className="ss-mockup-bar" style={{ background: s.color, width: "75%" }} />
-              <div className="ss-mockup-bar" style={{ background: s.color, width: "60%", opacity: 0.6 }} />
-              <div className="ss-mockup-bar" style={{ background: s.color, width: "85%", opacity: 0.3 }} />
-              <div className="ss-mockup-grid">
-                {[1,2,3,4].map(i => (
-                  <div key={i} className="ss-mockup-card" style={{ borderColor: s.color }}>
-                    <div className="ss-mockup-card-dot" style={{ background: s.color }} />
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="ss-mockup-desc">{s.desc}</div>
-          </div>
+          <figure className="ss-shot" style={{ margin: 0 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/screenshots/${s.id}.png`}
+              alt={`${s.label} — ${s.desc}`}
+              loading="lazy"
+              style={{ width: "100%", height: "auto", display: "block", borderRadius: "0 0 10px 10px" }}
+            />
+            <figcaption className="ss-mockup-desc">{s.desc}</figcaption>
+          </figure>
         </div>
       </div>
 
-      <div className="ss-thumbs">
+      <div className="ss-thumbs" role="tablist" aria-label="Product screenshots">
         {SCREENS.map((sc, i) => (
           <button
             key={sc.id}
+            type="button"
+            role="tab"
+            aria-selected={i === selected}
+            aria-label={`Show ${sc.label} screenshot`}
             className={`ss-thumb ${i === selected ? "ss-thumb-active" : ""}`}
             onClick={() => setSelected(i)}
           >
-            <div className="ss-thumb-color" style={{ background: sc.color }} />
             <div className="ss-thumb-label">{sc.label}</div>
           </button>
         ))}

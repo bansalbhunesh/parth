@@ -16,6 +16,48 @@ the problem, and give an easy out.
 
 ---
 
+## Where to find them — named sources (fastest first)
+
+**0. Your warm network (do this first).** You do NOT need a stranger. Anyone who
+has done MEP / electrical / HVAC design or construction QA on *any* large facility
+(not just data centres) is credible. Ask ex-colleagues, classmates now in
+EPC/MEP, professors who consult for industry. A warm intro converts ~10× better
+than a cold DM and is the only realistic path on a hackathon clock.
+
+**1. Communities you can join today (highest reply rate):**
+- **Infrastructure Masons (iMasons)** — global DC infra community, active Slack +
+  India members; post the tiny ask in a relevant channel.
+- **BICSI / BICSI India**, **7x24 Exchange**, **Uptime Institute** member network,
+  **ASHRAE India** chapters — all full of CxAs and MEP leads.
+
+**2. India DC operators (find their facilities / MEP / commissioning staff on LinkedIn):**
+STT GDC India · CtrlS · Nxtra by Airtel · Yotta · NTT Global Data Centers India ·
+Sify · Web Werks (Iron Mountain) · Pi Datacenters · AdaniConneX · Reliance Jio.
+
+**3. EPC / MEP design-build & commissioning firms (India DC work):**
+L&T Construction · Sterling & Wilson · Voltas · Blue Star · and the DC/MEP
+practices at Jacobs, AECOM, WSP, Arup, Cundall, Mott MacDonald · plus the field-
+services arms of **Vertiv / Schneider / ABB** (they commission this gear daily).
+
+**4. Independent third-party commissioning (CxA) firms** — search LinkedIn for
+*"commissioning authority data center"*, *"CxA data centre"*, *"owner's engineer
+data center India"*, *"MEP commissioning manager"*.
+
+**Who, exactly (titles to target):** Commissioning Authority / CxA · Owner's
+Engineer · MEP Design Lead · Data-Centre Project/Construction Manager · EPC QA/QC
+Lead · Critical-Facilities / Mission-Critical Engineer.
+
+**The hook is now stronger** — point them at a concrete real pair: *"a Tate
+ConCore 1250 panel (1250 lbf) proposed against a 1500 lbf high-density floor
+spec, or a Canalis KTA10 at 50 kA against a 65 kA fault duty — does catching that
+on submittal day match a review you've actually done?"* Specific beats abstract.
+
+**Minimum bar for the submission:** ONE practitioner, even anonymised
+("a CxA at a top-5 India colo"), even informal. That single line moves the
+customer-validation score more than any further code.
+
+---
+
 ## A. LinkedIn connection note (≤300 chars)
 
 > Hi [Name] — I built a tool that reads vendor submittals against the design

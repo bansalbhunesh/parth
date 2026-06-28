@@ -15,6 +15,7 @@ from backend.agents.reconciliation import (
     PROMPT_TEMPLATE,
 )
 from backend.agents.commissioning import predict_cx_impact, _RULES
+from backend.agents import cx_graph
 
 log = logging.getLogger("pramaan.analyze")
 
@@ -111,6 +112,17 @@ _FREEFORM_PARAMS = [
     dict(component="FLOOR", parameter="load_rating_kpa", severity="Critical",
          direction="min", unit_rx=r"kPa", unit="kPa",
          kw=[r"(?:floor\s+)?load[^.]{0,20}(?:rating|capacity)", r"load\s+rating"]),
+    # Structural raised-floor concentrated (CISCA) load, expressed in lbf on real
+    # access-floor datasheets (e.g. Tate ConCore 1250 = 1250 lbf design load).
+    dict(component="FLOOR-01", parameter="concentrated_load_lbf", severity="Major",
+         direction="min", unit_rx=r"lbf", unit="lbf",
+         kw=[r"concentrated[^.]{0,20}load", r"point\s+load"]),
+    # LV busbar trunking (busway) short-time withstand current Icw, in kA. Kept
+    # distinct from SWGR-MV: busway datasheets say "short-time withstand current"
+    # rather than "short-circuit rating" (e.g. Schneider Canalis KTA10 = 50 kA/1s).
+    dict(component="BUSWAY-01", parameter="short_time_withstand_ka", severity="Critical",
+         direction="min", unit_rx=r"kA", unit="kA",
+         kw=[r"short[-\s]?time\s+withstand", r"withstand\s+current"]),
 ]
 
 _OMISSION_RX = re.compile(
@@ -141,7 +153,7 @@ def _fmt_num(x: float) -> str:
 
 
 def _freeform_compare(spec_text: str, submittal_text: str) -> list[dict]:
-    devs, seen = [], set()
+    devs, seen, seen_sig = [], set(), set()
     for p in _FREEFORM_PARAMS:
         ckey = (p["component"], p["parameter"])
         if ckey in seen:
@@ -168,6 +180,14 @@ def _freeform_compare(spec_text: str, submittal_text: str) -> list[dict]:
                          f"required {_fmt_num(req)} {p['unit']}")
         if not is_dev:
             continue
+        # Value-signature dedup: if two overlapping rules report the SAME
+        # required->provided numeric transition (e.g. a busway Icw also matched
+        # by the switchgear rule), keep only the first so the fallback never
+        # double-counts one physical fact under two component labels.
+        sig = (_fmt_num(req), prov_label)
+        if sig in seen_sig:
+            continue
+        seen_sig.add(sig)
         seen.add(ckey)
         devs.append({
             "component": p["component"], "parameter": p["parameter"],
@@ -187,7 +207,8 @@ def _enrich_cx(d: dict, system_id: str) -> dict:
     """Attach commissioning test + lead time via the rule table only — never an
     LLM call. (LLM-based Cx prediction for ad-hoc parameters multiplied live
     latency by one extra call per deviation.) Unmapped parameters keep no Cx."""
-    if (d.get("component"), d.get("parameter")) in _RULES:
+    key = (d.get("component"), d.get("parameter"))
+    if key in _RULES or cx_graph.explain(*key):
         d.update(predict_cx_impact(d))
     d.setdefault("severity", "Major")
     d["system"] = system_id

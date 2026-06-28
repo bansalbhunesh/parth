@@ -1,0 +1,49 @@
+{
+  "meta": {
+    "name": "Pramaan Commissioning Risk Graph",
+    "what": "A directed knowledge graph: deviation-class -> commissioning-test -> Cx-level -> integration milestone. Every edge carries the failure mode it predicts and the governing standard that grounds the mapping. This is the structure behind the 'commissioning risk twin' — not a flat lookup; nodes and edges are independently citable and the graph is traversable and extensible.",
+    "level_taxonomy_basis": "ASHRAE Guideline 0-2019 (The Commissioning Process) and Guideline 1.1; BICSI-002 data-centre commissioning levels L1-L5; Uptime Institute Tier Certification of Constructed Facility (integrated-systems / fault-tolerance demonstration).",
+    "version": 2
+  },
+  "levels": {
+    "1": {"name": "Factory / component verification (FAT, receipt)", "basis": "BICSI-002 L1; ASHRAE Gdl 0 component verification"},
+    "2": {"name": "Site acceptance / installation verification", "basis": "BICSI-002 L2; ASHRAE Gdl 0 installation checks"},
+    "3": {"name": "Startup / energization testing", "basis": "BICSI-002 L3; ASHRAE Gdl 0 startup"},
+    "4": {"name": "Functional performance testing under load / failover", "basis": "BICSI-002 L4; ASHRAE Gdl 0 functional performance testing"},
+    "5": {"name": "Integrated systems test (pull-the-plug, sustained ops)", "basis": "BICSI-002 L5; Uptime Tier IV fault-tolerance demonstration"}
+  },
+  "cx_tests": [
+    {"id": "ITP-01", "name": "Equipment receipt inspection", "level": 1},
+    {"id": "ITP-02", "name": "Cable fire-rating / plenum compliance inspection", "level": 2},
+    {"id": "ITP-03", "name": "Arc-flash labeling and PPE verification", "level": 2},
+    {"id": "ITP-04", "name": "Pathway fill and cable management inspection", "level": 2},
+    {"id": "ITP-05", "name": "Structural load test and floor deflection", "level": 1},
+    {"id": "FAT-01", "name": "UPS module load-bank test", "level": 3},
+    {"id": "FAT-03", "name": "Switchgear / bus short-circuit withstand FAT", "level": 3},
+    {"id": "IST-01", "name": "Generator black-start and load-accept test", "level": 4},
+    {"id": "IST-07", "name": "UPS battery autonomy / ride-through test", "level": 4},
+    {"id": "IST-09", "name": "Cooling N+ redundancy failover test", "level": 4},
+    {"id": "IST-11", "name": "Generator on-site fuel endurance run", "level": 4},
+    {"id": "IST-14", "name": "BMS critical-alarm point-to-point test", "level": 4},
+    {"id": "IST-15", "name": "BMS monitoring redundancy failover test", "level": 4},
+    {"id": "IST-16", "name": "Cooling delta-T / capacity validation", "level": 4}
+  ],
+  "edges": [
+    {"component": "UPS-02", "parameter": "battery_runtime_min", "cx_test": "IST-07", "failure_mode": "UPS cannot ride the utility-loss gap to confirmed generator power", "standard_basis": "Uptime Tier IV stored-energy practice; NFPA 110 Level 1"},
+    {"component": "GEN-FUEL", "parameter": "onsite_fuel_hours", "cx_test": "IST-11", "failure_mode": "On-site fuel exhausted before resupply window at full load", "standard_basis": "Facility resilience design target; NFPA 110 fuel-supply provisions"},
+    {"component": "COOL-LOOP", "parameter": "redundancy", "cx_test": "IST-09", "failure_mode": "Loss of a cooling unit drops the hall below required capacity", "standard_basis": "Uptime Tier IV fault tolerance + concurrent maintainability"},
+    {"component": "SWGR-MV", "parameter": "short_circuit_rating_ka", "cx_test": "FAT-03", "failure_mode": "Switchgear cannot withstand prospective fault for the clearing time", "standard_basis": "IEC 61439-2; IEC 61641 internal-arc"},
+    {"component": "CABLE-DC", "parameter": "fire_rating", "cx_test": "ITP-02", "failure_mode": "Riser/plenum cable below required flame rating", "standard_basis": "NFPA 75; NFPA 262 (CMP/CMR plenum)"},
+    {"component": "BMS", "parameter": "critical_alarm_points", "cx_test": "IST-14", "failure_mode": "Critical alarm not monitored; fault goes unseen", "standard_basis": "BICSI-002 monitoring; Uptime operational sustainability"},
+    {"component": "FLOOR", "parameter": "height_mm", "cx_test": "ITP-01", "failure_mode": "Finished floor height off; airflow plenum / clearances wrong", "standard_basis": "TIA-942 raised-floor; project structural drawings"},
+    {"component": "GEN-01", "parameter": "start_time_sec", "cx_test": "IST-01", "failure_mode": "Generator fails to start and accept block load in time", "standard_basis": "NFPA 110 Type 10, Level 1"},
+    {"component": "COOL-LOOP", "parameter": "delta_t_c", "cx_test": "IST-16", "failure_mode": "Coil delta-T off; sensible capacity / airflow mismatch", "standard_basis": "ASHRAE TC 9.9 thermal guidelines"},
+    {"component": "UPS-02", "parameter": "efficiency_pct", "cx_test": "FAT-01", "failure_mode": "UPS double-conversion efficiency below design; PUE / heat budget miss", "standard_basis": "Design energy target; ASHRAE 90.4"},
+    {"component": "SWGR-MV", "parameter": "arc_flash_rating", "cx_test": "ITP-03", "failure_mode": "Arc-flash classification/labeling below required category", "standard_basis": "IEEE 1584; NFPA 70E"},
+    {"component": "CABLE-DC", "parameter": "max_bundle_size", "cx_test": "ITP-04", "failure_mode": "Cable bundle exceeds pathway-fill limit; derating / heat", "standard_basis": "BICSI-002 pathway fill; TIA-942"},
+    {"component": "BMS", "parameter": "monitoring_redundancy", "cx_test": "IST-15", "failure_mode": "Single monitoring path; loss blinds operations", "standard_basis": "Uptime Tier IV concurrent maintainability"},
+    {"component": "FLOOR", "parameter": "load_rating_kpa", "cx_test": "ITP-05", "failure_mode": "Uniform floor load rating below design basis", "standard_basis": "CISCA Recommended Test Procedures; design basis"},
+    {"component": "FLOOR-01", "parameter": "concentrated_load_lbf", "cx_test": "ITP-05", "failure_mode": "Panel concentrated (point) load below high-density rack requirement; permanent set under leveling foot/caster", "standard_basis": "CISCA Concentrated Load test method (e.g. Tate ConCore class rating)"},
+    {"component": "BUSWAY-01", "parameter": "short_time_withstand_ka", "cx_test": "FAT-03", "failure_mode": "Busbar trunking Icw below prospective fault level; bus damage on through-fault", "standard_basis": "IEC 61439-6 busbar trunking systems"}
+  ]
+}

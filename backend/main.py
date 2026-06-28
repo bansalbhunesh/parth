@@ -357,6 +357,14 @@ def cx_plan():
     return _load_json("commissioning/cx_plan.json")
 
 
+@app.get("/cx-graph")
+def cx_graph_endpoint():
+    """The standards-grounded commissioning knowledge graph: stats + node/edge
+    form (deviation-class -> Cx-test -> Cx-level) with per-edge citations."""
+    from backend.agents import cx_graph
+    return {"stats": cx_graph.graph_stats(), "graph": cx_graph.as_graph()}
+
+
 @app.get("/rfi-log")
 def rfi_log():
     return _load_json("rfi/rfi_log.json")
@@ -607,13 +615,14 @@ tr:hover td {{ background: #f0f4ff; }}
 @app.get("/pipeline")
 def pipeline_info():
     return {
-        "name": "Pramaan 5-Agent Pipeline",
+        "name": "Pramaan Agent Graph (with self-critique loop)",
         "framework": "LangGraph",
         "nodes": [
             {"id": "ingest", "agent": "Ingestion Agent", "description": "Document intake, parsing, normalization"},
             {"id": "load_standards", "agent": "Standards Loader", "description": "Load governing standards corpus"},
             {"id": "validate", "agent": "Validation Gate", "description": "Check spec+submittal exist; conditional routing"},
             {"id": "reconcile", "agent": "Reconciliation Agent", "description": "Cross-document deviation reasoning"},
+            {"id": "critique", "agent": "Self-Critique Agent", "description": "Verifies its own findings; loops back to reconcile on a failed self-check (reflexion)"},
             {"id": "cx_predict", "agent": "Cx Predictor", "description": "Map deviations to commissioning tests"},
             {"id": "format_output", "agent": "Output Formatter", "description": "Enrich and structure findings"},
         ],
@@ -622,7 +631,9 @@ def pipeline_info():
             ["load_standards", "validate"],
             {"from": "validate", "to": ["reconcile", "format_output"], "type": "conditional",
              "condition": "route_after_validate: skip reconciliation if spec or submittal missing"},
-            ["reconcile", "cx_predict"],
+            ["reconcile", "critique"],
+            {"from": "critique", "to": ["reconcile", "cx_predict"], "type": "conditional", "cycle": True,
+             "condition": "route_after_critique: loop back to reconcile on a failed self-check (bounded by PRAMAAN_MAX_REVISIONS), else proceed"},
             ["cx_predict", "format_output"],
         ],
         "separate_agents": [

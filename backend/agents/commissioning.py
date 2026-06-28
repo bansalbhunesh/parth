@@ -6,6 +6,7 @@ import json
 
 from backend.llm import complete_json
 from backend.paths import CORPUS
+from backend.agents import cx_graph
 
 
 def _current_week():
@@ -117,6 +118,26 @@ def predict_cx_impact(deviation: dict) -> dict:
             "lead_time_weeks": week_fail - cw,
             "severity": deviation.get("severity", severity),
             "cx_source": "rule",
+        }
+    # Standards-grounded knowledge graph: covers equipment classes outside the
+    # Meghdoot scheduling table (e.g. the real raised-floor / busway pairs) with
+    # a cited deviation -> test -> level path and a level-typical lead time —
+    # deterministic, no LLM call on the live path.
+    g = cx_graph.explain(key[0], key[1])
+    if g:
+        cw = _current_week()
+        lead = g.get("lead_time_weeks_typical")
+        return {
+            "predicted_cx_test": g["predicted_cx_test"],
+            "predicted_cx_level": g["predicted_cx_level"],
+            "predicted_cx_name": g["predicted_cx_name"],
+            "week_caught": cw,
+            "week_fail": (cw + lead) if lead else None,
+            "lead_time_weeks": lead,
+            "severity": deviation.get("severity", "Major"),
+            "cx_source": "graph",
+            "standard_basis": g.get("standard_basis"),
+            "failure_mode": g.get("failure_mode"),
         }
     return _llm_predict(deviation)
 

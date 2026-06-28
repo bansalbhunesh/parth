@@ -97,6 +97,12 @@
 
 Ready-made demo pairs ship in [`data/samples/`](data/samples/): a UPS edge pair, a **real Vertiv datasheet**, a standby-generator pair, and **eight fully-sourced real pairs** (Vertiv, Cummins, STULZ, ABB, FM-200/Novec, Carrier-class, EUROBAT, IEC 60076-11 transformer, NFPA 75 cabling — every value citable in [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md)). Drop any pair into the analyzer.
 
+> **It even reads scanned paper.** Real submittals arrive as stamped, scanned,
+> image-only PDFs. Try [`data/samples/real/scanned/submittal_ups_scanned.pdf`](data/samples/real/scanned/submittal_ups_scanned.pdf)
+> (no text layer) against `design_basis_helios.md` — Pramaan OCRs it and detects
+> the deviations anyway; where OCR isn't available it says so plainly rather than
+> returning a silent zero. Details: [`eval/OCR_SCANNED_PDF.md`](eval/OCR_SCANNED_PDF.md).
+
 > Health at a glance: **[`/health`](https://parth-3puc.onrender.com/health)** shows whether the LLM is wired (`"ready": true`); **[`/llm-check`](https://parth-3puc.onrender.com/llm-check)** makes a real call and reports the exact status. The app **degrades gracefully** — every endpoint returns 200 and the dashboard renders from bundled data even with no API key.
 
 ---

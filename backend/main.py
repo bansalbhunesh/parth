@@ -93,7 +93,12 @@ def _extract_upload_text(file: UploadFile) -> str:
     if name.lower().endswith(".pdf") or file.content_type == "application/pdf":
         text = extract_pdf_bytes(data, name)
         if not text:
-            raise HTTPException(400, f"Could not extract text from PDF: {name}")
+            raise HTTPException(
+                400,
+                f"Could not read '{name}'. It looks like a scanned / image-only PDF "
+                "and OCR is unavailable in this deployment. Upload a text-based PDF, "
+                "or paste the document text directly into Live Analysis.",
+            )
         return text
     return data.decode("utf-8", errors="replace")
 
@@ -171,7 +176,9 @@ def analyze_upload_stream(
             submittal_text = sub_data.decode("utf-8", errors="replace")
 
         if not spec_text or not submittal_text:
-            yield f"event: error\ndata: Could not extract text from uploaded files.\n\n"
+            yield ("event: error\ndata: Could not read one of the files — it may be a "
+                   "scanned / image-only PDF with OCR unavailable here. Upload a "
+                   "text-based PDF or paste the text directly.\n\n")
             yield "event: done\ndata: {}\n\n"
             return
 

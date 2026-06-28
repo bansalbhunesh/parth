@@ -26,6 +26,7 @@ novel, and we no longer claim it is.
 | **Lead-time-to-failure** (weeks early, quantified) | ✗ | ✅ per-deviation `lead_time_weeks` |
 | Open, reproducible **eval harness** (P/R/F1 + ground truth) | ✗ (closed SaaS) | ✅ 3 paths + real-LLM |
 | **Graceful degradation** when the LLM is down (no silent zero) | n/a | ✅ rule-based fallback + 18s cap |
+| **Reads scanned / image-only submittals** (the paper EPCs actually email) | partial | ✅ OCR fallback + honest message when unavailable |
 | Self-hostable / inspectable (MIT, full source) | ✗ | ✅ |
 
 **Our moat is the commissioning-risk twin + lead-time quantification + an open,
@@ -59,7 +60,7 @@ are. Judges reward that honesty.
   true status, and the rule-based fallback returns Cx-mapped deviations in <1s
   when the model is rate-limited (free-tier reality), instead of a silent zero.
 
-## 5. Feature teardown — the four things only Pramaan does
+## 5. Feature teardown — the five things only Pramaan does
 
 Submittal-review tools extract product data and check it against the spec. None
 of the following is in their public feature set — and together they are the moat:
@@ -78,7 +79,44 @@ of the following is in their public feature set — and together they are the mo
 4. **No-silent-zero resilience.** A deterministic detector that still returns the
    headline deviations when the LLM is rate-limited or absent — a property a
    cloud-only black box cannot offer on-prem or air-gapped sites.
+5. **Reads the documents that actually arrive.** Real submittals are stamped paper
+   scanned to image-only PDFs. Pramaan OCRs them ([`eval/OCR_SCANNED_PDF.md`](eval/OCR_SCANNED_PDF.md));
+   when OCR isn't available it says so plainly instead of returning a silent zero.
 
 The category proves the *demand* is real and buyers already pay for adjacent
 tooling. Pramaan's wedge is the **commissioning-risk layer on top** — the part
 that ties a document deviation to a dated, costed schedule event.
+
+## 6. The durable moat — what compounds with use
+
+Features can be copied; the items below get *harder* to catch the longer Pramaan
+runs, which is what makes them a moat rather than a checklist:
+
+1. **The commissioning-knowledge graph.** The proprietary asset isn't the LLM —
+   it's the curated mapping of *deviation → which L1–L5 commissioning test it
+   fails → typical lead-time-to-failure*, across 25+ standards and 11 countries.
+   That graph encodes domain expertise (CxA + standards) that a generic
+   submittal-checker doesn't have and can't scrape; it deepens with every system
+   type and standard added.
+2. **A data flywheel.** Every analysis a customer runs — and every correction a
+   commissioning engineer makes ("no, that maps to IST-09, not IST-07") — labels
+   the deviation→Cx→lead-time mapping. Accuracy on *real* submittals compounds
+   with usage; a new entrant starts from zero on that labelled data.
+3. **System-of-record switching cost.** Once Pramaan's output *is* the project's
+   Cx risk register — audit-ready, dated, cited — ripping it out mid-build means
+   re-deriving the schedule-risk evidence the owner's engineer signs against.
+   That stickiness grows over a multi-year build.
+4. **Distribution wedge.** Land with the owner's engineer / CxA (whose mandate
+   *is* catching non-conformances), expand to the EPC and operator on the same
+   project. The buyer with the strongest "this is literally my job" pull is the
+   cheapest to win first.
+
+### What is *not* yet a moat (so we don't oversell)
+
+- **The reasoning model is rented**, not owned — any team can call the same LLM.
+  The defensibility is the knowledge graph + labelled data around it, not the model.
+- **The data flywheel needs real deployments to spin** — today it's an
+  architecture, not yet accumulated proprietary data. The honest current moat is
+  the commissioning-risk layer + open-eval credibility (≈ a strong head start),
+  not yet network-effect lock-in. Closing the practitioner-validation gap
+  ([`docs/OUTREACH.md`](docs/OUTREACH.md)) is what starts the flywheel.

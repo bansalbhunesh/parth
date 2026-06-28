@@ -1,5 +1,12 @@
 FROM python:3.11-slim
 
+# tesseract-ocr powers the scanned/image-only PDF fallback (backend/agents/ingestion.py).
+# Without it the app still runs and degrades to an honest "scanned PDF, OCR
+# unavailable" message; with it, scanned submittals are read via OCR.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tesseract-ocr \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 COPY backend/requirements.txt backend/requirements.txt
 RUN pip install --no-cache-dir -r backend/requirements.txt

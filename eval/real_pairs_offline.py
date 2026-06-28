@@ -151,7 +151,7 @@ def run():
     print(f"{'='*68}")
     print("  Offline proves 'no silent zeros'. Run the LLM layer (make eval-real,")
     print("  warm key) to recover the llm-only rows; the contested case is the")
-    print("  reason we report ~0.95, not a suspiciously perfect 1.000.\n")
+    print("  reason we report ~0.9, not a suspiciously perfect 1.000.\n")
     # Non-zero exit if the offline guarantee regresses.
     return 0 if (off_recall == 1.0 and false_pos == 0) else 1
 

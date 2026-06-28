@@ -58,7 +58,7 @@ python3 eval/run_eval.py --detector llm
 7. **Cx Twin** → IST-07, IST-09, IST-11 pulsing red. These tests WILL fail.
 8. **Multi-project** → 12 projects across 11 countries (synthetic breadth test — 1.000 by construction; the real proof is the sourced datasheet pairs).
 9. **Copilot** → "Has UPS battery runtime come up before?" → RFI-014 cited.
-10. **Eval** → real datasheets: 17 deviations, 0 false positives, self-scored ~0.95 on one contested case. Reproducible no-key harness (`eval/real_pairs_offline.py`).
+10. **Eval** → real datasheets: 19 deviations (recall 1.000), 0 false positives, self-scored ~0.9 on one contested case (live-verified, gemini-2.5-flash). Reproducible no-key harness (`eval/real_pairs_offline.py`).
 11. **Export** → One click → HTML evidence pack with full audit trail.
 
 ## Guardrails

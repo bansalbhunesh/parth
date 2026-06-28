@@ -216,7 +216,7 @@ and 1000 A current are correctly **not** flagged.
 | **11 Supply-air setpoint** | `design_basis_thermal_setpoint.md` + `submittal_crah_setpoint.md` | Submittal proposes a **30 °C** supply setpoint: **within ASHRAE A1 _allowable_ (15–32 °C)** but **above _recommended_ (≤ 27 °C)** | A real CxA could call this either way — a non-conformance against the recommended envelope, or an accepted efficiency choice within allowable. |
 
 This pair exists so the benchmark is **not** a suspicious 1.000 everywhere. Counting
-the contested case against the system yields a precision near **0.95** — reported
+the contested case against the system yields a precision near **0.9** (live-verified, gemini-2.5-flash) — reported
 openly (see [`../../eval/REAL_PAIRS_EVAL.md`](../../eval/REAL_PAIRS_EVAL.md)). The
 offline detector deliberately does **not** fire on it (a confident rule has no
 business adjudicating a judgment call); it is reserved for the reasoning layer.

@@ -64,7 +64,7 @@ class TestNoSecretLeakage:
     def test_no_hardcoded_keys_in_source(self):
         backend_dir = pathlib.Path(__file__).parent.parent / "backend"
         for py_file in backend_dir.rglob("*.py"):
-            content = py_file.read_text()
+            content = py_file.read_text(encoding="utf-8")
             assert "sk-" not in content, f"Possible API key in {py_file.name}"
             assert "AIza" not in content, f"Possible Google key in {py_file.name}"
 

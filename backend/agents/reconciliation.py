@@ -168,10 +168,15 @@ def _validate_deviations(raw) -> list[dict]:
     return valid
 
 
-def reconcile_system_at(base, sys_id: str, standards_text: str, with_cx: bool = False):
+def reconcile_system_at(base, sys_id: str, standards_text: str, with_cx: bool = False,
+                        feedback: str = None):
     """Path-agnostic LLM reconciliation for a single system under `base`
     (a project corpus root with specs/ and submittals/). Set with_cx=True to
-    attach commissioning predictions (rule table is Meghdoot-specific)."""
+    attach commissioning predictions (rule table is Meghdoot-specific).
+
+    `feedback` carries a self-critique from a prior pass (the reflexion loop in
+    the orchestrator): when present, the model is asked to REVISE its previous
+    answer against the critique rather than start cold."""
     spec_path = base / "specs" / f"{sys_id}.md"
     sub_path = base / "submittals" / f"{sys_id}.md"
     if not spec_path.exists() or not sub_path.exists():
@@ -182,6 +187,12 @@ def reconcile_system_at(base, sys_id: str, standards_text: str, with_cx: bool = 
     prompt = PROMPT_TEMPLATE.format(
         spec=spec, submittal=submittal, standards=standards_text
     )
+    if feedback:
+        prompt += (
+            "\n\n=== SELF-REVIEW FEEDBACK (revise your previous answer) ===\n"
+            + feedback
+            + "\nReturn the corrected JSON array of deviations.\n"
+        )
     try:
         raw = complete_json(prompt, system=SYSTEM_PROMPT)
     except LLMError as exc:
@@ -197,8 +208,9 @@ def reconcile_system_at(base, sys_id: str, standards_text: str, with_cx: bool = 
     return devs
 
 
-def reconcile_system(sys_id: str, standards_text: str):
-    return reconcile_system_at(CORPUS, sys_id, standards_text, with_cx=True)
+def reconcile_system(sys_id: str, standards_text: str, feedback: str = None):
+    return reconcile_system_at(CORPUS, sys_id, standards_text, with_cx=True,
+                               feedback=feedback)
 
 
 def run_reconciliation_over_corpus():

@@ -1,11 +1,25 @@
 """
-Orchestrator — LangGraph pipeline with conditional routing:
-  [ingest, load_standards] -> validate -> reconcile -> cx_predict -> format_output
-                                       └─(no docs)─> END (skip reconciliation)
-Falls back to sequential runner if langgraph is not installed.
+Orchestrator — LangGraph agent graph with conditional routing AND a self-
+critique cycle (so this is a real agent, not a straight pipeline):
+
+  [ingest -> load_standards -> validate] --(docs)--> reconcile -> critique
+                                     └──(no docs)──> format_output
+        critique --(self-check fails, budget left)--> reconcile   <- the loop
+        critique --(ok / budget spent)-------------> cx_predict -> format_output
+
+The reconcile -> critique -> reconcile cycle is a genuine reflexion loop, bounded
+by PRAMAAN_MAX_REVISIONS so it always terminates: the reconciler's own findings
+are verified, and on a failed self-check (a flagged value that already meets the
+spec, a duplicate, or a low-confidence finding) the graph routes BACK to
+reconcile with the critique as feedback. Crucially the verifier never drops a
+value merely because it is not verbatim in the documents — the best findings are
+derived (4000/103 = 38.8 h) or recalled (R-410A GWP 2088). Falls back to an
+equivalent sequential runner if langgraph is not installed.
 """
 
 import logging
+import os
+import re
 import time
 from typing import List, Literal, Optional, TypedDict
 
@@ -15,6 +29,90 @@ from backend.agents.commissioning import predict_cx_impact, compute_risk_score
 from backend.paths import CORPUS
 
 log = logging.getLogger("pramaan.orchestrator")
+
+# ── Self-critique / reflexion loop configuration ─────────────────────
+# The reconcile node feeds into a critique node that verifies its own output;
+# on a failed self-check the graph loops BACK to reconcile (a genuine cycle, not
+# a straight pipeline), bounded so it always terminates.
+_MAX_REVISIONS = int(os.getenv("PRAMAAN_MAX_REVISIONS", "1"))   # extra reconcile passes
+_LOW_CONF = float(os.getenv("PRAMAAN_LOW_CONF", "0.45"))        # re-examine below this
+_LLM_CRITIQUE = os.getenv("PRAMAAN_LLM_CRITIQUE", "0") == "1"   # opt-in deeper critic
+
+_OMISSION_TOKENS = {
+    "notstated", "na", "tbd", "missing", "omitted", "none", "",
+    "tobeadvised", "pending", "onrequest", "availableonrequest",
+}
+
+
+def _norm(s):
+    return re.sub(r"[^a-z0-9]+", "", str(s).strip().lower())
+
+
+def _self_check(devs: List[dict]):
+    """Deterministic verifier over the reconciler's own findings. It only auto-
+    drops what is provably wrong — never a value that is merely 'not verbatim in
+    the docs', because the system's best findings are DERIVED (4000/103 = 38.8 h)
+    or RECALLED (R-410A GWP 2088), which by design do not appear in the source.
+
+    Catches: (1) equality false positives — a value flagged that already meets
+    the spec (the documented Sakura-type bug); (2) duplicate findings. Low-
+    confidence findings are kept but flagged for re-examination in the loop.
+
+    Returns (needs_revision, feedback, keep, issues)."""
+    issues, keep, seen = [], [], set()
+    for d in devs:
+        req = _norm(d.get("required_value"))
+        prov = _norm(d.get("provided_value"))
+        omission = (prov in _OMISSION_TOKENS) or ("notstated" in prov)
+        label = f"{d.get('component')}/{d.get('parameter')}"
+        if req and req == prov and not omission:
+            issues.append(f"{label}: provided value equals required ({d.get('required_value')}) "
+                          f"— compliant, not a deviation (false positive).")
+            continue  # safe to drop
+        sig = (_norm(d.get("component")), _norm(d.get("parameter")), req, prov)
+        if sig in seen:
+            issues.append(f"{label}: duplicate finding.")
+            continue  # safe to drop
+        seen.add(sig)
+        conf = d.get("confidence")
+        if isinstance(conf, (int, float)) and conf < _LOW_CONF:
+            issues.append(f"{label}: low confidence ({conf}); re-verify against the documents or drop.")
+        keep.append(d)
+    feedback = ""
+    if issues:
+        feedback = (
+            "A self-review of your previous findings flagged:\n- "
+            + "\n- ".join(issues)
+            + "\nRemove any finding where the submittal MEETS or EXCEEDS the design basis "
+            "(those are compliant), remove duplicates, and re-verify each low-confidence "
+            "finding — keep it only if it is a genuine non-conformance you can point to in "
+            "the documents. Keep all legitimate deviations, including values you derived or "
+            "recalled from domain knowledge."
+        )
+    return bool(issues), feedback, keep, issues
+
+
+def _llm_critique(devs, spec, submittal, standards):
+    """Opt-in deeper critic (PRAMAAN_LLM_CRITIQUE=1): a second model pass that
+    looks for subtle false positives and missed deviations the deterministic
+    check cannot see. Returns {needs_revision, feedback} or {} on any failure."""
+    from backend.llm import complete_json
+    import json as _json
+    prompt = (
+        "You are a senior CxA peer-reviewing another reviewer's deviation findings.\n"
+        f"DESIGN BASIS:\n{spec}\n\nSUBMITTAL:\n{submittal}\n\n"
+        f"FINDINGS TO REVIEW:\n{_json.dumps(devs, indent=2)}\n\n"
+        "Identify (a) any finding that is actually compliant (false positive) and "
+        "(b) any genuine deviation that was MISSED. Return JSON: "
+        '{"needs_revision": <bool>, "feedback": "<concise, specific guidance>"}.'
+    )
+    try:
+        r = complete_json(prompt, system="You are a meticulous commissioning peer reviewer.")
+        if isinstance(r, dict) and r.get("needs_revision"):
+            return {"needs_revision": True, "feedback": str(r.get("feedback", ""))}
+    except Exception as exc:
+        log.info("LLM critique skipped: %s", exc)
+    return {}
 
 
 class PipelineState(TypedDict):
@@ -26,6 +124,8 @@ class PipelineState(TypedDict):
     extracted_triples: Optional[List[dict]]
     deviations: List[dict]
     elapsed_ms: float
+    iteration: int
+    critique: Optional[dict]
 
 
 def node_ingest(state: PipelineState) -> PipelineState:
@@ -63,9 +163,54 @@ def route_after_validate(state: PipelineState) -> Literal["reconcile", "format_o
 
 
 def node_reconcile(state: PipelineState) -> PipelineState:
+    state["iteration"] = state.get("iteration", 0) + 1
+    feedback = (state.get("critique") or {}).get("feedback")
+    if feedback:
+        log.info("Reconcile pass %d for %s (revising on self-critique)",
+                 state["iteration"], state["system_id"])
     state["deviations"] = reconcile_system(state["system_id"],
-                                           state["standards_text"])
+                                           state["standards_text"],
+                                           feedback=feedback)
     return state
+
+
+def node_critique(state: PipelineState) -> PipelineState:
+    """Self-critique node — the reflexion step. Verifies the reconciler's own
+    findings; if the check fails and revision budget remains, marks the state so
+    the graph loops BACK to reconcile. On the final pass it applies the safe
+    deterministic cleanup (drop equality false-positives / duplicates)."""
+    devs = state.get("deviations") or []
+    spec = state.get("spec_text") or ""
+    sub = state.get("submittal_text") or ""
+    needs, feedback, keep, issues = _self_check(devs)
+
+    if _LLM_CRITIQUE and devs:
+        deeper = _llm_critique(devs, spec, sub, state.get("standards_text", ""))
+        if deeper.get("needs_revision"):
+            needs = True
+            feedback = (feedback + "\n" + deeper.get("feedback", "")).strip()
+            issues = issues + ["peer-review: " + deeper.get("feedback", "")]
+
+    budget_left = state.get("iteration", 1) <= _MAX_REVISIONS
+    revise = bool(needs and budget_left)
+    state["critique"] = {
+        "needs_revision": revise,
+        "iteration": state.get("iteration", 1),
+        "issues": issues,
+        "feedback": feedback,
+        "dropped": 0,
+    }
+    if not revise:
+        if len(keep) != len(devs):
+            state["critique"]["dropped"] = len(devs) - len(keep)
+            log.info("Self-critique cleaned %d finding(s) for %s",
+                     len(devs) - len(keep), state["system_id"])
+        state["deviations"] = keep
+    return state
+
+
+def route_after_critique(state: PipelineState) -> Literal["reconcile", "cx_predict"]:
+    return "reconcile" if (state.get("critique") or {}).get("needs_revision") else "cx_predict"
 
 
 def node_cx_predict(state: PipelineState) -> PipelineState:
@@ -95,6 +240,7 @@ def build_graph():
     g.add_node("load_standards", node_load_standards)
     g.add_node("validate", node_validate)
     g.add_node("reconcile", node_reconcile)
+    g.add_node("critique", node_critique)
     g.add_node("cx_predict", node_cx_predict)
     g.add_node("format_output", node_format_output)
 
@@ -105,7 +251,13 @@ def build_graph():
         "reconcile": "reconcile",
         "format_output": "format_output",
     })
-    g.add_edge("reconcile", "cx_predict")
+    g.add_edge("reconcile", "critique")
+    # The cycle: critique routes back to reconcile on a failed self-check
+    # (bounded by _MAX_REVISIONS), else forward to cx_predict.
+    g.add_conditional_edges("critique", route_after_critique, {
+        "reconcile": "reconcile",
+        "cx_predict": "cx_predict",
+    })
     g.add_edge("cx_predict", "format_output")
     g.add_edge("format_output", END)
     return g.compile()
@@ -121,6 +273,8 @@ def _init_state(system_id: str) -> PipelineState:
         "extracted_triples": None,
         "deviations": [],
         "elapsed_ms": 0,
+        "iteration": 0,
+        "critique": None,
     }
 
 
@@ -137,7 +291,11 @@ def run_pipeline(system_id: str) -> List[dict]:
         state = node_ingest(state)
         state = node_load_standards(state)
         if route_after_validate(state) == "reconcile":
-            state = node_reconcile(state)
+            while True:  # reflexion loop, bounded by _MAX_REVISIONS via node_critique
+                state = node_reconcile(state)
+                state = node_critique(state)
+                if route_after_critique(state) != "reconcile":
+                    break
             state = node_cx_predict(state)
         state = node_format_output(state)
         devs = state["deviations"]

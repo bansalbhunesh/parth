@@ -100,14 +100,16 @@ A `retrieve` node sits between `reconcile` and `critique`: when a finding cites 
 governing standard absent from the loaded context, a deterministic tool
 (`backend/agents/retrieval.py`) fetches it from the local scraped-standards KB and
 the graph **loops back to `reconcile`** to re-reason with it (`node_retrieve`,
-`route_after_retrieve`). Bounded by `PRAMAAN_MAX_RETRIEVALS`; opt-in via
-`PRAMAAN_RETRIEVAL` so the high-volume path keeps its latency, but the node + cycle
-always exist in the graph and `GET /pipeline`. The agent graph now has **two**
-bounded cycles (tool-call + reflexion), not a straight line.
+`route_after_retrieve`). Bounded by `PRAMAAN_MAX_RETRIEVALS`. **Active by default**
+— the fetch is a local lookup and only fires when a cited standard is in the KB but
+missing from context, so the worst case is a single extra `reconcile` pass; set
+`PRAMAAN_RETRIEVAL=0` to disable on latency-sensitive batch runs. The node + cycle
+exist in the graph and `GET /pipeline` either way. So the agent graph runs **two**
+bounded cycles on the default path (tool-call + reflexion), not a straight line.
 
 ### Test status
-`python -m pytest tests/ -q` → **308 passed** (267 prior + 17 real-pairs + 8
-cx-graph + 7 self-critique + 9 retrieval-loop). New suites:
+`python -m pytest tests/ -q` → **310 passed** (267 prior + 17 real-pairs + 8
+cx-graph + 7 self-critique + 11 retrieval-loop). New suites:
 `tests/test_real_pairs.py`, `tests/test_cx_graph.py`, `tests/test_self_critique.py`,
 `tests/test_retrieval_loop.py`.
 
@@ -124,10 +126,11 @@ cx-graph + 7 self-critique + 9 retrieval-loop). New suites:
 3. **P3 — frontend a11y/responsive.** Audit flagged weak mobile layout on tables/
    Gantt and missing ARIA elsewhere; the showcase is fixed, the dashboards are
    not. Run an axe pass.
-4. **P3 — pitch discipline.** Never say "F1 = 1.000" aloud. Lead with: *"17
-   genuine deviations and zero false positives on real Vertiv / Cummins / ABB /
-   Tate / Schneider documents the model had never seen — and one case we score
-   ourselves at ~0.9, because honest experts disagree."*
+4. **P3 — pitch discipline.** Never headline the synthetic "F1 = 1.000" as proof.
+   Lead with: *"19 genuine deviations — recall 1.000 — and zero false positives on
+   real Vertiv / Cummins / ABB / Tate / Schneider documents the model had never
+   seen, and one contested case we score ourselves at ~0.9, because honest experts
+   disagree."* Treat the seeded-corpus 1.000 as a scale/reproducibility check only.
 
 ---
 _Reproduce the honest numbers with no key: `python eval/real_pairs_offline.py`._

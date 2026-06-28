@@ -55,7 +55,7 @@ export default async function JudgePage() {
         </div>
         <div className="jm-metric">
           <div className="jm-metric-val ok">1.000</div>
-          <div className="jm-metric-label">F1 — real LLM, 12 projects</div>
+          <div className="jm-metric-label">recall on real, unseen datasheets · 0 FP · ~0.9 precision</div>
         </div>
         <div className="jm-metric">
           <div className="jm-metric-val accent">12 · 11</div>
@@ -78,11 +78,13 @@ export default async function JudgePage() {
 
       <section className="jm-section">
         <div className="jm-section-head">
-          <h2>Not one lucky project — the whole portfolio</h2>
+          <h2>Scale check — the whole portfolio</h2>
           <p>
-            12 projects across 11 countries and 6 tier standards. A real frontier
-            model recovers <strong>50/50 deviations</strong> from raw documents —
-            Recall 1.000, Precision 1.000.
+            12 projects across 11 countries and 6 tier standards. This is a
+            synthetic breadth corpus where the deviations are <strong>seeded</strong>,
+            so the model recovers 50/50 <em>by construction</em> — it proves the
+            pipeline scales and reproduces, not detection skill. The real proof is
+            the unseen-document panel above.
           </p>
         </div>
         <MultiProjectDashboard />

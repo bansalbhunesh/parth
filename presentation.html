@@ -535,7 +535,7 @@
   <div class="metric-row fade-up" style="margin-top:40px;">
     <div class="metric"><div class="metric-val accent">50</div><div class="metric-label">Deviations Caught</div></div>
     <div class="metric"><div class="metric-val green">1,024</div><div class="metric-label">Weeks Saved</div></div>
-    <div class="metric"><div class="metric-val purple">1.000</div><div class="metric-label">F1 Score</div></div>
+    <div class="metric"><div class="metric-val purple">1.000</div><div class="metric-label">Real-doc Recall</div></div>
     <div class="metric"><div class="metric-val gold">12</div><div class="metric-label">Projects</div></div>
   </div>
 </div>
@@ -808,8 +808,8 @@
 <!-- SLIDE 9: Eval Harness -->
 <div class="slide">
   <span class="tag tag-green fade-up">EVAL HARNESS</span>
-  <h2 class="fade-up">Three Independent Proof Paths</h2>
-  <p class="subtitle fade-up" style="margin-bottom:28px;">No circular reasoning — three independent paths all score 1.000</p>
+  <h2 class="fade-up">Reproducibility checks + proof on real documents</h2>
+  <p class="subtitle fade-up" style="margin-bottom:28px;">Paths 1&ndash;2 are seeded-corpus integrity checks (1.000 <em>by construction</em>, not detection skill); Path 3 &mdash; real, unseen datasheets &mdash; is the credibility signal.</p>
   <div class="grid grid-3 fade-up" style="max-width:950px;">
     <div class="card">
       <h3 style="color:var(--cyan);">Path 1: Structured</h3>
@@ -825,13 +825,13 @@
     </div>
     <div class="card">
       <h3 style="color:var(--gold);">Path 3: LLM Agent</h3>
-      <p style="color:var(--muted); font-size:0.85rem; margin-top:8px;">Raw docs → LLM reasoning → deviations</p>
-      <div class="card-value green" style="margin-top:12px;">≥ 0.92</div>
-      <p style="color:var(--muted); font-size:0.8rem;">Full AI pipeline proof</p>
+      <p style="color:var(--muted); font-size:0.85rem; margin-top:8px;">Real, unseen datasheets → LLM reasoning → deviations</p>
+      <div class="card-value green" style="margin-top:12px;">Recall 1.000</div>
+      <p style="color:var(--muted); font-size:0.8rem;">19/19 hard · 0 FP · ~0.9 precision (live-verified)</p>
     </div>
   </div>
   <p class="fade-up" style="color:var(--muted); font-size:0.85rem; margin-top:16px;">
-    <code style="font-family:var(--mono); color:var(--cyan);">make eval-all</code> — one command, three proofs
+    <code style="font-family:var(--mono); color:var(--cyan);">make eval-all</code> — two reproducibility checks + the real-document proof
   </p>
 </div>
 
@@ -880,7 +880,7 @@
     </div>
     <div class="rubric-card">
       <h3><span class="purple">Technical Excellence</span></h3>
-      <p>Synthetic portfolio is 1.000 by construction (breadth check); the real signal is 11 sourced datasheet pairs — 19 deviations (recall 1.000), 0 false positives, self-scored &approx;0.9 on one contested case. 308 tests. 23 endpoints. Independent text + real-LLM evaluation.</p>
+      <p>Synthetic portfolio is 1.000 by construction (breadth check); the real signal is 11 sourced datasheet pairs — 19 deviations (recall 1.000), 0 false positives, self-scored &approx;0.9 on one contested case. 310 tests. 23 endpoints. Independent text + real-LLM evaluation.</p>
     </div>
     <div class="rubric-card">
       <h3><span class="gold">Scalability & UX</span></h3>
@@ -972,7 +972,7 @@
   <div class="glow-line fade-up"></div>
   <p class="subtitle fade-up">
     50 deviations &middot; 1,024 weeks saved &middot; 12 projects &middot; 11 countries<br>
-    Real-doc: 0 false positives &middot; self-scored ~0.9 &middot; 308 tests
+    Real-doc: 0 false positives &middot; self-scored ~0.9 &middot; 310 tests
   </p>
   <div class="final-cta fade-up">
     <a class="cta-btn cta-primary" href="https://parth-tan.vercel.app" target="_blank">▶ Live Demo</a>

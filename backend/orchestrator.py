@@ -8,9 +8,12 @@ cycles (so this is a real agent, not a straight pipeline):
    critique --(self-check fails, budget left)-----> reconcile   <- cycle 2 (reflexion)
    critique --(ok / budget spent)----------------> cx_predict -> format_output
 
-Cycle 1 (retrieval, opt-in via PRAMAAN_RETRIEVAL, bounded by PRAMAAN_MAX_RETRIEVALS):
-when a finding cites a standard absent from the loaded context, a tool fetches it
-from the local KB and the graph loops back to re-reason with it. Cycle 2 (self-
+Cycle 1 (retrieval, active by default — set PRAMAAN_RETRIEVAL=0 to disable —
+bounded by PRAMAAN_MAX_RETRIEVALS): when a finding cites a standard absent from
+the loaded context, a tool fetches it from the local KB and the graph loops back
+to re-reason with it. The fetch is a deterministic local lookup; it only fires
+when the cited standard is in the KB but not yet in context, so the worst-case
+cost is a single extra reconcile pass. Cycle 2 (self-
 critique, bounded by PRAMAAN_MAX_REVISIONS): the reconciler's findings are verified
 and, on a failed self-check (a value already meeting spec, a duplicate, or a low-
 confidence finding), the graph routes back to reconcile with the critique as
@@ -42,10 +45,11 @@ _LOW_CONF = float(os.getenv("PRAMAAN_LOW_CONF", "0.45"))        # re-examine bel
 _LLM_CRITIQUE = os.getenv("PRAMAAN_LLM_CRITIQUE", "0") == "1"   # opt-in deeper critic
 
 # Retrieval tool-call loop: when a finding cites a standard not in context, fetch
-# it from the local KB and loop back to re-reason. Opt-in (default off) so the
-# high-volume /deviations path keeps its latency; the node + cycle always exist
-# in the graph and are exercised under test and when PRAMAAN_RETRIEVAL=1.
-_RETRIEVAL = os.getenv("PRAMAAN_RETRIEVAL", "0") == "1"
+# it from the local KB and loop back to re-reason. Active by default; the fetch is
+# a local lookup and only fires for an in-KB-but-missing citation, so it adds at
+# most one reconcile pass. Set PRAMAAN_RETRIEVAL=0 to disable on latency-sensitive
+# batch runs. The node + cycle always exist in the graph either way.
+_RETRIEVAL = os.getenv("PRAMAAN_RETRIEVAL", "1") != "0"
 _MAX_RETRIEVALS = int(os.getenv("PRAMAAN_MAX_RETRIEVALS", "1"))
 
 _OMISSION_TOKENS = {

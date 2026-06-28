@@ -30,6 +30,27 @@ def test_available_standards_nonempty():
 
 
 # ── the loop node ────────────────────────────────────────────────────
+def test_retrieval_active_by_default():
+    # The second cycle must be live on the default path (no env override),
+    # otherwise the "two bounded cycles" claim is only true behind a flag.
+    import os
+    if os.getenv("PRAMAAN_RETRIEVAL") == "0":
+        return  # caller explicitly opted out; default-on is the shipped behaviour
+    assert orch._RETRIEVAL is True
+
+
+def test_retrieve_node_loops_on_default(monkeypatch):
+    # With the shipped default (no flag flip), an in-KB-but-missing citation
+    # should fetch and loop back to reconcile.
+    monkeypatch.setattr(orch, "_MAX_RETRIEVALS", 1)
+    state = _init_state("X")
+    state["deviations"] = [{"standard_ref": "UPTIME-TIER4", "required_value": "10", "provided_value": "7"}]
+    state["standards_text"] = "unrelated standards text"
+    state = node_retrieve(state)
+    assert route_after_retrieve(state) == "reconcile"
+    assert state["retrieval_count"] == 1
+
+
 def test_retrieve_node_is_noop_when_disabled(monkeypatch):
     monkeypatch.setattr(orch, "_RETRIEVAL", False)
     state = _init_state("X")

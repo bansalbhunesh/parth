@@ -60,5 +60,5 @@ not pattern-matching:
    as Submittal → Analyze.
 
 > Cost note: `gemini-2.5-pro` is the most thorough but costs more per call. For
-> repeated demo runs use `gemini-3.5-flash` (≈10–15× cheaper); the analyze path
+> repeated demo runs use `gemini-2.5-flash` (≈10–15× cheaper); the analyze path
 > also caps the standards text it sends (~85% fewer tokens) to keep cost low.

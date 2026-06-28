@@ -81,7 +81,7 @@
 
 > **$30 billion is flowing into Indian data centres on the way to 2 GW by 2026 — and 9 in 10 large builds slip schedule, most expensively at commissioning.** One undetected vendor deviation can mean **$10–40M a month** of delay on a 50 MW build. Pramaan catches it **the day the submittal lands** — when the fix is a one-line RFI, not a seven-figure slip. → [`docs/BUSINESS.md`](docs/BUSINESS.md)
 >
-> **It reasons over real documents — not keywords.** On real **Vertiv, Cummins, STULZ, and ABB** datasheets against real standards (Uptime, NFPA, EPA, ASHRAE, IEC), it recovered **17 genuine deviations + 5 true negatives across eight systems — none seeded** — including arithmetic it did itself (4,000 gal ÷ 103 GPH = **38.8 h** vs 48 required) and refrigerant/agent GWPs it **recalled from domain knowledge** (R-410A = 2,088, R-134a = 1,430, FM-200 = 3,220) — values the datasheets never stated. Every value sourced → [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md)
+> **It reasons over real documents — not keywords.** On real **Vertiv, Cummins, STULZ, and ABB** datasheets against real standards (Uptime, NFPA, EPA, ASHRAE, IEC), it recovered **17 genuine deviations + 0 false positives across nine systems — none seeded** — including arithmetic it did itself (4,000 gal ÷ 103 GPH = **38.8 h** vs 48 required) and refrigerant/agent GWPs it **recalled from domain knowledge** (R-410A = 2,088, R-134a = 1,430, FM-200 = 3,220) — values the datasheets never stated. Every value sourced → [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md)
 >
 > **And it's production-grade.** Each finding cites the standard, predicts the commissioning test it will fail, and the weeks of lead time. When the AI is rate-limited, a rule-based engine still catches the headline shortfalls — **no silent zeros.** Benchmarked across 12 projects / 11 countries for breadth · 263 tests · CI green.
 
@@ -95,7 +95,7 @@
 2. In **Live Analysis**, click **“Load real document ★”** — or upload your own spec + submittal PDFs.
 3. Hit **Analyze**. Watch it stream the reasoning, then list each deviation with its severity, the standard it cites, the commissioning test it predicts will fail, and the lead time.
 
-Ready-made demo pairs ship in [`data/samples/`](data/samples/): a UPS edge pair, a **real Vertiv datasheet**, a standby-generator pair, and **six fully-sourced real pairs** (Vertiv, Cummins, STULZ, ABB, FM-200/Novec, Carrier-class, EUROBAT — every value citable in [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md)). Drop any pair into the analyzer.
+Ready-made demo pairs ship in [`data/samples/`](data/samples/): a UPS edge pair, a **real Vertiv datasheet**, a standby-generator pair, and **eight fully-sourced real pairs** (Vertiv, Cummins, STULZ, ABB, FM-200/Novec, Carrier-class, EUROBAT, IEC 60076-11 transformer, NFPA 75 cabling — every value citable in [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md)). Drop any pair into the analyzer.
 
 > Health at a glance: **[`/health`](https://parth-3puc.onrender.com/health)** shows whether the LLM is wired (`"ready": true`); **[`/llm-check`](https://parth-3puc.onrender.com/llm-check)** makes a real call and reports the exact status. The app **degrades gracefully** — every endpoint returns 200 and the dashboard renders from bundled data even with no API key.
 
@@ -288,7 +288,12 @@ python3 eval/multi_project_eval.py --json
 >    against the ≤750 cap, and caught a VRLA battery's 3–5-yr life vs a 10-yr
 >    requirement plus a missing-monitoring omission.
 >
-> **17 genuine deviations + 5 true negatives across eight systems, none seeded** —
+> 5. **Transformer · Cabling** — vs IEC 60076-11 / NFPA 75 / TIA-942. It flagged a
+>    dry-type transformer's harmonic rating (K-13→K-1) and a plenum cable's fire
+>    rating (CMP→CMR), while clearing the compliant Class-F insulation, Dyn11,
+>    6% impedance, Cat6A, and OM4/OS2 values.
+>
+> **17 genuine deviations + 0 false positives across nine systems, none seeded** —
 > sources for every number in [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md).
 
 **Key diversity dimensions:**

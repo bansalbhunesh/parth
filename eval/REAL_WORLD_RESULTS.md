@@ -16,7 +16,7 @@ reasons out deviations from scratch, scored against committed ground truth.
 | Single-project (Meghdoot) | 1 | 14 | **1.000** | **1.000** | **1.000** |
 | Multi-project (full portfolio) | 12 | 50 | **1.000** | **1.000** | **1.000** |
 
-- **Model:** `gemini-2.5-pro` (also verified all-14 recall on `gemini-3.5-flash`)
+- **Model:** `gemini-2.5-pro` (also verified all-14 recall on `gemini-2.5-flash`)
 - **Method:** real LLM reasoning over raw markdown, semantic scoring
 - **Date:** 2026-06-27
 - **False negatives:** 0 — the engine never missed a seeded deviation in any of
@@ -59,7 +59,7 @@ The harness reports **two** matching modes (see `eval/run_eval.py`):
 
 Real runs surfaced two issues that mocking never could:
 
-1. **`gemini-3.5-flash` scored 0.786 strict on Meghdoot** despite finding all
+1. **`gemini-2.5-flash` scored 0.786 strict on Meghdoot** despite finding all
    14 deviations — it labeled 3 differently. Root cause: brittle exact-string
    scoring. Fix: semantic matching (above) + a prompt that pins canonical
    `component` / snake_case `parameter` naming.

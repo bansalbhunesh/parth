@@ -170,8 +170,19 @@ never stated — genuine domain knowledge, not string-matching.
 
 ---
 
-**Together, the six real pairs give 15 genuine deviations + 5 true negatives**
-across UPS, generator, cooling, LV switchgear, fire suppression, chiller plant,
-and battery — sourced to Vertiv, Cummins, STULZ, ABB, FM-200/Novec, Carrier-class,
-EUROBAT, and the standards Uptime Tier IV, NFPA 110/2001, EPA 40 CFR 60, ASHRAE
-90.1/TC9.9, EU F-Gas, US AIM Act, IEC 61439/61641, IEEE 1188. **None seeded.**
+## Pairs 7–8 — Transformer · Cabling (LLM-verified, same batch)
+
+| Pair | Files | Real fact | Deviation |
+|------|-------|-----------|-----------|
+| **7 Transformer** | `design_basis_transformer.md` + `submittal_transformer.md` | Dry-type cast-resin, IEC 60076-11; **K-factor** rating for non-linear loads | `harmonic_rating: K-13 → K-1` **[Major]** (cleared Class-F, F1, Dyn11, 6% — all compliant) |
+| **8 Cabling** | `design_basis_cabling.md` + `submittal_cabling.md` | NFPA 75 / NFPA 262: plenum spaces need **CMP** (UL 910) | `plenum_fire_rating: CMP → CMR` **[Major]** (cleared Cat6A, OM4/OS2 — compliant) |
+
+---
+
+**Together, the eight real pairs give 17 genuine deviations + 0 false positives**
+(recall 1.000, single batch run — see [`../../eval/REAL_PAIRS_EVAL.md`](../../eval/REAL_PAIRS_EVAL.md))
+across UPS, generator, cooling, LV switchgear, fire suppression, chiller, battery,
+transformer, and cabling — sourced to Vertiv, Cummins, STULZ, ABB, FM-200/Novec,
+Carrier-class, EUROBAT, IEC/NFPA/TIA-942, and the standards Uptime Tier IV, NFPA
+110/2001/75, EPA 40 CFR 60, ASHRAE 90.1/TC9.9, EU F-Gas, US AIM Act, IEC
+61439/61641/60076, IEEE 1188. **None seeded.**

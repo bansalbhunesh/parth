@@ -95,10 +95,21 @@ bug in `REAL_WORLD_RESULTS.md`) and de-duplicates, while **never** dropping a
 derived/recalled finding. An opt-in deeper LLM critic is available behind
 `PRAMAAN_LLM_CRITIQUE=1`. The cycle is shown in `GET /pipeline`.
 
+### 3f. Retrieval tool-call loop — a second genuine cycle  *(deepens V3)*
+A `retrieve` node sits between `reconcile` and `critique`: when a finding cites a
+governing standard absent from the loaded context, a deterministic tool
+(`backend/agents/retrieval.py`) fetches it from the local scraped-standards KB and
+the graph **loops back to `reconcile`** to re-reason with it (`node_retrieve`,
+`route_after_retrieve`). Bounded by `PRAMAAN_MAX_RETRIEVALS`; opt-in via
+`PRAMAAN_RETRIEVAL` so the high-volume path keeps its latency, but the node + cycle
+always exist in the graph and `GET /pipeline`. The agent graph now has **two**
+bounded cycles (tool-call + reflexion), not a straight line.
+
 ### Test status
-`python -m pytest tests/ -q` → **299 passed** (267 prior + 17 real-pairs + 8
-cx-graph + 7 self-critique). New suites: `tests/test_real_pairs.py`,
-`tests/test_cx_graph.py`, `tests/test_self_critique.py`.
+`python -m pytest tests/ -q` → **308 passed** (267 prior + 17 real-pairs + 8
+cx-graph + 7 self-critique + 9 retrieval-loop). New suites:
+`tests/test_real_pairs.py`, `tests/test_cx_graph.py`, `tests/test_self_critique.py`,
+`tests/test_retrieval_loop.py`.
 
 ---
 
@@ -107,10 +118,9 @@ cx-graph + 7 self-critique). New suites: `tests/test_real_pairs.py`,
 1. **P1 — practitioner validation (V5).** The single highest-leverage item left.
    Even one informal CxA/owner's-engineer quote confirming the real-pair findings
    converts "is this real?" into "an expert says yes." See `docs/OUTREACH.md`.
-2. ~~**P2 — make the agent graph earn the name (V3).**~~ **DONE** (§3e): the
-   self-critique reflexion loop is a real cycle in the graph. A natural next
-   extension is a *retrieval* tool-call edge (fetch a governing clause on
-   demand) — optional, not required for the "agent system" claim now.
+2. ~~**P2 — make the agent graph earn the name (V3).**~~ **DONE** (§3e + §3f):
+   the graph now has two genuine bounded cycles — a self-critique reflexion loop
+   and a retrieval tool-call loop.
 3. **P3 — frontend a11y/responsive.** Audit flagged weak mobile layout on tables/
    Gantt and missing ARIA elsewhere; the showcase is fixed, the dashboards are
    not. Run an axe pass.

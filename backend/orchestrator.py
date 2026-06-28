@@ -1,20 +1,22 @@
 """
-Orchestrator — LangGraph agent graph with conditional routing AND a self-
-critique cycle (so this is a real agent, not a straight pipeline):
+Orchestrator — LangGraph agent graph with conditional routing and TWO bounded
+cycles (so this is a real agent, not a straight pipeline):
 
-  [ingest -> load_standards -> validate] --(docs)--> reconcile -> critique
+  [ingest -> load_standards -> validate] --(docs)--> reconcile -> retrieve -> critique
                                      └──(no docs)──> format_output
-        critique --(self-check fails, budget left)--> reconcile   <- the loop
-        critique --(ok / budget spent)-------------> cx_predict -> format_output
+   retrieve --(fetched a missing cited standard)--> reconcile   <- cycle 1 (tool-call)
+   critique --(self-check fails, budget left)-----> reconcile   <- cycle 2 (reflexion)
+   critique --(ok / budget spent)----------------> cx_predict -> format_output
 
-The reconcile -> critique -> reconcile cycle is a genuine reflexion loop, bounded
-by PRAMAAN_MAX_REVISIONS so it always terminates: the reconciler's own findings
-are verified, and on a failed self-check (a flagged value that already meets the
-spec, a duplicate, or a low-confidence finding) the graph routes BACK to
-reconcile with the critique as feedback. Crucially the verifier never drops a
-value merely because it is not verbatim in the documents — the best findings are
-derived (4000/103 = 38.8 h) or recalled (R-410A GWP 2088). Falls back to an
-equivalent sequential runner if langgraph is not installed.
+Cycle 1 (retrieval, opt-in via PRAMAAN_RETRIEVAL, bounded by PRAMAAN_MAX_RETRIEVALS):
+when a finding cites a standard absent from the loaded context, a tool fetches it
+from the local KB and the graph loops back to re-reason with it. Cycle 2 (self-
+critique, bounded by PRAMAAN_MAX_REVISIONS): the reconciler's findings are verified
+and, on a failed self-check (a value already meeting spec, a duplicate, or a low-
+confidence finding), the graph routes back to reconcile with the critique as
+feedback. The verifier never drops a value merely for not being verbatim in the
+docs — the best findings are derived (4000/103 = 38.8 h) or recalled (R-410A GWP
+2088). Falls back to an equivalent sequential runner if langgraph is absent.
 """
 
 import logging
@@ -26,6 +28,7 @@ from typing import List, Literal, Optional, TypedDict
 from backend.agents.ingestion import ingest_system
 from backend.agents.reconciliation import reconcile_system, _all_standards_text
 from backend.agents.commissioning import predict_cx_impact, compute_risk_score
+from backend.agents.retrieval import retrieve_standard
 from backend.paths import CORPUS
 
 log = logging.getLogger("pramaan.orchestrator")
@@ -37,6 +40,13 @@ log = logging.getLogger("pramaan.orchestrator")
 _MAX_REVISIONS = int(os.getenv("PRAMAAN_MAX_REVISIONS", "1"))   # extra reconcile passes
 _LOW_CONF = float(os.getenv("PRAMAAN_LOW_CONF", "0.45"))        # re-examine below this
 _LLM_CRITIQUE = os.getenv("PRAMAAN_LLM_CRITIQUE", "0") == "1"   # opt-in deeper critic
+
+# Retrieval tool-call loop: when a finding cites a standard not in context, fetch
+# it from the local KB and loop back to re-reason. Opt-in (default off) so the
+# high-volume /deviations path keeps its latency; the node + cycle always exist
+# in the graph and are exercised under test and when PRAMAAN_RETRIEVAL=1.
+_RETRIEVAL = os.getenv("PRAMAAN_RETRIEVAL", "0") == "1"
+_MAX_RETRIEVALS = int(os.getenv("PRAMAAN_MAX_RETRIEVALS", "1"))
 
 _OMISSION_TOKENS = {
     "notstated", "na", "tbd", "missing", "omitted", "none", "",
@@ -126,6 +136,9 @@ class PipelineState(TypedDict):
     elapsed_ms: float
     iteration: int
     critique: Optional[dict]
+    revision_count: int
+    retrieval_count: int
+    retrieved: List[str]
 
 
 def node_ingest(state: PipelineState) -> PipelineState:
@@ -174,6 +187,45 @@ def node_reconcile(state: PipelineState) -> PipelineState:
     return state
 
 
+def node_retrieve(state: PipelineState) -> PipelineState:
+    """Retrieval tool-call node. If a finding cites a governing standard that is
+    not already in the loaded context, fetch it from the local KB, append it to
+    the standards, and signal a loop back to reconcile so the model can re-reason
+    with the new context. Bounded by _MAX_RETRIEVALS; a no-op unless enabled."""
+    if not _RETRIEVAL:
+        state["_retrieve_again"] = False
+        return state
+    devs = state.get("deviations") or []
+    standards = state.get("standards_text") or ""
+    snorm = _norm(standards)
+    already = set(state.get("retrieved") or [])
+    additions, fetched = [], []
+    for d in devs:
+        ref = str(d.get("standard_ref") or "").strip()
+        if not ref or ref.upper() == "DESIGN-BASIS" or ref in already:
+            continue
+        if _norm(ref) in snorm:        # already in the loaded context
+            continue
+        text = retrieve_standard(ref)
+        if text:
+            additions.append(f"\n\n=== RETRIEVED STANDARD: {ref} ===\n{text}")
+            fetched.append(ref)
+    can_loop = bool(fetched) and state.get("retrieval_count", 0) < _MAX_RETRIEVALS
+    if can_loop:
+        state["standards_text"] = standards + "".join(additions)
+        state["retrieved"] = sorted(already | set(fetched))
+        state["retrieval_count"] = state.get("retrieval_count", 0) + 1
+        state["retrieval_log"] = fetched
+        log.info("Retrieved %d standard(s) for %s %s; re-reconciling",
+                 len(fetched), state["system_id"], fetched)
+    state["_retrieve_again"] = can_loop
+    return state
+
+
+def route_after_retrieve(state: PipelineState) -> Literal["reconcile", "critique"]:
+    return "reconcile" if state.get("_retrieve_again") else "critique"
+
+
 def node_critique(state: PipelineState) -> PipelineState:
     """Self-critique node — the reflexion step. Verifies the reconciler's own
     findings; if the check fails and revision budget remains, marks the state so
@@ -191,16 +243,18 @@ def node_critique(state: PipelineState) -> PipelineState:
             feedback = (feedback + "\n" + deeper.get("feedback", "")).strip()
             issues = issues + ["peer-review: " + deeper.get("feedback", "")]
 
-    budget_left = state.get("iteration", 1) <= _MAX_REVISIONS
-    revise = bool(needs and budget_left)
+    rev = state.get("revision_count", 0)
+    revise = bool(needs and rev < _MAX_REVISIONS)
     state["critique"] = {
         "needs_revision": revise,
-        "iteration": state.get("iteration", 1),
+        "revision_count": rev,
         "issues": issues,
         "feedback": feedback,
         "dropped": 0,
     }
-    if not revise:
+    if revise:
+        state["revision_count"] = rev + 1
+    else:
         if len(keep) != len(devs):
             state["critique"]["dropped"] = len(devs) - len(keep)
             log.info("Self-critique cleaned %d finding(s) for %s",
@@ -240,6 +294,7 @@ def build_graph():
     g.add_node("load_standards", node_load_standards)
     g.add_node("validate", node_validate)
     g.add_node("reconcile", node_reconcile)
+    g.add_node("retrieve", node_retrieve)
     g.add_node("critique", node_critique)
     g.add_node("cx_predict", node_cx_predict)
     g.add_node("format_output", node_format_output)
@@ -251,8 +306,14 @@ def build_graph():
         "reconcile": "reconcile",
         "format_output": "format_output",
     })
-    g.add_edge("reconcile", "critique")
-    # The cycle: critique routes back to reconcile on a failed self-check
+    g.add_edge("reconcile", "retrieve")
+    # Cycle 1 — retrieval tool-call: if a cited standard was missing from context
+    # and got fetched, loop back to reconcile (bounded by _MAX_RETRIEVALS).
+    g.add_conditional_edges("retrieve", route_after_retrieve, {
+        "reconcile": "reconcile",
+        "critique": "critique",
+    })
+    # Cycle 2 — self-critique: route back to reconcile on a failed self-check
     # (bounded by _MAX_REVISIONS), else forward to cx_predict.
     g.add_conditional_edges("critique", route_after_critique, {
         "reconcile": "reconcile",
@@ -275,6 +336,9 @@ def _init_state(system_id: str) -> PipelineState:
         "elapsed_ms": 0,
         "iteration": 0,
         "critique": None,
+        "revision_count": 0,
+        "retrieval_count": 0,
+        "retrieved": [],
     }
 
 
@@ -291,11 +355,15 @@ def run_pipeline(system_id: str) -> List[dict]:
         state = node_ingest(state)
         state = node_load_standards(state)
         if route_after_validate(state) == "reconcile":
-            while True:  # reflexion loop, bounded by _MAX_REVISIONS via node_critique
+            while True:  # retrieval + reflexion cycles, both bounded
                 state = node_reconcile(state)
+                state = node_retrieve(state)
+                if route_after_retrieve(state) == "reconcile":
+                    continue
                 state = node_critique(state)
-                if route_after_critique(state) != "reconcile":
-                    break
+                if route_after_critique(state) == "reconcile":
+                    continue
+                break
             state = node_cx_predict(state)
         state = node_format_output(state)
         devs = state["deviations"]

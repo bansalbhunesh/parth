@@ -76,7 +76,7 @@ Four paths against the same ground truth, different inputs:
 4. **Real-LLM + real pairs** — capability (the number that matters).
 
 Two-way scoring (exact + semantic) so numbers are never inflated; true negatives
-prove low false-positive rate. **299 tests · GitHub Actions CI green.**
+prove low false-positive rate. **308 tests · GitHub Actions CI green.**
 
 ## Resilience & ops
 
@@ -102,7 +102,7 @@ No secrets in the repo (env-only keys); request validation (`Field` length caps)
 | Frontend | Next.js 15, React 19, TypeScript — Vercel |
 | PDF | pdfplumber (primary) + PyMuPDF (fallback) |
 | Retrieval | TF-IDF (demo) → pgvector / Qdrant (scale) |
-| Eval / CI | 4 eval paths · 299 tests · GitHub Actions |
+| Eval / CI | 4 eval paths · 308 tests · GitHub Actions |
 
 ## Scale — demonstrated
 

@@ -640,8 +640,9 @@
 <!-- SLIDE 6: Detection Accuracy -->
 <div class="slide">
   <span class="tag tag-green fade-up">DETECTION ACCURACY</span>
-  <h2 class="fade-up">F1 = 1.000 &middot; Zero False Positives</h2>
-  <div class="grid grid-4 fade-up" style="max-width:900px; margin-top:24px;">
+  <h2 class="fade-up">Honest Detection Numbers</h2>
+  <p class="fade-up" style="color:var(--muted); font-size:0.82rem; margin-top:8px;">The synthetic portfolio below scores 1.000 <em>by construction</em> — a plumbing / breadth check, not a flex.</p>
+  <div class="grid grid-4 fade-up" style="max-width:900px; margin-top:18px;">
     <div class="card">
       <div class="card-value green">1.000</div>
       <div class="card-label">Precision</div>
@@ -674,7 +675,7 @@
     </div>
   </div>
   <p class="fade-up" style="color:var(--muted); font-size:0.85rem; margin-top:16px;">
-    Triple eval harness: structured baseline + raw text extraction + multi-project aggregate
+    <strong>The number that matters:</strong> 11 sourced real datasheet pairs — 17 deviations, 0 false positives, and a self-scored &approx;0.95 on one contested ASHRAE case. We report 0.95, not a suspicious 1.000.
   </p>
 </div>
 
@@ -682,7 +683,8 @@
 <div class="slide">
   <span class="tag tag-purple fade-up">MULTI-PROJECT GENERALISATION</span>
   <h2 class="fade-up">12 Projects &middot; 11 Countries &middot; 6 Tier Standards</h2>
-  <div class="project-row fade-up" style="margin-top:24px; flex-wrap:wrap; gap:10px;">
+  <p class="fade-up" style="color:var(--muted); font-size:0.82rem; margin-top:8px;">Synthetic breadth test — deviations are seeded, so F1 is 1.000 <em>by construction</em>. The real-world proof is the sourced-datasheet pairs, not this grid.</p>
+  <div class="project-row fade-up" style="margin-top:18px; flex-wrap:wrap; gap:10px;">
     <div class="project-chip">
       <div class="project-chip-name">Meghdoot</div>
       <div class="project-chip-meta">Tier IV · Mumbai · 40MW</div>
@@ -878,7 +880,7 @@
     </div>
     <div class="rubric-card">
       <h3><span class="purple">Technical Excellence</span></h3>
-      <p>Triple eval harness with P/R/F1 = 1.000 across 12 projects. 263 tests. 22 endpoints. Independent text + real-LLM evaluation. Zero false positives.</p>
+      <p>Synthetic portfolio is 1.000 by construction (breadth check); the real signal is 11 sourced datasheet pairs — 17 deviations, 0 false positives, self-scored &approx;0.95 on one contested case. 299 tests. 23 endpoints. Independent text + real-LLM evaluation.</p>
     </div>
     <div class="rubric-card">
       <h3><span class="gold">Scalability & UX</span></h3>
@@ -970,7 +972,7 @@
   <div class="glow-line fade-up"></div>
   <p class="subtitle fade-up">
     50 deviations &middot; 1,024 weeks saved &middot; 12 projects &middot; 11 countries<br>
-    F1 = 1.000 &middot; Zero false positives &middot; 263 tests
+    Real-doc: 0 false positives &middot; self-scored 0.95 &middot; 299 tests
   </p>
   <div class="final-cta fade-up">
     <a class="cta-btn cta-primary" href="https://parth-tan.vercel.app" target="_blank">▶ Live Demo</a>

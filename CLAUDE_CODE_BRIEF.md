@@ -19,12 +19,12 @@ All components implemented, tested, and polished:
 - [x] Standards scraper v2 (3-tier: Firecrawl → Crawl4ai → Playwright)
 - [x] Docker Compose one-command setup with health checks
 - [x] GitHub Actions CI (backend tests, frontend build, Docker smoke test)
-- [x] 263 tests across API, agents, corpus, and multi-project eval
+- [x] 299 tests across API, agents, corpus, and multi-project eval
 
 ## Reproduce the Numbers
 
 ```bash
-# Run 263 tests
+# Run 299 tests
 python3 -m pytest tests/ -v
 
 # Single project eval (14 devs, 267 weeks, F1=1.000)
@@ -56,9 +56,9 @@ python3 eval/run_eval.py --detector llm
 5. **Pipeline** → 5 agents animate in sequence. Architecture diagram shows full stack.
 6. **System health** → 10 systems grid. 7 critical, 7 major deviations flagged.
 7. **Cx Twin** → IST-07, IST-09, IST-11 pulsing red. These tests WILL fail.
-8. **Multi-project** → 12 projects across 11 countries. F1=1.000 everywhere.
+8. **Multi-project** → 12 projects across 11 countries (synthetic breadth test — 1.000 by construction; the real proof is the sourced datasheet pairs).
 9. **Copilot** → "Has UPS battery runtime come up before?" → RFI-014 cited.
-10. **Eval** → P/R/F1 = 1.000. Zero false positives. Reproducible harness.
+10. **Eval** → real datasheets: 17 deviations, 0 false positives, self-scored ~0.95 on one contested case. Reproducible no-key harness (`eval/real_pairs_offline.py`).
 11. **Export** → One click → HTML evidence pack with full audit trail.
 
 ## Guardrails

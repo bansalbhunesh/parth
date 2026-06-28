@@ -1,9 +1,12 @@
 """Tests for the standards retrieval tool and the retrieval tool-call loop."""
 
 import backend.orchestrator as orch
-from backend.agents.retrieval import retrieve_standard, available_standards
+from backend.agents.retrieval import available_standards, retrieve_standard
 from backend.orchestrator import (
-    node_retrieve, route_after_retrieve, build_graph, _init_state,
+    _init_state,
+    build_graph,
+    node_retrieve,
+    route_after_retrieve,
 )
 
 

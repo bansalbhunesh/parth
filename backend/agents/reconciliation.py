@@ -6,8 +6,8 @@ basis, vendor submittal, and governing standards.
 import json
 import logging
 
-from backend.llm import complete_json, LLMError
 from backend.agents.commissioning import predict_cx_impact
+from backend.llm import LLMError, complete_json
 from backend.paths import CORPUS
 
 log = logging.getLogger("pramaan.reconciliation")

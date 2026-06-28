@@ -143,8 +143,8 @@ def main():
         return
 
     print(f"\n{'='*70}")
-    print(f"  PRAMAAN TEXT-BASED EVAL — RAW MARKDOWN → REGEX EXTRACTION")
-    print(f"  (Independent input path: extraction engine over raw markdown)")
+    print("  PRAMAAN TEXT-BASED EVAL — RAW MARKDOWN → REGEX EXTRACTION")
+    print("  (Independent input path: extraction engine over raw markdown)")
     print(f"{'='*70}")
 
     for pid, r in results.items():

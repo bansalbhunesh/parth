@@ -22,9 +22,9 @@ disagree on whether that is a non-conformance, so counting it yields a precision
 below 1.000 — which is the honest number, reported rather than hidden.
 """
 
+import pathlib
 import re
 import sys
-import pathlib
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))
 

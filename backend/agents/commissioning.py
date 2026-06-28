@@ -4,9 +4,9 @@ Commissioning Risk Predictor — maps deviations to Cx tests and computes lead t
 
 import json
 
+from backend.agents import cx_graph
 from backend.llm import complete_json
 from backend.paths import CORPUS
-from backend.agents import cx_graph
 
 
 def _current_week():

@@ -7,7 +7,6 @@ so they must be bulletproof. Judges always ask "what happens without your key?"
 — this file is the answer.
 """
 
-import io
 import os
 import pathlib
 import sys
@@ -29,7 +28,7 @@ class TestLLMGracefulFailure:
 
     def test_complete_raises_without_gemini_key(self):
         _clear_keys()
-        from backend.llm import complete, LLMError
+        from backend.llm import LLMError, complete
         try:
             complete("hello")
             assert False, "expected LLMError"
@@ -38,7 +37,7 @@ class TestLLMGracefulFailure:
 
     def test_complete_json_raises_without_key(self):
         _clear_keys()
-        from backend.llm import complete_json, LLMError
+        from backend.llm import LLMError, complete_json
         try:
             complete_json("hello")
             assert False, "expected LLMError"
@@ -47,7 +46,7 @@ class TestLLMGracefulFailure:
 
     def test_claude_provider_raises_without_key(self):
         _clear_keys()
-        from backend.llm import _claude, LLMError
+        from backend.llm import LLMError, _claude
         try:
             _claude("hello", "", True)
             assert False, "expected LLMError"
@@ -56,7 +55,7 @@ class TestLLMGracefulFailure:
 
     def test_gemini_stream_raises_without_key(self):
         _clear_keys()
-        from backend.llm import _gemini_stream, LLMError
+        from backend.llm import LLMError, _gemini_stream
         try:
             list(_gemini_stream("hello", ""))
             assert False, "expected LLMError"
@@ -65,7 +64,7 @@ class TestLLMGracefulFailure:
 
     def test_claude_stream_raises_without_key(self):
         _clear_keys()
-        from backend.llm import _claude_stream, LLMError
+        from backend.llm import LLMError, _claude_stream
         try:
             list(_claude_stream("hello", ""))
             assert False, "expected LLMError"
@@ -141,7 +140,7 @@ class TestCommissioningFallback:
         assert "requires Cx engineer review" in result["predicted_cx_name"]
 
     def test_all_known_rules_route_to_rule_source(self):
-        from backend.agents.commissioning import predict_cx_impact, _RULES
+        from backend.agents.commissioning import _RULES, predict_cx_impact
         for (comp, param) in _RULES:
             result = predict_cx_impact({
                 "component": comp, "parameter": param, "severity": "Critical",
@@ -362,8 +361,9 @@ class TestExtractionScoring:
     """Extraction scoring math is correct across all precision/recall regimes."""
 
     def test_perfect_extraction(self):
-        from backend.agents.extraction import score_extraction
         import json
+
+        from backend.agents.extraction import score_extraction
         ref = [{"component": "A", "parameter": "p"},
                {"component": "B", "parameter": "q"}]
         with tempfile.NamedTemporaryFile(
@@ -382,8 +382,9 @@ class TestExtractionScoring:
             tmp.unlink()
 
     def test_false_positive_lowers_precision(self):
-        from backend.agents.extraction import score_extraction
         import json
+
+        from backend.agents.extraction import score_extraction
         ref = [{"component": "A", "parameter": "p"}]
         with tempfile.NamedTemporaryFile(
             suffix=".json", mode="w", delete=False, dir=str(CORPUS)
@@ -401,8 +402,9 @@ class TestExtractionScoring:
             tmp.unlink()
 
     def test_missed_deviation_lowers_recall(self):
-        from backend.agents.extraction import score_extraction
         import json
+
+        from backend.agents.extraction import score_extraction
         ref = [{"component": "A", "parameter": "p"},
                {"component": "B", "parameter": "q"}]
         with tempfile.NamedTemporaryFile(

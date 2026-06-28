@@ -9,11 +9,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
-from backend.paths import CORPUS, PROJECTS_DIR
-from backend.orchestrator import run_pipeline, run_full_pipeline
-from backend.agents.rfi_copilot import ask, ask_stream, ask_fallback
-from backend.agents.ingestion import ingest_corpus, extract_pdf_bytes
+from backend.agents.ingestion import extract_pdf_bytes, ingest_corpus
+from backend.agents.rfi_copilot import ask, ask_fallback, ask_stream
 from backend.analyze import run_analysis, run_streaming_analysis
+from backend.orchestrator import run_pipeline
+from backend.paths import CORPUS, PROJECTS_DIR
 
 logging.basicConfig(
     level=logging.INFO,
@@ -120,8 +120,7 @@ def analyze(req: AnalyzeRequest):
 @app.post("/analyze/stream")
 def analyze_stream(req: AnalyzeRequest):
     def generate():
-        t0 = time.time()
-        yield f"event: status\ndata: Loading standards knowledge base...\n\n"
+        yield "event: status\ndata: Loading standards knowledge base...\n\n"
         yield from run_streaming_analysis(req.spec_text, req.submittal_text, req.system_id)
 
     return _sse_response(generate())
@@ -183,7 +182,7 @@ def analyze_upload_stream(
             return
 
         yield f"event: preview\ndata: {json.dumps({'spec': spec_text[:500], 'submittal': submittal_text[:500]})}\n\n"
-        yield f"event: status\ndata: Loading standards knowledge base...\n\n"
+        yield "event: status\ndata: Loading standards knowledge base...\n\n"
         yield from run_streaming_analysis(spec_text, submittal_text, system_id)
 
     return _sse_response(generate())
@@ -379,7 +378,8 @@ def metrics():
     findings = reconcile()
     r = score(findings, gt)
 
-    from eval.text_eval import run_text_eval, aggregate as text_agg
+    from eval.text_eval import aggregate as text_agg
+    from eval.text_eval import run_text_eval
     text_results = run_text_eval()
     text_aggregate = text_agg(text_results)
 
@@ -560,7 +560,7 @@ tr:hover td {{ background: #f0f4ff; }}
 </style></head><body>
 <div class="header">
   <h1>PRA<span>MAAN</span> Compliance Evidence Pack</h1>
-  <p>{data['project']} &middot; {data['tier']} &middot; {data['location']} &middot; Generated Week {data['generated_week']}</p>
+  <p>{data['project']} &middot; {data['tier']} &middot; {data['location']} &middot; Week {data['generated_week']}</p>
 </div>
 <div class="content">
 <div class="meta">
@@ -620,10 +620,13 @@ def pipeline_info():
         "nodes": [
             {"id": "ingest", "agent": "Ingestion Agent", "description": "Document intake, parsing, normalization"},
             {"id": "load_standards", "agent": "Standards Loader", "description": "Load governing standards corpus"},
-            {"id": "validate", "agent": "Validation Gate", "description": "Check spec+submittal exist; conditional routing"},
+            {"id": "validate", "agent": "Validation Gate",
+             "description": "Check spec+submittal exist; conditional routing"},
             {"id": "reconcile", "agent": "Reconciliation Agent", "description": "Cross-document deviation reasoning"},
-            {"id": "retrieve", "agent": "Standards Retrieval Tool", "description": "Fetches a cited standard absent from context; loops back to reconcile (tool-call cycle)"},
-            {"id": "critique", "agent": "Self-Critique Agent", "description": "Verifies its own findings; loops back to reconcile on a failed self-check (reflexion)"},
+            {"id": "retrieve", "agent": "Standards Retrieval Tool",
+             "description": "Fetches a cited standard absent from context; loops back to reconcile (tool-call cycle)"},
+            {"id": "critique", "agent": "Self-Critique Agent",
+             "description": "Verifies its own findings; loops back to reconcile on a failed self-check (reflexion)"},
             {"id": "cx_predict", "agent": "Cx Predictor", "description": "Map deviations to commissioning tests"},
             {"id": "format_output", "agent": "Output Formatter", "description": "Enrich and structure findings"},
         ],
@@ -634,14 +637,17 @@ def pipeline_info():
              "condition": "route_after_validate: skip reconciliation if spec or submittal missing"},
             ["reconcile", "retrieve"],
             {"from": "retrieve", "to": ["reconcile", "critique"], "type": "conditional", "cycle": True,
-             "condition": "route_after_retrieve: loop back to reconcile after fetching a missing cited standard (bounded by PRAMAAN_MAX_RETRIEVALS), else proceed"},
+             "condition": "route_after_retrieve: loop back to reconcile after fetching a missing cited standard "
+                          "(bounded by PRAMAAN_MAX_RETRIEVALS), else proceed"},
             {"from": "critique", "to": ["reconcile", "cx_predict"], "type": "conditional", "cycle": True,
-             "condition": "route_after_critique: loop back to reconcile on a failed self-check (bounded by PRAMAAN_MAX_REVISIONS), else proceed"},
+             "condition": "route_after_critique: loop back to reconcile on a failed self-check "
+                          "(bounded by PRAMAAN_MAX_REVISIONS), else proceed"},
             ["cx_predict", "format_output"],
         ],
         "separate_agents": [
             {"id": "extraction", "agent": "Extraction Agent", "description": "Raw document to structured triples"},
-            {"id": "rfi_copilot", "agent": "RFI Copilot", "description": "RAG over project corpus with prior-RFI matching"},
+            {"id": "rfi_copilot", "agent": "RFI Copilot",
+             "description": "RAG over project corpus with prior-RFI matching"},
         ],
     }
 
@@ -737,7 +743,7 @@ def project_detail(project_id: str):
 
 @app.get("/projects/eval/aggregate")
 def projects_eval_aggregate():
-    from eval.multi_project_eval import run_all, aggregate
+    from eval.multi_project_eval import aggregate, run_all
     results = run_all()
     agg = aggregate(results)
     per_project = {

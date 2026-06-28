@@ -7,15 +7,15 @@ import re
 import time
 from typing import NamedTuple
 
+from backend.agents import cx_graph
+from backend.agents.commissioning import _RULES, predict_cx_impact
 from backend.agents.reconciliation import (
+    PROMPT_TEMPLATE,
+    SYSTEM_PROMPT,
     _all_standards_text,
     _check_citation_faithfulness,
     _validate_deviations,
-    SYSTEM_PROMPT,
-    PROMPT_TEMPLATE,
 )
-from backend.agents.commissioning import predict_cx_impact, _RULES
-from backend.agents import cx_graph
 
 log = logging.getLogger("pramaan.analyze")
 
@@ -281,16 +281,17 @@ def run_streaming_analysis(
         spec=spec_text, submittal=submittal_text, standards=standards,
     )
 
-    yield f"event: status\ndata: Running AI reconciliation engine...\n\n"
+    yield "event: status\ndata: Running AI reconciliation engine...\n\n"
 
     try:
-        from backend.llm import complete_stream as llm_stream, _extract_json
+        from backend.llm import _extract_json
+        from backend.llm import complete_stream as llm_stream
         full_text = ""
         for chunk in llm_stream(prompt, system=SYSTEM_PROMPT):
             full_text += chunk
             yield f"event: token\ndata: {json.dumps(chunk)}\n\n"
 
-        yield f"event: status\ndata: Validating deviations...\n\n"
+        yield "event: status\ndata: Validating deviations...\n\n"
         raw = _extract_json(full_text)
         devs = _validate_deviations(raw)
         devs = _check_citation_faithfulness(devs, spec_text, submittal_text, standards)
@@ -299,7 +300,7 @@ def run_streaming_analysis(
         mode = "llm"
     except Exception as exc:
         log.warning("LLM stream analysis failed, rule-based fallback: %s", exc)
-        yield f"event: status\ndata: AI engine unavailable — running rule-based detector...\n\n"
+        yield "event: status\ndata: AI engine unavailable — running rule-based detector...\n\n"
         devs = _resilient_fallback(spec_text, submittal_text, system_id)
         mode = "deterministic"
 

@@ -7,7 +7,6 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))
 
-from backend.paths import CORPUS, PROJECTS_DIR
 
 DATA = pathlib.Path(__file__).parent.parent / "data"
 
@@ -68,7 +67,7 @@ def reconcile_project_llm(corpus_path: pathlib.Path):
     """Real LLM reconciliation: the model reads each system's raw spec +
     submittal + standards and reasons out deviations from scratch. Requires an
     LLM key (GEMINI_API_KEY, or PRAMAAN_LLM=openai with a /v1 gateway)."""
-    from backend.agents.reconciliation import reconcile_system_at, _standards_text_at
+    from backend.agents.reconciliation import _standards_text_at, reconcile_system_at
     standards = _standards_text_at(corpus_path)
     findings = []
     for spec in sorted((corpus_path / "specs").glob("*.md")):

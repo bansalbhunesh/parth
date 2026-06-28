@@ -1,7 +1,6 @@
 
 import json
 import pathlib
-import subprocess
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))
@@ -13,7 +12,7 @@ class TestGeneratorReproducibility:
     """Verify generate_corpus.py produces output matching committed data."""
 
     def test_generator_produces_14_deviations(self):
-        from data.generate_corpus import SYSTEMS, DEVIATION_TO_CX
+        from data.generate_corpus import SYSTEMS
         devs = []
         for sys_id, sys_data in SYSTEMS.items():
             for req in sys_data["requirements"]:
@@ -24,7 +23,7 @@ class TestGeneratorReproducibility:
         assert len(devs) == 14
 
     def test_generator_produces_267_weeks(self):
-        from data.generate_corpus import SYSTEMS, DEVIATION_TO_CX, PROJECT
+        from data.generate_corpus import DEVIATION_TO_CX, PROJECT, SYSTEMS
         total = 0
         for sys_id, sys_data in SYSTEMS.items():
             for req in sys_data["requirements"]:
@@ -38,7 +37,7 @@ class TestGeneratorReproducibility:
         assert total == 267
 
     def test_all_deviations_have_cx_mapping(self):
-        from data.generate_corpus import SYSTEMS, DEVIATION_TO_CX
+        from data.generate_corpus import DEVIATION_TO_CX, SYSTEMS
         for sys_id, sys_data in SYSTEMS.items():
             for req in sys_data["requirements"]:
                 comp, param, required, *_ = req
@@ -49,7 +48,6 @@ class TestGeneratorReproducibility:
 
     def test_cx_plan_covers_all_deviation_tests(self):
         from data.generate_corpus import DEVIATION_TO_CX
-        gt = json.loads((ROOT / "data" / "corpus" / "ground_truth.json").read_text())
         cx_plan = json.loads(
             (ROOT / "data" / "corpus" / "commissioning" / "cx_plan.json").read_text()
         )

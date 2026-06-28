@@ -72,7 +72,6 @@ class TestExtractionAgent:
         assert "{doc_type}" in EXTRACT_PROMPT
 
     def test_score_extraction(self):
-        from backend.agents.extraction import score_extraction
         extracted = [
             {"component": "UPS-02", "parameter": "battery_runtime_min"},
             {"component": "FAKE", "parameter": "fake_param"},
@@ -104,7 +103,7 @@ class TestCommissioningAgent:
         assert result["cx_source"] == "rule"
 
     def test_predict_all_known_deviations(self):
-        from backend.agents.commissioning import predict_cx_impact, _RULES
+        from backend.agents.commissioning import _RULES, predict_cx_impact
         for (comp, param), (test_id, level, week_fail, sev) in _RULES.items():
             dev = {"component": comp, "parameter": param, "severity": sev}
             result = predict_cx_impact(dev)
@@ -217,8 +216,11 @@ class TestOrchestrator:
 
     def test_pipeline_nodes(self):
         from backend.orchestrator import (
-            node_ingest, node_load_standards, node_validate,
-            node_cx_predict, node_format_output,
+            node_cx_predict,
+            node_format_output,
+            node_ingest,
+            node_load_standards,
+            node_validate,
         )
         assert callable(node_ingest)
         assert callable(node_load_standards)
@@ -275,7 +277,7 @@ class TestTextEval:
         assert len(findings) == 14
 
     def test_text_eval_scores_perfect(self):
-        from eval.text_eval import run_text_eval, aggregate
+        from eval.text_eval import aggregate, run_text_eval
         results = run_text_eval()
         agg = aggregate(results)
         assert agg["aggregate_f1"] == 1.0

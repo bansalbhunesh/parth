@@ -154,7 +154,7 @@ class TestCorpusIntegrity:
         rfis = json.loads((CORPUS / "rfi" / "rfi_log.json").read_text())
         assert len(rfis) > 0
         for rfi in rfis:
-            assert "id" in rfi, f"RFI missing 'id' field"
+            assert "id" in rfi, "RFI missing 'id' field"
             assert "system" in rfi, f"RFI {rfi.get('id')} missing 'system' field"
             assert "question" in rfi or "subject" in rfi, \
                 f"RFI {rfi.get('id')} missing 'question'/'subject' field"

@@ -57,7 +57,7 @@ def main():
     proj_500 = 500 / rate
     portfolio = 50_000 / rate
     print(f"\n{'='*62}")
-    print(f"  PRAMAAN SCALE BENCHMARK - deterministic detection layer")
+    print("  PRAMAAN SCALE BENCHMARK - deterministic detection layer")
     print(f"{'='*62}")
     print(f"  systems processed     : {n:,}")
     print(f"  deviations found      : {devs:,}")
@@ -67,8 +67,8 @@ def main():
     print(f"  projected 500-system project : {proj_500:.2f} s")
     print(f"  projected 100-project (50k sys) portfolio : {portfolio:.1f} s")
     print(f"{'~'*62}")
-    print(f"  LLM layer: per-system, parallelisable + response-cached;")
-    print(f"  delta ingest re-checks only changed submittals.")
+    print("  LLM layer: per-system, parallelisable + response-cached;")
+    print("  delta ingest re-checks only changed submittals.")
     print(f"{'='*62}\n")
 
 

@@ -93,18 +93,6 @@ def _gemini(prompt, system, json_mode):
                     time.sleep(1.5 * (attempt + 1))
                     continue
                 raise
-    except ImportError:
-        import google.generativeai as genai
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel(
-            model_name,
-            system_instruction=system or None,
-            generation_config={
-                "temperature": 0.1,
-                "response_mime_type": "application/json" if json_mode else "text/plain",
-            },
-        )
-        return model.generate_content(prompt).text
     except Exception as exc:
         log.error("Gemini API error: %s", exc)
         raise LLMError(f"Gemini API call failed: {exc}") from exc
@@ -211,17 +199,6 @@ def _gemini_stream(prompt, system):
         for chunk in client.models.generate_content_stream(
             model=model_name, contents=prompt, config=config,
         ):
-            if chunk.text:
-                yield chunk.text
-    except ImportError:
-        import google.generativeai as genai
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel(
-            model_name,
-            system_instruction=system or None,
-            generation_config={"temperature": 0.1, "response_mime_type": "text/plain"},
-        )
-        for chunk in model.generate_content(prompt, stream=True):
             if chunk.text:
                 yield chunk.text
     except Exception as exc:

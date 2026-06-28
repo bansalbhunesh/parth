@@ -34,8 +34,8 @@ false positives*, not a suspiciously perfect synthetic score.
 | V5 | P3 | "Production-grade" | No practitioner validation; frontend `ScreenshotShowcase` rendered CSS mockups while real PNGs sat unused; `reactflow` declared but never imported. | `frontend/components/ScreenshotShowcase.tsx` (pre-fix); `frontend/package.json:14` |
 
 **Overclaim sweep (numbers a judge could falsify live):** mostly clean.
-- "263 tests" → actually **267** `def test_` (now **292** after this pass) — *under*-claimed, safe. `grep -rc "def test_" tests/`.
-- "22 endpoints" → **23** decorated routes — safe. `backend/main.py`.
+- "263 tests" → actually **267** `def test_` (now **310** collected after this pass) — *under*-claimed, safe. `grep -rc "def test_" tests/`.
+- "22 endpoints" → **24** decorated routes — safe. `backend/main.py`.
 - "5 agents" / "LangGraph" → defensible but thin (see V3). Left as-is; the Cx graph upgrade (below) strengthens the surrounding claim.
 
 ---
@@ -131,6 +131,39 @@ cx-graph + 7 self-critique + 11 retrieval-loop). New suites:
    real Vertiv / Cummins / ABB / Tate / Schneider documents the model had never
    seen, and one contested case we score ourselves at ~0.9, because honest experts
    disagree."* Treat the seeded-corpus 1.000 as a scale/reproducibility check only.
+
+---
+
+## 5. Pre-submission hardening sweep (2026-06-28)
+
+A full-surface pass over every backend module, route, eval/test file, frontend
+file, doc and config — to ensure a reviewer can't surface a dead import, an
+outdated wrapper, or a count that doesn't match the code. All fixes verified by
+`ruff check` (clean) and the full suite (**310 passed**).
+
+- **Dead code (ruff F-class → 0).** Removed 14 unused imports / variables across
+  `backend/main.py`, `eval/multi_project_eval.py` and 9 test files (e.g. the
+  unused `run_full_pipeline` import, `t0`, `ups`, `gt`, `PIL` bindings); sorted
+  imports; dropped f-strings without placeholders.
+- **Outdated wrapper removed.** `backend/llm.py` carried a deprecated
+  `google.generativeai` fallback that never executed (the current `google-genai`
+  SDK is always installed). Removed the dead branches in `_gemini` /
+  `_gemini_stream` **and** the `google-generativeai` pin from
+  `backend/requirements.txt`, matching `pyproject.toml`.
+- **Dead dependencies removed.** `pgvector` (declared, never imported — TF-IDF is
+  the live retriever; pgvector remains the documented *scale* path) from
+  `requirements.txt`; `reactflow` (declared, never imported) from
+  `frontend/package.json`, with `package-lock.json` re-synced so `npm ci` stays
+  valid.
+- **Doc ↔ code reconciliation.** Endpoint count corrected to the true **24**
+  decorated routes everywhere (docs variously said 22 / 23); `test_api.py` count
+  fixed (53, not 22); real-datasheet pairs aligned to **11** (README/DECK said 8);
+  presentation badge to **15** slides (was 13). Verified-accurate counts left as
+  is: 19-section dashboard, 25+ standards, 310 tests.
+- **Verified clean (no change needed):** no `TODO`/`FIXME`/debug `print`/
+  `console.log`; no FastAPI `on_event` or pydantic-v1 patterns; every frontend
+  component is imported; all README-referenced files/links resolve; no secret in
+  any tracked file.
 
 ---
 _Reproduce the honest numbers with no key: `python eval/real_pairs_offline.py`._

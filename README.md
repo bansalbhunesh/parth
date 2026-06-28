@@ -31,7 +31,7 @@
   <a href="https://parth-tan.vercel.app/judge"><img src="https://img.shields.io/badge/★_JUDGE_MODE-90--second_proof-ffb020?style=for-the-badge&labelColor=1a1508" alt="Judge Mode"></a>
   <a href="https://parth-tan.vercel.app"><img src="https://img.shields.io/badge/▶_LIVE_DEMO-parth--tan.vercel.app-00d4ff?style=for-the-badge&labelColor=0a0d11" alt="Live Demo"></a>
   <a href="https://parth-3puc.onrender.com/health"><img src="https://img.shields.io/badge/API-parth--3puc.onrender.com-35c98b?style=for-the-badge&labelColor=0d1a14" alt="API"></a>
-  <a href="presentation.html"><img src="https://img.shields.io/badge/📊_PRESENTATION-13_slides-a855f7?style=for-the-badge&labelColor=1a1020" alt="Presentation"></a>
+  <a href="presentation.html"><img src="https://img.shields.io/badge/📊_PRESENTATION-15_slides-a855f7?style=for-the-badge&labelColor=1a1020" alt="Presentation"></a>
 </p>
 
 <p align="center">
@@ -95,7 +95,7 @@
 2. In **Live Analysis**, click **“Load real document ★”** — or upload your own spec + submittal PDFs.
 3. Hit **Analyze**. Watch it stream the reasoning, then list each deviation with its severity, the standard it cites, the commissioning test it predicts will fail, and the lead time.
 
-Ready-made demo pairs ship in [`data/samples/`](data/samples/): a UPS edge pair, a **real Vertiv datasheet**, a standby-generator pair, and **eight fully-sourced real pairs** (Vertiv, Cummins, STULZ, ABB, FM-200/Novec, Carrier-class, EUROBAT, IEC 60076-11 transformer, NFPA 75 cabling — every value citable in [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md)). Drop any pair into the analyzer.
+Ready-made demo pairs ship in [`data/samples/`](data/samples/): a UPS edge pair, a **real Vertiv datasheet**, a standby-generator pair, and **eleven fully-sourced real pairs** (Vertiv, Cummins, STULZ, ABB, FM-200/Novec, Carrier-class, EUROBAT, IEC 60076-11 transformer, NFPA 75 cabling, Tate ConCore raised-floor, Schneider Canalis busway, ASHRAE supply-air setpoint — every value citable in [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md)). Drop any pair into the analyzer.
 
 > **It even reads scanned paper.** Real submittals arrive as stamped, scanned,
 > image-only PDFs. Try [`data/samples/real/scanned/submittal_ups_scanned.pdf`](data/samples/real/scanned/submittal_ups_scanned.pdf)
@@ -341,7 +341,7 @@ cd frontend && npm install && npm run dev          # → localhost:3000
 curl http://localhost:8000/export/audit/html > evidence.html
 ```
 
-> **No API key?** The dashboard runs fully with ground-truth fallback data. All 22 API endpoints return 200. Both eval harnesses (structured + text-based), the corpus, and the frontend work offline. 310 tests pass without any external dependencies.
+> **No API key?** The dashboard runs fully with ground-truth fallback data. All 24 API endpoints return 200. Both eval harnesses (structured + text-based), the corpus, and the frontend work offline. 310 tests pass without any external dependencies.
 >
 > **Or just open the live demo:** [parth-tan.vercel.app](https://parth-tan.vercel.app) (frontend) · [parth-3puc.onrender.com](https://parth-3puc.onrender.com/health) (API)
 
@@ -443,7 +443,7 @@ Pramaan cross-references against **7 governing standards** — all content is pa
 | `GET` | `/projects/{id}` | Full project detail — deviations, cx plan, true negatives |
 | `GET` | `/projects/eval/aggregate` | Multi-project eval — aggregate P/R/F1 across all projects |
 
-22 endpoints. All return 200 with graceful fallback to ground-truth data when no LLM key is configured. Streaming endpoints use Server-Sent Events (SSE) for real-time token delivery.
+24 endpoints. All return 200 with graceful fallback to ground-truth data when no LLM key is configured. Streaming endpoints use Server-Sent Events (SSE) for real-time token delivery.
 
 > **Interactive API docs:** Launch the backend and visit [localhost:8000/docs](http://localhost:8000/docs) for live Swagger UI — try every endpoint in your browser.
 
@@ -454,7 +454,7 @@ Pramaan cross-references against **7 governing standards** — all content is pa
 ```
 pramaan/
 ├── backend/
-│   ├── main.py                    # FastAPI — 22 endpoints, SSE streaming, graceful fallback
+│   ├── main.py                    # FastAPI — 24 endpoints, SSE streaming, graceful fallback
 │   ├── analyze.py                 # Shared analysis logic (sync + streaming)
 │   ├── paths.py                   # Single source of truth for data paths
 │   ├── orchestrator.py            # LangGraph pipeline with conditional routing
@@ -526,13 +526,13 @@ pramaan/
 │   └── lib/
 │       └── api.ts                 # API client + SSE parser + fallback data
 └── tests/
-    ├── test_api.py                # 22 API endpoint tests (sync + streaming + upload)
+    ├── test_api.py                # 53 API tests (sync + streaming + upload)
     ├── test_agents.py             # Agent unit tests (ingestion, extraction, cx, reconciliation)
     ├── test_corpus.py             # Corpus integrity tests (JSON/Markdown validation)
     └── test_multi_project.py      # Multi-project dataset + eval tests
 ```
 
-**40+ source files · 7,300+ lines of code · 310 tests · 12 projects · 22 endpoints**
+**40+ source files · 7,300+ lines of code · 310 tests · 12 projects · 24 endpoints**
 
 ---
 

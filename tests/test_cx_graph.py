@@ -3,7 +3,7 @@
 import pathlib
 
 from backend.agents import cx_graph
-from backend.agents.commissioning import predict_cx_impact, _RULES
+from backend.agents.commissioning import predict_cx_impact
 from backend.analyze import _resilient_fallback
 
 REAL = pathlib.Path(__file__).parent.parent / "data" / "samples" / "real"

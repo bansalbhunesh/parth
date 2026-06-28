@@ -108,7 +108,7 @@ class TestMultiProjectEval:
         assert len(projects) >= 6
 
     def test_reconcile_each_project(self):
-        from eval.multi_project_eval import discover_projects, reconcile_project, load_gt
+        from eval.multi_project_eval import discover_projects, load_gt, reconcile_project
         for pid, path in discover_projects().items():
             gt_devs, _ = load_gt(path)
             findings = reconcile_project(path)
@@ -135,7 +135,7 @@ class TestMultiProjectEval:
             assert len(r["scores"]["fp"]) == 0, f"{pid}: has false positives"
 
     def test_aggregate_metrics(self):
-        from eval.multi_project_eval import run_all, aggregate
+        from eval.multi_project_eval import aggregate, run_all
         results = run_all()
         agg = aggregate(results)
         assert agg["aggregate_f1"] == 1.0
@@ -171,7 +171,7 @@ class TestLLMDetectorWiring:
         import os
         os.environ.pop("GEMINI_API_KEY", None)
         os.environ.pop("OPENAI_API_KEY", None)
-        from eval.multi_project_eval import run_all, aggregate
+        from eval.multi_project_eval import aggregate, run_all
         # Without a key the LLM detector finds nothing, but the harness still
         # produces a well-formed aggregate (recall 0, no exceptions).
         results = run_all(detector="llm")
@@ -180,6 +180,6 @@ class TestLLMDetectorWiring:
         assert agg["total_fp"] == 0
 
     def test_structured_detector_still_default(self):
-        from eval.multi_project_eval import run_all, aggregate
+        from eval.multi_project_eval import aggregate, run_all
         agg = aggregate(run_all())
         assert agg["aggregate_f1"] == 1.0

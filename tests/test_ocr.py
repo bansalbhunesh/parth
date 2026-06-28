@@ -18,7 +18,7 @@ def _build_scanned_pdf(lines: list[str]) -> bytes:
     """Render text to an image and embed it as a full-page image in a PDF, so the
     resulting PDF has NO text layer — a faithful scanned-document simulation."""
     fitz = pytest.importorskip("fitz")
-    PIL = pytest.importorskip("PIL")
+    pytest.importorskip("PIL")
     from PIL import Image, ImageDraw, ImageFont
 
     W, H = 1000, 1300

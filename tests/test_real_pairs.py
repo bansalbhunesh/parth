@@ -9,8 +9,9 @@ import pathlib
 
 import pytest
 
-from backend.analyze import _resilient_fallback, _freeform_compare
-from eval.real_pairs_offline import MANIFEST, run as run_offline_eval
+from backend.analyze import _freeform_compare, _resilient_fallback
+from eval.real_pairs_offline import MANIFEST
+from eval.real_pairs_offline import run as run_offline_eval
 
 REAL = pathlib.Path(__file__).parent.parent / "data" / "samples" / "real"
 

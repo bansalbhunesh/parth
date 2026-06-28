@@ -28,9 +28,9 @@ import re
 import time
 from typing import List, Literal, Optional, TypedDict
 
+from backend.agents.commissioning import compute_risk_score, predict_cx_impact
 from backend.agents.ingestion import ingest_system
-from backend.agents.reconciliation import reconcile_system, _all_standards_text
-from backend.agents.commissioning import predict_cx_impact, compute_risk_score
+from backend.agents.reconciliation import _all_standards_text, reconcile_system
 from backend.agents.retrieval import retrieve_standard
 from backend.paths import CORPUS
 
@@ -110,8 +110,9 @@ def _llm_critique(devs, spec, submittal, standards):
     """Opt-in deeper critic (PRAMAAN_LLM_CRITIQUE=1): a second model pass that
     looks for subtle false positives and missed deviations the deterministic
     check cannot see. Returns {needs_revision, feedback} or {} on any failure."""
-    from backend.llm import complete_json
     import json as _json
+
+    from backend.llm import complete_json
     prompt = (
         "You are a senior CxA peer-reviewing another reviewer's deviation findings.\n"
         f"DESIGN BASIS:\n{spec}\n\nSUBMITTAL:\n{submittal}\n\n"
@@ -289,7 +290,7 @@ def node_format_output(state: PipelineState) -> PipelineState:
 
 def build_graph():
     try:
-        from langgraph.graph import StateGraph, END
+        from langgraph.graph import END, StateGraph
     except ImportError:
         return None
 

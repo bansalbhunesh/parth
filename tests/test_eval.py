@@ -5,15 +5,13 @@ perfect precision, recall, and F1 against the ground truth corpus.
 These tests prove the plumbing is correct and the eval metrics are reproducible.
 """
 
-import json
 import pathlib
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))
 
 from eval.baseline_reconciler import reconcile
-from eval.run_eval import load_ground_truth, score, key
-
+from eval.run_eval import key, load_ground_truth, score
 
 CORPUS = pathlib.Path(__file__).parent.parent / "data" / "corpus"
 
@@ -218,8 +216,7 @@ class TestSemanticMatching:
     def test_value_collision_disambiguated_by_system(self):
         # Two deviations share the 10->7 transition (UPS battery, COOL delta).
         # A 10->7 finding on UPS must NOT be credited as the COOL deviation.
-        gt, by_key = self._gt_by_key()
-        ups = by_key[("UPS-02", "battery_runtime_min")]
+        gt, _ = self._gt_by_key()
         # Only report the UPS one; COOL/delta_t_c should remain a miss.
         findings = [dict(d) for d in gt
                     if (d["component"], d["parameter"]) != ("COOL-LOOP", "delta_t_c")]

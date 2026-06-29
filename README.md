@@ -31,7 +31,7 @@
   <a href="https://parth-tan.vercel.app/judge"><img src="https://img.shields.io/badge/★_JUDGE_MODE-90--second_proof-ffb020?style=for-the-badge&labelColor=1a1508" alt="Judge Mode"></a>
   <a href="https://parth-tan.vercel.app"><img src="https://img.shields.io/badge/▶_LIVE_DEMO-parth--tan.vercel.app-00d4ff?style=for-the-badge&labelColor=0a0d11" alt="Live Demo"></a>
   <a href="https://parth-3puc.onrender.com/health"><img src="https://img.shields.io/badge/API-parth--3puc.onrender.com-35c98b?style=for-the-badge&labelColor=0d1a14" alt="API"></a>
-  <a href="presentation.html"><img src="https://img.shields.io/badge/📊_PRESENTATION-15_slides-a855f7?style=for-the-badge&labelColor=1a1020" alt="Presentation"></a>
+  <a href="presentation.html"><img src="https://img.shields.io/badge/📊_PRESENTATION-14_slides-a855f7?style=for-the-badge&labelColor=1a1020" alt="Presentation"></a>
 </p>
 
 <p align="center">
@@ -271,7 +271,7 @@ python3 eval/multi_project_eval.py --json
 > distinction (88% vs 96%), and a missing-value omission (THD not stated). Full
 > result + screenshots: [`data/samples/REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md).
 >
-> **Eight fully-sourced real pairs (every value citable):**
+> **Eleven fully-sourced real pairs (every value citable):**
 > 1. **Power** — a **Vertiv Liebert GXT5** UPS (7-min full-load runtime, 95.9%
 >    online efficiency) and a **Cummins QSK60** genset (EPA Tier 2, 103 GPH) vs
 >    Uptime Tier IV / NFPA 110 / EPA 40 CFR 60. Offline the rule-based engine
@@ -299,7 +299,14 @@ python3 eval/multi_project_eval.py --json
 >    rating (CMP→CMR), while clearing the compliant Class-F insulation, Dyn11,
 >    6% impedance, Cat6A, and OM4/OS2 values.
 >
-> **17 genuine deviations + 0 false positives across nine systems, none seeded** —
+> 6. **Raised floor · Busway · Supply-air setpoint** — the hard-fact additions vs
+>    CISCA / IEC 61439 / ASHRAE TC9.9. A **Tate ConCore 1250** access-floor panel
+>    (1,250 lbf — its *published* ceiling) vs a 1,500 lbf spec, and a **Schneider
+>    Canalis KTA10** busway (50 kA/1 s Icw) vs a 65 kA fault duty — no "wrong
+>    variant" escape — plus one deliberately **contested** ASHRAE setpoint (30 °C,
+>    within allowable but above recommended) we score against ourselves.
+>
+> **19 genuine deviations + 0 false positives across eleven systems, none seeded** —
 > sources for every number in [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md).
 
 **Key diversity dimensions:**
@@ -432,7 +439,7 @@ Pramaan cross-references against **7 governing standards** — all content is pa
 | `POST` | `/copilot` | RAG-powered project Q&A with prior-RFI matching |
 | `POST` | `/copilot/stream` | Streaming copilot with token-by-token response |
 | `GET` | `/cx-plan` | Commissioning plan with 17 L1–L5 tests |
-| `GET` | `/rfi-log` | Full RFI log (12 historical RFIs) |
+| `GET` | `/rfi-log` | Full RFI log (8 historical RFIs) |
 | `GET` | `/metrics` | Live eval metrics (P/R/F1, lead time, confidence) |
 | `GET` | `/pipeline` | Agent pipeline topology (nodes + edges) |
 | `GET` | `/corpus/doc/{type}/{id}` | Raw spec or submittal document text |
@@ -468,17 +475,17 @@ pramaan/
 │       └── rfi_copilot.py         # RAG copilot + prior-RFI matching + streaming
 ├── data/
 │   ├── generate_corpus.py         # Deterministic corpus generator (Project Meghdoot)
-│   ├── generate_projects.py       # Multi-project generator (5 additional projects)
+│   ├── generate_projects.py       # Multi-project generator (11 additional projects)
 │   ├── scrape_standards.py        # 3-tier scraper: Firecrawl → Crawl4ai → Playwright
 │   ├── corpus/                    # Project Meghdoot (primary, 14 deviations)
 │   │   ├── specs/                 # 10 system design specifications
 │   │   ├── submittals/            # 10 vendor submittals (7 with seeded deviations)
 │   │   ├── standards/             # 7 governing standards (paraphrased)
 │   │   ├── commissioning/         # L1–L5 commissioning test plan (17 tests)
-│   │   ├── rfi/                   # 12 historical RFIs
+│   │   ├── rfi/                   # 8 historical RFIs
 │   │   ├── extracted/             # Pre-extracted structured data (33 reqs, 33 subs)
 │   │   └── ground_truth.json      # 14 deviations + 3 true negatives
-│   ├── projects/                  # 5 additional project datasets
+│   ├── projects/                  # 11 additional project datasets
 │   │   ├── vajra/                 # 20 MW Tier III, Pune (Indian standards)
 │   │   ├── nordic/               # 10 MW EN 50600, Oslo (European standards)
 │   │   ├── sahara/               # 5 MW Tier II, Dubai (DEWA regulations)
@@ -499,7 +506,7 @@ pramaan/
 │   │   ├── page.tsx               # Main dashboard — 19 sections
 │   │   ├── layout.tsx             # Root layout with fonts
 │   │   └── globals.css            # Full design system (~1100 lines)
-│   ├── components/                # 23 React components
+│   ├── components/                # 24 React components
 │   │   ├── HeroIntro.tsx          # Problem statement for judges
 │   │   ├── NavBar.tsx             # 19-section sticky nav
 │   │   ├── SectionIndex.tsx       # Interactive section directory
@@ -604,7 +611,7 @@ python3 eval/run_eval.py --detector llm
 | **Innovation** | Goes past AI submittal review (the commercial state of the art — BuildSync, Spec-ID, InspectMind) by predicting **which commissioning test each deviation will fail, and how many weeks early** — cross-referencing spec + submittal + governing standard with a full citation chain. Proven on a **real third-party Vertiv datasheet**, not just our own data | 5 specialized agents, LangGraph orchestration, citation chain, commissioning-risk twin, [`REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md) |
 | **Business Impact** | 1,024 weeks of early detection across 50 findings in 12 projects prevents seven-figure schedule slips | Interactive ROI calculator, cost-of-delay timeline, before/after comparison |
 | **Technical Excellence** | Dual eval harness (structured + text-based). The synthetic portfolio scores 1.000 **by construction** (we label it a plumbing/breadth check, not a flex); the honest signal is **11 real sourced datasheet pairs — 19 deviations (recall 1.000), 0 false positives, and a self-scored ≈0.9 on one contested ASHRAE case**, live-verified (`gemini-2.5-flash`, recall 1.000 on hard deviations). 310-test suite | Independent text-extraction + real-LLM eval, semantic + strict scoring, no-key offline harness (`eval/real_pairs_offline.py`), 25+ standards |
-| **Robustness** | Graceful degradation everywhere — no API key, malformed PDFs, cold backend all return 200; `/llm-check` surfaces the true LLM status | 45-test resilience suite, ISR-cached frontend, deterministic fallback |
+| **Robustness** | Graceful degradation everywhere — no API key, malformed PDFs, cold backend all return 200; `/llm-check` surfaces the true LLM status | 50-test resilience suite, ISR-cached frontend, deterministic fallback |
 | **Scalability** | 12 projects → enterprise portfolio via multi-project eval + batch ingest + vector store | Multi-project dashboard, architecture diagram, scale story |
 | **UX** | Two surfaces: a focused **Judge Mode** (90-second proof) and a 19-section deep-dive dashboard, both ISR-cached for instant loads, streaming AI | `/judge` + full dashboard, live PDF upload, dark theme, responsive |
 
@@ -671,5 +678,5 @@ python3 eval/run_eval.py --detector llm
 <p align="center">
   <strong>PRA<span style="color:#36d6e7">MAAN</span></strong><br>
   <em>EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4</em><br>
-  <sub>5 AI Agents &middot; 12 Projects &middot; 11 Countries &middot; 23 Endpoints &middot; 50 Deviations &middot; 1,024 Weeks Saved &middot; 310 Tests &middot; 11 Real Pairs &middot; Real-doc 0 FP &middot; Honest ~0.9</sub>
+  <sub>5 AI Agents &middot; 12 Projects &middot; 11 Countries &middot; 24 Endpoints &middot; 50 Deviations &middot; 1,024 Weeks Saved &middot; 310 Tests &middot; 11 Real Pairs &middot; Real-doc 0 FP &middot; Honest ~0.9</sub>
 </p>

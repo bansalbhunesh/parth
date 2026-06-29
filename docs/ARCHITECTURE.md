@@ -59,12 +59,12 @@ to a sequential runner if LangGraph isn't installed.
 
 - **Benchmark (breadth):** a deterministic 12-project synthetic corpus — 11
   countries, 6 tier standards — for honest, repeatable measurement.
-- **Real evidence (reality):** **8 fully-sourced real pairs** in
+- **Real evidence (reality):** **11 fully-sourced real pairs** in
   [`../data/samples/real/`](../data/samples/real/) — Vertiv GXT5 + Cummins QSK60,
   STULZ CyberAir 3 DX, ABB MNS, FM-200/Novec, Carrier-class chiller, EUROBAT VRLA,
   IEC 60076-11 transformer, NFPA 75 cabling — vs Uptime / NFPA 110/2001/75 / EPA
   40 CFR 60 / ASHRAE TC9.9 / EU F-Gas / IEC 61439/61641/60076 / TIA-942. Every
-  value cited in `PROVENANCE.md`. **17 deviations + 0 false positives across nine
+  value cited in `PROVENANCE.md`. **19 deviations + 0 false positives across eleven
   systems, none seeded**, all LLM-verified in a single batch (`gemini-2.5-flash`).
 
 ## Evaluation

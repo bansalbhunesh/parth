@@ -22,8 +22,8 @@ each issue it says *which test it will fail and how many weeks early you caught 
 
 ## Why it's believable (not a slide)
 We pointed it at **real spec sheets from real vendors** — Vertiv, Cummins, STULZ,
-ABB and others — against the real industry standards. It found **15 genuine problems
-out of 15, with zero false alarms.** It even did engineering on its own: it divided
+ABB and others — against the real industry standards. It found **19 genuine problems
+out of 19, with zero false alarms.** It even did engineering on its own: it divided
 a fuel tank by a burn rate to prove a generator couldn't last the required time, and
 it knew the environmental rating of a refrigerant the spec sheet never printed. Try
 it live: **parth-tan.vercel.app/judge**.

@@ -12,7 +12,7 @@ corpus:  ## Generate all project corpora (12 projects, 50 deviations)
 	python3 data/generate_corpus.py
 	python3 data/generate_projects.py
 
-test:  ## Run 258-test suite
+test:  ## Run 310-test suite
 	python3 -m pytest tests/ -q
 
 test-cov:  ## Run tests with coverage report
@@ -58,7 +58,7 @@ verify:  ## One-command verification: tests + all evals + frontend type check
 	@echo "║  PRAMAAN — Full Verification Suite                         ║"
 	@echo "╚══════════════════════════════════════════════════════════════╝"
 	@echo ""
-	@echo "▸ [1/5] Running 258-test suite..."
+	@echo "▸ [1/5] Running 310-test suite..."
 	python3 -m pytest tests/ -q --tb=short
 	@echo ""
 	@echo "▸ [2/5] Baseline eval (Meghdoot, 14 devs)..."

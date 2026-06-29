@@ -25,7 +25,7 @@ novel, and we no longer claim it is.
 | **Predict which commissioning test each deviation fails** | ✗ | ✅ L1–L5 Cx twin |
 | **Lead-time-to-failure** (weeks early, quantified) | ✗ | ✅ per-deviation `lead_time_weeks` |
 | Open, reproducible **eval harness** (P/R/F1 + ground truth) | ✗ (closed SaaS) | ✅ 3 paths + real-LLM |
-| **Graceful degradation** when the LLM is down (no silent zero) | n/a | ✅ rule-based fallback + 18s cap |
+| **Graceful degradation** when the LLM is down (no silent zero) | n/a | ✅ rule-based fallback + 60s cap |
 | **Reads scanned / image-only submittals** (the paper EPCs actually email) | partial | ✅ OCR fallback + honest message when unavailable |
 | Self-hostable / inspectable (MIT, full source) | ✗ | ✅ |
 
@@ -73,7 +73,7 @@ of the following is in their public feature set — and together they are the mo
    fails" — the number that converts a finding into a dated, prioritised action
    and a board-level schedule-risk metric.
 3. **Open, reproducible eval + real-world result.** A public test harness, a
-   263-test suite, and a **17/17-recall result on real third-party datasheets**
+   310-test suite, and a **19/19-recall result on real third-party datasheets**
    ([`eval/REAL_PAIRS_EVAL.md`](eval/REAL_PAIRS_EVAL.md)). Closed SaaS asks you to
    trust the marketing; we ship the proof.
 4. **No-silent-zero resilience.** A deterministic detector that still returns the

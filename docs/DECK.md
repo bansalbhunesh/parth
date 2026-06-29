@@ -43,7 +43,7 @@
 ### Slide 6 — It's real, and it's honest
 - **11 sourced real pairs:** Vertiv · Cummins · STULZ · ABB · FM-200 · Carrier · EUROBAT · transformer · cabling · Tate ConCore · Schneider Canalis · ASHRAE setpoint
 - vs real standards: Uptime · NFPA · EPA · ASHRAE · IEC · TIA-942
-- **17 deviations + 0 false positives across 9 systems — none seeded**
+- **19 deviations + 0 false positives across 11 systems — none seeded**
 - Knew R410A's GWP (2,088); *cleared* IP54 that exceeds spec
 - **Visual:** the PROVENANCE.md source table.
 - **Speaker note:** "every value is citable" — this is the anti-vaporware slide.

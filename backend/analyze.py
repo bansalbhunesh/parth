@@ -126,8 +126,8 @@ _FREEFORM_PARAMS = [
 ]
 
 _OMISSION_RX = re.compile(
-    r"(not\s+stated|upon\s+request|available\s+on\s+request|n/?a|tbd|"
-    r"to\s+be\s+(?:advised|confirmed)|pending)", re.I)
+    r"(not\s+stated|upon\s+request|available\s+on\s+request|\bn/?a\b|\btbd\b|"
+    r"to\s+be\s+(?:advised|confirmed)|\bpending\b)", re.I)
 
 
 def _num_near(text: str, kw: str, unit_rx: str, window: int = 50):

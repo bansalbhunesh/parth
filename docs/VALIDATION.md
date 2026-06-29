@@ -42,9 +42,10 @@ industry, at the one moment it's still free to fix.
 
 ## 4. The product already works on the real vendors' equipment
 
-Eight sourced pairs — **Vertiv, Cummins, STULZ, ABB, FM-200/Novec, Carrier-class,
-EUROBAT, IEC 60076-11 transformer, NFPA 75 cabling** — **17 genuine deviations +
-0 false positives, all LLM-verified in a single batch, every value cited**
+Eleven sourced pairs — **Vertiv, Cummins, STULZ, ABB, FM-200/Novec, Carrier-class,
+EUROBAT, IEC 60076-11 transformer, NFPA 75 cabling, Tate ConCore raised-floor,
+Schneider Canalis busway, ASHRAE supply-air setpoint** — **19 genuine deviations +
+0 false positives, all verified, every value cited**
 ([`../data/samples/real/PROVENANCE.md`](../data/samples/real/PROVENANCE.md)). The
 model did arithmetic (4,000 ÷ 103 = 38.8 h) and recalled three refrigerant/agent
 GWPs the datasheets never stated. This is reality, not a synthetic benchmark.

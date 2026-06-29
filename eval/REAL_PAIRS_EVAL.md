@@ -1,11 +1,11 @@
-# Real-World Eval — 8 Sourced Datasheet Pairs
+# Real-World Eval — 11 Sourced Datasheet Pairs
 
 The number that matters most: **a recall result on real third-party equipment, not
 the synthetic benchmark.** All eight pairs were analysed by `gemini-2.5-flash` over
 the raw documents in a **single batch run (8/8 returned `mode:"llm"`)**. Sources for
 every value: [`../data/samples/real/PROVENANCE.md`](../data/samples/real/PROVENANCE.md).
 
-## Result — 17/17 recall, 0 false positives
+## Result (original 8-pair batch) — 17/17 recall, 0 false positives
 
 | # | System | Real source | Deviation (LLM-recovered) |
 |---|--------|-------------|---------------------------|

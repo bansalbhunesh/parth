@@ -1,5 +1,6 @@
 """Pramaan API — uvicorn backend.main:app --reload"""
 
+import html
 import json
 import logging
 import time
@@ -55,8 +56,16 @@ class AnalyzeRequest(BaseModel):
 def _load_json(path: str) -> dict:
     full = CORPUS / path
     if full.exists():
-        return json.loads(full.read_text())
+        try:
+            return json.loads(full.read_text(encoding="utf-8"))
+        except Exception:
+            log.warning("Failed to parse %s; returning empty", path)
     return {}
+
+
+def _esc(v) -> str:
+    """HTML-escape a value for safe interpolation into the evidence-pack HTML."""
+    return html.escape(str(v))
 
 
 def _count_requirements() -> int:
@@ -371,6 +380,18 @@ def rfi_log():
 
 @app.get("/metrics")
 def metrics():
+    try:
+        return _compute_metrics()
+    except Exception as exc:
+        log.warning("metrics unavailable: %s", exc)
+        return {
+            "detection": {}, "text_eval": {}, "commissioning": {}, "corpus": {},
+            "citation_faithfulness": None,
+            "error": "metrics temporarily unavailable",
+        }
+
+
+def _compute_metrics():
     from eval.baseline_reconciler import reconcile
     from eval.run_eval import load_ground_truth, score
 
@@ -476,28 +497,28 @@ def export_audit_html():
     rows_html = ""
     for i, d in enumerate(data["evidence"], 1):
         sev_color = "#ff4d4d" if d.get("severity") == "Critical" else "#ffb020"
-        rationale = d.get("rationale", "")
+        rationale = _esc(d.get("rationale", ""))
         rows_html += f"""
         <tr>
             <td>{i}</td>
-            <td><b>{d.get('component','')}</b></td>
-            <td>{d.get('parameter','').replace('_',' ')}</td>
-            <td>{d.get('required_value','')} {d.get('unit','')}</td>
-            <td style="color:{sev_color}"><b>{d.get('provided_value','')} {d.get('unit','')}</b></td>
-            <td>{d.get('spec_clause','')}</td>
-            <td>{d.get('standard_ref','')}</td>
-            <td>{d.get('predicted_cx_test','—')}</td>
-            <td><b>{d.get('lead_time_weeks','—')}w</b></td>
-            <td style="color:{sev_color}"><b>{d.get('severity','')}</b></td>
+            <td><b>{_esc(d.get('component',''))}</b></td>
+            <td>{_esc(d.get('parameter','').replace('_',' '))}</td>
+            <td>{_esc(d.get('required_value',''))} {_esc(d.get('unit',''))}</td>
+            <td style="color:{sev_color}"><b>{_esc(d.get('provided_value',''))} {_esc(d.get('unit',''))}</b></td>
+            <td>{_esc(d.get('spec_clause',''))}</td>
+            <td>{_esc(d.get('standard_ref',''))}</td>
+            <td>{_esc(d.get('predicted_cx_test','—'))}</td>
+            <td><b>{_esc(d.get('lead_time_weeks') or '—')}w</b></td>
+            <td style="color:{sev_color}"><b>{_esc(d.get('severity',''))}</b></td>
         </tr>
         <tr class="rationale-row"><td colspan="10">{rationale}</td></tr>"""
 
-    lead_times = [d.get("lead_time_weeks", 0) for d in data["evidence"]]
+    lead_times = [d.get("lead_time_weeks") or 0 for d in data["evidence"]]
     total_lead = sum(lead_times)
     max_lead = max(lead_times) if lead_times else 0
     bar_html = ""
     for d in data["evidence"]:
-        lt = d.get("lead_time_weeks", 0)
+        lt = d.get("lead_time_weeks") or 0
         pct = (lt / max_lead * 100) if max_lead else 0
         sev_color = "#ff4d4d" if d.get("severity") == "Critical" else "#ffb020"
         bar_html += f"""<div class="bar-row">
@@ -743,6 +764,14 @@ def project_detail(project_id: str):
 
 @app.get("/projects/eval/aggregate")
 def projects_eval_aggregate():
+    try:
+        return _compute_projects_aggregate()
+    except Exception as exc:
+        log.warning("projects aggregate unavailable: %s", exc)
+        return {"aggregate": {}, "per_project": {}, "error": "aggregate temporarily unavailable"}
+
+
+def _compute_projects_aggregate():
     from eval.multi_project_eval import aggregate, run_all
     results = run_all()
     agg = aggregate(results)

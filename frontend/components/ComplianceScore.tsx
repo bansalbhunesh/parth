@@ -35,6 +35,7 @@ export default function ComplianceScore() {
     async function load() {
       try {
         const r = await fetch(`${API}/deviations`, { cache: "no-store" });
+        if (!r.ok) throw new Error(String(r.status));
         const data = await r.json();
         const devs = data.register || [];
 

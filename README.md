@@ -206,6 +206,8 @@ real-document run is captured in
 | Cx prediction | **1.000** | ≥ 0.85 |
 | Citation faithfulness | N/A | ≥ 0.95 |
 
+<sub>**Baseline column = a by-construction integrity check** — it compares pre-extracted triples to ground truth, so P/R/F1 read 1.000 *by construction*, and **baseline Cx is echoed from the answer key, not predicted**. The honest capability signal is the **real-datasheet eval** (recall 1.000, ~0.9 precision, 0 FP) and the LLM-agent column — we label this rather than headline it.</sub>
+
 </td>
 <td>
 
@@ -439,6 +441,7 @@ Pramaan cross-references against **7 governing standards** — all content is pa
 | `POST` | `/copilot` | RAG-powered project Q&A with prior-RFI matching |
 | `POST` | `/copilot/stream` | Streaming copilot with token-by-token response |
 | `GET` | `/cx-plan` | Commissioning plan with 17 L1–L5 tests |
+| `GET` | `/cx-graph` | Commissioning knowledge graph (16 cited deviation→test edges over 5 levels) |
 | `GET` | `/rfi-log` | Full RFI log (8 historical RFIs) |
 | `GET` | `/metrics` | Live eval metrics (P/R/F1, lead time, confidence) |
 | `GET` | `/pipeline` | Agent pipeline topology (nodes + edges) |

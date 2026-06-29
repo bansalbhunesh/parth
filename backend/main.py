@@ -345,6 +345,11 @@ def copilot_stream(q: CopilotQuery):
     def generate():
         try:
             for event_type, data in ask_stream(q.query):
+                # token data is raw model text (may contain newlines) — JSON-encode
+                # it so the line-based SSE parser doesn't truncate at the first \n.
+                # meta is already a JSON string; leave it as-is.
+                if event_type == "token":
+                    data = json.dumps(data)
                 yield f"event: {event_type}\ndata: {data}\n\n"
             yield "event: done\ndata: {}\n\n"
         except Exception as exc:
@@ -352,7 +357,7 @@ def copilot_stream(q: CopilotQuery):
             devs = _load_json("ground_truth.json").get("seeded_deviations", [])
             fb = ask_fallback(q.query, devs)
             yield f"event: meta\ndata: {json.dumps({'sources': fb['sources'], 'prior_rfis': fb['prior_rfis']})}\n\n"
-            yield f"event: token\ndata: {fb['answer']}\n\n"
+            yield f"event: token\ndata: {json.dumps(fb['answer'])}\n\n"
             yield "event: done\ndata: {}\n\n"
 
     return _sse_response(generate())
@@ -430,6 +435,10 @@ def _compute_metrics():
             "mean_lead_time_weeks": round(r["mean_lead_time_weeks"], 1),
             "max_lead_time_weeks": r["max_lead_time_weeks"],
             "total_lead_time_weeks": r["total_lead_time_weeks"],
+            # Honesty annotation: on the structured baseline, cx_prediction_accuracy
+            # is echoed from ground truth (1.000 by construction), not predicted.
+            # Capability is measured by the real-datasheet eval, not this number.
+            "basis": "structured baseline — cx echoed from ground truth (by construction)",
         },
         "corpus": {
             "systems_modeled": len(list((CORPUS / "specs").glob("*.md")))
@@ -442,6 +451,9 @@ def _compute_metrics():
             "scale_target_line_items_per_project": project_info.get("line_items_total", 0),
         },
         "citation_faithfulness": round(r["citation_faithfulness"], 3),
+        # Baseline findings are not citation-checked, so this is the by-construction
+        # structured value — not a capability measurement (see real-datasheet eval).
+        "citation_faithfulness_basis": "structured baseline — not citation-checked (by construction)",
     }
 
 

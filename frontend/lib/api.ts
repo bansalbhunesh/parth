@@ -185,7 +185,7 @@ export async function streamCopilot(
 
     await consumeSSE(r, {
       meta: (data) => { try { onMeta(JSON.parse(data)); } catch {} },
-      token: (data) => onToken(data),
+      token: (data) => { try { onToken(JSON.parse(data)); } catch { onToken(data); } },
       done: () => { onDone(); },
     });
     onDone();

@@ -46,9 +46,8 @@ def _pdf_text_layer(data: bytes, filename: str) -> str:
 
     try:
         import fitz
-        doc = fitz.open(stream=data, filetype="pdf")
-        pages = [page.get_text() for page in doc]
-        doc.close()
+        with fitz.open(stream=data, filetype="pdf") as doc:
+            pages = [page.get_text() for page in doc]
         return "\n\n".join(pages)
     except ImportError:
         log.warning("No PDF library available, cannot extract: %s", filename)
@@ -92,13 +91,12 @@ def _ocr_pdf_bytes(data: bytes, filename: str) -> str:
         dpi = 300
 
     try:
-        doc = fitz.open(stream=data, filetype="pdf")
-        pages = []
-        for page in doc:
-            pix = page.get_pixmap(dpi=dpi)
-            img = Image.open(io.BytesIO(pix.tobytes("png")))
-            pages.append(pytesseract.image_to_string(img))
-        doc.close()
+        with fitz.open(stream=data, filetype="pdf") as doc:
+            pages = []
+            for page in doc:
+                pix = page.get_pixmap(dpi=dpi)
+                img = Image.open(io.BytesIO(pix.tobytes("png")))
+                pages.append(pytesseract.image_to_string(img))
         text = "\n\n".join(pages)
         if text.strip():
             log.info("OCR recovered %d chars from scanned PDF %s", len(text), filename)
@@ -163,7 +161,9 @@ def ingest_system(system_id: str) -> dict:
             continue
         for ext in ("*.md", "*.pdf", "*.txt"):
             for f in sorted(doc_dir.glob(ext)):
-                if f.stem == system_id or f.stem.startswith(system_id):
+                if (f.stem == system_id
+                        or f.stem.startswith(system_id + "_")
+                        or f.stem.startswith(system_id + "-")):
                     doc = ingest_file(f)
                     doc["system_id"] = system_id
                     doc["doc_type"] = doc_type

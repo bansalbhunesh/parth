@@ -144,6 +144,11 @@ class PipelineState(TypedDict):
     revision_count: int
     retrieval_count: int
     retrieved: List[str]
+    retrieval_log: List[str]
+    # Routing flag for the retrieval cycle. Declared as a real channel so it
+    # survives state reduction on every pinned langgraph version (rather than
+    # relying on the conditional-edge seeing the node's returned dict).
+    _retrieve_again: bool
 
 
 def node_ingest(state: PipelineState) -> PipelineState:
@@ -344,6 +349,8 @@ def _init_state(system_id: str) -> PipelineState:
         "revision_count": 0,
         "retrieval_count": 0,
         "retrieved": [],
+        "retrieval_log": [],
+        "_retrieve_again": False,
     }
 
 

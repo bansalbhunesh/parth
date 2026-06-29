@@ -1,12 +1,15 @@
 """RFI / Project Copilot — conversational RAG over the full project corpus."""
 
 import json
+import logging
 import math
 import re
 from collections import Counter
 
 from backend.llm import complete, complete_stream
 from backend.paths import CORPUS
+
+log = logging.getLogger("pramaan.copilot")
 
 
 def _tokenize(text: str):
@@ -25,7 +28,7 @@ def _load_chunks():
 
     cx_path = CORPUS / "commissioning" / "cx_plan.json"
     if cx_path.exists():
-        cx = json.loads(cx_path.read_text())
+        cx = json.loads(cx_path.read_text(encoding="utf-8"))
         chunks.append({
             "source": "commissioning/cx_plan.json",
             "text": json.dumps(cx, indent=2),
@@ -33,24 +36,24 @@ def _load_chunks():
 
     rfi_path = CORPUS / "rfi" / "rfi_log.json"
     if rfi_path.exists():
-        rfis = json.loads(rfi_path.read_text())
+        rfis = json.loads(rfi_path.read_text(encoding="utf-8"))
         for r in rfis:
             chunks.append({
-                "source": f"rfi/{r['id']}",
-                "text": f"RFI {r['id']} ({r['system']}, {r['status']}): "
-                        f"Q: {r['question']} A: {r.get('resolution') or 'open'}",
+                "source": f"rfi/{r.get('id', '?')}",
+                "text": f"RFI {r.get('id', '?')} ({r.get('system', '')}, {r.get('status', '')}): "
+                        f"Q: {r.get('question', '')} A: {r.get('resolution') or 'open'}",
                 "rfi": r,
             })
 
     gt_path = CORPUS / "ground_truth.json"
     if gt_path.exists():
-        gt = json.loads(gt_path.read_text())
+        gt = json.loads(gt_path.read_text(encoding="utf-8"))
         for d in gt.get("seeded_deviations", []):
             chunks.append({
-                "source": f"deviation/{d['id']}",
-                "text": (f"Deviation {d['id']}: {d['component']}.{d['parameter']} "
-                         f"required={d['required_value']} provided={d['provided_value']} "
-                         f"{d['unit']} severity={d['severity']} "
+                "source": f"deviation/{d.get('id', '?')}",
+                "text": (f"Deviation {d.get('id', '?')}: {d.get('component', '')}.{d.get('parameter', '')} "
+                         f"required={d.get('required_value', '')} provided={d.get('provided_value', '')} "
+                         f"{d.get('unit', '')} severity={d.get('severity', '')} "
                          f"cx_test={d.get('predicted_cx_test')}"),
             })
     return chunks
@@ -77,14 +80,15 @@ def _ensure_index():
     try:
         _CHUNKS = _load_chunks()
         _IDF = _build_idf(_CHUNKS)
-    except Exception:
+    except Exception as exc:
+        log.warning("RFI copilot index build failed: %s", exc)
         _CHUNKS = []
         _IDF = {}
 
 
 def _retrieve(query: str, k: int = 6):
     _ensure_index()
-    q_tokens = _tokenize(query)
+    q_tokens = _tokenize(query or "")
     if not q_tokens:
         return _CHUNKS[:k]
 
@@ -130,8 +134,9 @@ def ask(query: str):
 
 
 def ask_fallback(query: str, devs: list[dict]) -> dict:
+    q = (query or "").lower()
     relevant = [d for d in devs if any(
-        term in query.lower()
+        term and term in q
         for term in [d.get("system", "").lower(), d.get("component", "").lower(),
                      d.get("parameter", "").replace("_", " ").lower()]
     )]

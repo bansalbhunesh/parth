@@ -1801,3 +1801,18 @@ table.reg .row-critical { border-left: 2px solid var(--fault); }
   margin-right: 4px;
 }
 .nav-judge:hover { background: var(--lead-glow); }
+
+/* Accessibility: honour the user's reduced-motion preference. The dashboard runs
+   many looping / scroll-triggered animations (live-pulse, scan-sweep, count-ups,
+   cursor-blink); for users who opt out we drop them to near-instant so the content
+   stays fully usable without vestibular discomfort. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

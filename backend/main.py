@@ -3,6 +3,7 @@
 import html
 import json
 import logging
+import os
 import time
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
@@ -39,8 +40,19 @@ app = FastAPI(
     description="Spec-to-Site Deviation Sentinel for hyperscale data-centre EPC delivery",
     version="2.0.0",
 )
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"],
-                   allow_headers=["*"])
+# CORS: permissive by default so the public judge demo never breaks, but
+# lockable in production by setting PRAMAAN_CORS_ORIGINS to a comma-separated
+# allowlist (e.g. "https://pramaan.vercel.app"). No cookies/credentials are
+# used, so the wildcard default carries no credential-leak risk.
+_cors_env = os.getenv("PRAMAAN_CORS_ORIGINS", "").strip()
+_cors_origins = [o.strip() for o in _cors_env.split(",") if o.strip()] or ["*"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_cors_origins,
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class CopilotQuery(BaseModel):
@@ -66,6 +78,15 @@ def _load_json(path: str) -> dict:
 def _esc(v) -> str:
     """HTML-escape a value for safe interpolation into the evidence-pack HTML."""
     return html.escape(str(v))
+
+
+def _safe_id(value: str, kind: str) -> str:
+    """Reject path traversal in identifiers that get joined onto a filesystem
+    path (system_id, project_id). Blocks separators, parent refs and NULs so a
+    crafted id cannot escape the corpus / projects directory."""
+    if not value or "/" in value or "\\" in value or ".." in value or "\x00" in value:
+        raise HTTPException(400, f"Invalid {kind} identifier")
+    return value
 
 
 def _count_requirements() -> int:
@@ -95,10 +116,17 @@ def _check_size(data: bytes, name: str):
         raise HTTPException(413, f"{name} exceeds the {MAX_UPLOAD_BYTES // (1024*1024)} MB upload limit")
 
 
-def _extract_upload_text(file: UploadFile) -> str:
-    data = file.file.read()
-    name = file.filename or "upload"
+def _read_capped(file: UploadFile, name: str) -> bytes:
+    """Read at most MAX_UPLOAD_BYTES+1 bytes so an oversized upload is rejected
+    before it can be fully buffered into memory (size-after-read DoS)."""
+    data = file.file.read(MAX_UPLOAD_BYTES + 1)
     _check_size(data, name)
+    return data
+
+
+def _extract_upload_text(file: UploadFile) -> str:
+    name = file.filename or "upload"
+    data = _read_capped(file, name)
     if name.lower().endswith(".pdf") or file.content_type == "application/pdf":
         text = extract_pdf_bytes(data, name)
         if not text:
@@ -163,12 +191,10 @@ def analyze_upload_stream(
     submittal_file: UploadFile = File(...),
     system_id: str = "CUSTOM",
 ):
-    spec_data = spec_file.file.read()
     spec_name = spec_file.filename or "spec"
-    sub_data = submittal_file.file.read()
     sub_name = submittal_file.filename or "submittal"
-    _check_size(spec_data, spec_name)
-    _check_size(sub_data, sub_name)
+    spec_data = _read_capped(spec_file, spec_name)
+    sub_data = _read_capped(submittal_file, sub_name)
 
     def generate():
         yield f"event: status\ndata: Extracting text from {spec_name}...\n\n"

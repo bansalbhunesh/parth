@@ -282,7 +282,11 @@ export async function getMultiProjectEval(): Promise<MultiProjectEval | null> {
   try {
     const r = await fetch(`${API}/projects/eval/aggregate`, fetchOpts({ cache: "no-store" }));
     if (!r.ok) throw new Error(String(r.status));
-    return await r.json();
+    const data = await r.json();
+    // A degraded backend returns {aggregate:{}, error:...} with HTTP 200 — treat
+    // that as a miss so the dashboard shows the bundled fallback, not NaN.
+    if (!data || typeof data.aggregate?.aggregate_f1 !== "number") return FALLBACK_MULTI_EVAL;
+    return data;
   } catch {
     return FALLBACK_MULTI_EVAL;
   }

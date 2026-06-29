@@ -76,6 +76,7 @@ export default function DeviationRegister({ rows }: { rows: Deviation[] }) {
         <input
           className="register-search"
           type="text"
+          aria-label="Search deviations"
           placeholder="Search components, parameters, standards..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -103,19 +104,31 @@ export default function DeviationRegister({ rows }: { rows: Deviation[] }) {
           <thead>
             <tr>
               <th>#</th>
-              <th className="reg-sortable" onClick={() => toggleSort("component")}>
+              <th className="reg-sortable" tabIndex={0}
+                  aria-sort={sortKey === "component" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+                  onClick={() => toggleSort("component")}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleSort("component"); } }}>
                 Component{sortIcon("component")}
               </th>
-              <th className="reg-sortable" onClick={() => toggleSort("parameter")}>
+              <th className="reg-sortable" tabIndex={0}
+                  aria-sort={sortKey === "parameter" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+                  onClick={() => toggleSort("parameter")}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleSort("parameter"); } }}>
                 Requirement{sortIcon("parameter")}
               </th>
               <th>Spec vs Submittal</th>
               <th>Standard</th>
               <th>Predicted Cx failure</th>
-              <th className="reg-sortable" onClick={() => toggleSort("lead_time_weeks")}>
+              <th className="reg-sortable" tabIndex={0}
+                  aria-sort={sortKey === "lead_time_weeks" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+                  onClick={() => toggleSort("lead_time_weeks")}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleSort("lead_time_weeks"); } }}>
                 Lead{sortIcon("lead_time_weeks")}
               </th>
-              <th className="reg-sortable" onClick={() => toggleSort("severity")}>
+              <th className="reg-sortable" tabIndex={0}
+                  aria-sort={sortKey === "severity" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+                  onClick={() => toggleSort("severity")}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleSort("severity"); } }}>
                 Severity{sortIcon("severity")}
               </th>
             </tr>
@@ -128,7 +141,10 @@ export default function DeviationRegister({ rows }: { rows: Deviation[] }) {
                 <tr
                   key={id}
                   className={`${d.severity === "Critical" ? "row-critical" : ""} reg-clickable`}
+                  tabIndex={0}
+                  aria-expanded={isExpanded}
                   onClick={() => toggleExpand(id)}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleExpand(id); } }}
                 >
                   <td className="val row-num">{i + 1}</td>
                   <td className="val">{d.component}</td>

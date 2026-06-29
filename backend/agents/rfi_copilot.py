@@ -71,19 +71,34 @@ def _build_idf(chunks):
 
 _CHUNKS = None
 _IDF = None
+_AVGDL = 0.0
+
+# BM25 parameters — k1 controls term-frequency saturation, b controls how
+# strongly document length normalises the score. Length normalisation is what
+# stops long spec / standard documents from burying short, highly-relevant RFI
+# chunks (a raw tf*idf sum previously favoured longer documents, suppressing
+# exact prior-RFI matches like RFI-014).
+_BM25_K1 = 1.5
+_BM25_B = 0.75
 
 
 def _ensure_index():
-    global _CHUNKS, _IDF
+    global _CHUNKS, _IDF, _AVGDL
     if _CHUNKS is not None:
         return
     try:
         _CHUNKS = _load_chunks()
+        for c in _CHUNKS:
+            toks = _tokenize(c["text"])
+            c["_tf"] = Counter(toks)
+            c["_len"] = len(toks)
+        _AVGDL = (sum(c["_len"] for c in _CHUNKS) / len(_CHUNKS)) if _CHUNKS else 0.0
         _IDF = _build_idf(_CHUNKS)
     except Exception as exc:
         log.warning("RFI copilot index build failed: %s", exc)
         _CHUNKS = []
         _IDF = {}
+        _AVGDL = 0.0
 
 
 def _retrieve(query: str, k: int = 6):
@@ -93,15 +108,18 @@ def _retrieve(query: str, k: int = 6):
         return _CHUNKS[:k]
 
     q_weights = Counter(q_tokens)
+    avgdl = _AVGDL or 1.0
     scored = []
     for c in _CHUNKS:
-        c_tokens = Counter(_tokenize(c["text"]))
+        tf = c["_tf"]
+        dl = c["_len"] or 1
         score = 0.0
         for t, qf in q_weights.items():
-            if t in c_tokens:
-                tf = 1 + math.log(c_tokens[t])
+            f = tf.get(t, 0)
+            if f:
                 idf = _IDF.get(t, 1.0)
-                score += qf * tf * idf
+                denom = f + _BM25_K1 * (1 - _BM25_B + _BM25_B * dl / avgdl)
+                score += qf * idf * (f * (_BM25_K1 + 1)) / denom
         if score > 0:
             scored.append((score, c))
     scored.sort(key=lambda x: -x[0])

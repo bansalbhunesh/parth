@@ -94,7 +94,11 @@ export default function EvalDashboard() {
 
   useEffect(() => {
     getMetrics().then((data) => {
-      if (data && (data as Record<string, unknown>).detection) {
+      // A degraded backend returns {detection:{}, error:...} with HTTP 200.
+      // Only switch to live data when a real numeric metric is present, so the
+      // dashboard never renders NaN / crashes on `.toFixed` of undefined.
+      const d = data as { detection?: { baseline_f1?: unknown }; error?: unknown } | null;
+      if (d && !d.error && d.detection && typeof d.detection.baseline_f1 === "number") {
         setM(data as unknown as Metrics);
         setLive(true);
       }

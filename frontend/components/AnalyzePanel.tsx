@@ -84,6 +84,13 @@ interface AnalyzeResult {
 
 const API = process.env.NEXT_PUBLIC_API ?? "http://localhost:8000";
 
+// Robust against a missing elapsed_ms (e.g. an older streaming payload): show a
+// neutral dash rather than the literal "undefinedms".
+function formatElapsed(ms: number | undefined | null): string {
+  if (ms == null || Number.isNaN(ms)) return "—";
+  return ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${Math.round(ms)} ms`;
+}
+
 type InputMode = "text" | "pdf";
 
 function DropZone({
@@ -115,10 +122,20 @@ function DropZone({
   return (
     <div
       className={`analyze-dropzone ${dragOver ? "drag-over" : ""} ${file ? "has-file" : ""}`}
+      role="button"
+      tabIndex={disabled ? -1 : 0}
+      aria-label={`${label}: drop a PDF, MD or TXT file here, or activate to browse`}
+      aria-disabled={disabled}
       onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
       onDragLeave={() => setDragOver(false)}
       onDrop={handleDrop}
       onClick={() => !disabled && inputRef.current?.click()}
+      onKeyDown={(e) => {
+        if (!disabled && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault();
+          inputRef.current?.click();
+        }
+      }}
     >
       <input
         ref={inputRef}
@@ -340,6 +357,7 @@ export default function AnalyzePanel() {
             <div className="analyze-editor-label">Design Basis (Spec)</div>
             <textarea
               className="analyze-textarea"
+              aria-label="Design basis specification text"
               value={spec}
               onChange={(e) => setSpec(e.target.value)}
               placeholder={"Paste design basis requirements here...\n\nExample format:\n- **UPS-02** — battery runtime min: shall be **10 min** (ref: UPTIME-TIER4; clause DB-4.3)"}
@@ -350,6 +368,7 @@ export default function AnalyzePanel() {
             <div className="analyze-editor-label">Vendor Submittal</div>
             <textarea
               className="analyze-textarea"
+              aria-label="Vendor submittal text"
               value={submittal}
               onChange={(e) => setSubmittal(e.target.value)}
               placeholder={"Paste vendor submittal here...\n\nExample format:\n- **UPS-02** — battery runtime min: **7 min** (vendor datasheet)"}
@@ -413,9 +432,7 @@ export default function AnalyzePanel() {
               {result.count} deviation{result.count !== 1 ? "s" : ""} found
             </span>
             <span className="analyze-results-meta">
-              {result.elapsed_ms >= 1000
-                ? `${(result.elapsed_ms / 1000).toFixed(1)}s`
-                : `${result.elapsed_ms}ms`}
+              {formatElapsed(result.elapsed_ms)}
               {" · "}
               {result.mode === "llm" ? "AI reasoning" : "rule-based engine"}
             </span>

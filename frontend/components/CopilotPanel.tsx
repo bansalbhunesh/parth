@@ -84,6 +84,7 @@ export default function CopilotPanel() {
       <div className="copilot-input-row">
         <input
           className="copilot-input"
+          aria-label="Ask the project copilot a question"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Ask about specs, submittals, standards, or RFIs..."

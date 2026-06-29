@@ -166,4 +166,55 @@ outdated wrapper, or a count that doesn't match the code. All fixes verified by
   any tracked file.
 
 ---
+
+## 6. Second hardening pass — defect & accessibility sweep (2026-06-29)
+
+A follow-up surface sweep after the live engine was validated end-to-end (6/6
+real deviations recovered on an unseen Liebert GXT MT+ datasheet × design basis).
+Focus: the residual cosmetic / crash / security / a11y seams a reviewer could
+still hit.
+
+- **Cosmetic "undefinedms" eliminated.** The streaming / upload analysis result
+  omitted `elapsed_ms`, so the live results header rendered the literal
+  "undefinedms". `run_streaming_analysis` now times and emits `elapsed_ms`; the
+  frontend `formatElapsed()` guard shows a dash (never "undefined") if it is ever
+  absent.
+- **Two dashboard crash paths closed.** When `/metrics` or
+  `/projects/eval/aggregate` degrade (they return `{detection:{}}` /
+  `{aggregate:{}}` with HTTP 200), `EvalDashboard` and `MultiProjectDashboard`
+  previously called `.toFixed()` on `undefined` and threw. Both now validate the
+  payload shape (a real numeric metric must be present) before replacing the
+  bundled fallback.
+- **Path-traversal guard.** `system_id` / `project_id` are now validated by
+  `_safe_id()` (rejects separators, `..`, NUL) before being joined onto a
+  filesystem path in `/corpus/doc/...` and `/projects/{id}`.
+- **Upload DoS narrowed.** `_read_capped()` reads at most the 15 MB limit + 1
+  byte, so an oversized upload is rejected before it is buffered into memory
+  (was: full read, then size check).
+- **CORS lockable.** `allow_origins` is now driven by `PRAMAAN_CORS_ORIGINS`
+  (comma-separated allowlist) with `allow_credentials=False`; defaults to `*` so
+  the public demo can't break.
+- **Prompt-injection fencing.** The reconciliation system prompt now instructs
+  the model to treat the (untrusted) spec/submittal strictly as data and to
+  disregard any instructions embedded in those documents.
+- **RFI retrieval upgraded to BM25.** Replaced the raw tf·idf sum with BM25
+  (document-length normalization) so long spec/standard files no longer bury
+  short, exact prior-RFI matches (e.g. RFI-014).
+- **Accessibility.** Upload dropzone made keyboard-operable (role/tabindex/
+  Enter-Space); the duplicate page `<h1>` (Sentinel headline) demoted to `<h2>`,
+  leaving one canonical hero `<h1>`; programmatic labels added to the two
+  analysis textareas, the copilot input and the register search; sortable column
+  headers got keyboard + `aria-sort`; expandable register rows got keyboard +
+  `aria-expanded`.
+- **Deliberately NOT changed (documented).** The no-key rule-based fallback was
+  *not* extended with capacity / power-factor / redundancy rules: the offline
+  guarantee tests pin `len(devs)` and `devs == []` on the real datasheet pairs,
+  and on the live cases the units don't match the rules (e.g. "3000 VA" vs a kVA
+  rule), so the additions would risk regressions for ~no recall gain. The correct
+  fix for the no-key path is wiring the LLM key — the LLM path already recovers
+  all of these (6/6 on the unseen Liebert × design-basis pair).
+- **Verified by** `ruff check` (clean), the full suite (**310 passed**),
+  `tsc --noEmit` (0 type errors) and a clean production `next build`.
+
+---
 _Reproduce the honest numbers with no key: `python eval/real_pairs_offline.py`._

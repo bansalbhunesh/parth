@@ -276,6 +276,7 @@ def run_streaming_analysis(
 ):
     import json
 
+    t0 = time.time()
     standards = _all_standards_text(max_chars_per=1800)
     prompt = PROMPT_TEMPLATE.format(
         spec=spec_text, submittal=submittal_text, standards=standards,
@@ -304,11 +305,13 @@ def run_streaming_analysis(
         devs = _resilient_fallback(spec_text, submittal_text, system_id)
         mode = "deterministic"
 
+    elapsed = round((time.time() - t0) * 1000)
     result = {
         "system": system_id,
         "deviations": devs,
         "count": len(devs),
         "mode": mode,
+        "elapsed_ms": elapsed,
     }
     yield f"event: result\ndata: {json.dumps(result)}\n\n"
     yield "event: done\ndata: {}\n\n"

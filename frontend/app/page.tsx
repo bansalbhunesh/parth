@@ -36,10 +36,10 @@ function Sentinel({ d }: { d: Deviation }) {
         <span className="eyebrow-dot" />
         DEVIATION SENTINEL — {d.severity.toUpperCase()}
       </div>
-      <h1>
+      <h2 className="sentinel-headline">
         {d.component}: {d.parameter.replace(/_/g, " ")} — {d.provided_value}{" "}
         {d.unit} vs {d.required_value} {d.unit} required
-      </h1>
+      </h2>
       <div className="sub">
         Caught the day the submittal was uploaded — Week {d.week_caught}.
         Without Pramaan this surfaces in commissioning at Week {d.week_fail}.

@@ -151,7 +151,7 @@ body {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.3; }
 }
-.sentinel h1 {
+.sentinel h2.sentinel-headline {
   font-size: 24px; line-height: 1.3; margin: 0 0 8px; font-weight: 700;
   max-width: 800px;
 }

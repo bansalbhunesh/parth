@@ -33,6 +33,29 @@ novel, and we no longer claim it is.
 reproducible eval** — turning "this submittal deviates" into "this will fail
 IST-07 at Week 44; you have 27 weeks to act."
 
+### 2a. Market validation + the agentic tier (2026)
+
+The thesis is no longer speculative: in **April 2026 Trimble acquired Document
+Crunch** — a construction "AI risk-intelligence" platform that compares documents
+to standards, flags deviations, and cites sources — to fold it into its project-
+delivery ecosystem. Trunk Tools (CNBC, Aug 2025) raised on adjacent document-QA.
+That a $15B contractor-software vendor paid to own *exactly* the
+deviation-vs-standards-with-citations capability is the strongest possible
+external signal that Pramaan is building in the right place. It also sets the bar:
+these are funded, production, field-data products. We do **not** out-scale them.
+
+Where we are *not* a follower: none of the public agentic-risk or submittal tools
+(Document Crunch, BuildSync, Trunk Tools, Part3, InspectMind) publicly unify a
+spec deviation → the **commissioning test it fails** → the **schedule milestone it
+slips** (CPM + beta-PERT Monte-Carlo) → the **long-lead supplier whose
+re-procurement is the real cost** into **one standards-cited, offline-deterministic
+graph** with a `blast_radius()` traversal. Schedule-delay AI exists (BuildOps,
+CMiC, academic early-warning systems), and so does deviation detection — but the
+**join** between them, every edge citation-backed and reproducible without an API
+key, is the part we have not found in any public competitor. That is the wedge a
+hackathon judge can see end-to-end in two minutes; the incumbents sell the pieces
+separately and behind a login.
+
 ## 3. Evidence hierarchy (strongest first)
 
 1. **Real third-party document** — a Vertiv Liebert datasheet the system never

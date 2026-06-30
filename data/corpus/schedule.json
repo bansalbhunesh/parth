@@ -1,0 +1,429 @@
+{
+  "project_id": "meghdoot",
+  "time_unit": "weeks",
+  "current_week": 11,
+  "deadline_week": 52,
+  "tasks": [
+    {
+      "id": "DESIGN",
+      "name": "Design freeze & IFC release",
+      "duration": {
+        "optimistic": 6,
+        "most_likely": 8,
+        "pessimistic": 12
+      }
+    },
+    {
+      "id": "PROCURE",
+      "name": "Long-lead procurement release",
+      "duration": {
+        "optimistic": 8,
+        "most_likely": 12,
+        "pessimistic": 20
+      },
+      "predecessors": [
+        "DESIGN"
+      ]
+    },
+    {
+      "id": "CIVIL",
+      "name": "Civil & structural",
+      "duration": {
+        "optimistic": 8,
+        "most_likely": 10,
+        "pessimistic": 14
+      },
+      "predecessors": [
+        "DESIGN"
+      ]
+    },
+    {
+      "id": "MEP",
+      "name": "MEP rough-in",
+      "duration": {
+        "optimistic": 6,
+        "most_likely": 8,
+        "pessimistic": 12
+      },
+      "predecessors": [
+        "CIVIL"
+      ]
+    },
+    {
+      "id": "INSTALL-COOL",
+      "name": "COOL install & terminate",
+      "component": "COOL",
+      "cx_test": "FAT-01",
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 4,
+        "pessimistic": 8
+      },
+      "predecessors": [
+        "MEP",
+        "PROCURE"
+      ]
+    },
+    {
+      "id": "INSTALL-GEN",
+      "name": "GEN install & terminate",
+      "component": "GEN",
+      "cx_test": "FAT-01",
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 4,
+        "pessimistic": 8
+      },
+      "predecessors": [
+        "MEP",
+        "PROCURE"
+      ]
+    },
+    {
+      "id": "INSTALL-SWGR",
+      "name": "SWGR install & terminate",
+      "component": "SWGR",
+      "cx_test": "FAT-01",
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 4,
+        "pessimistic": 8
+      },
+      "predecessors": [
+        "MEP",
+        "PROCURE"
+      ]
+    },
+    {
+      "id": "INSTALL-UPS",
+      "name": "UPS install & terminate",
+      "component": "UPS",
+      "cx_test": "FAT-01",
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 4,
+        "pessimistic": 8
+      },
+      "predecessors": [
+        "MEP",
+        "PROCURE"
+      ]
+    },
+    {
+      "id": "CX-ITP-01",
+      "name": "Equipment receipt inspection",
+      "cx_test": "ITP-01",
+      "cx_level": 1,
+      "duration": {
+        "optimistic": 1,
+        "most_likely": 1.5,
+        "pessimistic": 3
+      },
+      "predecessors": [
+        "INSTALL-COOL",
+        "INSTALL-GEN",
+        "INSTALL-SWGR",
+        "INSTALL-UPS"
+      ]
+    },
+    {
+      "id": "CX-ITP-05",
+      "name": "Structural load test and floor deflection",
+      "cx_test": "ITP-05",
+      "cx_level": 1,
+      "duration": {
+        "optimistic": 1,
+        "most_likely": 1.5,
+        "pessimistic": 3
+      },
+      "predecessors": [
+        "INSTALL-COOL",
+        "INSTALL-GEN",
+        "INSTALL-SWGR",
+        "INSTALL-UPS"
+      ]
+    },
+    {
+      "id": "GATE-L1",
+      "name": "Cx Level 1 complete",
+      "cx_level": 1,
+      "is_milestone": true,
+      "duration": {
+        "fixed": 0
+      },
+      "predecessors": [
+        "CX-ITP-01",
+        "CX-ITP-05"
+      ]
+    },
+    {
+      "id": "CX-ITP-02",
+      "name": "Cable fire-rating / plenum compliance inspection",
+      "cx_test": "ITP-02",
+      "cx_level": 2,
+      "duration": {
+        "optimistic": 1,
+        "most_likely": 2,
+        "pessimistic": 4
+      },
+      "predecessors": [
+        "GATE-L1"
+      ]
+    },
+    {
+      "id": "CX-ITP-03",
+      "name": "Arc flash labeling and PPE verification",
+      "cx_test": "ITP-03",
+      "cx_level": 2,
+      "duration": {
+        "optimistic": 1,
+        "most_likely": 2,
+        "pessimistic": 4
+      },
+      "predecessors": [
+        "GATE-L1"
+      ]
+    },
+    {
+      "id": "CX-ITP-04",
+      "name": "Pathway fill and cable management inspection",
+      "cx_test": "ITP-04",
+      "cx_level": 2,
+      "duration": {
+        "optimistic": 1,
+        "most_likely": 2,
+        "pessimistic": 4
+      },
+      "predecessors": [
+        "GATE-L1"
+      ]
+    },
+    {
+      "id": "GATE-L2",
+      "name": "Cx Level 2 complete",
+      "cx_level": 2,
+      "is_milestone": true,
+      "duration": {
+        "fixed": 0
+      },
+      "predecessors": [
+        "CX-ITP-02",
+        "CX-ITP-03",
+        "CX-ITP-04"
+      ]
+    },
+    {
+      "id": "CX-FAT-01",
+      "name": "UPS module load-bank test",
+      "cx_test": "FAT-01",
+      "cx_level": 3,
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 3,
+        "pessimistic": 5
+      },
+      "predecessors": [
+        "GATE-L2"
+      ]
+    },
+    {
+      "id": "CX-FAT-02",
+      "name": "Generator load-bank test",
+      "cx_test": "FAT-02",
+      "cx_level": 3,
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 3,
+        "pessimistic": 5
+      },
+      "predecessors": [
+        "GATE-L2"
+      ]
+    },
+    {
+      "id": "CX-FAT-03",
+      "name": "Protection coordination / fault-withstand verification",
+      "cx_test": "FAT-03",
+      "cx_level": 3,
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 3,
+        "pessimistic": 5
+      },
+      "predecessors": [
+        "GATE-L2"
+      ]
+    },
+    {
+      "id": "GATE-L3",
+      "name": "Cx Level 3 complete",
+      "cx_level": 3,
+      "is_milestone": true,
+      "duration": {
+        "fixed": 0
+      },
+      "predecessors": [
+        "CX-FAT-01",
+        "CX-FAT-02",
+        "CX-FAT-03"
+      ]
+    },
+    {
+      "id": "CX-IST-01",
+      "name": "Utility failure simulation",
+      "cx_test": "IST-01",
+      "cx_level": 4,
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 3.5,
+        "pessimistic": 7
+      },
+      "predecessors": [
+        "GATE-L3"
+      ]
+    },
+    {
+      "id": "CX-IST-05",
+      "name": "Single-path maintenance simulation",
+      "cx_test": "IST-05",
+      "cx_level": 4,
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 3.5,
+        "pessimistic": 7
+      },
+      "predecessors": [
+        "GATE-L3"
+      ]
+    },
+    {
+      "id": "CX-IST-07",
+      "name": "Load transfer under maintenance (battery autonomy)",
+      "cx_test": "IST-07",
+      "cx_level": 4,
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 3.5,
+        "pessimistic": 7
+      },
+      "predecessors": [
+        "GATE-L3"
+      ]
+    },
+    {
+      "id": "CX-IST-09",
+      "name": "Cooling failover under fault + maintenance",
+      "cx_test": "IST-09",
+      "cx_level": 4,
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 3.5,
+        "pessimistic": 7
+      },
+      "predecessors": [
+        "GATE-L3"
+      ]
+    },
+    {
+      "id": "CX-IST-11",
+      "name": "Sustained utility-outage run (fuel autonomy)",
+      "cx_test": "IST-11",
+      "cx_level": 4,
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 3.5,
+        "pessimistic": 7
+      },
+      "predecessors": [
+        "GATE-L3"
+      ]
+    },
+    {
+      "id": "CX-IST-14",
+      "name": "Monitoring & alarm verification",
+      "cx_test": "IST-14",
+      "cx_level": 4,
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 3.5,
+        "pessimistic": 7
+      },
+      "predecessors": [
+        "GATE-L3"
+      ]
+    },
+    {
+      "id": "CX-IST-16",
+      "name": "Cooling performance and thermal verification",
+      "cx_test": "IST-16",
+      "cx_level": 4,
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 3.5,
+        "pessimistic": 7
+      },
+      "predecessors": [
+        "GATE-L3"
+      ]
+    },
+    {
+      "id": "CX-IST-15",
+      "name": "Full-facility failover drill",
+      "cx_test": "IST-15",
+      "cx_level": 4,
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 3.5,
+        "pessimistic": 7
+      },
+      "predecessors": [
+        "GATE-L3"
+      ]
+    },
+    {
+      "id": "GATE-L4",
+      "name": "Cx Level 4 complete",
+      "cx_level": 4,
+      "is_milestone": true,
+      "duration": {
+        "fixed": 0
+      },
+      "predecessors": [
+        "CX-IST-01",
+        "CX-IST-05",
+        "CX-IST-07",
+        "CX-IST-09",
+        "CX-IST-11",
+        "CX-IST-14",
+        "CX-IST-16",
+        "CX-IST-15"
+      ]
+    },
+    {
+      "id": "CX-SAT-01",
+      "name": "72-hour sustained operations test",
+      "cx_test": "SAT-01",
+      "cx_level": 5,
+      "duration": {
+        "optimistic": 3,
+        "most_likely": 5,
+        "pessimistic": 9
+      },
+      "predecessors": [
+        "GATE-L4"
+      ]
+    },
+    {
+      "id": "GATE-L5",
+      "name": "Ready-for-service (L5 integrated systems test)",
+      "cx_level": 5,
+      "is_milestone": true,
+      "duration": {
+        "fixed": 0
+      },
+      "predecessors": [
+        "CX-SAT-01"
+      ]
+    }
+  ]
+}

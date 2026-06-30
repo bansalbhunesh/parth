@@ -12,6 +12,11 @@ venv/
 node_modules/
 .next/
 tsconfig.tsbuildinfo
-# data artifacts (regenerate via data/generate_corpus.py)
+# data artifacts (regenerate via data/generate_corpus.py). NOTE: the seed corpus
+# the demo + tests load is force-tracked despite this rule (git keeps tracking a
+# file once added with -f). That includes specs/ground_truth/cx_plan/rfi/extracted
+# AND data/corpus/{schedule,supply_chain}.json — the live default-project PS4 data.
+# A git-ignore negation can't re-include them (parent dir is ignored), so if these
+# are ever regenerated fresh, re-add with: git add -f data/corpus/<file>.json
 data/corpus/
 .coverage

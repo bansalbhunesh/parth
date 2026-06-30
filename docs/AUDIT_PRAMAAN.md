@@ -10,6 +10,115 @@ between "real data" and "synthetic data".
 
 ---
 
+## 0. PS4-capability build (2026-06-30) — closing the two coverage gaps
+
+Problem Statement 4 lists five capability areas and five evaluation-focus metrics.
+Pramaan was deep on three (spec compliance, commissioning QA, RFI) but partial on
+schedule-risk and absent on supply-chain visibility. Research-grounded (CPM/PERT/
+Monte-Carlo, supply-chain ETA, construction-delay SOTA, knowledge-graph design),
+this pass built both — plus the unifying graph — additively, behind feature flags,
+keeping the existing demo byte-for-byte intact:
+
+- **Schedule-risk engine** (`backend/agents/schedule_risk.py`): CPM + 10k-trial
+  beta-PERT Monte Carlo → P50/P80/P90, on-time probability, criticality + sensitivity;
+  each deviation injected as a rework/late-delivery risk driver → milestone slip.
+- **Supply-chain engine** (`backend/agents/supply_chain.py`): 10-stage ETA, `P(late)`
+  via normal CDF, transparent multi-tier supplier risk, cost-of-delay alternatives.
+- **Project graph** (`backend/agents/project_graph.py`): one networkx graph unifying
+  deviation→standard→Cx→milestone→equipment→supplier; `blast_radius()` walks it
+  deterministically (UPS battery → IST-07 → Vertiv 40-wk re-procure → 13-wk RFS slip).
+  Edges are standards-cited, numbers are data-sourced — the LLM only narrates.
+- **Data**: `schedule.json` + `supply_chain.json` generated for all 12 projects,
+  joined via the existing `cx_test`/`component` keys (no change to existing files).
+- **API**: `/projects/{id}/schedule|supply-chain|graph|blast-radius/{dev}`, flag-gated
+  (`PRAMAAN_SCHEDULE/SUPPLY/GRAPH`), `{available:false}` on missing data — never 404/500.
+- **Frontend**: three new dashboard sections (ScheduleRisk, SupplyChainPanel + world
+  map, ProjectGraph) + a judge-page slip card; hand-rolled SVG/CSS, zero new deps,
+  production build green.
+- **Honesty rail**: a schedule **calibration** harness (`eval/schedule_calibration.py`)
+  — P80 self-coverage 0.80, degrading honestly under optimism bias — framed as
+  calibration on synthetic data, NOT field-validated accuracy.
+
+Test suite: **315 → 416** (+101). Dashboard: **19 → 22 sections**. Components:
+**24 → 27**. All five PS4 build areas now Deep; PS4_ALIGNMENT.md updated.
+
+---
+
+## 0. Fidelity & honesty pass (2026-06-30) — closing the overclaim seams
+
+A final honesty sweep over the PS4 build closed the gaps a domain-expert judge
+would catch between the live engines and the bundled cold-load fallbacks/prose:
+
+- **Bundled fallback parity** (`frontend/lib/api.ts`): `FALLBACK_SUPPLY` shipped
+  only 2 of 4 shipments while the panel header read "4 long-lead / 2 at risk" —
+  rebuilt to all four (SHP-COOL/GEN/SWGR/UPS) from the live corpus engine output;
+  `FALLBACK_SCHEDULE` Monte-Carlo markers/milestones/slip and `FALLBACK_GRAPH`
+  stats re-synced to live values so a cold load is byte-faithful to a warm one.
+- **Narration number-grounding** (`backend/llm.py` `restate()` + `numbers_grounded()`,
+  wired into both engines' `narrate()`): the LLM restatement path now validates that
+  every numeric token in the prose appears verbatim in the computed template — an
+  invented or re-rounded figure (e.g. 61.9 → "62") falls back to the always-correct
+  template. Conservative by design; the offline demo was already template-only.
+- **Worst-case qualifiers**: the judge-page slip card now reads "worst case, all N
+  uncaught" (a deterministic upper bound, not a forecast), and `PS4_ALIGNMENT.md`
+  reframes the 13-wk blast-radius slip as a *worst-case remediation bound* (assumes
+  long-lead re-procurement, not a battery-only swap).
+
+Test suite: **432 → 435** (+3 narration-guard tests). tsc 0 · vitest 6/6 ·
+`next build` green (4 pages prerendered through the fallback path) · ruff clean.
+
+---
+
+## 0. Second-pass hardening (2026-06-29) — 8-agent independent audit + fixes
+
+An adversarial 8-agent audit (backend logic, security, API robustness, frontend,
+eval credibility, docs, deployment, data integrity) re-checked the branch. Data
+integrity and the real-datasheet pairs came back clean; builds deploy green. The
+findings that were fixed in this pass:
+
+- **Silent-zero guard (P0).** `reconcile_system_at` swallows `LLMError → []`, so
+  on a throttled/no-key backend `/deviations` and `/ingest` returned a valid-looking
+  empty `200` — defeating both the backend ground-truth fallback and the frontend
+  fallback. Both endpoints now fall back to ground truth on an *empty* result, not
+  only on a raised exception. Frontend `getCxPlan` likewise now rejects an empty
+  `{}` 200 (which would otherwise crash `CommissioningTwin` and blank the page).
+- **Path-traversal guard wired (P1).** `_safe_id` existed but was never called;
+  `corpus_doc` and `project_detail` now invoke it (regression-tested).
+- **Metric honesty.** `cx_prediction_accuracy = 1.000` relabelled as a tautological
+  consistency check (the `_RULES` table mirrors ground-truth authoring); the stale
+  6-project/33-deviation `results_multi_project.json` regenerated to the real
+  **12 / 50 / 1,024**; the real-LLM "1.000 everywhere" sweep now carries an explicit
+  self-seeded + post-tuning (`P 0.962 → 1.000`) caveat at the headline.
+- **Robustness.** Reflexion loop now retains best-so-far findings (a degraded
+  revision pass can no longer erase pass-1 results); RFI-copilot index publishes
+  globals only after it is fully built (cold-start race); `/corpus/stats` no longer
+  `KeyError`s when `specs/` is absent; `prefers-reduced-motion` now gates the JS
+  count-up animations, not just CSS.
+- **Doc drift.** README Scale Story corrected (203 requirements, 91 systems,
+  `10→203`, 12-project grid); generator docstring corrected from "6" to 11 projects.
+
+A follow-up sweep then closed the lower-severity items the audit deferred:
+
+- **Upload DoS.** A pure-ASGI `BodySizeLimitMiddleware` now rejects requests whose
+  declared `Content-Length` exceeds 20 MB with a 413 *before* the multipart parser
+  spools the body to disk (the 15 MB `_read_capped` only protected memory).
+- **SSE event-splitting.** Upload filenames are now stripped of CR/LF (`_sse_safe`)
+  before interpolation into `data:` lines, so a crafted filename can't inject events.
+- **Prompt injection.** The RFI copilot's system prompt now instructs the model to
+  treat CONTEXT/QUESTION as untrusted data (parity with reconciliation).
+- **Evidence-pack XSS (latent).** Header `project`/`tier`/`location`, the title, the
+  bar-chart labels and standards list in `export_audit_html` are now `_esc`-escaped.
+- **Frontend resilience.** Added a route-level `app/error.tsx` (catches Server-
+  Component render throws before the client boundary mounts, incl. `/judge`);
+  `AnalyzePanel` guards `severity`/`parameter` against malformed LLM rows; React
+  keys in `DeviationRegister`/`CommissioningTwin` now include the row index.
+
+Test suite: **310 → 315** (+5 regression tests across the silent-zero, traversal-
+guard and body-size fixes). The historical counts in the sections below reflect the
+2026-06-28 pass and are left as dated record.
+
+---
+
 ## 1. Executive verdict
 
 The submission's engineering and presentation are genuinely strong. Its one

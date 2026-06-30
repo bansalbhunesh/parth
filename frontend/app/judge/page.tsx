@@ -1,7 +1,7 @@
 import Link from "next/link";
 import AnalyzePanel from "../../components/AnalyzePanel";
 import MultiProjectDashboard from "../../components/MultiProjectDashboard";
-import { getRegister } from "../../lib/api";
+import { getRegister, getSchedule } from "../../lib/api";
 
 // Same ISR treatment as the main page — instant reloads from the edge cache.
 export const revalidate = 600;
@@ -12,7 +12,7 @@ export const metadata = {
 };
 
 export default async function JudgePage() {
-  const rows = await getRegister();
+  const [rows, schedule] = await Promise.all([getRegister(), getSchedule()]);
   const hero = rows.find((r) => r.component === "UPS-02") ?? rows[0];
 
   return (
@@ -33,6 +33,14 @@ export default async function JudgePage() {
           It catches the spec deviation the day the submittal lands —
           <span> not in commissioning, six months and a few crore too late.</span>
         </h1>
+        <p className="jm-sub">
+          <strong>What only Pramaan does:</strong> other tools stop at the
+          spec-vs-submittal mismatch. Pramaan names the exact{" "}
+          <strong>commissioning test</strong> that deviation will fail and the{" "}
+          <strong>weeks of lead time</strong> you have to fix it first — a
+          domain-informed rule + LLM hybrid that turns a design-review miss into a
+          scheduled, preventable commissioning failure.
+        </p>
         {hero && (
           <p className="jm-sub">
             Live example — <strong>{hero.component} {hero.parameter.replace(/_/g, " ")}</strong>:
@@ -70,10 +78,58 @@ export default async function JudgePage() {
             Hit <strong>“Load real document ★”</strong> (a real Vertiv UPS datasheet
             vs a design basis), or upload your own spec + submittal. Pramaan reasons
             out the non-compliances from scratch and cites the standard, the
-            commissioning test, and the lead time for each.
+            commissioning test, and the lead time for each. Every value in our
+            real-pairs benchmark is independently sourced —{" "}
+            <a
+              href="https://github.com/bansalbhunesh/parth/blob/main/data/samples/real/PROVENANCE.md"
+              target="_blank"
+              rel="noreferrer"
+            >
+              verify each one yourself
+            </a>.
           </p>
         </div>
         <AnalyzePanel />
+      </section>
+
+      <section className="jm-section">
+        <div className="jm-section-head">
+          <h2>And it reaches all the way to the handover date</h2>
+          <p>
+            A deviation isn&apos;t just a compliance flag. Pramaan traces it to the
+            commissioning test it fails, the schedule milestone it slips, and the
+            long-lead supplier whose re-procurement is the real cost — one connected
+            graph, every edge standards-cited, no number invented. Caught at submittal
+            review, here&apos;s what these {schedule.n_risks} deviations are worth to the
+            ready-for-service date:
+          </p>
+        </div>
+        <div className="jm-metrics">
+          <div className="jm-metric">
+            <div className="jm-metric-val ok">
+              {schedule.baseline.on_time_probability !== null
+                ? `${Math.round(schedule.baseline.on_time_probability * 100)}%`
+                : "—"}
+            </div>
+            <div className="jm-metric-label">on-time probability · baseline</div>
+          </div>
+          <div className="jm-metric">
+            <div className="jm-metric-val">
+              {schedule.deviation_impact
+                ? `${Math.round((schedule.deviation_impact.at_risk_on_time ?? 0) * 100)}%`
+                : "—"}
+            </div>
+            <div className="jm-metric-label">on-time if these deviations slip through</div>
+          </div>
+          <div className="jm-metric">
+            <div className="jm-metric-val lead">
+              +{schedule.deviation_impact?.slip_weeks ?? 0} wk
+            </div>
+            <div className="jm-metric-label">
+              ready-for-service slip · worst case, all {schedule.n_risks} uncaught
+            </div>
+          </div>
+        </div>
       </section>
 
       <section className="jm-section">
@@ -86,12 +142,20 @@ export default async function JudgePage() {
             pipeline scales and reproduces, not detection skill. The real proof is
             the unseen-document panel above.
           </p>
+          <p className="jm-generalize">
+            <strong>Not just data centres.</strong> The engine is domain-agnostic:
+            any field where a written specification must be reconciled against a
+            vendor submittal and a downstream acceptance test — pharma GMP
+            qualification, aerospace AS9100, medical-device V&amp;V, switchgear type
+            testing — is the same problem. Data-centre EPC is simply the
+            highest-stakes instance we proved it on.
+          </p>
         </div>
         <MultiProjectDashboard />
       </section>
 
       <footer className="jm-foot">
-        <Link href="/" className="jm-foot-cta">Open the full 19-section dashboard →</Link>
+        <Link href="/" className="jm-foot-cta">Open the full 22-section dashboard →</Link>
         <div className="jm-foot-links">
           <a href="https://parth-3puc.onrender.com/health" target="_blank" rel="noreferrer">API health</a>
           <span>·</span>

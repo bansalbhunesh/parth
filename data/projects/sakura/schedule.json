@@ -1,0 +1,235 @@
+{
+  "project_id": "sakura",
+  "time_unit": "weeks",
+  "current_week": 10,
+  "deadline_week": 50,
+  "tasks": [
+    {
+      "id": "DESIGN",
+      "name": "Design freeze & IFC release",
+      "duration": {
+        "optimistic": 6,
+        "most_likely": 8,
+        "pessimistic": 12
+      }
+    },
+    {
+      "id": "PROCURE",
+      "name": "Long-lead procurement release",
+      "duration": {
+        "optimistic": 8,
+        "most_likely": 12,
+        "pessimistic": 20
+      },
+      "predecessors": [
+        "DESIGN"
+      ]
+    },
+    {
+      "id": "CIVIL",
+      "name": "Civil & structural",
+      "duration": {
+        "optimistic": 8,
+        "most_likely": 10,
+        "pessimistic": 14
+      },
+      "predecessors": [
+        "DESIGN"
+      ]
+    },
+    {
+      "id": "MEP",
+      "name": "MEP rough-in",
+      "duration": {
+        "optimistic": 6,
+        "most_likely": 8,
+        "pessimistic": 12
+      },
+      "predecessors": [
+        "CIVIL"
+      ]
+    },
+    {
+      "id": "INSTALL-COOL",
+      "name": "COOL install & terminate",
+      "component": "COOL",
+      "cx_test": "FAT-S01",
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 4,
+        "pessimistic": 8
+      },
+      "predecessors": [
+        "MEP",
+        "PROCURE"
+      ]
+    },
+    {
+      "id": "INSTALL-GEN",
+      "name": "GEN install & terminate",
+      "component": "GEN",
+      "cx_test": "FAT-S01",
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 4,
+        "pessimistic": 8
+      },
+      "predecessors": [
+        "MEP",
+        "PROCURE"
+      ]
+    },
+    {
+      "id": "INSTALL-SWGR",
+      "name": "SWGR install & terminate",
+      "component": "SWGR",
+      "cx_test": "FAT-S01",
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 4,
+        "pessimistic": 8
+      },
+      "predecessors": [
+        "MEP",
+        "PROCURE"
+      ]
+    },
+    {
+      "id": "INSTALL-UPS",
+      "name": "UPS install & terminate",
+      "component": "UPS",
+      "cx_test": "FAT-S01",
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 4,
+        "pessimistic": 8
+      },
+      "predecessors": [
+        "MEP",
+        "PROCURE"
+      ]
+    },
+    {
+      "id": "CX-ITP-S01",
+      "name": "Cable fire rating inspection",
+      "cx_test": "ITP-S01",
+      "cx_level": 2,
+      "duration": {
+        "optimistic": 1,
+        "most_likely": 2,
+        "pessimistic": 4
+      },
+      "predecessors": [
+        "INSTALL-COOL",
+        "INSTALL-GEN",
+        "INSTALL-SWGR",
+        "INSTALL-UPS"
+      ]
+    },
+    {
+      "id": "GATE-L2",
+      "name": "Cx Level 2 complete",
+      "cx_level": 2,
+      "is_milestone": true,
+      "duration": {
+        "fixed": 0
+      },
+      "predecessors": [
+        "CX-ITP-S01"
+      ]
+    },
+    {
+      "id": "CX-FAT-S01",
+      "name": "Seismic qualification test \u2014 generators",
+      "cx_test": "FAT-S01",
+      "cx_level": 3,
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 3,
+        "pessimistic": 5
+      },
+      "predecessors": [
+        "GATE-L2"
+      ]
+    },
+    {
+      "id": "GATE-L3",
+      "name": "Cx Level 3 complete",
+      "cx_level": 3,
+      "is_milestone": true,
+      "duration": {
+        "fixed": 0
+      },
+      "predecessors": [
+        "CX-FAT-S01"
+      ]
+    },
+    {
+      "id": "CX-IST-S01",
+      "name": "Seismic response verification",
+      "cx_test": "IST-S01",
+      "cx_level": 4,
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 3.5,
+        "pessimistic": 7
+      },
+      "predecessors": [
+        "GATE-L3"
+      ]
+    },
+    {
+      "id": "CX-IST-S02",
+      "name": "Full facility failover test",
+      "cx_test": "IST-S02",
+      "cx_level": 4,
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 3.5,
+        "pessimistic": 7
+      },
+      "predecessors": [
+        "GATE-L3"
+      ]
+    },
+    {
+      "id": "GATE-L4",
+      "name": "Cx Level 4 complete",
+      "cx_level": 4,
+      "is_milestone": true,
+      "duration": {
+        "fixed": 0
+      },
+      "predecessors": [
+        "CX-IST-S01",
+        "CX-IST-S02"
+      ]
+    },
+    {
+      "id": "CX-SAT-S01",
+      "name": "72-hour sustained operations",
+      "cx_test": "SAT-S01",
+      "cx_level": 5,
+      "duration": {
+        "optimistic": 3,
+        "most_likely": 5,
+        "pessimistic": 9
+      },
+      "predecessors": [
+        "GATE-L4"
+      ]
+    },
+    {
+      "id": "GATE-L5",
+      "name": "Ready-for-service (L5 integrated systems test)",
+      "cx_level": 5,
+      "is_milestone": true,
+      "duration": {
+        "fixed": 0
+      },
+      "predecessors": [
+        "CX-SAT-S01"
+      ]
+    }
+  ]
+}

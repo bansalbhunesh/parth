@@ -188,12 +188,23 @@ def route_after_validate(state: PipelineState) -> Literal["reconcile", "format_o
 def node_reconcile(state: PipelineState) -> PipelineState:
     state["iteration"] = state.get("iteration", 0) + 1
     feedback = (state.get("critique") or {}).get("feedback")
+    prior = state.get("deviations") or []
     if feedback:
         log.info("Reconcile pass %d for %s (revising on self-critique)",
                  state["iteration"], state["system_id"])
-    state["deviations"] = reconcile_system(state["system_id"],
-                                           state["standards_text"],
-                                           feedback=feedback)
+    revised = reconcile_system(state["system_id"],
+                               state["standards_text"],
+                               feedback=feedback)
+    # Best-so-far retention: a revision pass must refine, never regress. If the
+    # second pass throttles to [] or returns fewer findings than the prior pass
+    # (e.g. LLMError swallowed -> []), keep the prior result rather than letting a
+    # degraded retry silently erase legitimate findings.
+    if feedback and len(revised) < len(prior):
+        log.warning("Revision for %s returned %d < prior %d; keeping prior findings",
+                    state["system_id"], len(revised), len(prior))
+        state["deviations"] = prior
+    else:
+        state["deviations"] = revised
     return state
 
 

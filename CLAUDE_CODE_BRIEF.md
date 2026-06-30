@@ -13,18 +13,18 @@ All components implemented, tested, and polished:
 - [x] Evidence pack (JSON + printable HTML) + /metrics endpoint
 - [x] Baseline eval: P/R/F1 = 1.000, Cx prediction = 1.000 (all 12 projects)
 - [x] Backend graceful fallback (all 24 endpoints return 200 without API key)
-- [x] 19-section frontend dashboard with scroll animations + 24 components
+- [x] 22-section frontend dashboard with scroll animations + 27 components
 - [x] Hero intro, architecture diagram, ROI calculator, before/after comparison
 - [x] Standards KB, eval dashboard, scale story, academic references
 - [x] Standards scraper v2 (3-tier: Firecrawl → Crawl4ai → Playwright)
 - [x] Docker Compose one-command setup with health checks
 - [x] GitHub Actions CI (backend tests, frontend build, Docker smoke test)
-- [x] 310 tests across API, agents, corpus, and multi-project eval
+- [x] 435 tests across API, agents, corpus, and multi-project eval
 
 ## Reproduce the Numbers
 
 ```bash
-# Run 310 tests
+# Run 435 tests
 python3 -m pytest tests/ -v
 
 # Single project eval (14 devs, 267 weeks, F1=1.000)

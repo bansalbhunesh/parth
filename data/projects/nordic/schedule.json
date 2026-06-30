@@ -1,0 +1,219 @@
+{
+  "project_id": "nordic edge",
+  "time_unit": "weeks",
+  "current_week": 6,
+  "deadline_week": 40,
+  "tasks": [
+    {
+      "id": "DESIGN",
+      "name": "Design freeze & IFC release",
+      "duration": {
+        "optimistic": 6,
+        "most_likely": 8,
+        "pessimistic": 12
+      }
+    },
+    {
+      "id": "PROCURE",
+      "name": "Long-lead procurement release",
+      "duration": {
+        "optimistic": 8,
+        "most_likely": 12,
+        "pessimistic": 20
+      },
+      "predecessors": [
+        "DESIGN"
+      ]
+    },
+    {
+      "id": "CIVIL",
+      "name": "Civil & structural",
+      "duration": {
+        "optimistic": 8,
+        "most_likely": 10,
+        "pessimistic": 14
+      },
+      "predecessors": [
+        "DESIGN"
+      ]
+    },
+    {
+      "id": "MEP",
+      "name": "MEP rough-in",
+      "duration": {
+        "optimistic": 6,
+        "most_likely": 8,
+        "pessimistic": 12
+      },
+      "predecessors": [
+        "CIVIL"
+      ]
+    },
+    {
+      "id": "INSTALL-COOL",
+      "name": "COOL install & terminate",
+      "component": "COOL",
+      "cx_test": "FAT-N01",
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 4,
+        "pessimistic": 8
+      },
+      "predecessors": [
+        "MEP",
+        "PROCURE"
+      ]
+    },
+    {
+      "id": "INSTALL-GEN",
+      "name": "GEN install & terminate",
+      "component": "GEN",
+      "cx_test": "FAT-N01",
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 4,
+        "pessimistic": 8
+      },
+      "predecessors": [
+        "MEP",
+        "PROCURE"
+      ]
+    },
+    {
+      "id": "INSTALL-UPS",
+      "name": "UPS install & terminate",
+      "component": "UPS",
+      "cx_test": "FAT-N01",
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 4,
+        "pessimistic": 8
+      },
+      "predecessors": [
+        "MEP",
+        "PROCURE"
+      ]
+    },
+    {
+      "id": "CX-ITP-N01",
+      "name": "Cable Euroclass fire inspection",
+      "cx_test": "ITP-N01",
+      "cx_level": 2,
+      "duration": {
+        "optimistic": 1,
+        "most_likely": 2,
+        "pessimistic": 4
+      },
+      "predecessors": [
+        "INSTALL-COOL",
+        "INSTALL-GEN",
+        "INSTALL-UPS"
+      ]
+    },
+    {
+      "id": "GATE-L2",
+      "name": "Cx Level 2 complete",
+      "cx_level": 2,
+      "is_milestone": true,
+      "duration": {
+        "fixed": 0
+      },
+      "predecessors": [
+        "CX-ITP-N01"
+      ]
+    },
+    {
+      "id": "CX-FAT-N01",
+      "name": "UPS battery type verification",
+      "cx_test": "FAT-N01",
+      "cx_level": 3,
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 3,
+        "pessimistic": 5
+      },
+      "predecessors": [
+        "GATE-L2"
+      ]
+    },
+    {
+      "id": "GATE-L3",
+      "name": "Cx Level 3 complete",
+      "cx_level": 3,
+      "is_milestone": true,
+      "duration": {
+        "fixed": 0
+      },
+      "predecessors": [
+        "CX-FAT-N01"
+      ]
+    },
+    {
+      "id": "CX-IST-N01",
+      "name": "Generator noise compliance test",
+      "cx_test": "IST-N01",
+      "cx_level": 4,
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 3.5,
+        "pessimistic": 7
+      },
+      "predecessors": [
+        "GATE-L3"
+      ]
+    },
+    {
+      "id": "CX-IST-N02",
+      "name": "Annual free cooling performance verification",
+      "cx_test": "IST-N02",
+      "cx_level": 4,
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 3.5,
+        "pessimistic": 7
+      },
+      "predecessors": [
+        "GATE-L3"
+      ]
+    },
+    {
+      "id": "GATE-L4",
+      "name": "Cx Level 4 complete",
+      "cx_level": 4,
+      "is_milestone": true,
+      "duration": {
+        "fixed": 0
+      },
+      "predecessors": [
+        "CX-IST-N01",
+        "CX-IST-N02"
+      ]
+    },
+    {
+      "id": "CX-SAT-N01",
+      "name": "72-hour PUE measurement",
+      "cx_test": "SAT-N01",
+      "cx_level": 5,
+      "duration": {
+        "optimistic": 3,
+        "most_likely": 5,
+        "pessimistic": 9
+      },
+      "predecessors": [
+        "GATE-L4"
+      ]
+    },
+    {
+      "id": "GATE-L5",
+      "name": "Ready-for-service (L5 integrated systems test)",
+      "cx_level": 5,
+      "is_milestone": true,
+      "duration": {
+        "fixed": 0
+      },
+      "predecessors": [
+        "CX-SAT-N01"
+      ]
+    }
+  ]
+}

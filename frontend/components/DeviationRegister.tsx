@@ -135,7 +135,7 @@ export default function DeviationRegister({ rows }: { rows: Deviation[] }) {
           </thead>
           <tbody>
             {filtered.map((d, i) => {
-              const id = `${d.component}-${d.parameter}`;
+              const id = `${d.component}-${d.parameter}-${i}`;
               const isExpanded = expanded.has(id);
               return (
                 <tr

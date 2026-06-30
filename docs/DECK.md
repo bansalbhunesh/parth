@@ -70,7 +70,7 @@
 
 ### Slide 10 — Production-grade
 - **No silent zeros** — rule-based fallback when the AI is rate-limited
-- **310 tests · CI green · deployed** (Vercel + Render)
+- **435 tests · CI green · deployed** (Vercel + Render)
 - Two-way scoring · true negatives · `/llm-check` live status
 - **Visual:** green CI badge + the resilience flow.
 - **Speaker note:** "engineered for the bad day, not just the stage."

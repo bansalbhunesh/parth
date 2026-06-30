@@ -78,6 +78,13 @@ export default function ComplianceScore() {
 
   useEffect(() => {
     if (!overall) return;
+    // Honor prefers-reduced-motion: the CSS rule can't touch this rAF count-up,
+    // so gate it explicitly and snap to the final score.
+    if (typeof window !== "undefined" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setAnimated(overall);
+      return;
+    }
     const start = performance.now();
     function tick(now: number) {
       const t = Math.min((now - start) / 1800, 1);

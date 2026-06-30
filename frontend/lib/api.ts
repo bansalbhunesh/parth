@@ -143,9 +143,143 @@ export async function getCxPlan(): Promise<CxPlan | null> {
   try {
     const r = await fetch(`${API}/cx-plan`, fetchOpts({ next: { revalidate: 600 } }));
     if (!r.ok) throw new Error(String(r.status));
-    return await r.json();
+    const data = await r.json();
+    // The backend returns {} (HTTP 200) when cx_plan.json is missing/unparseable.
+    // An empty object is truthy, so without this guard CommissioningTwin would
+    // render and throw on Object.entries(undefined) / cxPlan.tests.map — and the
+    // top-level ErrorBoundary would blank the whole dashboard. Treat a shape-
+    // invalid payload as a failure and use the bundled fallback instead.
+    if (!data || !data.levels || !data.tests) return FALLBACK_CX_PLAN;
+    return data as CxPlan;
   } catch {
     return FALLBACK_CX_PLAN;
+  }
+}
+
+// ── PS4 capability layers: schedule risk · supply chain · project graph ──────
+
+export interface ScheduleTaskCPM {
+  name: string; is_milestone: boolean; cx_level: number | null;
+  es: number; ef: number; ls: number; lf: number;
+  total_float: number; free_float: number; critical: boolean;
+}
+export interface ScheduleAnalysis {
+  available: boolean;
+  project_id?: string;
+  deadline_week?: number | null;
+  cpm: {
+    tasks: Record<string, ScheduleTaskCPM>;
+    project_duration: number;
+    critical_path: string[];
+  };
+  monte_carlo: {
+    p50: number; p80: number; p90: number; mean_finish: number;
+    on_time_probability: number | null; deadline_week: number | null;
+    histogram: Array<{ x0: number; x1: number; count: number }>;
+    criticality_index: Record<string, number>;
+    sensitivity: Record<string, number>;
+    milestones: Record<string, { p50: number; p80: number }>;
+  };
+  baseline: { p50: number; p80: number; p90: number; on_time_probability: number | null };
+  deviation_impact: {
+    milestone: string; baseline_p80: number | null; at_risk_p80: number | null;
+    slip_weeks: number | null; baseline_on_time: number | null; at_risk_on_time: number | null;
+  } | null;
+  n_risks: number;
+  narrative?: { narrative: string; mode: string };
+}
+
+export interface Shipment {
+  id: string; equipment_type: string; description: string; supplier: string;
+  origin_country: string; destination_site: string; current_stage: string;
+  required_on_site_week: number; eta_p50: number; eta_p80: number; sigma: number;
+  p_late: number; slack_weeks: number;
+  supplier_risk: { score: number; band: string; contributions: Record<string, number> };
+  delivery_risk: { score: number; band: string; consequence: number };
+  on_critical_path: boolean; at_risk: boolean; linked_task_id: string | null;
+}
+export interface SupplyChainAnalysis {
+  available: boolean;
+  project_id?: string; current_week?: number;
+  shipments: Shipment[];
+  summary: {
+    total: number; at_risk: number; by_band: Record<string, number>;
+    worst_item: string | null; worst_score: number;
+  };
+  narrative?: { narrative: string; mode: string };
+}
+
+export interface GraphNode { id: string; kind: string; label: string }
+export interface GraphEdge { from: string; to: string; rel: string; basis?: string | null }
+export interface ProjectGraph {
+  available: boolean;
+  stats: { nodes: number; edges: number; by_kind: Record<string, number>; relationship_types: string[] };
+  graph: { nodes: GraphNode[]; edges: GraphEdge[] };
+}
+export interface BlastRadius {
+  available: boolean;
+  deviation?: string; component?: string;
+  cx_tests_at_risk: Array<{ id: string; label: string }>;
+  equipment: string[];
+  suppliers: Array<{ id: string; label: string; lead_time_weeks: number | null }>;
+  milestones: Array<{ id: string; label: string; planned_week: number | null; slip_weeks: number }>;
+  weeks_at_risk: number; cx_planned_week: number; fix_complete_week: number;
+  worst_milestone_slip: number; caught_in_time: boolean; reach_size: number;
+}
+
+export async function getSchedule(projectId = "meghdoot"): Promise<ScheduleAnalysis> {
+  try {
+    const r = await fetch(`${API}/projects/${projectId}/schedule`, fetchOpts({ next: { revalidate: 600 } }));
+    if (!r.ok) throw new Error(String(r.status));
+    const d = await r.json();
+    if (!d || d.available === false || !d.monte_carlo || !d.baseline
+        || !d.cpm || !d.cpm.tasks || !Array.isArray(d.monte_carlo.histogram)) {
+      return FALLBACK_SCHEDULE;
+    }
+    return d as ScheduleAnalysis;
+  } catch {
+    return FALLBACK_SCHEDULE;
+  }
+}
+
+export async function getSupplyChain(projectId = "meghdoot"): Promise<SupplyChainAnalysis> {
+  try {
+    const r = await fetch(`${API}/projects/${projectId}/supply-chain`, fetchOpts({ next: { revalidate: 600 } }));
+    if (!r.ok) throw new Error(String(r.status));
+    const d = await r.json();
+    if (!d || d.available === false || !d.summary || !Array.isArray(d.shipments)) {
+      return FALLBACK_SUPPLY;
+    }
+    return d as SupplyChainAnalysis;
+  } catch {
+    return FALLBACK_SUPPLY;
+  }
+}
+
+export async function getProjectGraph(projectId = "meghdoot"): Promise<ProjectGraph> {
+  try {
+    const r = await fetch(`${API}/projects/${projectId}/graph`, fetchOpts({ next: { revalidate: 600 } }));
+    if (!r.ok) throw new Error(String(r.status));
+    const d = await r.json();
+    if (!d || d.available === false || !d.graph || !d.stats
+        || !Array.isArray(d.graph.nodes) || !Array.isArray(d.graph.edges)) {
+      return FALLBACK_GRAPH;
+    }
+    return d as ProjectGraph;
+  } catch {
+    return FALLBACK_GRAPH;
+  }
+}
+
+export async function getBlastRadius(devId: string, projectId = "meghdoot"): Promise<BlastRadius | null> {
+  try {
+    const r = await fetch(`${API}/projects/${projectId}/blast-radius/${devId}`, { cache: "no-store" });
+    if (!r.ok) throw new Error(String(r.status));
+    const d = await r.json();
+    if (!d || d.available === false) return null;
+    return d as BlastRadius;
+  } catch {
+    return null;
   }
 }
 
@@ -363,6 +497,110 @@ export const FALLBACK_CX_PLAN: CxPlan = {
     { id: "IST-16", level: 4, name: "Cooling performance and thermal verification", scheduled_week: 36, acceptance: "Delta-T and flow rates meet design criteria" },
     { id: "SAT-01", level: 5, name: "72-hour sustained operations test", scheduled_week: 48, acceptance: "No critical alarms for 72 hours" },
   ],
+};
+
+// Bundled fallbacks so the page renders fully even with the backend cold/off.
+// Numbers mirror Project Meghdoot's real analysis output.
+export const FALLBACK_SCHEDULE: ScheduleAnalysis = {
+  available: true,
+  project_id: "meghdoot",
+  deadline_week: 52,
+  cpm: {
+    tasks: {
+      "GATE-L5": { name: "Ready-for-service (L5 integrated systems test)", is_milestone: true,
+        cx_level: 5, es: 44, ef: 44, ls: 44, lf: 44, total_float: 0, free_float: 0, critical: true },
+    },
+    project_duration: 47.5,
+    critical_path: ["DESIGN", "CIVIL", "MEP", "INSTALL-UPS", "GATE-L5"],
+  },
+  monte_carlo: {
+    p50: 67.4, p80: 70.2, p90: 71.6, mean_finish: 67.5,
+    on_time_probability: 0.0, deadline_week: 52,
+    histogram: [
+      { x0: 56, x1: 60, count: 320 }, { x0: 60, x1: 64, count: 980 },
+      { x0: 64, x1: 68, count: 1850 }, { x0: 68, x1: 72, count: 1240 },
+      { x0: 72, x1: 76, count: 610 },
+    ],
+    criticality_index: { "GATE-L5": 1.0, "INSTALL-UPS": 0.62 },
+    sensitivity: { "INSTALL-UPS": 0.41, CIVIL: 0.33, MEP: 0.28 },
+    milestones: { "GATE-L5": { p50: 67.4, p80: 70.2 } },
+  },
+  baseline: { p50: 49.5, p80: 53.3, p90: 55.6, on_time_probability: 0.63 },
+  deviation_impact: {
+    milestone: "GATE-L5", baseline_p80: 53.3, at_risk_p80: 70.2, slip_weeks: 16.9,
+    baseline_on_time: 0.63, at_risk_on_time: 0.0,
+  },
+  n_risks: 14,
+  narrative: {
+    narrative: "Baseline P80 finish is week 53 (on-time probability 0.63). If the 14 detected "
+      + "deviations are left uncaught, the ready-for-service milestone slips ~16 weeks and on-time "
+      + "probability falls to 0; catching them at submittal review protects the date.",
+    mode: "rule-based-fallback",
+  },
+};
+
+// All 4 long-lead shipments, mirroring Project Meghdoot's (corpus) live engine
+// output so the cold-load panel matches the "4 long-lead / 2 at risk" header.
+export const FALLBACK_SUPPLY: SupplyChainAnalysis = {
+  available: true,
+  project_id: "Project Meghdoot",
+  current_week: 11,
+  shipments: [
+    { id: "SHP-COOL", equipment_type: "COOL", description: "Precision cooling / CRAH", supplier: "STULZ",
+      origin_country: "Germany", destination_site: "Navi Mumbai, India", current_stage: "MANUFACTURING",
+      required_on_site_week: 28, eta_p50: 26.1, eta_p80: 29.88, sigma: 4.496, p_late: 0.3363, slack_weeks: 1.9,
+      supplier_risk: { score: 9, band: "green",
+        contributions: { single_source: 0, concentration: 0, geo: 6, port_congestion: 0, subtier_shortage: 0, backlog: 3 } },
+      delivery_risk: { score: 12.2, band: "green", consequence: 0.5 },
+      on_critical_path: false, at_risk: true, linked_task_id: "INSTALL-COOL" },
+    { id: "SHP-GEN", equipment_type: "GEN", description: "Standby diesel genset", supplier: "Cummins",
+      origin_country: "US", destination_site: "Navi Mumbai, India", current_stage: "MANUFACTURING",
+      required_on_site_week: 28, eta_p50: 34, eta_p80: 41.1, sigma: 8.432, p_late: 0.7616, slack_weeks: -6,
+      supplier_risk: { score: 37.5, band: "amber",
+        contributions: { single_source: 30, concentration: 0, geo: 1.5, port_congestion: 0, subtier_shortage: 0, backlog: 6 } },
+      delivery_risk: { score: 61.9, band: "amber", consequence: 1 },
+      on_critical_path: true, at_risk: true, linked_task_id: "INSTALL-GEN" },
+    { id: "SHP-SWGR", equipment_type: "SWGR", description: "MV/LV switchgear lineup", supplier: "ABB",
+      origin_country: "Germany", destination_site: "Navi Mumbai, India", current_stage: "FAT",
+      required_on_site_week: 28, eta_p50: 25.9, eta_p80: 26.97, sigma: 1.276, p_late: 0.0499, slack_weeks: 2.1,
+      supplier_risk: { score: 57, band: "amber",
+        contributions: { single_source: 30, concentration: 0, geo: 6, port_congestion: 0, subtier_shortage: 15, backlog: 6 } },
+      delivery_risk: { score: 2.2, band: "green", consequence: 0.5 },
+      on_critical_path: false, at_risk: false, linked_task_id: "INSTALL-SWGR" },
+    { id: "SHP-UPS", equipment_type: "UPS", description: "Modular UPS system", supplier: "Vertiv",
+      origin_country: "US", destination_site: "Navi Mumbai, India", current_stage: "MANUFACTURING",
+      required_on_site_week: 28, eta_p50: 26, eta_p80: 30.73, sigma: 5.621, p_late: 0.361, slack_weeks: 2,
+      supplier_risk: { score: 19.5, band: "green",
+        contributions: { single_source: 0, concentration: 0, geo: 1.5, port_congestion: 0, subtier_shortage: 15, backlog: 3 } },
+      delivery_risk: { score: 27.4, band: "green", consequence: 1 },
+      on_critical_path: true, at_risk: false, linked_task_id: "INSTALL-UPS" },
+  ],
+  summary: { total: 4, at_risk: 2, by_band: { green: 3, amber: 1, red: 0 },
+    worst_item: "SHP-GEN", worst_score: 61.9 },
+  narrative: { narrative: "2 of 4 long-lead shipments are at risk of missing their required-on-site "
+    + "date (worst: SHP-GEN at delivery-risk 61.9/100).", mode: "rule-based-fallback" },
+};
+
+export const FALLBACK_GRAPH: ProjectGraph = {
+  available: true,
+  stats: { nodes: 80, edges: 143,
+    by_kind: { deviation: 14, equipment: 13, standard: 4, cx_test: 14, milestone: 1, supplier: 4, schedule_task: 30 },
+    relationship_types: ["about", "blocks", "delays", "depends-on", "part-of", "predicts-failure-of", "supplied-by", "verified-at", "violates"] },
+  graph: {
+    nodes: [
+      { id: "DEV:DEV-001", kind: "deviation", label: "DEV-001" },
+      { id: "EQ:UPS-02", kind: "equipment", label: "UPS-02" },
+      { id: "CX:IST-07", kind: "cx_test", label: "Load transfer under maintenance (battery autonomy)" },
+      { id: "MS:RFS", kind: "milestone", label: "Ready-for-service (integrated systems test)" },
+      { id: "SUP:Vertiv", kind: "supplier", label: "Vertiv" },
+    ],
+    edges: [
+      { from: "DEV:DEV-001", to: "EQ:UPS-02", rel: "about", basis: null },
+      { from: "DEV:DEV-001", to: "CX:IST-07", rel: "predicts-failure-of", basis: "UPTIME-TIER4" },
+      { from: "CX:IST-07", to: "MS:RFS", rel: "verified-at", basis: null },
+      { from: "EQ:UPS-02", to: "SUP:Vertiv", rel: "supplied-by", basis: null },
+    ],
+  },
 };
 
 export const FALLBACK: Deviation[] = [

@@ -1,0 +1,208 @@
+{
+  "project_id": "yangtze",
+  "time_unit": "weeks",
+  "current_week": 12,
+  "deadline_week": 56,
+  "tasks": [
+    {
+      "id": "DESIGN",
+      "name": "Design freeze & IFC release",
+      "duration": {
+        "optimistic": 6,
+        "most_likely": 8,
+        "pessimistic": 12
+      }
+    },
+    {
+      "id": "PROCURE",
+      "name": "Long-lead procurement release",
+      "duration": {
+        "optimistic": 8,
+        "most_likely": 12,
+        "pessimistic": 20
+      },
+      "predecessors": [
+        "DESIGN"
+      ]
+    },
+    {
+      "id": "CIVIL",
+      "name": "Civil & structural",
+      "duration": {
+        "optimistic": 8,
+        "most_likely": 10,
+        "pessimistic": 14
+      },
+      "predecessors": [
+        "DESIGN"
+      ]
+    },
+    {
+      "id": "MEP",
+      "name": "MEP rough-in",
+      "duration": {
+        "optimistic": 6,
+        "most_likely": 8,
+        "pessimistic": 12
+      },
+      "predecessors": [
+        "CIVIL"
+      ]
+    },
+    {
+      "id": "INSTALL-COOL",
+      "name": "COOL install & terminate",
+      "component": "COOL",
+      "cx_test": null,
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 4,
+        "pessimistic": 8
+      },
+      "predecessors": [
+        "MEP",
+        "PROCURE"
+      ]
+    },
+    {
+      "id": "INSTALL-GEN",
+      "name": "GEN install & terminate",
+      "component": "GEN",
+      "cx_test": null,
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 4,
+        "pessimistic": 8
+      },
+      "predecessors": [
+        "MEP",
+        "PROCURE"
+      ]
+    },
+    {
+      "id": "INSTALL-UPS",
+      "name": "UPS install & terminate",
+      "component": "UPS",
+      "cx_test": null,
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 4,
+        "pessimistic": 8
+      },
+      "predecessors": [
+        "MEP",
+        "PROCURE"
+      ]
+    },
+    {
+      "id": "CX-ITP-Y01",
+      "name": "Equipment receipt inspection",
+      "cx_test": "ITP-Y01",
+      "cx_level": 1,
+      "duration": {
+        "optimistic": 1,
+        "most_likely": 1.5,
+        "pessimistic": 3
+      },
+      "predecessors": [
+        "INSTALL-COOL",
+        "INSTALL-GEN",
+        "INSTALL-UPS"
+      ]
+    },
+    {
+      "id": "GATE-L1",
+      "name": "Cx Level 1 complete",
+      "cx_level": 1,
+      "is_milestone": true,
+      "duration": {
+        "fixed": 0
+      },
+      "predecessors": [
+        "CX-ITP-Y01"
+      ]
+    },
+    {
+      "id": "CX-IST-Y01",
+      "name": "UPS battery autonomy test",
+      "cx_test": "IST-Y01",
+      "cx_level": 4,
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 3.5,
+        "pessimistic": 7
+      },
+      "predecessors": [
+        "GATE-L1"
+      ]
+    },
+    {
+      "id": "CX-IST-Y02",
+      "name": "Per-rack cooling capacity test",
+      "cx_test": "IST-Y02",
+      "cx_level": 4,
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 3.5,
+        "pessimistic": 7
+      },
+      "predecessors": [
+        "GATE-L1"
+      ]
+    },
+    {
+      "id": "CX-IST-Y03",
+      "name": "Government fire reporting integration test",
+      "cx_test": "IST-Y03",
+      "cx_level": 4,
+      "duration": {
+        "optimistic": 2,
+        "most_likely": 3.5,
+        "pessimistic": 7
+      },
+      "predecessors": [
+        "GATE-L1"
+      ]
+    },
+    {
+      "id": "GATE-L4",
+      "name": "Cx Level 4 complete",
+      "cx_level": 4,
+      "is_milestone": true,
+      "duration": {
+        "fixed": 0
+      },
+      "predecessors": [
+        "CX-IST-Y01",
+        "CX-IST-Y02",
+        "CX-IST-Y03"
+      ]
+    },
+    {
+      "id": "CX-SAT-Y01",
+      "name": "72-hour sustained operations",
+      "cx_test": "SAT-Y01",
+      "cx_level": 5,
+      "duration": {
+        "optimistic": 3,
+        "most_likely": 5,
+        "pessimistic": 9
+      },
+      "predecessors": [
+        "GATE-L4"
+      ]
+    },
+    {
+      "id": "GATE-L5",
+      "name": "Ready-for-service (L5 integrated systems test)",
+      "cx_level": 5,
+      "is_milestone": true,
+      "duration": {
+        "fixed": 0
+      },
+      "predecessors": [
+        "CX-SAT-Y01"
+      ]
+    }
+  ]
+}

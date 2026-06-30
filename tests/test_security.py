@@ -32,14 +32,53 @@ class TestInputSanitization:
         r = client.get("/corpus/doc/specs/..%2F..%2Fetc%2Fpasswd")
         assert r.status_code in (400, 404)
 
+    def test_safe_id_fires_on_corpus_doc(self):
+        # 'foo..bar' is a single path segment, so it reaches the handler (routing
+        # does NOT 404 it) and must be rejected by the _safe_id guard itself —
+        # proving the traversal guard is actually wired in, not just framework luck.
+        r = client.get("/corpus/doc/specs/foo..bar")
+        assert r.status_code == 400
+
+    def test_safe_id_fires_on_project_detail(self):
+        r = client.get("/projects/foo..bar")
+        assert r.status_code == 400
+
     def test_oversized_analyze_input(self):
         huge = "x" * 1_000_000
         r = client.post("/analyze", json={"spec_text": huge, "submittal_text": huge})
         assert r.status_code in (200, 413, 422)
 
+    def test_request_body_over_limit_rejected(self):
+        # >20 MB body is rejected with 413 by the ASGI body-size guard before the
+        # multipart parser can spool it to disk (DoS guard). Sends a real oversized
+        # body so the Content-Length the guard inspects is genuine.
+        oversized = "x" * (21 * 1024 * 1024)
+        r = client.post("/analyze", json={"spec_text": oversized, "submittal_text": ""})
+        assert r.status_code == 413
+
+    def test_normal_request_passes_body_guard(self):
+        # A normal small request must still flow through the guard untouched.
+        r = client.post("/copilot", json={"query": "What is the UPS runtime spec?"})
+        assert r.status_code == 200
+
     def test_unicode_injection(self):
         r = client.post("/copilot", json={"query": "‮​  test"})
         assert r.status_code == 200
+
+
+class TestNoSilentZeros:
+    """The headline deviation register must never silently collapse to zero on a
+    seeded corpus. reconcile_system_at swallows LLMError -> [], so when the LLM is
+    unavailable/throttled the pipeline returns no exception and an empty list;
+    /deviations must fall back to ground truth rather than ship an empty 200.
+    Regression guard for the empty-200 silent-zero bug."""
+
+    def test_deviations_never_empty_on_seeded_corpus(self):
+        r = client.get("/deviations")
+        assert r.status_code == 200
+        data = r.json()
+        assert data["count"] >= 1, "deviation register collapsed to a silent zero"
+        assert len(data["register"]) >= 1
 
 
 class TestNoSecretLeakage:

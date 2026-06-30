@@ -1,6 +1,9 @@
-import { getRegister, getCxPlan, Deviation, CxPlan } from "../lib/api";
+import { getRegister, getCxPlan, getSchedule, getSupplyChain, getProjectGraph, Deviation, CxPlan } from "../lib/api";
 import DeviationRegister from "../components/DeviationRegister";
 import CommissioningTwin from "../components/CommissioningTwin";
+import ScheduleRisk from "../components/ScheduleRisk";
+import SupplyChainPanel from "../components/SupplyChainPanel";
+import ProjectGraphView from "../components/ProjectGraph";
 import CopilotPanel from "../components/CopilotPanel";
 import StatsBar from "../components/StatsBar";
 import PipelineViz from "../components/PipelineViz";
@@ -199,7 +202,9 @@ function TotalSavingsHero() {
 export const revalidate = 600;
 
 export default async function Page() {
-  const [rows, cxPlan] = await Promise.all([getRegister(), getCxPlan()]);
+  const [rows, cxPlan, schedule, supply, graph] = await Promise.all([
+    getRegister(), getCxPlan(), getSchedule(), getSupplyChain(), getProjectGraph(),
+  ]);
   const hero = rows.find((r) => r.component === "UPS-02") ?? rows[0];
   const critical = rows.filter((r) => r.severity === "Critical").length;
   const major = rows.filter((r) => r.severity === "Major").length;
@@ -321,6 +326,27 @@ export default async function Page() {
       </h2>
       <ScrollReveal>
         {cxPlan && <CommissioningTwin cxPlan={cxPlan} deviations={rows} />}
+      </ScrollReveal>
+
+      <h2 className="section" id="schedule">
+        Predictive schedule risk &middot; Monte-Carlo CPM &middot; P80 finish
+      </h2>
+      <ScrollReveal>
+        <ErrorBoundary><ScheduleRisk analysis={schedule} /></ErrorBoundary>
+      </ScrollReveal>
+
+      <h2 className="section" id="supply">
+        Supply-chain visibility &middot; long-lead equipment &middot; delivery risk
+      </h2>
+      <ScrollReveal>
+        <ErrorBoundary><SupplyChainPanel analysis={supply} /></ErrorBoundary>
+      </ScrollReveal>
+
+      <h2 className="section" id="graph">
+        Living project graph &middot; deviation &rarr; commissioning &rarr; schedule &rarr; supply
+      </h2>
+      <ScrollReveal>
+        <ErrorBoundary><ProjectGraphView graph={graph} /></ErrorBoundary>
       </ScrollReveal>
 
       <h2 className="section" id="standards">

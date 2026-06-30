@@ -155,6 +155,11 @@ def score(findings, ground_truth):
         "strict_tp": len(strict_tp), "strict_fp": sorted(strict_fp),
         "strict_fn": sorted(strict_fn),
         "cx_prediction_accuracy": cx_acc,
+        "cx_prediction_accuracy_note": (
+            "Consistency check, NOT a learned/predictive metric: the Cx mapping is a "
+            "deterministic rule table (_RULES) hand-authored alongside ground truth, so a "
+            "match is tautological by construction. Reported for plumbing transparency only."
+        ),
         "citation_faithfulness": faith_pct,
         "mean_lead_time_weeks": mean_lead,
         "max_lead_time_weeks": max_lead,
@@ -225,7 +230,8 @@ def main():
         print(f"  strict-only misses      : {r['strict_fn']}")
         print("  (caught semantically, labeled differently)")
     print(f"{'~'*55}")
-    print(f"  Cx-test prediction acc  : {r['cx_prediction_accuracy']:.3f}")
+    print(f"  Cx-rule consistency     : {r['cx_prediction_accuracy']:.3f}  "
+          "(deterministic rule table authored with GT — tautological consistency check, not a learned metric)")
     print(f"  Citation faithfulness   : {r['citation_faithfulness']:.3f}")
     if r['mean_confidence'] is not None:
         print(f"  Mean confidence         : {r['mean_confidence']:.3f}")

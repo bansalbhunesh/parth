@@ -6,8 +6,9 @@ reasons out deviations from scratch, scored against committed ground truth.
 
 > **Why this matters:** the structured eval compares pre-extracted triples and
 > is trivially 1.000. The numbers below come from an actual frontier model
-> recovering deviations from raw documents — the score that proves the pipeline
-> works, not just the harness.
+> recovering deviations from raw documents — a score that exercises the full
+> pipeline, not just the harness. Read it with the caveats under the headline:
+> the ground truth is self-authored, and the precision figure is post-tuning.
 
 ## Headline
 
@@ -21,6 +22,19 @@ reasons out deviations from scratch, scored against committed ground truth.
 - **Date:** 2026-06-27
 - **False negatives:** 0 — the engine never missed a seeded deviation in any of
   the 12 projects (11 countries, 6 tier standards).
+
+> **Read these numbers honestly (don't over-read the 1.000s):**
+> 1. **Recall is partly structural.** The deviations are graded against *our own*
+>    seeded ground truth, so a recall near 1.000 reflects "the model re-finds the
+>    differences we planted," not detection on an independent labeled set. The
+>    real-world generalization signal is the third-party datasheet pairs in
+>    `REAL_PAIRS_EVAL.md` (4/4 reproducible offline; the rest need a key).
+> 2. **Precision 1.000 is post-tuning.** The first 12-project run scored
+>    **P=0.962** (2 false positives in Sakura). We then scoped the reconciliation
+>    prompt to fix that exact failure (see "What broke" below) → 1.000. That is an
+>    improvement made *in response to the eval set*, so treat 0.962→1.000 as the
+>    honest before/after, not a from-scratch perfect sweep. As this repo says
+>    elsewhere: a perfect score is a flag to investigate, not a brag.
 
 ## How to reproduce
 

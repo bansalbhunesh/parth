@@ -1,0 +1,267 @@
+{
+  "project_id": "Project Sahara",
+  "current_week": 10,
+  "shipments": [
+    {
+      "id": "SHP-COOL",
+      "component": "COOL",
+      "equipment_type": "COOL",
+      "description": "Precision cooling / CRAH",
+      "supplier": "STULZ",
+      "vendor": "STULZ",
+      "origin_country": "Germany",
+      "country": "Germany",
+      "destination_site": "Dubai, UAE",
+      "required_on_site_week": 28.0,
+      "lead_time_weeks": 32,
+      "single_source": false,
+      "feeds_cx_test": "FAT-S01",
+      "linked_task_id": "INSTALL-COOL",
+      "on_critical_path": false,
+      "current_stage": "MANUFACTURING",
+      "supplier_risk_factors": {
+        "single_source": 0.0,
+        "subtier_shortage": 0.0,
+        "geo": 0.4,
+        "backlog": 0.3
+      },
+      "stages": [
+        {
+          "name": "PO_PLACED",
+          "status": "pending",
+          "planned_mean_weeks": 0.0,
+          "planned_std_weeks": 0.0
+        },
+        {
+          "name": "ENGINEERING_SUBMITTAL",
+          "status": "done",
+          "planned_mean_weeks": 2.6,
+          "planned_std_weeks": 0.39
+        },
+        {
+          "name": "MANUFACTURING",
+          "status": "active",
+          "planned_mean_weeks": 17.6,
+          "planned_std_weeks": 4.4,
+          "actual_start_week": -3.4
+        },
+        {
+          "name": "FAT",
+          "status": "pending",
+          "planned_mean_weeks": 1.9,
+          "planned_std_weeks": 0.28
+        },
+        {
+          "name": "EX_WORKS",
+          "status": "pending",
+          "planned_mean_weeks": 1.0,
+          "planned_std_weeks": 0.15
+        },
+        {
+          "name": "OCEAN_FREIGHT",
+          "status": "pending",
+          "planned_mean_weeks": 4.5,
+          "planned_std_weeks": 0.67
+        },
+        {
+          "name": "PORT_CUSTOMS",
+          "status": "pending",
+          "planned_mean_weeks": 1.9,
+          "planned_std_weeks": 0.47
+        },
+        {
+          "name": "INLAND_TRANSPORT",
+          "status": "pending",
+          "planned_mean_weeks": 1.6,
+          "planned_std_weeks": 0.24
+        },
+        {
+          "name": "SITE_DELIVERED",
+          "status": "pending",
+          "planned_mean_weeks": 0.0,
+          "planned_std_weeks": 0.0
+        },
+        {
+          "name": "INSTALLED",
+          "status": "pending",
+          "planned_mean_weeks": 1.0,
+          "planned_std_weeks": 0.15
+        }
+      ]
+    },
+    {
+      "id": "SHP-GEN",
+      "component": "GEN",
+      "equipment_type": "GEN",
+      "description": "Standby diesel genset",
+      "supplier": "Cummins",
+      "vendor": "Cummins",
+      "origin_country": "US",
+      "country": "US",
+      "destination_site": "Dubai, UAE",
+      "required_on_site_week": 28.0,
+      "lead_time_weeks": 60,
+      "single_source": true,
+      "feeds_cx_test": "FAT-S01",
+      "linked_task_id": "INSTALL-GEN",
+      "on_critical_path": true,
+      "current_stage": "MANUFACTURING",
+      "supplier_risk_factors": {
+        "single_source": 1.0,
+        "subtier_shortage": 0.0,
+        "geo": 0.1,
+        "backlog": 0.6
+      },
+      "stages": [
+        {
+          "name": "PO_PLACED",
+          "status": "pending",
+          "planned_mean_weeks": 0.0,
+          "planned_std_weeks": 0.0
+        },
+        {
+          "name": "ENGINEERING_SUBMITTAL",
+          "status": "done",
+          "planned_mean_weeks": 4.8,
+          "planned_std_weeks": 0.72
+        },
+        {
+          "name": "MANUFACTURING",
+          "status": "active",
+          "planned_mean_weeks": 33.0,
+          "planned_std_weeks": 8.25,
+          "actual_start_week": -21.2
+        },
+        {
+          "name": "FAT",
+          "status": "pending",
+          "planned_mean_weeks": 3.6,
+          "planned_std_weeks": 0.54
+        },
+        {
+          "name": "EX_WORKS",
+          "status": "pending",
+          "planned_mean_weeks": 1.8,
+          "planned_std_weeks": 0.27
+        },
+        {
+          "name": "OCEAN_FREIGHT",
+          "status": "pending",
+          "planned_mean_weeks": 8.4,
+          "planned_std_weeks": 1.26
+        },
+        {
+          "name": "PORT_CUSTOMS",
+          "status": "pending",
+          "planned_mean_weeks": 3.6,
+          "planned_std_weeks": 0.9
+        },
+        {
+          "name": "INLAND_TRANSPORT",
+          "status": "pending",
+          "planned_mean_weeks": 3.0,
+          "planned_std_weeks": 0.45
+        },
+        {
+          "name": "SITE_DELIVERED",
+          "status": "pending",
+          "planned_mean_weeks": 0.0,
+          "planned_std_weeks": 0.0
+        },
+        {
+          "name": "INSTALLED",
+          "status": "pending",
+          "planned_mean_weeks": 1.8,
+          "planned_std_weeks": 0.27
+        }
+      ]
+    },
+    {
+      "id": "SHP-UPS",
+      "component": "UPS",
+      "equipment_type": "UPS",
+      "description": "Modular UPS system",
+      "supplier": "Vertiv",
+      "vendor": "Vertiv",
+      "origin_country": "US",
+      "country": "US",
+      "destination_site": "Dubai, UAE",
+      "required_on_site_week": 28.0,
+      "lead_time_weeks": 40,
+      "single_source": false,
+      "feeds_cx_test": "FAT-S01",
+      "linked_task_id": "INSTALL-UPS",
+      "on_critical_path": true,
+      "current_stage": "MANUFACTURING",
+      "supplier_risk_factors": {
+        "single_source": 0.0,
+        "subtier_shortage": 1.0,
+        "geo": 0.1,
+        "backlog": 0.3
+      },
+      "stages": [
+        {
+          "name": "PO_PLACED",
+          "status": "pending",
+          "planned_mean_weeks": 0.0,
+          "planned_std_weeks": 0.0
+        },
+        {
+          "name": "ENGINEERING_SUBMITTAL",
+          "status": "done",
+          "planned_mean_weeks": 3.2,
+          "planned_std_weeks": 0.48
+        },
+        {
+          "name": "MANUFACTURING",
+          "status": "active",
+          "planned_mean_weeks": 22.0,
+          "planned_std_weeks": 5.5,
+          "actual_start_week": -10.8
+        },
+        {
+          "name": "FAT",
+          "status": "pending",
+          "planned_mean_weeks": 2.4,
+          "planned_std_weeks": 0.36
+        },
+        {
+          "name": "EX_WORKS",
+          "status": "pending",
+          "planned_mean_weeks": 1.2,
+          "planned_std_weeks": 0.18
+        },
+        {
+          "name": "OCEAN_FREIGHT",
+          "status": "pending",
+          "planned_mean_weeks": 5.6,
+          "planned_std_weeks": 0.84
+        },
+        {
+          "name": "PORT_CUSTOMS",
+          "status": "pending",
+          "planned_mean_weeks": 2.4,
+          "planned_std_weeks": 0.6
+        },
+        {
+          "name": "INLAND_TRANSPORT",
+          "status": "pending",
+          "planned_mean_weeks": 2.0,
+          "planned_std_weeks": 0.3
+        },
+        {
+          "name": "SITE_DELIVERED",
+          "status": "pending",
+          "planned_mean_weeks": 0.0,
+          "planned_std_weeks": 0.0
+        },
+        {
+          "name": "INSTALLED",
+          "status": "pending",
+          "planned_mean_weeks": 1.2,
+          "planned_std_weeks": 0.18
+        }
+      ]
+    }
+  ]
+}

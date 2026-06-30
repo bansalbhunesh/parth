@@ -12,14 +12,17 @@ const SECTIONS = [
   { id: "risk", num: "09", label: "Risk Matrix", desc: "Severity x lead time deviation mapping", color: "#ff4d4d" },
   { id: "register", num: "10", label: "Deviation Register", desc: "Full evidence table with citation chains", color: "#ff4d4d" },
   { id: "twin", num: "11", label: "Cx Risk Twin", desc: "Commissioning timeline with at-risk tests", color: "#5b8cff" },
-  { id: "standards", num: "12", label: "Standards KB", desc: "7 governing standards with 1,580 lines", color: "#5b8cff" },
-  { id: "multiproject", num: "13", label: "Multi-Project Eval", desc: "12 projects, 11 countries, 50 deviations, F1=1.000", color: "#a855f7" },
-  { id: "eval", num: "14", label: "Eval Harness", desc: "P/R/F1 = 1.000 with FP rate testing", color: "#35c98b" },
-  { id: "roi", num: "15", label: "ROI Calculator", desc: "Interactive business impact model", color: "#ffb020" },
-  { id: "scale", num: "16", label: "Scale Story", desc: "10 systems today, 14,000 line items tomorrow", color: "#36d6e7" },
-  { id: "analyze", num: "17", label: "Live Analysis", desc: "Upload PDFs or paste text for end-to-end deviation detection", color: "#36d6e7" },
-  { id: "copilot", num: "18", label: "Project Copilot", desc: "RAG over specs, submittals, standards & RFIs", color: "#36d6e7" },
-  { id: "refs", num: "19", label: "Academic Refs", desc: "Peer-reviewed foundations for the approach", color: "#5b8cff" },
+  { id: "schedule", num: "12", label: "Schedule Risk", desc: "Monte-Carlo CPM — P80 finish + deviation slip to RFS", color: "#ffb020" },
+  { id: "supply", num: "13", label: "Supply-Chain Risk", desc: "Long-lead equipment delivery risk + world map", color: "#36d6e7" },
+  { id: "graph", num: "14", label: "Living Project Graph", desc: "Deviation → Cx → schedule → supplier blast radius", color: "#a855f7" },
+  { id: "standards", num: "15", label: "Standards KB", desc: "7 governing standards with 1,580 lines", color: "#5b8cff" },
+  { id: "multiproject", num: "16", label: "Multi-Project Eval", desc: "12 projects, 11 countries, 50 deviations, F1=1.000", color: "#a855f7" },
+  { id: "eval", num: "17", label: "Eval Harness", desc: "P/R/F1 = 1.000 with FP rate testing", color: "#35c98b" },
+  { id: "roi", num: "18", label: "ROI Calculator", desc: "Interactive business impact model", color: "#ffb020" },
+  { id: "scale", num: "19", label: "Scale Story", desc: "10 systems today, 14,000 line items tomorrow", color: "#36d6e7" },
+  { id: "analyze", num: "20", label: "Live Analysis", desc: "Upload PDFs or paste text for end-to-end deviation detection", color: "#36d6e7" },
+  { id: "copilot", num: "21", label: "Project Copilot", desc: "RAG over specs, submittals, standards & RFIs", color: "#36d6e7" },
+  { id: "refs", num: "22", label: "Academic Refs", desc: "Peer-reviewed foundations for the approach", color: "#5b8cff" },
 ];
 
 export default function SectionIndex() {
@@ -27,7 +30,7 @@ export default function SectionIndex() {
     <div className="sidx">
       <div className="sidx-header">
         <div className="sidx-badge">PRODUCT WALKTHROUGH</div>
-        <div className="sidx-title">19 sections &middot; everything a judge needs</div>
+        <div className="sidx-title">22 sections &middot; everything a judge needs</div>
       </div>
       <div className="sidx-grid">
         {SECTIONS.map((s) => (

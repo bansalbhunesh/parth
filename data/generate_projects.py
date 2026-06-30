@@ -1,21 +1,20 @@
 """
 Multi-project corpus generator for Pramaan.
 
-Generates 6 realistic EPC data-centre project corpora, each with seeded
+Generates 11 realistic EPC data-centre project corpora, each with seeded
 deviations, commissioning plans, and standards references. Projects span
 different tiers, geographies, climates, and governing standards to prove
-the deviation-detection pipeline generalises beyond a single dataset.
+the deviation-detection pipeline generalises beyond a single dataset. With the
+hand-maintained `meghdoot` corpus (in data/corpus/) this makes 12 projects /
+11 countries total.
 
-Projects:
-  1. meghdoot    — 40 MW Tier IV, Navi Mumbai (existing, Indian standards)
-  2. vajra       — 20 MW Tier III, Pune (Indian standards, different deviations)
-  3. nordic      — 10 MW Tier III, Oslo (EN 50600 European standard)
-  4. sahara      — 5 MW Tier II, Dubai (DEWA/ADDC requirements)
-  5. cascade     — 30 MW Tier IV, Oregon (US NEC/NFPA/ASHRAE)
-  6. yangtze     — 50 MW Tier IV, Shanghai (GB 50174 Chinese standard)
+Generated projects (meghdoot is maintained separately under data/corpus/):
+  vajra (Pune, IN), nordic (Oslo, NO), sahara (Dubai, AE), cascade (Oregon, US),
+  yangtze (Shanghai, CN), athena (DE), maple (CA), outback (AU), pampas (BR),
+  sakura (JP), thames (UK)
 
 Usage:
-    python3 data/generate_projects.py           # generate all 6 projects
+    python3 data/generate_projects.py           # generate all 11 projects
     python3 data/generate_projects.py --list     # list project IDs
 """
 

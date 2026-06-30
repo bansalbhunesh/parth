@@ -6,7 +6,7 @@ import { useState } from "react";
 // /screenshots/<id>.png). These replace the earlier CSS mockups — judges in the
 // Screenshots section now see the actual app, not stylised placeholders.
 const SCREENS = [
-  { id: "hero-full", label: "Full Dashboard", desc: "19-section deep-dive dashboard, dark theme, ISR-cached" },
+  { id: "hero-full", label: "Full Dashboard", desc: "22-section deep-dive dashboard, dark theme, ISR-cached" },
   { id: "register", label: "Deviation Register", desc: "Every finding with severity, lead time and the Cx test it will fail" },
   { id: "risk", label: "Commissioning Risk Matrix", desc: "Deviations plotted by severity × weeks-to-failure" },
   { id: "pipeline", label: "AI Agent Pipeline", desc: "Ingestion → Extraction → Reconciliation → Cx Predictor → RFI Copilot" },

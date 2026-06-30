@@ -19,7 +19,7 @@
   <img src="https://img.shields.io/badge/real_datasheet_pairs-11-35c98b?style=flat-square&labelColor=0d1a14" alt="11 real pairs">
   <img src="https://img.shields.io/badge/real--doc_false_positives-0-35c98b?style=flat-square&labelColor=0d1a14" alt="0 false positives on real docs">
   <img src="https://img.shields.io/badge/honest_precision-0.9-ffb020?style=flat-square&labelColor=1a1508" alt="Honest precision 0.9">
-  <img src="https://img.shields.io/badge/tests-310-5b8cff?style=flat-square&labelColor=111820" alt="310 tests">
+  <img src="https://img.shields.io/badge/tests-435-5b8cff?style=flat-square&labelColor=111820" alt="435 tests">
   <img src="https://img.shields.io/badge/agents-5-5b8cff?style=flat-square&labelColor=111820" alt="5 agents">
   <img src="https://img.shields.io/badge/countries-11-ffb020?style=flat-square&labelColor=1a1508" alt="11 countries">
   <img src="https://img.shields.io/github/actions/workflow/status/bansalbhunesh/parth/ci.yml?style=flat-square&labelColor=111820&label=CI" alt="CI">
@@ -61,7 +61,7 @@
 - [Multi-Project Generalisation](#multi-project-generalisation)
 - [Quick Start](#quick-start)
 - [One-Command Setup](#one-command-setup)
-- [Frontend — 19-Section Dashboard](#frontend--19-section-dashboard)
+- [Frontend — 22-Section Dashboard](#frontend--22-section-dashboard)
 - [Standards Corpus](#standards-corpus)
 - [API Reference](#api-reference)
 - [Project Structure](#project-structure)
@@ -83,7 +83,9 @@
 >
 > **It reasons over real documents — not keywords.** Across **11 sourced datasheet pairs** — Vertiv, Cummins, STULZ, ABB, **Tate ConCore, Schneider Canalis** — against real standards (Uptime, NFPA, EPA, ASHRAE, IEC, CISCA), it recovered **19 genuine deviations — recall 1.000 — + 0 false positives, none seeded** — including arithmetic it did itself (4,000 gal ÷ 103 GPH = **38.8 h** vs 48 required) and refrigerant/agent GWPs it **recalled from domain knowledge** (R-410A 2,088, R-134a 1,430, FM-200 3,220) the datasheets never stated. Two of those are **hard product-ceiling shortfalls** (ConCore 1250 = 1,250 lbf vs 1,500 required; Canalis KTA10 = 50 kA vs 65). We deliberately keep **one contested case and score ourselves ≈ 0.9 (live-verified, gemini-2.5-flash: 19/19 hard deviations recovered) — not a suspicious 1.000.** Every value sourced → [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md)
 >
-> **And it's production-grade.** Each finding cites the standard, predicts the commissioning test it will fail, and the weeks of lead time. When the AI is rate-limited, a rule-based engine still catches the headline shortfalls — **no silent zeros.** Benchmarked across 12 projects / 11 countries for breadth · 310 tests · CI green.
+> **And it's production-grade.** Each finding cites the standard, predicts the commissioning test it will fail, and the weeks of lead time. When the AI is rate-limited, a rule-based engine still catches the headline shortfalls — **no silent zeros.** Benchmarked across 12 projects / 11 countries for breadth · 435 tests · CI green.
+>
+> **The one-line moat:** other tools stop at the spec-vs-submittal mismatch — Pramaan names the exact *commissioning test* that deviation will fail and the *weeks of lead time* to fix it first, a domain-informed rule + LLM hybrid that turns a design-review miss into a scheduled, preventable commissioning failure. **And it generalises:** any *specification → vendor submittal → acceptance-test* domain — pharma GMP qualification, aerospace AS9100, medical-device V&V, switchgear type-testing — is the same problem. Data-centre EPC is simply the highest-stakes instance we proved it on.
 
 ---
 
@@ -325,8 +327,8 @@ python3 eval/multi_project_eval.py --json
 python3 data/generate_corpus.py                    # Project Meghdoot (primary)
 python3 data/generate_projects.py                  # 11 additional projects
 
-# 2. Run the 310-test suite (no API key needed)
-python3 -m pytest tests/ -q                       # → 310 passed
+# 2. Run the 435-test suite (no API key needed)
+python3 -m pytest tests/ -q                       # → 435 passed
 
 # 3. Prove the pipeline + eval harness (3 independent paths)
 python3 eval/run_eval.py --detector baseline      # → P/R/F1 = 1.000, 267 weeks saved
@@ -350,7 +352,7 @@ cd frontend && npm install && npm run dev          # → localhost:3000
 curl http://localhost:8000/export/audit/html > evidence.html
 ```
 
-> **No API key?** The dashboard runs fully with ground-truth fallback data. All 24 API endpoints return 200. Both eval harnesses (structured + text-based), the corpus, and the frontend work offline. 310 tests pass without any external dependencies.
+> **No API key?** The dashboard runs fully with ground-truth fallback data. All 24 API endpoints return 200. Both eval harnesses (structured + text-based), the corpus, and the frontend work offline. 435 tests pass without any external dependencies.
 >
 > **Or just open the live demo:** [parth-tan.vercel.app](https://parth-tan.vercel.app) (frontend) · [parth-3puc.onrender.com](https://parth-3puc.onrender.com/health) (API)
 
@@ -366,7 +368,7 @@ docker compose up --build
 # Option 2: Makefile
 make setup          # Install all dependencies
 make corpus         # Generate 12 project datasets
-make test           # Run 310 tests
+make test           # Run 435 tests
 make eval-all       # Run all 3 eval paths
 make verify         # One-command: tests + all evals + type check
 make run            # Start backend API
@@ -376,7 +378,7 @@ make run            # Start backend API
 
 ---
 
-## Frontend — 19-Section Dashboard
+## Frontend — 22-Section Dashboard
 
 The dashboard is a single-page application designed for a **60-second demo narrative**, built with **24 React components** (including `ErrorBoundary` for graceful failure recovery):
 
@@ -395,12 +397,15 @@ The dashboard is a single-page application designed for a **60-second demo narra
 | 11 | **Risk Matrix** | Severity × Lead Time matrix with deviation dots |
 | 12 | **Deviation Register** | Interactive table with search, filter, sort, and expandable rationale |
 | 13 | **Cx Risk Twin** | L1–L5 Gantt chart with at-risk tests pulsing red |
-| 14 | **Standards KB** | 7 color-coded standard cards with finding counts |
-| 15 | **Multi-Project Eval** | 12 project cards with per-project P/R/F1, aggregate metrics |
-| 16 | **Eval Dashboard** | Animated P/R/F1 counters + baseline vs LLM comparison table |
-| 17 | **Live Analysis** | Upload PDFs or paste text for end-to-end deviation detection with streaming AI reasoning |
-| 18 | **ROI Calculator** | Interactive slider: project value → rework avoided → payback days |
-| 19 | **Scale Story** | 10 → 33 → 87 → 14K animated progression + architecture details |
+| 14 | **Schedule Risk** | Monte-Carlo CPM: P50/P80/P90 finish distribution, on-time probability, deviation→milestone slip, sensitivity tornado |
+| 15 | **Supply-Chain Risk** | Long-lead equipment delivery risk: per-shipment P(late), supplier-risk decomposition, hand-rolled equirectangular world map |
+| 16 | **Living Project Graph** | Unified deviation → Cx test → schedule milestone → supplier blast-radius graph (the Innovation backbone) |
+| 17 | **Standards KB** | 7 color-coded standard cards with finding counts |
+| 18 | **Multi-Project Eval** | 12 project cards with per-project P/R/F1, aggregate metrics |
+| 19 | **Eval Dashboard** | Animated P/R/F1 counters + baseline vs LLM comparison table |
+| 20 | **Live Analysis** | Upload PDFs or paste text for end-to-end deviation detection with streaming AI reasoning |
+| 21 | **ROI Calculator** | Interactive slider: project value → rework avoided → payback days |
+| 22 | **Scale Story** | 10 → 203 → 87 → 14K animated progression + architecture details |
 
 Plus: **Copilot panel** (streaming RAG Q&A with preset queries), **Academic References** (4 peer-reviewed papers), **Export button** (HTML evidence pack download).
 
@@ -506,14 +511,14 @@ pramaan/
 │   └── text_eval.py              # Raw-markdown extraction eval (independent input path)
 ├── frontend/
 │   ├── app/
-│   │   ├── page.tsx               # Main dashboard — 19 sections
+│   │   ├── page.tsx               # Main dashboard — 22 sections
 │   │   ├── layout.tsx             # Root layout with fonts
 │   │   └── globals.css            # Full design system (~1100 lines)
 │   ├── components/                # 24 React components
 │   │   ├── HeroIntro.tsx          # Problem statement for judges
-│   │   ├── NavBar.tsx             # 19-section sticky nav
+│   │   ├── NavBar.tsx             # 22-section sticky nav
 │   │   ├── SectionIndex.tsx       # Interactive section directory
-│   │   ├── MultiProjectDashboard.tsx # 6-project eval grid with per-project metrics
+│   │   ├── MultiProjectDashboard.tsx # 12-project eval grid with per-project metrics
 │   │   ├── StatsBar.tsx           # Summary stats strip
 │   │   ├── PipelineViz.tsx        # Animated 5-agent pipeline
 │   │   ├── ArchitectureDiagram.tsx # 4-layer architecture diagram
@@ -542,7 +547,7 @@ pramaan/
     └── test_multi_project.py      # Multi-project dataset + eval tests
 ```
 
-**40+ source files · 7,300+ lines of code · 310 tests · 12 projects · 24 endpoints**
+**40+ source files · 7,300+ lines of code · 435 tests · 12 projects · 24 endpoints**
 
 ---
 
@@ -553,8 +558,8 @@ The demo corpus models **10 systems** with **33 requirements**. The architecture
 | Current (Demo) | At Scale |
 |-----------------|----------|
 | 12 projects, 11 countries | Enterprise portfolio — hundreds of projects |
-| 81 systems across 12 projects | 500+ systems per project |
-| 130 requirements tracked | 14,000+ line items per project |
+| 91 systems across 12 projects | 500+ systems per project |
+| 203 requirements tracked | 14,000+ line items per project |
 | 50 deviations detected | Continuous monitoring pipeline |
 | TF-IDF retriever | pgvector / Qdrant vector store |
 | Synchronous agents | LangGraph async + queue |
@@ -613,10 +618,10 @@ python3 eval/run_eval.py --detector llm
 |------------------|-----------------|----------|
 | **Innovation** | Goes past AI submittal review (the commercial state of the art — BuildSync, Spec-ID, InspectMind) by predicting **which commissioning test each deviation will fail, and how many weeks early** — cross-referencing spec + submittal + governing standard with a full citation chain. Proven on a **real third-party Vertiv datasheet**, not just our own data | 5 specialized agents, LangGraph orchestration, citation chain, commissioning-risk twin, [`REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md) |
 | **Business Impact** | 1,024 weeks of early detection across 50 findings in 12 projects prevents seven-figure schedule slips | Interactive ROI calculator, cost-of-delay timeline, before/after comparison |
-| **Technical Excellence** | Dual eval harness (structured + text-based). The synthetic portfolio scores 1.000 **by construction** (we label it a plumbing/breadth check, not a flex); the honest signal is **11 real sourced datasheet pairs — 19 deviations (recall 1.000), 0 false positives, and a self-scored ≈0.9 on one contested ASHRAE case**, live-verified (`gemini-2.5-flash`, recall 1.000 on hard deviations). 310-test suite | Independent text-extraction + real-LLM eval, semantic + strict scoring, no-key offline harness (`eval/real_pairs_offline.py`), 25+ standards |
+| **Technical Excellence** | Dual eval harness (structured + text-based). The synthetic portfolio scores 1.000 **by construction** (we label it a plumbing/breadth check, not a flex); the honest signal is **11 real sourced datasheet pairs — 19 deviations (recall 1.000), 0 false positives, and a self-scored ≈0.9 on one contested ASHRAE case**, live-verified (`gemini-2.5-flash`, recall 1.000 on hard deviations). 435-test suite | Independent text-extraction + real-LLM eval, semantic + strict scoring, no-key offline harness (`eval/real_pairs_offline.py`), 25+ standards |
 | **Robustness** | Graceful degradation everywhere — no API key, malformed PDFs, cold backend all return 200; `/llm-check` surfaces the true LLM status | 50-test resilience suite, ISR-cached frontend, deterministic fallback |
 | **Scalability** | 12 projects → enterprise portfolio via multi-project eval + batch ingest + vector store | Multi-project dashboard, architecture diagram, scale story |
-| **UX** | Two surfaces: a focused **Judge Mode** (90-second proof) and a 19-section deep-dive dashboard, both ISR-cached for instant loads, streaming AI | `/judge` + full dashboard, live PDF upload, dark theme, responsive |
+| **UX** | Two surfaces: a focused **Judge Mode** (90-second proof) and a 22-section deep-dive dashboard, both ISR-cached for instant loads, streaming AI | `/judge` + full dashboard, live PDF upload, dark theme, responsive |
 
 ---
 
@@ -681,5 +686,5 @@ python3 eval/run_eval.py --detector llm
 <p align="center">
   <strong>PRA<span style="color:#36d6e7">MAAN</span></strong><br>
   <em>EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4</em><br>
-  <sub>5 AI Agents &middot; 12 Projects &middot; 11 Countries &middot; 24 Endpoints &middot; 50 Deviations &middot; 1,024 Weeks Saved &middot; 310 Tests &middot; 11 Real Pairs &middot; Real-doc 0 FP &middot; Honest ~0.9</sub>
+  <sub>5 AI Agents &middot; 12 Projects &middot; 11 Countries &middot; 24 Endpoints &middot; 50 Deviations &middot; 1,024 Weeks Saved &middot; 435 Tests &middot; 11 Real Pairs &middot; Real-doc 0 FP &middot; Honest ~0.9</sub>
 </p>

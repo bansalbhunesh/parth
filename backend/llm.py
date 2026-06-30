@@ -65,6 +65,37 @@ def complete_json(prompt: str, system: str = ""):
         raise LLMError(f"LLM returned unparseable JSON: {exc}") from exc
 
 
+_NUM_RE = re.compile(r"\d+(?:\.\d+)?")
+
+
+def numbers_grounded(prose: str, source: str) -> bool:
+    """True iff every numeric token in `prose` also appears verbatim in `source`.
+    The narrate() engines tell the LLM to quote only the computed figures; this
+    catches a model that invents or re-rounds a number anyway (e.g. restating
+    a delivery-risk of 61.9 as '62'), so an ungrounded figure never reaches a
+    judge. Conservative by design: a legitimate re-rounding also fails and we
+    fall back to the always-correct template."""
+    allowed = set(_NUM_RE.findall(source))
+    return all(tok in allowed for tok in _NUM_RE.findall(prose))
+
+
+def restate(template: str, instruction: str, system: str) -> dict:
+    """Ask the LLM to restate `template` more fluently for a briefing, but fall
+    back to the template verbatim if the LLM is unreachable, returns nothing, or
+    introduces any number absent from `template`. Returns {narrative, mode} where
+    mode is 'llm' only when the restatement is number-grounded."""
+    try:
+        prose = complete(
+            f"Numbers (quote ONLY these, invent nothing): {template}\n{instruction}",
+            system=system, json_mode=False,
+        ).strip()
+    except Exception:
+        return {"narrative": template, "mode": "rule-based-fallback"}
+    if prose and numbers_grounded(prose, template):
+        return {"narrative": prose, "mode": "llm"}
+    return {"narrative": template, "mode": "rule-based-fallback"}
+
+
 def _gemini(prompt, system, json_mode):
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:

@@ -445,12 +445,12 @@ export default function AnalyzePanel() {
           ) : (
             <div className="analyze-devs">
               {result.deviations.map((d, i) => (
-                <div key={i} className={`analyze-dev analyze-dev-${d.severity.toLowerCase()}`}>
+                <div key={i} className={`analyze-dev analyze-dev-${(d.severity ?? "major").toLowerCase()}`}>
                   <div className="analyze-dev-header">
-                    <span className="analyze-dev-component">{d.component}</span>
-                    <span className={`sev ${d.severity}`}>{d.severity}</span>
+                    <span className="analyze-dev-component">{d.component ?? "—"}</span>
+                    <span className={`sev ${d.severity ?? ""}`}>{d.severity ?? "—"}</span>
                   </div>
-                  <div className="analyze-dev-param">{d.parameter.replace(/_/g, " ")}</div>
+                  <div className="analyze-dev-param">{(d.parameter ?? "").replace(/_/g, " ")}</div>
                   <div className="analyze-dev-values">
                     <span className="analyze-dev-req">Required: {d.required_value} {d.unit}</span>
                     <span className="analyze-dev-prov">Provided: {d.provided_value} {d.unit}</span>

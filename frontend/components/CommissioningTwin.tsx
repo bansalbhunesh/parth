@@ -107,9 +107,9 @@ export default function CommissioningTwin({
         <div className="cx-risk-cards">
           {deviations
             .filter((d) => d.predicted_cx_test)
-            .map((d) => (
+            .map((d, i) => (
               <div
-                key={`${d.component}-${d.parameter}`}
+                key={`${d.component}-${d.parameter}-${i}`}
                 className="cx-risk-card"
               >
                 <div className="cx-risk-test">

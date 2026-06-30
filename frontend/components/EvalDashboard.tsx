@@ -16,6 +16,13 @@ function AnimatedMetric({ value, label, suffix = "", color = "var(--lead)", dela
       ([entry]) => {
         if (!entry.isIntersecting) return;
         observer.disconnect();
+        // Honor prefers-reduced-motion: the CSS rule only zeroes CSS animations,
+        // not this rAF count-up, so gate it explicitly and snap to the final value.
+        if (typeof window !== "undefined" &&
+            window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          setCurrent(value);
+          return;
+        }
         setTimeout(() => {
           const start = performance.now();
           function tick(now: number) {

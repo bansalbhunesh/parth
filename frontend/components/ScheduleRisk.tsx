@@ -8,7 +8,7 @@ const W = 820;
 const H = 210;
 const PAD_L = 10;
 const PAD_R = 10;
-const PAD_T = 16;
+const PAD_T = 34; // headroom for up to two rows of staggered percentile labels
 const PAD_B = 30;
 
 function pct(p: number | null | undefined): string {
@@ -45,6 +45,23 @@ export default function ScheduleRisk({ analysis }: { analysis: ScheduleAnalysis 
     ["P80", mc.p80, "var(--warn)"],
     ["P90", mc.p90, "var(--fault)"],
   ];
+
+  // Stagger the percentile labels into up to two rows so close percentiles
+  // (e.g. P80 70.2 vs P90 71.55) don't print on top of each other. Greedy:
+  // prefer the upper row; drop to the lower row only when too near the last
+  // label placed on the upper row.
+  const LABEL_MIN_GAP = 58;
+  const ROW_Y = [PAD_T - 22, PAD_T - 8];
+  const rowLastX = [-Infinity, -Infinity];
+  const markerLayout = markers
+    .map(([lbl, wk, c]) => ({ lbl, wk, c, x: xAt(wk) }))
+    .sort((a, b) => a.x - b.x)
+    .map((m) => {
+      let row = m.x - rowLastX[0] < LABEL_MIN_GAP ? 1 : 0;
+      if (row === 1 && m.x - rowLastX[1] < LABEL_MIN_GAP) row = 0;
+      rowLastX[row] = m.x;
+      return { ...m, y: ROW_Y[row] };
+    });
 
   return (
     <div className="sr">
@@ -84,11 +101,13 @@ export default function ScheduleRisk({ analysis }: { analysis: ScheduleAnalysis 
               fill={late ? "var(--fault)" : "var(--lead)"} opacity={late ? 0.85 : 0.55} rx={1} />
           );
         })}
-        {markers.map(([lbl, wk, c]) => (
+        {markerLayout.map(({ lbl, wk, c, x, y }) => (
           <g key={lbl}>
-            <line x1={xAt(wk)} x2={xAt(wk)} y1={PAD_T} y2={PAD_T + plotH}
+            <line x1={x} x2={x} y1={PAD_T} y2={PAD_T + plotH}
               stroke={c} strokeWidth={1.5} strokeDasharray="4 3" />
-            <text x={xAt(wk)} y={PAD_T - 4} fill={c} fontSize={12} textAnchor="middle">{lbl} · {wk}</text>
+            {/* faint connector from the staggered label down to the line top */}
+            <line x1={x} x2={x} y1={y + 3} y2={PAD_T} stroke={c} strokeWidth={0.75} opacity={0.45} />
+            <text x={x} y={y} fill={c} fontSize={12} textAnchor="middle">{lbl} · {wk}</text>
           </g>
         ))}
         {deadline !== null && (

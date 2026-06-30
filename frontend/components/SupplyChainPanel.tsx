@@ -58,6 +58,24 @@ export default function SupplyChainPanel({ analysis }: { analysis: SupplyChainAn
   const latLines: number[] = [];
   for (let lat = -60; lat <= 60; lat += 30) latLines.push(lat);
 
+  // Label the real shipment endpoints (origins + the destination site) so the
+  // arcs are legible without any fabricated coastlines. Dedupe by pixel position
+  // since several shipments share the same origin/destination.
+  const labels = new Map<string, { x: number; y: number; text: string; dest: boolean }>();
+  for (const sh of analysis.shipments) {
+    const o = coordsFor(sh.origin_country);
+    const d = coordsFor(sh.destination_site);
+    if (o) {
+      const x = xAt(o[1]), y = yAt(o[0]);
+      labels.set(`${Math.round(x)},${Math.round(y)}`, { x, y, text: sh.origin_country, dest: false });
+    }
+    if (d) {
+      const x = xAt(d[1]), y = yAt(d[0]);
+      const short = sh.destination_site.split(",")[0].trim() || sh.destination_site;
+      labels.set(`${Math.round(x)},${Math.round(y)}`, { x, y, text: short, dest: true });
+    }
+  }
+
   return (
     <div className="sc">
       <div className="sc-summary">
@@ -80,6 +98,26 @@ export default function SupplyChainPanel({ analysis }: { analysis: SupplyChainAn
           <line key={`h${lat}`} x1={0} y1={yAt(lat)} x2={MW} y2={yAt(lat)} stroke="var(--line)" strokeWidth={0.5} opacity={0.5} />
         ))}
         {analysis.shipments.map((sh) => <Arc key={sh.id} s={sh} />)}
+        {[...labels.values()].map((p) => (
+          <text key={`${p.x},${p.y}`} x={p.x} y={p.y - 9}
+            fill={p.dest ? "var(--lead)" : "var(--muted)"}
+            fontSize={11} fontWeight={p.dest ? 700 : 500}
+            textAnchor={p.x > MW - 90 ? "end" : p.x < 90 ? "start" : "middle"}>
+            {p.text}
+          </text>
+        ))}
+        {/* legend — risk bands + at-risk styling, so the arcs read at a glance */}
+        <g transform={`translate(14 ${MH - 20})`} fontSize={11}>
+          <rect x={-8} y={-16} width={344} height={26} rx={6} fill="var(--panel)" opacity={0.65} />
+          <circle cx={2} cy={0} r={4} fill="var(--ok)" />
+          <text x={11} y={4} fill="var(--muted)">low risk</text>
+          <circle cx={78} cy={0} r={4} fill="var(--warn)" />
+          <text x={87} y={4} fill="var(--muted)">medium</text>
+          <circle cx={150} cy={0} r={4} fill="var(--fault)" />
+          <text x={159} y={4} fill="var(--muted)">high</text>
+          <line x1={210} x2={236} y1={0} y2={0} stroke="var(--muted)" strokeWidth={2} strokeDasharray="5 3" />
+          <text x={242} y={4} fill="var(--muted)">at-risk shipment</text>
+        </g>
       </svg>
 
       <table className="sc-table">

@@ -17,7 +17,7 @@ Live: **frontend** parth-tan.vercel.app · **API** parth-3puc.onrender.com
         │
         ▼
 ┌───────────────────────────────────────────────────────────────┐
-│  FastAPI backend (Render)  —  24 endpoints · SSE streaming     │
+│  FastAPI backend (Render)  —  28 endpoints · SSE streaming     │
 │                                                                │
 │   LangGraph pipeline (StateGraph + conditional routing):       │
 │                                                                │

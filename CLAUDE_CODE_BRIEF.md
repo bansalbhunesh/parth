@@ -12,7 +12,7 @@ All components implemented, tested, and polished:
 - [x] RFI copilot with TF-IDF retrieval + prior-RFI matching
 - [x] Evidence pack (JSON + printable HTML) + /metrics endpoint
 - [x] Baseline eval: P/R/F1 = 1.000, Cx prediction = 1.000 (all 12 projects)
-- [x] Backend graceful fallback (all 24 endpoints return 200 without API key)
+- [x] Backend graceful fallback (all 28 endpoints return 200 without API key)
 - [x] 22-section frontend dashboard with scroll animations + 27 components
 - [x] Hero intro, architecture diagram, ROI calculator, before/after comparison
 - [x] Standards KB, eval dashboard, scale story, academic references

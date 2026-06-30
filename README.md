@@ -352,7 +352,7 @@ cd frontend && npm install && npm run dev          # → localhost:3000
 curl http://localhost:8000/export/audit/html > evidence.html
 ```
 
-> **No API key?** The dashboard runs fully with ground-truth fallback data. All 24 API endpoints return 200. Both eval harnesses (structured + text-based), the corpus, and the frontend work offline. 435 tests pass without any external dependencies.
+> **No API key?** The dashboard runs fully with ground-truth fallback data. All 28 API endpoints return 200. Both eval harnesses (structured + text-based), the corpus, and the frontend work offline. 435 tests pass without any external dependencies.
 >
 > **Or just open the live demo:** [parth-tan.vercel.app](https://parth-tan.vercel.app) (frontend) · [parth-3puc.onrender.com](https://parth-3puc.onrender.com/health) (API)
 
@@ -458,7 +458,7 @@ Pramaan cross-references against **7 governing standards** — all content is pa
 | `GET` | `/projects/{id}` | Full project detail — deviations, cx plan, true negatives |
 | `GET` | `/projects/eval/aggregate` | Multi-project eval — aggregate P/R/F1 across all projects |
 
-24 endpoints. All return 200 with graceful fallback to ground-truth data when no LLM key is configured. Streaming endpoints use Server-Sent Events (SSE) for real-time token delivery.
+28 endpoints. All return 200 with graceful fallback to ground-truth data when no LLM key is configured. Streaming endpoints use Server-Sent Events (SSE) for real-time token delivery.
 
 > **Interactive API docs:** Launch the backend and visit [localhost:8000/docs](http://localhost:8000/docs) for live Swagger UI — try every endpoint in your browser.
 
@@ -469,7 +469,7 @@ Pramaan cross-references against **7 governing standards** — all content is pa
 ```
 pramaan/
 ├── backend/
-│   ├── main.py                    # FastAPI — 24 endpoints, SSE streaming, graceful fallback
+│   ├── main.py                    # FastAPI — 28 endpoints, SSE streaming, graceful fallback
 │   ├── analyze.py                 # Shared analysis logic (sync + streaming)
 │   ├── paths.py                   # Single source of truth for data paths
 │   ├── orchestrator.py            # LangGraph pipeline with conditional routing
@@ -547,7 +547,7 @@ pramaan/
     └── test_multi_project.py      # Multi-project dataset + eval tests
 ```
 
-**40+ source files · 7,300+ lines of code · 435 tests · 12 projects · 24 endpoints**
+**40+ source files · 7,300+ lines of code · 435 tests · 12 projects · 28 endpoints**
 
 ---
 
@@ -686,5 +686,5 @@ python3 eval/run_eval.py --detector llm
 <p align="center">
   <strong>PRA<span style="color:#36d6e7">MAAN</span></strong><br>
   <em>EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4</em><br>
-  <sub>5 AI Agents &middot; 12 Projects &middot; 11 Countries &middot; 24 Endpoints &middot; 50 Deviations &middot; 1,024 Weeks Saved &middot; 435 Tests &middot; 11 Real Pairs &middot; Real-doc 0 FP &middot; Honest ~0.9</sub>
+  <sub>5 AI Agents &middot; 12 Projects &middot; 11 Countries &middot; 28 Endpoints &middot; 50 Deviations &middot; 1,024 Weeks Saved &middot; 435 Tests &middot; 11 Real Pairs &middot; Real-doc 0 FP &middot; Honest ~0.9</sub>
 </p>

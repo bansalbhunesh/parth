@@ -7,6 +7,9 @@ import { useState } from "react";
 // Screenshots section now see the actual app, not stylised placeholders.
 const SCREENS = [
   { id: "hero-full", label: "Full Dashboard", desc: "22-section deep-dive dashboard, dark theme, ISR-cached" },
+  { id: "schedule", label: "Predictive Schedule Risk", desc: "Monte-Carlo CPM — P80 finish, deviation slip to RFS, sensitivity tornado" },
+  { id: "supply", label: "Supply-Chain Risk", desc: "Long-lead equipment ETA, P(late), delivery-risk + world-map view" },
+  { id: "graph", label: "Living Project Graph", desc: "Deviation → commissioning test → schedule slip → long-lead supplier blast radius" },
   { id: "register", label: "Deviation Register", desc: "Every finding with severity, lead time and the Cx test it will fail" },
   { id: "risk", label: "Commissioning Risk Matrix", desc: "Deviations plotted by severity × weeks-to-failure" },
   { id: "pipeline", label: "AI Agent Pipeline", desc: "Ingestion → Extraction → Reconciliation → Cx Predictor → RFI Copilot" },

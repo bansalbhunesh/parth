@@ -356,6 +356,18 @@ curl http://localhost:8000/export/audit/html > evidence.html
 >
 > **Or just open the live demo:** [parth-tan.vercel.app](https://parth-tan.vercel.app) (frontend) · [parth-3puc.onrender.com](https://parth-3puc.onrender.com/health) (API)
 
+### Deploy your own — environment variables
+
+| Host | Variable | Required? | Notes |
+|------|----------|-----------|-------|
+| **Render** (backend) | `GEMINI_API_KEY` | for live LLM | AI Studio key; **without it the app still boots and every endpoint returns 200 via the deterministic fallback** — only live narration/extraction is disabled. Verify with `/llm-check`. |
+| **Render** (backend) | `GEMINI_MODEL` | optional | defaults to `gemini-2.5-flash` (pinned in `render.yaml`; `2.0-flash` 429s on free keys). |
+| **Render** (backend) | `PRAMAAN_LLM_TIMEOUT` | optional | seconds the sync `/analyze` waits on the LLM before falling back (default `60`). |
+| **Render** (backend) | `PRAMAAN_SCHEDULE` / `PRAMAAN_SUPPLY` / `PRAMAAN_GRAPH` | optional | PS4 layers; default `1` (on). Set `0` to hide a section. |
+| **Vercel** (frontend) | `NEXT_PUBLIC_API` | **required** | set to the Render backend URL (e.g. `https://parth-3puc.onrender.com`). Inlined at build time. **Without it the frontend falls back to bundled data** (which mirrors live engine output, so the demo still renders correctly but is not live-served). |
+
+> Render free-tier services **suspend after extended inactivity** and cold-start on the first hit (~30–50 s). If `/health` returns a "Service Suspended" page, resume/redeploy the service from the Render dashboard before the demo.
+
 ---
 
 ## One-Command Setup

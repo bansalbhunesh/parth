@@ -96,7 +96,7 @@ of the following is in their public feature set — and together they are the mo
    fails" — the number that converts a finding into a dated, prioritised action
    and a board-level schedule-risk metric.
 3. **Open, reproducible eval + real-world result.** A public test harness, a
-   435-test suite, and a **19/19-recall result on real third-party datasheets**
+   440-test suite, and a **19/19-recall result on real third-party datasheets**
    ([`eval/REAL_PAIRS_EVAL.md`](eval/REAL_PAIRS_EVAL.md)). Closed SaaS asks you to
    trust the marketing; we ship the proof.
 4. **No-silent-zero resilience.** A deterministic detector that still returns the

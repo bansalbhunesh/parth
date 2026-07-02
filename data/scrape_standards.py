@@ -18,11 +18,9 @@ Requirements:
 """
 
 import asyncio
-import json
 import os
 import pathlib
 import re
-import sys
 
 SCRAPED_DIR = pathlib.Path(__file__).parent / "scraped"
 

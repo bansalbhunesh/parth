@@ -3,6 +3,7 @@
 > The words you actually say, timed to ~3:00. Built for a *business* panel:
 > lead with the money, let one live real-document catch carry the wow, close on
 > impact. Rehearse the demo until it's muscle memory — everything flexes around it.
+> Recording the video? The shoot itself is run by [`docs/VIDEO_RUNBOOK.md`](docs/VIDEO_RUNBOOK.md).
 
 ---
 

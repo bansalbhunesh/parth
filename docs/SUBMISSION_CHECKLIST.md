@@ -6,19 +6,19 @@
 
 ## Hard deadline
 
-- [ ] **Phase 2 submission deadline confirmed on Unstop:** `____-__-__ __:__ IST`
-- [ ] Submit at least **6 hours early** (Render cold starts, upload retries, form surprises).
+- [x] **Phase 2 submission deadline confirmed on Unstop:** `2026-07-07` (exact hour TBC on the dashboard — treat as morning IST until confirmed)
+- [ ] Submit by **6 July evening** (leave a full night of slack for cold starts, upload retries, form surprises).
 
 ## Deliverables
 
 | # | Deliverable (per rules) | Artifact | Status |
 |---|---|---|---|
-| 1 | **Public GitHub repository** | `https://github.com/bansalbhunesh/parth` | ⬜ flip to public (Settings → General → Danger Zone); then verify badges + links render logged-out |
+| 1 | **Public GitHub repository** | `https://github.com/bansalbhunesh/parth` | ✅ public since 2026-07-03; CI badge verified "passing" logged-out. NOTE: the repo home renders `main`'s README — keep `main` fast-forwarded to the submission tip |
 | 2 | **Pitch video** (3 min) | YouTube unlisted link → also placed in README "Judges: start here" §3 | ⬜ record per `docs/VIDEO_RUNBOOK.md` (script: `PITCH.md`) |
 | 3 | **Architecture document** | [`docs/ARCHITECTURE.md`](ARCHITECTURE.md) (+ `docs/pipeline-diagram.svg`) | ✅ |
 | 4 | **Impact model** (quantified business benefit) | [`docs/BUSINESS.md`](BUSINESS.md) — every figure cited | ✅ |
 | 5 | Pitch deck (if the form takes a file) | [`docs/Pramaan_Deck.pdf`](Pramaan_Deck.pdf) — 15 pages, regenerate with `python scripts/export_deck.py` after any deck edit | ✅ |
-| 6 | Live demo URL | `https://parth-tan.vercel.app/judge` (front) · `https://parth-3puc.onrender.com/health` (API) | ⬜ blocked on Render redeploy + fresh key |
+| 6 | Live demo URL | `https://parth-tan.vercel.app/judge` (front) · `https://parth-3puc.onrender.com/health` (API) | ⬜ blocked on Render: paste the fresh `GEMINI_API_KEY` + Manual Deploy latest `main`. Key verified locally 2026-07-03: deep probe 5 findings/23s · GXT5 pair 5 findings/16s (llm) · scanned-PDF OCR 3 findings/18.5s (llm) — OCR stays in the demo |
 | 7 | Team details | 1–4 members, one team per person — from the Unstop registration | ⬜ confirm roster matches registration |
 
 ## Pre-submission gates (run in this order, same day)

@@ -3,12 +3,30 @@
 > Honest landscape analysis. We don't claim to be the only system that reads
 > submittals; we claim a specific, defensible edge and back every number.
 
-## 1. There is no public peer benchmark (yet)
+## 1. The visible hackathon field (surveyed 2026-07-03)
 
-The ET AI Hackathon 2.0 is mid-competition — participant repositories are not
-public, so there is no rival submission to benchmark against directly. The
-meaningful comparison is therefore against (a) the **commercial state of the
-art** and (b) the **judging rubric**.
+A GitHub sweep (repo + code search on "ET AI Hackathon" and every
+problem-statement keyword) catalogued **~70 public participant repositories
+across all tracks**. Scored on hard, checkable signals, the visible field has:
+
+| Signal | Visible field (~70 repos, all tracks) | Pramaan |
+|---|---|---|
+| CI pipeline | **0** | ✅ green (tests + 3 evals + tsc + build + Docker smoke + ruff) |
+| Test suite | **1** (minimal) | ✅ 440 tests |
+| Eval harness with ground truth | **0** | ✅ 4 paths + no-key real-pairs harness |
+| Quantified impact model | **0** | ✅ `docs/BUSINESS.md`, every figure cited |
+| Live deployment | 3 | ✅ 2 (Vercel + Render) |
+| Real third-party documents in the loop | ~2 | ✅ 11 sourced datasheet pairs |
+
+In our own track (PS4), the strongest visible rival is a FastAPI+Claude+ChromaDB
+platform with an NCR workflow — real code, but no tests, no eval, no CI, no
+deployment. The caveat cuts both ways: serious teams keep repos private until
+submission (we did), so the visible field is a floor, not the field. The honest
+claim is not "we beat everyone"; it is that **no publicly visible entry in any
+track ships verifiable rigor** — reproducible numbers, an open eval, a test
+suite a judge can run — which is precisely the axis Pramaan is built on.
+Everything below benchmarks against the harder target: the **commercial state
+of the art** and the **judging rubric**.
 
 ## 2. The commercial landscape (and where we differ)
 

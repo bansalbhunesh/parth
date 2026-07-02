@@ -28,6 +28,19 @@ the highest-leverage areas is the strategy, not shallow coverage of all five.)
 | 4 | **Commissioning Quality Assurance Copilot** — guide IST sequences vs TIA-942/BICSI/Uptime, flag non-conformances vs acceptance criteria | Commissioning-risk twin: each deviation mapped to the exact IST/FAT it will fail, on a 17-test Cx graph keyed to Uptime/TIA-942/BICSI | ✅ **Deep** |
 | 5 | **Project Knowledge & RFI Intelligence Agent** — RAG over specs/submittals/RFIs/minutes, cited answers, surface prior resolved RFIs | RFI copilot: BM25 RAG over the project corpus, cited answers, prior-RFI surfacing | ✅ **Deep** |
 
+### The QMS audit trail (build area 1's "log to QMS" clause, explicitly)
+
+PS4 asks that non-conformances be "logged to a QMS audit trail." Pramaan's
+evidence pack **is** that artifact: `GET /export/audit` (JSON) and
+`GET /export/audit/html` (printable) emit every finding as an NCR-shaped
+record — deviation, severity, spec clause, governing-standard citation, the
+commissioning test it would fail, lead time, detection timestamp, and the
+agent's rationale — one click from the dashboard. It is the same record an
+ISO 9001-style NCR register needs, already cited and dated, and it round-trips
+into any QMS that imports JSON. We deliberately ship the audit trail as an
+open, exportable document rather than a walled-in NCR CRUD screen: the
+commissioning authority signs against evidence, not against our UI.
+
 ## PS4 evaluation focus — where we stand
 
 | Evaluation-focus metric | Pramaan evidence | Status |

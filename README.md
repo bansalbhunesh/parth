@@ -31,7 +31,7 @@
   <a href="https://parth-tan.vercel.app/judge"><img src="https://img.shields.io/badge/★_JUDGE_MODE-90--second_proof-ffb020?style=for-the-badge&labelColor=1a1508" alt="Judge Mode"></a>
   <a href="https://parth-tan.vercel.app"><img src="https://img.shields.io/badge/▶_LIVE_DEMO-parth--tan.vercel.app-00d4ff?style=for-the-badge&labelColor=0a0d11" alt="Live Demo"></a>
   <a href="https://parth-3puc.onrender.com/health"><img src="https://img.shields.io/badge/API-parth--3puc.onrender.com-35c98b?style=for-the-badge&labelColor=0d1a14" alt="API"></a>
-  <a href="presentation.html"><img src="https://img.shields.io/badge/📊_PRESENTATION-14_slides-a855f7?style=for-the-badge&labelColor=1a1020" alt="Presentation"></a>
+  <a href="presentation.html"><img src="https://img.shields.io/badge/📊_PRESENTATION-15_slides-a855f7?style=for-the-badge&labelColor=1a1020" alt="Presentation"></a>
 </p>
 
 <p align="center">
@@ -46,6 +46,16 @@
     <a href="data/samples/real/PROVENANCE.md">Real-datasheet provenance</a>
   </sub>
 </p>
+
+---
+
+## ⚡ Judges: start here (2 minutes)
+
+1. **See it catch a real deviation** → [Judge Mode](https://parth-tan.vercel.app/judge): click **Load real document ★**, hit **Analyze**, watch it derive 38.8 h of fuel autonomy from a real Cummins datasheet and name the commissioning test that fails.
+2. **Don't take our word for any number** → `git clone … && make verify` — 440 tests, three eval harnesses, and the frontend type-check reproduce every headline figure offline, no API key. A no-key harness for the real-datasheet result: `python eval/real_pairs_offline.py`.
+3. **The 3-minute pitch video** → *(link lands here on submission)* · script: [`PITCH.md`](PITCH.md)
+4. **Business case in one page** → [`docs/BUSINESS.md`](docs/BUSINESS.md) — what one caught deviation is worth ($10–40M/month of commissioning slip).
+5. **Every value in the real pairs is citable** → [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md).
 
 ---
 
@@ -470,8 +480,8 @@ Pramaan cross-references against **7 governing standards** — all content is pa
 | `GET` | `/pipeline` | Agent pipeline topology (nodes + edges) |
 | `GET` | `/corpus/doc/{type}/{id}` | Raw spec or submittal document text |
 | `GET` | `/corpus/stats` | Corpus statistics (systems, standards, documents) |
-| `GET` | `/export/audit` | JSON compliance evidence pack |
-| `GET` | `/export/audit/html` | Printable HTML evidence pack with full audit trail |
+| `GET` | `/export/audit` | JSON compliance evidence pack — an NCR-shaped **QMS audit trail** (deviation, severity, clause, standard citation, Cx test, lead time, timestamp, rationale) |
+| `GET` | `/export/audit/html` | Printable HTML evidence pack with the full audit trail — what the commissioning authority signs against |
 | `GET` | `/projects` | List all 12 project datasets with summary stats |
 | `GET` | `/projects/{id}` | Full project detail — deviations, cx plan, true negatives |
 | `GET` | `/projects/eval/aggregate` | Multi-project eval — aggregate P/R/F1 across all projects |

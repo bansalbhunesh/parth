@@ -532,6 +532,9 @@
   <p class="fade-up" style="color:var(--muted); margin-top:24px; font-size:0.95rem;">
     Spec-to-Site Deviation Sentinel + Commissioning Risk Twin
   </p>
+  <p class="fade-up" style="color:var(--muted); margin-top:10px; font-size:0.9rem;">
+    <em>Pramaan (प्रमाण) — Sanskrit for <strong style="color:var(--cyan);">proof</strong>. Named on purpose: every number here is reproducible.</em>
+  </p>
   <div class="metric-row fade-up" style="margin-top:40px;">
     <div class="metric"><div class="metric-val accent">50</div><div class="metric-label">Deviations Caught</div></div>
     <div class="metric"><div class="metric-val green">1,024</div><div class="metric-label">Weeks Saved</div></div>
@@ -835,6 +838,27 @@
   </p>
 </div>
 
+<!-- SLIDE 9b: Verifiability -->
+<div class="slide">
+  <span class="tag tag-cyan fade-up">DON'T TRUST US — RUN IT</span>
+  <h2 class="fade-up">Every Number on These Slides Reproduces Offline</h2>
+  <p class="subtitle fade-up" style="margin-bottom:28px;">One command. No API key. A judge's laptop is enough.</p>
+  <div class="card fade-up" style="max-width:720px; text-align:left;">
+    <p style="font-family:var(--mono); color:var(--cyan); font-size:1.05rem;">git clone &middot; make verify</p>
+    <ul class="features" style="max-width:unset; margin-top:12px;">
+      <li><strong>440 tests</strong> — API, agents, security, resilience, real pairs</li>
+      <li><strong>3 eval harnesses</strong> — every headline metric regenerated</li>
+      <li><strong>Type-check + production build</strong> — CI green, publicly visible</li>
+      <li><strong>No-key real-datasheet harness</strong> — <code style="font-family:var(--mono);">eval/real_pairs_offline.py</code></li>
+    </ul>
+  </div>
+  <p class="fade-up" style="color:var(--muted); font-size:0.9rem; margin-top:20px; max-width:720px;">
+    We surveyed ~70 public repos across every track of this hackathon:
+    <strong style="color:var(--gold);">zero CI pipelines, zero eval harnesses, one minimal test suite.</strong><br>
+    Claims are easy. <span style="color:var(--cyan);">Pramaan means proof.</span>
+  </p>
+</div>
+
 <!-- SLIDE 10: Scale Story -->
 <div class="slide">
   <span class="tag tag-purple fade-up">SCALE STORY</span>
@@ -972,7 +996,7 @@
   <div class="glow-line fade-up"></div>
   <p class="subtitle fade-up">
     50 deviations &middot; 1,024 weeks saved &middot; 12 projects &middot; 11 countries<br>
-    Real-doc: 0 false positives &middot; self-scored ~0.9 &middot; 435 tests
+    Real-doc: 0 false positives &middot; self-scored ~0.9 &middot; 440 tests
   </p>
   <div class="final-cta fade-up">
     <a class="cta-btn cta-primary" href="https://parth-tan.vercel.app" target="_blank">▶ Live Demo</a>
@@ -994,7 +1018,7 @@ let current = 0;
 function goTo(n) {
   if (n < 0 || n >= slides.length) return;
   slides[current].classList.remove('active');
-  slides[current].classList.add(n > current ? 'prev' : '');
+  if (n > current) slides[current].classList.add('prev');
   current = n;
   slides.forEach((s, i) => {
     s.classList.remove('active', 'prev');

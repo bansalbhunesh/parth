@@ -311,26 +311,38 @@ def health():
 
 
 @app.get("/llm-check")
-def llm_check():
-    """Make a real, minimal LLM call and report the actual outcome. Unlike
-    /health (which only checks the key is present), this surfaces the true
-    reason analysis falls back — e.g. out of credit, bad model, bad key —
-    without ever returning the key itself."""
+def llm_check(deep: bool = False):
+    """Make a real LLM call and report the actual outcome. Unlike /health
+    (which only checks the key is present), this surfaces the true reason
+    analysis falls back — e.g. out of credit, bad model, bad key — without
+    ever returning the key itself.
+
+    A tiny probe can pass while reconcile-sized calls 429 (free-tier quotas
+    are token-weighted), so `?deep=1` sends the *same prompt the live demo
+    sends* — the bundled demo pair + standards context through the real
+    reconcile template, bounded by the same timeout pool — and reports the
+    honest mode, latency, and finding count. Pre-flight with deep=1."""
     status = _llm_status()
     if not status.get("ready"):
         return {"ok": False, "reason": "no_key_configured", **status}
+    if deep:
+        return _llm_check_deep(status)
     try:
         from backend.llm import complete
         out = complete("Reply with the single word: ok", json_mode=False)
         return {
             "ok": True,
+            "probe": "tiny",
             "provider": status["provider"],
             "model": status.get("model"),
             "sample_response": (out or "").strip()[:80],
+            "hint": "A tiny probe can pass while demo-sized calls fail on "
+                    "free-tier quotas — pre-flight with /llm-check?deep=1.",
         }
     except Exception as exc:  # noqa: BLE001 — we want the raw reason
         return {
             "ok": False,
+            "probe": "tiny",
             "provider": status["provider"],
             "model": status.get("model"),
             "error": str(exc)[:400],
@@ -338,6 +350,62 @@ def llm_check():
                     "free native GEMINI_API_KEY), wrong OPENAI_MODEL, or a "
                     "revoked key.",
         }
+
+
+def _llm_check_deep(status: dict) -> dict:
+    """Reconcile-sized probe: the exact prompt shape /analyze sends, so a
+    green result means the demo's LLM path will actually fire."""
+    import concurrent.futures
+    import time as _time
+
+    from backend.agents.reconciliation import (
+        PROMPT_TEMPLATE,
+        SYSTEM_PROMPT,
+        _all_standards_text,
+        _validate_deviations,
+    )
+    from backend.analyze import _LLM_POOL, _LLM_TIMEOUT_S
+
+    demo = CORPUS.parent / "demo"
+    try:
+        spec = (demo / "sample_spec.md").read_text(encoding="utf-8")
+        submittal = (demo / "sample_submittal.md").read_text(encoding="utf-8")
+    except OSError:
+        return {"ok": False, "probe": "deep", "reason": "demo_pair_missing",
+                **{k: status.get(k) for k in ("provider", "model")}}
+    prompt = PROMPT_TEMPLATE.format(
+        spec=spec, submittal=submittal,
+        standards=_all_standards_text(max_chars_per=1800),
+    )
+    base = {
+        "probe": "deep",
+        "provider": status["provider"],
+        "model": status.get("model"),
+        "prompt_chars": len(prompt),
+        "timeout_s": _LLM_TIMEOUT_S,
+    }
+    t0 = _time.time()
+    try:
+        from backend.llm import complete_json
+        raw = _LLM_POOL.submit(complete_json, prompt, SYSTEM_PROMPT).result(
+            timeout=_LLM_TIMEOUT_S)
+        devs = _validate_deviations(raw)
+        return {"ok": True, **base,
+                "elapsed_ms": round((_time.time() - t0) * 1000),
+                "findings": len(devs)}
+    except concurrent.futures.TimeoutError:
+        return {"ok": False, **base,
+                "elapsed_ms": round((_time.time() - t0) * 1000),
+                "error": f"reconcile-sized call exceeded {_LLM_TIMEOUT_S:.0f}s "
+                         "— the demo would fall back to the rule-based engine",
+                "hint": "Free-tier congestion; retry, or swap in a fresh key."}
+    except Exception as exc:  # noqa: BLE001 — we want the raw reason
+        return {"ok": False, **base,
+                "elapsed_ms": round((_time.time() - t0) * 1000),
+                "error": str(exc)[:400],
+                "hint": "The tiny probe may still pass — this failure class "
+                        "(usually 429 quota) only shows on demo-sized prompts. "
+                        "Swap in a fresh GEMINI_API_KEY and re-check."}
 
 
 @app.get("/project")

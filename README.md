@@ -365,8 +365,11 @@ curl http://localhost:8000/export/audit/html > evidence.html
 | **Render** (backend) | `PRAMAAN_LLM_TIMEOUT` | optional | seconds the sync `/analyze` waits on the LLM before falling back (default `60`). |
 | **Render** (backend) | `PRAMAAN_SCHEDULE` / `PRAMAAN_SUPPLY` / `PRAMAAN_GRAPH` | optional | PS4 layers; default `1` (on). Set `0` to hide a section. |
 | **Vercel** (frontend) | `NEXT_PUBLIC_API` | **required** | set to the Render backend URL (e.g. `https://parth-3puc.onrender.com`). Inlined at build time. **Without it the frontend falls back to bundled data** (which mirrors live engine output, so the demo still renders correctly but is not live-served). |
+| **Render** (backend) | `PRAMAAN_LLM=openai` + `OPENAI_API_KEY` / `OPENAI_BASE_URL` / `OPENAI_MODEL` / `OPENAI_JSON_MODE=1` | demo-day plan B | **Backup LLM via any OpenAI-compatible gateway** if the Gemini free tier exhausts (429s on demo-sized prompts while tiny probes still pass). Confirm the gateway actually serves the model, flip the env vars, redeploy, and re-run the gate below. |
 
 > Render free-tier services **suspend after extended inactivity** and cold-start on the first hit (~30–50 s). If `/health` returns a "Service Suspended" page, resume/redeploy the service from the Render dashboard before the demo.
+>
+> **Pre-demo gate:** `make verify-live` (`scripts/verify_live.py`) verifies the *deployed* stack end-to-end — deployed commit vs `origin/main`, PS4 layers, a reconcile-sized `/llm-check?deep=1`, and the real Vertiv GXT5 pair through `/analyze` **and** `/analyze/stream` (must return `mode: llm`, not the fallback). Demo only on `GREEN -- demo away.`
 
 ---
 

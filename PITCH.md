@@ -8,12 +8,18 @@
 
 ## Pre-flight (5 minutes before you present)
 
+- Run **`make verify-live`** (or `python scripts/verify_live.py`) — the ONLY
+  green light that counts. It checks the deployed commit, the PS4 layers, and
+  runs the *real GXT5 pair* through `/analyze` + `/analyze/stream` end-to-end.
+  **Do not trust a bare `/llm-check`** — the tiny probe can pass while
+  demo-sized calls 429 (that exact false-green killed the live AI path once).
+  If anything is red: fresh `GEMINI_API_KEY` in Render → Manual Deploy →
+  re-run until `GREEN -- demo away.`
 - Open **`/judge`** (parth-tan.vercel.app/judge).
-- Hit **`/llm-check`** — confirm `"ok": true`. If it's 429, swap in a fresh key
-  first (README). The rule-based fallback covers you, but you want the live AI.
 - Have one **real pair** ready from `data/samples/real/` — the **Vertiv GXT5 +
   Cummins QSK60** power pair is the richest (5 findings, incl. the arithmetic).
-- Do **one warm-up Analyze** so the backend is awake — no cold-start mid-pitch.
+- Do **one warm-up Analyze** in the UI so the path a judge sees is the path
+  you just verified — no cold-start mid-pitch.
 - Speak **slower** than feels natural. Let the derived-number moment land in silence.
 
 ---

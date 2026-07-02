@@ -436,3 +436,67 @@ class TestApiEdgeCases:
         for sys_id in data["systems"]:
             assert isinstance(sys_id, str)
             assert len(sys_id) > 0
+
+
+class TestLLMCheck:
+    """/llm-check must report the truth for both probe sizes — a tiny probe
+    that passes while demo-sized calls 429 was exactly the failure mode that
+    silently degraded the live demo (2026-07-03 audit)."""
+
+    def test_llm_check_no_key(self, monkeypatch):
+        monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+        monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+        r = client.get("/llm-check")
+        assert r.status_code == 200
+        data = r.json()
+        assert data["ok"] is False
+        assert data["reason"] == "no_key_configured"
+
+    def test_llm_check_deep_no_key(self, monkeypatch):
+        monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+        monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+        r = client.get("/llm-check?deep=1")
+        assert r.status_code == 200
+        assert r.json()["ok"] is False
+        assert r.json()["reason"] == "no_key_configured"
+
+    def test_llm_check_deep_success_reports_findings(self, monkeypatch):
+        import backend.llm as llm_mod
+        monkeypatch.setenv("GEMINI_API_KEY", "test-key-not-real")
+        fake = [{"component": "UPS-02", "parameter": "battery_runtime_min",
+                 "required_value": "10", "provided_value": "7"}]
+        monkeypatch.setattr(llm_mod, "complete_json", lambda prompt, system="": fake)
+        r = client.get("/llm-check?deep=1")
+        assert r.status_code == 200
+        data = r.json()
+        assert data["ok"] is True
+        assert data["probe"] == "deep"
+        assert data["findings"] == 1
+        # The probe must be demo-sized, not a token ping.
+        assert data["prompt_chars"] > 5000
+        assert "elapsed_ms" in data
+
+    def test_llm_check_deep_surfaces_quota_error(self, monkeypatch):
+        import backend.llm as llm_mod
+        monkeypatch.setenv("GEMINI_API_KEY", "test-key-not-real")
+
+        def boom(prompt, system=""):
+            raise llm_mod.LLMError("429 RESOURCE_EXHAUSTED: quota exceeded")
+        monkeypatch.setattr(llm_mod, "complete_json", boom)
+        r = client.get("/llm-check?deep=1")
+        assert r.status_code == 200
+        data = r.json()
+        assert data["ok"] is False
+        assert data["probe"] == "deep"
+        assert "429" in data["error"]
+
+    def test_llm_check_tiny_hints_at_deep(self, monkeypatch):
+        import backend.llm as llm_mod
+        monkeypatch.setenv("GEMINI_API_KEY", "test-key-not-real")
+        monkeypatch.setattr(llm_mod, "complete",
+                            lambda prompt, system="", json_mode=True: "ok")
+        r = client.get("/llm-check")
+        data = r.json()
+        assert data["ok"] is True
+        assert data["probe"] == "tiny"
+        assert "deep=1" in data["hint"]

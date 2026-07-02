@@ -1,4 +1,4 @@
-.PHONY: setup test eval eval-text eval-multi run build docker help
+.PHONY: setup test eval eval-text eval-multi run build docker help verify-live
 
 help:  ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-18s\033[0m %s\n", $$1, $$2}'
@@ -12,7 +12,7 @@ corpus:  ## Generate all project corpora (12 projects, 50 deviations)
 	python3 data/generate_corpus.py
 	python3 data/generate_projects.py
 
-test:  ## Run 315-test suite
+test:  ## Run the full test suite
 	python3 -m pytest tests/ -q
 
 test-cov:  ## Run tests with coverage report
@@ -58,7 +58,7 @@ verify:  ## One-command verification: tests + all evals + frontend type check
 	@echo "║  PRAMAAN — Full Verification Suite                         ║"
 	@echo "╚══════════════════════════════════════════════════════════════╝"
 	@echo ""
-	@echo "▸ [1/5] Running 315-test suite..."
+	@echo "▸ [1/5] Running full test suite..."
 	python3 -m pytest tests/ -q --tb=short
 	@echo ""
 	@echo "▸ [2/5] Baseline eval (Meghdoot, 14 devs)..."
@@ -79,3 +79,6 @@ verify:  ## One-command verification: tests + all evals + frontend type check
 
 build:  ## Build frontend for production
 	cd frontend && npm run build
+
+verify-live:  ## Pre-demo gate: is the DEPLOYED stack demo-ready right now?
+	python3 scripts/verify_live.py

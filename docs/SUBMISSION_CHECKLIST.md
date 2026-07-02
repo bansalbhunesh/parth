@@ -6,8 +6,9 @@
 
 ## Hard deadline
 
-- [x] **Phase 2 submission deadline confirmed on Unstop:** `2026-07-07` (exact hour TBC on the dashboard — treat as morning IST until confirmed)
-- [ ] Submit by **6 July evening** (leave a full night of slack for cold starts, upload retries, form surprises).
+- [x] **Phase 2 submission deadline confirmed on Unstop:** `2026-07-27` (exact hour TBC on the dashboard — treat as morning IST until confirmed)
+- [ ] Submit by **26 July evening** (leave a full night of slack for cold starts, upload retries, form surprises).
+- [ ] Freeze window: **no risky changes after 24 July** — final 3 days are verify/rehearse/record only.
 
 ## Deliverables
 

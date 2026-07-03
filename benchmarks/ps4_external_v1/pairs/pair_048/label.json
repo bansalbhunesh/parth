@@ -1,0 +1,66 @@
+[
+  {
+    "pair_id": "pair_048",
+    "system_type": "ups",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P048-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "table_or_layout",
+    "component": "battery autonomy at full load",
+    "parameter": "runtime_minutes",
+    "required_value": "10 minutes",
+    "submitted_value": "8 minutes",
+    "deviation_type": "below_requirement",
+    "severity": "high",
+    "expected_finding": "The full-load row shows 8 min, below the 10-min full-load requirement.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "at full load"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Full load | 8 min"
+    },
+    "expected_commissioning_test": "UPS autonomy discharge test",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "team_authored_from_public_values",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_048",
+    "system_type": "ups",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P048-L02",
+    "label_type": "clean_negative",
+    "difficulty": "direct_value",
+    "component": "online efficiency",
+    "parameter": "efficiency_pct",
+    "required_value": "96 percent",
+    "submitted_value": "96.5 percent",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 96.5% >= 96%.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "96 percent"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "96.5 percent"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

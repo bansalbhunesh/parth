@@ -1,0 +1,66 @@
+[
+  {
+    "pair_id": "pair_052",
+    "system_type": "pdu_rpp",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P052-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "derived_arithmetic",
+    "component": "branch B1 total load",
+    "parameter": "branch_load_a",
+    "required_value": "32 A",
+    "submitted_value": "42 A",
+    "deviation_type": "above_limit",
+    "severity": "high",
+    "expected_finding": "Summed B1 outlet load (16+14+12 = 42 A) exceeds the 32 A branch rating.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "not exceed its rating"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "C13-1 16 A; C13-2 14 A; C13-3 12 A"
+    },
+    "expected_commissioning_test": "Branch-circuit load verification",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "team_authored_from_public_values",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_052",
+    "system_type": "pdu_rpp",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P052-L02",
+    "label_type": "clean_negative",
+    "difficulty": "categorical_reasoning",
+    "component": "form factor",
+    "parameter": "form_factor",
+    "required_value": "Zero-U 3-phase",
+    "submitted_value": "Zero-U 3-phase",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — form factor as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Zero-U 3-phase"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Zero-U 3-phase"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

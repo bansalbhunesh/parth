@@ -1,10 +1,10 @@
 {
   "benchmark": "ps4_external_v1",
-  "benchmark_version": "1.1.0",
-  "frozen_on": "2026-07-03",
-  "label_count": 110,
-  "pair_count": 43,
+  "benchmark_version": "1.2.0",
+  "frozen_on": "2026-07-04",
+  "label_count": 129,
+  "pair_count": 53,
   "review_status": "single_author_frozen_pending_review",
-  "labels_freeze_sha256": "e3ceef2883af15b3a54b249e819bc6c9b18efa82c19888dd4a6f12d0b2a4b809",
+  "labels_freeze_sha256": "f13a4f72895d8ef31df1fe716ad5a73526f109a152b9060e38cd1e5179710b12",
   "note": "Single-author frozen labels pending independent second-reviewer adjudication. Editing labels after a run must bump benchmark_version."
 }

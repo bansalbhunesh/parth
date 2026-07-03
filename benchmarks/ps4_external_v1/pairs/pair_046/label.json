@@ -1,0 +1,66 @@
+[
+  {
+    "pair_id": "pair_046",
+    "system_type": "refrigerant",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P046-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "domain_recall",
+    "component": "refrigerant GWP",
+    "parameter": "refrigerant_gwp",
+    "required_value": "750",
+    "submitted_value": "R-134a (GWP 1430)",
+    "deviation_type": "above_limit",
+    "severity": "high",
+    "expected_finding": "R-134a GWP (1430, IPCC AR4) exceeds the 750 limit.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "GWP shall be <= 750"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Refrigerant: R-134a"
+    },
+    "expected_commissioning_test": "Refrigerant compliance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "public_product_value",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_046",
+    "system_type": "refrigerant",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P046-L02",
+    "label_type": "clean_negative",
+    "difficulty": "direct_value",
+    "component": "refrigerant charge",
+    "parameter": "charge_kg",
+    "required_value": "50 kg",
+    "submitted_value": "40 kg",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 40 <= 50 kg.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "50 kg"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "40 kg"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

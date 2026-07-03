@@ -1,0 +1,66 @@
+[
+  {
+    "pair_id": "pair_050",
+    "system_type": "cabling",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P050-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "categorical_reasoning",
+    "component": "plenum cable fire rating",
+    "parameter": "cable_fire_rating",
+    "required_value": "CMP",
+    "submitted_value": "CMR",
+    "deviation_type": "wrong_category",
+    "severity": "medium",
+    "expected_finding": "CMR does not meet the CMP plenum requirement (NFPA 75 / NFPA 262).",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "shall use CMP"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "fire rating: CMR"
+    },
+    "expected_commissioning_test": "Cable listing review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "public_product_value",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_050",
+    "system_type": "cabling",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P050-L02",
+    "label_type": "omission",
+    "difficulty": "omission_detection",
+    "component": "UL 910 listing",
+    "parameter": "ul_listing",
+    "required_value": "provided",
+    "submitted_value": "Not stated",
+    "deviation_type": "omission",
+    "severity": "medium",
+    "expected_finding": "Submittal omits the required UL 910 listing.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "UL 910 listing"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "(no listing)"
+    },
+    "expected_commissioning_test": "Fire-listing review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "public_product_value",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

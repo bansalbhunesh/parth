@@ -26,8 +26,19 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import benchmark_lib as L  # noqa: E402
 
 BENCH = L.BENCH
-BENCH_VERSION = "1.1.0"
+BENCH_VERSION = "1.2.0"
 REVIEW_STATUS = "single_author_frozen_pending_review"
+
+# Verified public source URLs (retrieved 2026-07-04 via web search) cited by the
+# primary-source-derived pairs. Government / national-lab pages only; the fixture
+# documents are team-authored and paraphrase values — no proprietary text copied.
+DERIVED_URLS = {
+    "pair_044": "https://www.ecfr.gov/current/title-40/chapter-I/subchapter-C/part-60/subpart-IIII",
+    "pair_045": "https://www.epa.gov/ghgemissions/understanding-global-warming-potentials",
+    "pair_046": "https://www.epa.gov/ghgemissions/understanding-global-warming-potentials",
+    "pair_051": "https://datacenters.lbl.gov/sites/default/files/FINAL%20Thermal%20Guidelines%20and%20Temp%20Measurements%209-15-2020.pdf",
+    "pair_053": "https://datacenters.lbl.gov/sites/default/files/FINAL%20Thermal%20Guidelines%20and%20Temp%20Measurements%209-15-2020.pdf",
+}
 
 
 def label(lid, ltype, diff, comp, param, req, sub, dev, sev, finding,
@@ -841,23 +852,197 @@ PAIRS = [
                  ("§1", "EPA Tier 4"), ("image", "Emissions: EPA Tier 2"), "Emissions compliance review"),
              neg("P043-L02", "rated voltage", "voltage_v", "415 V", "415 V", "No deviation — 415 V as required.", "scanned_or_image"),
          ]),
+
+    # 44 — Generator EPA tier (primary-source-derived: US EPA 40 CFR 60 Subpart IIII)
+    dict(id="pair_044", system_type="generator",
+         owner_origin="owner_design_basis_team_authored", sub_origin="team_authored_from_public_values",
+         derived_ref="US EPA 40 CFR 60 Subpart IIII (stationary CI engine tiers)",
+         owner_md=owner("Standby generator (EPA)",
+             "## 1. Emissions\n- Emissions shall meet **EPA Tier 4** for new stationary CI engines.\n- Rated voltage shall be **415 V**."),
+         sub_md=sub("Genset submittal",
+             "## 1. Data\n- Emissions certification: **EPA Tier 2**.\n- Rated voltage: **415 V**.",
+             "Team-authored; tier values cited from public US EPA 40 CFR 60 Subpart IIII."),
+         notes="Primary-source-derived (EPA CFR). Tier 2 does not meet Tier 4. Voltage compliant.",
+         labels=[
+             label("P044-L01", "positive_deviation", "categorical_reasoning", "emissions tier", "epa_tier",
+                 "EPA Tier 4", "EPA Tier 2", "below_requirement", "high", "EPA Tier 2 does not meet the Tier 4 requirement (40 CFR 60 Subpart IIII).",
+                 ("§1", "EPA Tier 4"), ("§1", "EPA Tier 2"), "Emissions compliance review", basis="public_product_value"),
+             neg("P044-L02", "rated voltage", "voltage_v", "415 V", "415 V", "No deviation — 415 V as required."),
+         ]),
+
+    # 45 — Refrigerant R-410A GWP (primary-source-derived: IPCC AR4 / EU F-Gas 517/2014)
+    dict(id="pair_045", system_type="refrigerant",
+         owner_origin="owner_design_basis_team_authored", sub_origin="team_authored_from_public_values",
+         derived_ref="IPCC AR4 GWP values; EU F-Gas Regulation (EU) 517/2014",
+         owner_md=owner("Refrigerant (F-Gas)",
+             "## 1. Sustainability\n- Refrigerant GWP shall be **<= 750** (EU F-Gas alignment).\n- A leak-detection system shall be provided."),
+         sub_md=sub("DX refrigerant submittal",
+             "## 1. Data\n- Refrigerant: **R-410A**.\n- Leak-detection: **provided**.",
+             "Team-authored; R-410A GWP (2088) cited from IPCC AR4."),
+         notes="Primary-source-derived (IPCC AR4). R-410A GWP 2088 > 750. Leak-detection compliant.",
+         labels=[
+             label("P045-L01", "positive_deviation", "domain_recall", "refrigerant GWP", "refrigerant_gwp",
+                 "750", "R-410A (GWP 2088)", "above_limit", "high", "R-410A GWP (2088, IPCC AR4) exceeds the 750 limit.",
+                 ("§1", "GWP shall be <= 750"), ("§1", "Refrigerant: R-410A"), "Refrigerant / F-Gas compliance review", basis="public_product_value"),
+             neg("P045-L02", "leak detection", "leak_detection", "provided", "provided", "No deviation — leak detection provided.", "categorical_reasoning"),
+         ]),
+
+    # 46 — Refrigerant R-134a GWP (primary-source-derived: IPCC AR4)
+    dict(id="pair_046", system_type="refrigerant",
+         owner_origin="owner_design_basis_team_authored", sub_origin="team_authored_from_public_values",
+         derived_ref="IPCC AR4 GWP values",
+         owner_md=owner("Chiller refrigerant",
+             "## 1. Sustainability\n- Refrigerant GWP shall be **<= 750**.\n- Charge shall be **<= 50 kg**."),
+         sub_md=sub("Chiller refrigerant submittal",
+             "## 1. Data\n- Refrigerant: **R-134a**.\n- Charge: **40 kg**.", "Team-authored; R-134a GWP (1430) cited from IPCC AR4."),
+         notes="Primary-source-derived (IPCC AR4). R-134a GWP 1430 > 750. Charge compliant.",
+         labels=[
+             label("P046-L01", "positive_deviation", "domain_recall", "refrigerant GWP", "refrigerant_gwp",
+                 "750", "R-134a (GWP 1430)", "above_limit", "high", "R-134a GWP (1430, IPCC AR4) exceeds the 750 limit.",
+                 ("§1", "GWP shall be <= 750"), ("§1", "Refrigerant: R-134a"), "Refrigerant compliance review", basis="public_product_value"),
+             neg("P046-L02", "refrigerant charge", "charge_kg", "50 kg", "40 kg", "No deviation — 40 <= 50 kg."),
+         ]),
+
+    # 47 — Li-ion fire-area aggregate (primary-source-derived: NFPA 855)
+    dict(id="pair_047", system_type="battery",
+         owner_origin="owner_design_basis_team_authored", sub_origin="team_authored_from_public_values",
+         derived_ref="NFPA 855 (energy storage; <=600 kWh Li-ion per fire area, <=50 kWh per unit)",
+         owner_md=owner("Li-ion battery room (NFPA 855)",
+             "## 1. Fire area\n- Li-ion energy per fire area shall be **<= 600 kWh**.\n- Energy per unit shall be **<= 50 kWh**."),
+         sub_md=sub("Li-ion rack submittal",
+             "## 1. Configuration\n- **24 racks**, each **26.5 kWh**.", "Team-authored; NFPA 855 thresholds cited from public code summaries."),
+         notes="Primary-source-derived (NFPA 855). 24 x 26.5 = 636 kWh > 600 cap. Per-unit 26.5 <= 50 compliant.",
+         labels=[
+             label("P047-L01", "positive_deviation", "derived_arithmetic", "fire-area li-ion energy", "fire_area_kwh",
+                 "600 kWh", "636 kWh", "above_limit", "high", "Aggregate 24 x 26.5 = 636 kWh exceeds the 600 kWh per-fire-area cap (NFPA 855).",
+                 ("§1", "<= 600 kWh"), ("§1", "24 racks, each 26.5 kWh"), "Fire-area energy review", basis="public_product_value"),
+             neg("P047-L02", "per-unit energy", "unit_kwh", "50 kWh", "26.5 kWh", "No deviation — 26.5 <= 50 kWh per unit."),
+         ]),
+
+    # 48 — UPS runtime table (primary-source-derived; table lookup)
+    dict(id="pair_048", system_type="ups",
+         owner_origin="owner_design_basis_team_authored", sub_origin="team_authored_from_public_values",
+         derived_ref="public online double-conversion UPS runtime tables (values paraphrased)",
+         owner_md=owner("UPS runtime (table)",
+             "## 1. Autonomy\n- Battery autonomy shall be **>= 10 minutes** at **full load**.\n- Online efficiency shall be **>= 96 percent**."),
+         sub_md=sub("UPS runtime submittal",
+             "## 1. Runtime table\n\n| Load | Runtime |\n|---|---|\n| 50% | 18 min |\n| Full load | 8 min |\n\n"
+             "## 2. Efficiency\n- Online efficiency: **96.5 percent**.", "Team-authored; runtime figures paraphrased from public UPS runtime tables."),
+         notes="Primary-source-derived (table). Full-load runtime 8 min < 10 min (must read the full-load row). Efficiency compliant.",
+         labels=[
+             label("P048-L01", "positive_deviation", "table_or_layout", "battery autonomy at full load", "runtime_minutes",
+                 "10 minutes", "8 minutes", "below_requirement", "high", "The full-load row shows 8 min, below the 10-min full-load requirement.",
+                 ("§1", "at full load"), ("§1", "Full load | 8 min"), "UPS autonomy discharge test", basis="team_authored_from_public_values"),
+             neg("P048-L02", "online efficiency", "efficiency_pct", "96 percent", "96.5 percent", "No deviation — 96.5% >= 96%."),
+         ]),
+
+    # 49 — Switchgear Form / arc test (primary-source-derived: IEC 61439-2 / 61641)
+    dict(id="pair_049", system_type="switchgear",
+         owner_origin="owner_design_basis_team_authored", sub_origin="team_authored_from_public_values",
+         derived_ref="IEC 61439-2 (Forms of separation); IEC 61641 (internal-arc test)",
+         owner_md=owner("Switchgear (IEC)",
+             "## 1. Separation & arc\n- Internal separation shall be **Form 4b** (IEC 61439-2).\n- Assembly shall be **arc-tested to IEC 61641**."),
+         sub_md=sub("Switchgear submittal",
+             "## 1. Data\n- Internal separation: **Form 3b**.", "Team-authored; IEC 61439-2/61641 framework cited from public standard scopes."),
+         notes="Primary-source-derived (IEC). Form 3b < Form 4b; internal-arc test omitted.",
+         labels=[
+             label("P049-L01", "positive_deviation", "categorical_reasoning", "internal separation", "form",
+                 "Form 4b", "Form 3b", "below_requirement", "high", "Form 3b does not meet the Form 4b requirement (IEC 61439-2).",
+                 ("§1", "Form 4b"), ("§1", "separation: Form 3b"), "Internal-separation review", basis="public_product_value"),
+             label("P049-L02", "omission", "omission_detection", "internal-arc test", "arc_test",
+                 "IEC 61641", "Not stated", "omission", "high", "Submittal omits the required IEC 61641 internal-arc test.",
+                 ("§1", "arc-tested to IEC 61641"), ("§1", "(no arc test)"), "Internal-arc test review", basis="public_product_value"),
+         ]),
+
+    # 50 — Cabling plenum (primary-source-derived: NFPA 75 / NFPA 262)
+    dict(id="pair_050", system_type="cabling",
+         owner_origin="owner_design_basis_team_authored", sub_origin="team_authored_from_public_values",
+         derived_ref="NFPA 75 / NFPA 262 (plenum cable CMP)",
+         owner_md=owner("Plenum cabling (NFPA)",
+             "## 1. Fire rating\n- Plenum pathways shall use **CMP** cable (NFPA 75 / NFPA 262).\n- A UL 910 listing shall be provided."),
+         sub_md=sub("Cabling submittal",
+             "## 1. Data\n- Cable fire rating: **CMR**.", "Team-authored; NFPA 75/262 plenum requirement cited from public code summaries."),
+         notes="Primary-source-derived (NFPA). CMR not acceptable in plenum; UL 910 listing omitted.",
+         labels=[
+             label("P050-L01", "positive_deviation", "categorical_reasoning", "plenum cable fire rating", "cable_fire_rating",
+                 "CMP", "CMR", "wrong_category", "medium", "CMR does not meet the CMP plenum requirement (NFPA 75 / NFPA 262).",
+                 ("§1", "shall use CMP"), ("§1", "fire rating: CMR"), "Cable listing review", basis="public_product_value"),
+             label("P050-L02", "omission", "omission_detection", "UL 910 listing", "ul_listing",
+                 "provided", "Not stated", "omission", "medium", "Submittal omits the required UL 910 listing.",
+                 ("§1", "UL 910 listing"), ("§1", "(no listing)"), "Fire-listing review", basis="public_product_value"),
+         ]),
+
+    # 51 — Supply-air setpoint contested (primary-source-derived: ASHRAE TC9.9 A1)
+    dict(id="pair_051", system_type="crac_crah",
+         owner_origin="owner_design_basis_team_authored", sub_origin="team_authored_from_public_values",
+         derived_ref="ASHRAE TC9.9 Class A1 (recommended <=27 C, allowable 15-32 C)",
+         owner_md=owner("Supply-air setpoint (ASHRAE)",
+             "## 1. Thermal\n- Supply-air temperature should not exceed **27 C** (ASHRAE TC9.9 A1 recommended)."),
+         sub_md=sub("CRAH setpoint submittal",
+             "## 1. Setpoint\n- Supply-air setpoint: **30 C** (within A1 allowable 15-32 C).",
+             "Team-authored; ASHRAE A1 recommended/allowable bands cited from public ASHRAE TC9.9 guidance."),
+         notes="Primary-source-derived (ASHRAE). Contested: 30 C above recommended (27) but within allowable (32).",
+         labels=[
+             label("P051-L01", "ambiguous_contested", "categorical_reasoning", "supply-air setpoint", "supply_air_temp_c",
+                 "27 C recommended", "30 C", "contested", "info",
+                 "Contested: 30 C is above the ASHRAE A1 recommended 27 C but within the allowable band; a CxA could rule either way.",
+                 ("§1", "should not exceed 27 C"), ("§1", "setpoint: 30 C"), "Thermal set-point review (judgment call)",
+                 basis="public_product_value", contested=True),
+         ]),
+
+    # 52 — PDU branch derived sum (primary-source-derived; arithmetic)
+    dict(id="pair_052", system_type="pdu_rpp",
+         owner_origin="owner_design_basis_team_authored", sub_origin="team_authored_from_public_values",
+         derived_ref="public rack PDU branch-schedule format (values paraphrased)",
+         owner_md=owner("Rack PDU (branch sum)",
+             "## 1. Branch capacity\n- Each **32 A** branch total connected load shall not exceed its rating.\n- Form factor shall be **Zero-U 3-phase**."),
+         sub_md=sub("PDU branch submittal",
+             "## 1. Branch B1 outlets\n\n| Outlet | Load |\n|---|---|\n| C13-1 | 16 A |\n| C13-2 | 14 A |\n| C13-3 | 12 A |\n\n"
+             "## 2. Form factor\n- Zero-U 3-phase.", "Team-authored; branch-schedule format paraphrased from public PDU docs."),
+         notes="Primary-source-derived (arithmetic). Sum of B1 outlets 16+14+12 = 42 A > 32 A branch rating. Form compliant.",
+         labels=[
+             label("P052-L01", "positive_deviation", "derived_arithmetic", "branch B1 total load", "branch_load_a",
+                 "32 A", "42 A", "above_limit", "high", "Summed B1 outlet load (16+14+12 = 42 A) exceeds the 32 A branch rating.",
+                 ("§1", "not exceed its rating"), ("§1", "C13-1 16 A; C13-2 14 A; C13-3 12 A"), "Branch-circuit load verification", basis="team_authored_from_public_values"),
+             neg("P052-L02", "form factor", "form_factor", "Zero-U 3-phase", "Zero-U 3-phase", "No deviation — form factor as required.", "categorical_reasoning"),
+         ]),
+
+    # 53 — Cooling redundancy (primary-source-derived: Uptime Tier IV / ASHRAE)
+    dict(id="pair_053", system_type="crac_crah",
+         owner_origin="owner_design_basis_team_authored", sub_origin="team_authored_from_public_values",
+         derived_ref="Uptime Institute Tier IV fault tolerance; ASHRAE TC9.9",
+         owner_md=owner("Cooling redundancy (Tier IV)",
+             "## 1. Redundancy\n- Cooling shall be **N+2** (Tier IV fault tolerance + concurrent maintainability).\n- Supply-air temperature shall be **<= 27 C**."),
+         sub_md=sub("CRAH redundancy submittal",
+             "## 1. Data\n- Redundancy: **N+1**.\n- Supply-air temperature: **24 C**.",
+             "Team-authored; Tier IV N+2 expectation cited from public Uptime tier descriptions (criteria, not proprietary text)."),
+         notes="Primary-source-derived (Uptime/ASHRAE). N+1 does not meet the N+2 fault-tolerance basis. Supply air compliant.",
+         labels=[
+             label("P053-L01", "positive_deviation", "categorical_reasoning", "cooling redundancy", "redundancy",
+                 "N+2", "N+1", "below_requirement", "high", "N+1 does not meet the N+2 fault-tolerance design basis.",
+                 ("§1", "N+2"), ("§1", "Redundancy: N+1"), "Redundancy / concurrent-maint review", basis="public_product_value"),
+             neg("P053-L02", "supply-air temperature", "supply_air_temp_c", "27 C", "24 C", "No deviation — 24 <= 27 C."),
+         ]),
 ]
 
 
 def _manifest_row(source_id, pair_id, file_name, system_type, role, origin, notes,
-                  doc_type="markdown", owner_name="Pramaan team"):
+                  doc_type="markdown", owner_name="Pramaan team", prim="secondary", ref="", url=""):
     fpath = BENCH / file_name
+    lic = ("public reference values (paraphrased/cited); no proprietary standard text copied"
+           if ref else "team-authored fixture (repository MIT/CC-BY); no proprietary standard text")
+    note = notes + (f"; primary-source-derived: values cited from {ref}" if ref else "")
     return {
         "source_id": source_id, "pair_id": pair_id, "file_name": file_name,
         "system_type": system_type, "document_role": role, "document_type": doc_type,
-        "source_origin": origin, "source_url": "",
-        "source_owner": owner_name, "retrieval_date": "",
+        "source_origin": origin, "source_url": url,
+        "source_owner": owner_name, "retrieval_date": ("2026-07-04" if url else ""),
         "version_or_revision": BENCH_VERSION,
         "sha256": L.sha256_file(fpath),
-        "license_or_usage_basis": "team-authored fixture (repository MIT/CC-BY); no proprietary standard text",
-        "primary_or_secondary": "secondary",
+        "license_or_usage_basis": lic,
+        "primary_or_secondary": prim,
         "contains_proprietary_standard_text": "no",
-        "notes": notes,
+        "notes": note,
     }
 
 
@@ -898,8 +1083,11 @@ def main() -> int:
         rel = f"pairs/{p['id']}"
         manifest_rows.append(_manifest_row(f"{p['id']}-owner", p["id"], f"{rel}/owner_requirement.md",
             p["system_type"], "owner_requirement", p["owner_origin"], "owner design basis"))
+        derived = p.get("derived_ref", "")
         manifest_rows.append(_manifest_row(f"{p['id']}-sub", p["id"], f"{rel}/{sub_file}",
-            p["system_type"], sub_role, p["sub_origin"], "vendor submittal fixture", doc_type=sub_type))
+            p["system_type"], sub_role, p["sub_origin"], "vendor submittal fixture", doc_type=sub_type,
+            prim=("primary_derived" if derived else "secondary"), ref=derived,
+            url=DERIVED_URLS.get(p["id"], "")))
 
     with (BENCH / "manifest.csv").open("w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=L.MANIFEST_COLUMNS)

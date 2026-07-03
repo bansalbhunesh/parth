@@ -19,7 +19,7 @@
     "version_or_revision": {"type": "string"},
     "sha256": {"type": "string", "description": "sha256 of the local file (checked against disk)"},
     "license_or_usage_basis": {"type": "string"},
-    "primary_or_secondary": {"enum": ["primary", "secondary"]},
+    "primary_or_secondary": {"enum": ["primary", "secondary", "primary_derived"]},
     "contains_proprietary_standard_text": {"enum": ["yes", "no"]},
     "notes": {"type": "string"}
   }

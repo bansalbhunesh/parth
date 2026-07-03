@@ -1,0 +1,66 @@
+[
+  {
+    "pair_id": "pair_045",
+    "system_type": "refrigerant",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P045-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "domain_recall",
+    "component": "refrigerant GWP",
+    "parameter": "refrigerant_gwp",
+    "required_value": "750",
+    "submitted_value": "R-410A (GWP 2088)",
+    "deviation_type": "above_limit",
+    "severity": "high",
+    "expected_finding": "R-410A GWP (2088, IPCC AR4) exceeds the 750 limit.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "GWP shall be <= 750"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Refrigerant: R-410A"
+    },
+    "expected_commissioning_test": "Refrigerant / F-Gas compliance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "public_product_value",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_045",
+    "system_type": "refrigerant",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P045-L02",
+    "label_type": "clean_negative",
+    "difficulty": "categorical_reasoning",
+    "component": "leak detection",
+    "parameter": "leak_detection",
+    "required_value": "provided",
+    "submitted_value": "provided",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — leak detection provided.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "provided"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "provided"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

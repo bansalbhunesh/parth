@@ -1,0 +1,66 @@
+[
+  {
+    "pair_id": "pair_047",
+    "system_type": "battery",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P047-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "derived_arithmetic",
+    "component": "fire-area li-ion energy",
+    "parameter": "fire_area_kwh",
+    "required_value": "600 kWh",
+    "submitted_value": "636 kWh",
+    "deviation_type": "above_limit",
+    "severity": "high",
+    "expected_finding": "Aggregate 24 x 26.5 = 636 kWh exceeds the 600 kWh per-fire-area cap (NFPA 855).",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "<= 600 kWh"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "24 racks, each 26.5 kWh"
+    },
+    "expected_commissioning_test": "Fire-area energy review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "public_product_value",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_047",
+    "system_type": "battery",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P047-L02",
+    "label_type": "clean_negative",
+    "difficulty": "direct_value",
+    "component": "per-unit energy",
+    "parameter": "unit_kwh",
+    "required_value": "50 kWh",
+    "submitted_value": "26.5 kWh",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 26.5 <= 50 kWh per unit.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "50 kWh"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "26.5 kWh"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

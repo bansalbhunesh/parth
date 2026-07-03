@@ -1,0 +1,66 @@
+[
+  {
+    "pair_id": "pair_049",
+    "system_type": "switchgear",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P049-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "categorical_reasoning",
+    "component": "internal separation",
+    "parameter": "form",
+    "required_value": "Form 4b",
+    "submitted_value": "Form 3b",
+    "deviation_type": "below_requirement",
+    "severity": "high",
+    "expected_finding": "Form 3b does not meet the Form 4b requirement (IEC 61439-2).",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Form 4b"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "separation: Form 3b"
+    },
+    "expected_commissioning_test": "Internal-separation review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "public_product_value",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_049",
+    "system_type": "switchgear",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P049-L02",
+    "label_type": "omission",
+    "difficulty": "omission_detection",
+    "component": "internal-arc test",
+    "parameter": "arc_test",
+    "required_value": "IEC 61641",
+    "submitted_value": "Not stated",
+    "deviation_type": "omission",
+    "severity": "high",
+    "expected_finding": "Submittal omits the required IEC 61641 internal-arc test.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "arc-tested to IEC 61641"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "(no arc test)"
+    },
+    "expected_commissioning_test": "Internal-arc test review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "public_product_value",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

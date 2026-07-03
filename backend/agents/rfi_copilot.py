@@ -156,6 +156,7 @@ def ask(query: str):
         "answer": answer,
         "sources": [c["source"] for c in ctx],
         "prior_rfis": prior_rfis,
+        "mode": "llm",
     }
 
 
@@ -169,7 +170,9 @@ def ask_fallback(query: str, devs: list[dict]) -> dict:
     if not relevant:
         relevant = devs[:3]
     return {
-        "answer": f"Based on the deviation register, {len(relevant)} relevant finding(s) found. "
+        "answer": "[Offline reference — the AI copilot is unavailable; this answer is "
+                  "drawn from the stored project deviation register, not a live model.] "
+                  + f"Based on the deviation register, {len(relevant)} relevant finding(s) found. "
                   + " ".join(
                       f"{d['component']}.{d['parameter']}: provided {d.get('provided_value','')} "
                       f"vs required {d.get('required_value','')} ({d.get('severity','')}, "
@@ -178,6 +181,7 @@ def ask_fallback(query: str, devs: list[dict]) -> dict:
                   ),
         "sources": [d.get("spec_clause", "") for d in relevant],
         "prior_rfis": [],
+        "mode": "offline-fallback",
     }
 
 

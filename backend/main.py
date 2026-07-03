@@ -498,30 +498,63 @@ def systems():
     return {"systems": sorted(p.stem for p in specs_dir.glob("*.md"))}
 
 
+def _corpus_texts(system_id: str) -> tuple[str | None, str | None]:
+    """Load the corpus spec + submittal markdown for a system, or (None, None)
+    if either is missing. Used to run the INDEPENDENT rule-based detector when
+    the LLM pipeline returns empty — never the seeded answer key."""
+    spec_p = CORPUS / "specs" / f"{system_id}.md"
+    sub_p = CORPUS / "submittals" / f"{system_id}.md"
+    if spec_p.exists() and sub_p.exists():
+        return spec_p.read_text(encoding="utf-8"), sub_p.read_text(encoding="utf-8")
+    return None, None
+
+
 @app.post("/ingest/{system_id}")
-def ingest(system_id: str):
+def ingest(system_id: str, seeded_demo: bool = False):
     if system_id not in _get_valid_systems():
         raise HTTPException(404, f"Unknown system '{system_id}'. Valid: {sorted(_get_valid_systems())}")
     t0 = time.time()
+
+    # Explicit, opt-in demo fixture. This is the ONLY path that surfaces the
+    # ground-truth (answer-key) labels, and it never poses as inference: the
+    # caller must ask for it with ?seeded_demo=true and the payload is stamped
+    # analysis_mode="seeded_demo" with a disclaimer. The normal analysis path
+    # below never substitutes labels.
+    if seeded_demo:
+        seeded = _load_json("ground_truth.json").get("seeded_deviations", [])
+        fixture = [d for d in seeded if d.get("system") == system_id]
+        return {
+            "system": system_id,
+            "deviations": fixture,
+            "count": len(fixture),
+            "analysis_mode": "seeded_demo",
+            "disclaimer": "SEEDED DEMO FIXTURE — pre-authored ground-truth labels, "
+                          "not live inference. Omit ?seeded_demo=true for real analysis.",
+            "elapsed_ms": 0,
+        }
+
     log.info("Ingesting system %s", system_id)
     devs = run_pipeline(system_id)
-    # An empty result can mean (a) the LLM layer was throttled/unavailable
-    # (reconcile swallows LLMError -> []) or (b) this system is genuinely clean.
-    # Disambiguate via ground truth: if this system is seeded with deviations but
-    # the pipeline found none, the LLM was down — fall back rather than emit a
-    # silent zero. A true-negative system (no seeded deviations) stays empty.
+    mode = "pipeline"
+    # An empty result means the LLM/graph layer produced nothing (throttled, no
+    # key, or genuinely clean). NEVER substitute the answer key: degrade to the
+    # independent rule-based detector over the same spec/submittal — exactly the
+    # /analyze contract. If the corpus text is missing, report unavailable.
     if not devs:
-        seeded = _load_json("ground_truth.json").get("seeded_deviations", [])
-        system_seeded = [d for d in seeded if d.get("system") == system_id]
-        if system_seeded:
-            log.warning("System %s seeded but pipeline found 0; using ground-truth fallback", system_id)
-            devs = system_seeded
+        spec_text, sub_text = _corpus_texts(system_id)
+        if spec_text is not None and sub_text is not None:
+            from backend.analyze import _resilient_fallback
+            devs = _resilient_fallback(spec_text, sub_text, system_id)
+            mode = "rule"
+        else:
+            mode = "unavailable"
     elapsed = round((time.time() - t0) * 1000)
-    log.info("System %s: %d deviations in %dms", system_id, len(devs), elapsed)
+    log.info("System %s: %d deviations in %dms (mode=%s)", system_id, len(devs), elapsed, mode)
     return {
         "system": system_id,
         "deviations": devs,
         "count": len(devs),
+        "analysis_mode": mode,
         "elapsed_ms": elapsed,
     }
 
@@ -541,28 +574,42 @@ def _build_register(devs: list[dict]) -> dict:
 
 
 @app.get("/deviations")
-def deviations():
-    gt = _load_json("ground_truth.json")
-    seeded = gt.get("seeded_deviations", [])
+def deviations(seeded_demo: bool = False):
+    # Opt-in, clearly-labelled demo fixture (answer key) — never returned by the
+    # default analysis path below.
+    if seeded_demo:
+        seeded = _load_json("ground_truth.json").get("seeded_deviations", [])
+        return {
+            **_build_register(seeded),
+            "analysis_mode": "seeded_demo",
+            "disclaimer": "SEEDED DEMO FIXTURE — pre-authored ground-truth labels, "
+                          "not live inference. Omit ?seeded_demo=true for real analysis.",
+        }
     specs_dir = CORPUS / "specs"
     if not specs_dir.exists():
-        return _build_register(seeded)
+        return {**_build_register([]), "analysis_mode": "unavailable"}
+    mode = "pipeline"
     try:
         out = []
         for p in sorted(specs_dir.glob("*.md")):
             out.extend(run_pipeline(p.stem))
     except Exception as exc:
-        log.warning("Pipeline failed, using ground-truth fallback: %s", exc)
-        return _build_register(seeded)
-    # reconcile_system_at swallows LLMError -> [] (no exception propagates), so an
-    # empty result on a seeded corpus means the LLM layer was unavailable/throttled
-    # — NOT that the build is genuinely clean. Never ship a silent zero on the
-    # headline register: fall back to ground truth when the corpus is known to
-    # carry deviations but the pipeline found none.
-    if not out and seeded:
-        log.warning("Pipeline returned 0 deviations on a seeded corpus; using ground-truth fallback")
-        return _build_register(seeded)
-    return _build_register(out)
+        log.warning("Pipeline failed: %s", exc)
+        out = []
+    # An empty register means the LLM layer was unavailable/throttled (or the
+    # corpus is genuinely clean) — NOT a licence to emit the answer key. Degrade
+    # to the INDEPENDENT rule engine over each spec/submittal pair; label the
+    # findings analysis_mode="rule" so the UI can badge them honestly.
+    if not out:
+        rule_devs = []
+        for p in sorted(specs_dir.glob("*.md")):
+            spec_text, sub_text = _corpus_texts(p.stem)
+            if spec_text is not None and sub_text is not None:
+                from backend.analyze import _resilient_fallback
+                rule_devs.extend(_resilient_fallback(spec_text, sub_text, p.stem))
+        out = rule_devs
+        mode = "rule" if rule_devs else "unavailable"
+    return {**_build_register(out), "analysis_mode": mode}
 
 
 # ── Copilot endpoints ───────────────────────────────────────────────
@@ -593,7 +640,9 @@ def copilot_stream(q: CopilotQuery):
             log.warning("Copilot stream failed, sending fallback: %s", exc)
             devs = _load_json("ground_truth.json").get("seeded_deviations", [])
             fb = ask_fallback(q.query, devs)
-            yield f"event: meta\ndata: {json.dumps({'sources': fb['sources'], 'prior_rfis': fb['prior_rfis']})}\n\n"
+            meta = {"sources": fb["sources"], "prior_rfis": fb["prior_rfis"],
+                    "mode": fb.get("mode", "offline-fallback")}
+            yield f"event: meta\ndata: {json.dumps(meta)}\n\n"
             yield f"event: token\ndata: {json.dumps(fb['answer'])}\n\n"
             yield "event: done\ndata: {}\n\n"
 

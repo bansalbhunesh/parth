@@ -25,8 +25,10 @@ log = logging.getLogger("pramaan.llm")
 PROVIDER = os.getenv("PRAMAAN_LLM", "gemini")  # "gemini" | "claude" | "openai"
 
 # Canonical failover order (primary is tried first, then the rest of this
-# list, skipping anything without a key configured).
-_CHAIN_ORDER = ["gemini", "openai", "claude"]
+# list, skipping anything without a key configured). gemini primary, the
+# OpenAI-compatible gateway (Qwen) as first fallback, Groq (free tier, its own
+# quota) as second fallback for full insurance, then Claude.
+_CHAIN_ORDER = ["gemini", "openai", "groq", "claude"]
 
 # Observability for /llm-check — which provider last answered, and the last
 # failover with its (redacted) reason. Never stores secrets.
@@ -42,7 +44,7 @@ class LLMError(Exception):
 
 def _key_env(provider: str) -> str:
     return {"gemini": "GEMINI_API_KEY", "openai": "OPENAI_API_KEY",
-            "claude": "ANTHROPIC_API_KEY"}[provider]
+            "groq": "GROQ_API_KEY", "claude": "ANTHROPIC_API_KEY"}[provider]
 
 
 def _configured(provider: str) -> bool:
@@ -217,36 +219,60 @@ def _gemini(prompt, system, json_mode):
         raise LLMError(f"Gemini API call failed: {exc}") from exc
 
 
-def _openai(prompt, system, json_mode):
-    """OpenAI-compatible provider — works with any /v1 gateway (e.g. an
-    aggregator that proxies Gemini/Claude). Set OPENAI_API_KEY, OPENAI_BASE_URL
-    (the gateway's /v1 root), and OPENAI_MODEL (e.g. gemini-2.0-flash)."""
-    api_key = os.environ.get("OPENAI_API_KEY")
+def _openai_compatible(prompt, system, json_mode, *, label, api_key, base_url,
+                       model, json_mode_on, max_tokens):
+    """Shared OpenAI-compatible chat call — used by both the generic gateway
+    (OpenRouter/Qwen) and Groq, which speak the same /v1 protocol. `label` is
+    only for logs; secrets are never logged."""
     if not api_key:
-        raise LLMError("OPENAI_API_KEY not set")
-    base_url = os.getenv("OPENAI_BASE_URL") or None
-    model_name = os.getenv("OPENAI_MODEL", "gemini-2.0-flash")
-    log.info("OpenAI-compat call: model=%s, base=%s, json_mode=%s, prompt_len=%d",
-             model_name, base_url, json_mode, len(prompt))
+        raise LLMError(f"{label} API key not set")
+    log.info("%s call: model=%s, base=%s, json_mode=%s, prompt_len=%d",
+             label, model, base_url, json_mode, len(prompt))
     try:
         from openai import OpenAI
-        client = OpenAI(api_key=api_key, base_url=base_url)
+        client = OpenAI(api_key=api_key, base_url=base_url or None)
         messages = []
         if system:
             messages.append({"role": "system", "content": system})
         messages.append({"role": "user", "content": prompt})
-        # Cap output generously: gateways (OpenRouter etc.) often default to a
-        # small max_tokens, which silently truncates a multi-finding reconcile
-        # JSON mid-array and makes it unparseable. Match the Claude budget.
-        kwargs = {"model": model_name, "messages": messages, "temperature": 0.1,
-                  "max_tokens": int(os.getenv("OPENAI_MAX_TOKENS", "4000"))}
-        if json_mode and os.getenv("OPENAI_JSON_MODE", "0") == "1":
+        # Cap output generously: gateways often default to a small max_tokens,
+        # which silently truncates a multi-finding reconcile JSON mid-array and
+        # makes it unparseable. Match the Claude budget.
+        kwargs = {"model": model, "messages": messages, "temperature": 0.1,
+                  "max_tokens": max_tokens}
+        if json_mode and json_mode_on:
             kwargs["response_format"] = {"type": "json_object"}
         resp = client.chat.completions.create(**kwargs)
         return resp.choices[0].message.content
     except Exception as exc:
-        log.error("OpenAI-compat API error: %s", exc)
-        raise LLMError(f"OpenAI-compatible API call failed: {exc}") from exc
+        log.error("%s API error: %s", label, exc)
+        raise LLMError(f"{label} API call failed: {exc}") from exc
+
+
+def _openai(prompt, system, json_mode):
+    """OpenAI-compatible gateway — works with any /v1 endpoint (e.g. OpenRouter
+    proxying Qwen). Set OPENAI_API_KEY, OPENAI_BASE_URL (the /v1 root), and
+    OPENAI_MODEL."""
+    return _openai_compatible(
+        prompt, system, json_mode, label="OpenAI-compat",
+        api_key=os.environ.get("OPENAI_API_KEY"),
+        base_url=os.getenv("OPENAI_BASE_URL"),
+        model=os.getenv("OPENAI_MODEL", "gemini-2.0-flash"),
+        json_mode_on=os.getenv("OPENAI_JSON_MODE", "0") == "1",
+        max_tokens=int(os.getenv("OPENAI_MAX_TOKENS", "4000")))
+
+
+def _groq(prompt, system, json_mode):
+    """Groq — fast LPU inference on its own free-tier quota (full-insurance
+    second fallback). Uses Groq's OpenAI-compatible endpoint. Set GROQ_API_KEY;
+    GROQ_MODEL defaults to llama-3.3-70b-versatile."""
+    return _openai_compatible(
+        prompt, system, json_mode, label="Groq",
+        api_key=os.environ.get("GROQ_API_KEY"),
+        base_url=os.getenv("GROQ_BASE_URL", "https://api.groq.com/openai/v1"),
+        model=os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
+        json_mode_on=os.getenv("GROQ_JSON_MODE", "1") == "1",
+        max_tokens=int(os.getenv("GROQ_MAX_TOKENS", "4000")))
 
 
 def _claude(prompt, system, json_mode):
@@ -309,32 +335,48 @@ def complete_stream(prompt: str, system: str = ""):
                    f"last error: {last_exc}")
 
 
-def _openai_stream(prompt, system):
-    api_key = os.environ.get("OPENAI_API_KEY")
+def _openai_compatible_stream(prompt, system, *, label, api_key, base_url,
+                              model, max_tokens):
     if not api_key:
-        raise LLMError("OPENAI_API_KEY not set")
-    base_url = os.getenv("OPENAI_BASE_URL") or None
-    model_name = os.getenv("OPENAI_MODEL", "gemini-2.0-flash")
-    log.info("OpenAI-compat stream: model=%s, base=%s, prompt_len=%d",
-             model_name, base_url, len(prompt))
+        raise LLMError(f"{label} API key not set")
+    log.info("%s stream: model=%s, base=%s, prompt_len=%d",
+             label, model, base_url, len(prompt))
     try:
         from openai import OpenAI
-        client = OpenAI(api_key=api_key, base_url=base_url)
+        client = OpenAI(api_key=api_key, base_url=base_url or None)
         messages = []
         if system:
             messages.append({"role": "system", "content": system})
         messages.append({"role": "user", "content": prompt})
         stream = client.chat.completions.create(
-            model=model_name, messages=messages, temperature=0.1, stream=True,
-            max_tokens=int(os.getenv("OPENAI_MAX_TOKENS", "4000")),
+            model=model, messages=messages, temperature=0.1, stream=True,
+            max_tokens=max_tokens,
         )
         for chunk in stream:
             delta = chunk.choices[0].delta.content
             if delta:
                 yield delta
     except Exception as exc:
-        log.error("OpenAI-compat stream error: %s", exc)
-        raise LLMError(f"OpenAI-compatible streaming failed: {exc}") from exc
+        log.error("%s stream error: %s", label, exc)
+        raise LLMError(f"{label} streaming failed: {exc}") from exc
+
+
+def _openai_stream(prompt, system):
+    yield from _openai_compatible_stream(
+        prompt, system, label="OpenAI-compat",
+        api_key=os.environ.get("OPENAI_API_KEY"),
+        base_url=os.getenv("OPENAI_BASE_URL"),
+        model=os.getenv("OPENAI_MODEL", "gemini-2.0-flash"),
+        max_tokens=int(os.getenv("OPENAI_MAX_TOKENS", "4000")))
+
+
+def _groq_stream(prompt, system):
+    yield from _openai_compatible_stream(
+        prompt, system, label="Groq",
+        api_key=os.environ.get("GROQ_API_KEY"),
+        base_url=os.getenv("GROQ_BASE_URL", "https://api.groq.com/openai/v1"),
+        model=os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
+        max_tokens=int(os.getenv("GROQ_MAX_TOKENS", "4000")))
 
 
 def _gemini_stream(prompt, system):
@@ -383,10 +425,12 @@ def _claude_stream(prompt, system):
 
 
 # --- Dispatch registration (after the provider functions exist) -------------
-_DISPATCH = {"gemini": _gemini, "openai": _openai, "claude": _claude}
+_DISPATCH = {"gemini": _gemini, "openai": _openai, "groq": _groq,
+             "claude": _claude}
 _STREAM_DISPATCH = {
     "gemini": _gemini_stream,
     "openai": _openai_stream,
+    "groq": _groq_stream,
     "claude": _claude_stream,
 }
 
@@ -399,6 +443,8 @@ def _provider_public_meta(provider: str) -> dict:
     if provider == "openai":
         return {"model": os.getenv("OPENAI_MODEL", "gemini-2.0-flash"),
                 "base_url_set": bool(os.getenv("OPENAI_BASE_URL"))}
+    if provider == "groq":
+        return {"model": os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")}
     return {"model": os.getenv("CLAUDE_MODEL", "claude-opus-4-8")}
 
 

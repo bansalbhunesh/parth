@@ -71,17 +71,31 @@ def test_gemini_quota_falls_back_to_qwen(monkeypatch):
     assert "429" in fo["reason"]
 
 
-# 3. Qwen failure falls back to Claude.
-def test_qwen_failure_falls_back_to_claude(monkeypatch):
+# 3. Qwen failure falls back to Groq (second fallback), then Claude.
+def test_qwen_failure_falls_back_to_groq(monkeypatch):
     monkeypatch.setenv("GEMINI_API_KEY", "g")
     monkeypatch.setenv("OPENAI_API_KEY", "o")
-    monkeypatch.setenv("ANTHROPIC_API_KEY", "a")
+    monkeypatch.setenv("GROQ_API_KEY", "q")
     _stub(monkeypatch, "gemini", exc=_quota_error())
     _stub(monkeypatch, "openai", exc=L.LLMError("gateway 502"))
-    _stub(monkeypatch, "claude", result="CLAUDE_OK")
+    _stub(monkeypatch, "groq", result="GROQ_OK")
     out = L.complete("hi")
-    assert out == "CLAUDE_OK"
-    assert L.FAILOVER_STATUS["last_successful_provider"] == "claude"
+    assert out == "GROQ_OK"
+    assert L.FAILOVER_STATUS["last_successful_provider"] == "groq"
+
+
+def test_full_chain_order_and_groq_to_claude(monkeypatch):
+    """The canonical chain is gemini -> openai(qwen) -> groq -> claude, and a
+    failure of everything above Claude lands on Claude."""
+    for k in ("GEMINI_API_KEY", "OPENAI_API_KEY", "GROQ_API_KEY",
+              "ANTHROPIC_API_KEY"):
+        monkeypatch.setenv(k, "x")
+    assert L.provider_chain() == ["gemini", "openai", "groq", "claude"]
+    _stub(monkeypatch, "gemini", exc=_quota_error())
+    _stub(monkeypatch, "openai", exc=L.LLMError("502"))
+    _stub(monkeypatch, "groq", exc=L.LLMError("groq 429"))
+    _stub(monkeypatch, "claude", result="CLAUDE_LAST_RESORT")
+    assert L.complete("hi") == "CLAUDE_LAST_RESORT"
 
 
 # 4. All LLMs fail -> LLMError so callers fall back to the deterministic engine.

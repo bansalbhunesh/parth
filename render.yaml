@@ -38,3 +38,11 @@ services:
         value: "4000"   # gateways default low and truncate multi-finding JSON
       - key: OPENAI_API_KEY
         sync: false   # set the OpenRouter key (sk-or-...) in the Render dashboard
+      # --- Second failover leg: Groq (free tier, its own quota) for full
+      # insurance. Chain: gemini -> qwen gateway -> groq -> rule floor. Groq
+      # has good recall but a mild over-flag tendency, so it sits behind the
+      # cleaner Qwen. Inert until GROQ_API_KEY is set. ---
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      - key: GROQ_API_KEY
+        sync: false   # set the Groq key (gsk_...) in the Render dashboard

@@ -1688,6 +1688,7 @@ table.reg .row-critical { border-left: 2px solid var(--fault); }
   border-radius: 20px;
   padding: 3px 10px;
   vertical-align: middle;
+  white-space: nowrap;   /* keep "JUDGE MODE" on one line on narrow screens */
 }
 .jm-link, .jm-foot-cta {
   color: var(--lead);
@@ -1698,6 +1699,7 @@ table.reg .row-critical { border-left: 2px solid var(--fault); }
   padding: 8px 16px;
   border-radius: 10px;
   transition: background 0.2s, border-color 0.2s;
+  white-space: nowrap;   /* "Full dashboard →" never breaks mid-phrase */
 }
 .jm-link:hover, .jm-foot-cta:hover {
   background: var(--lead-glow);
@@ -1791,6 +1793,14 @@ table.reg .row-critical { border-left: 2px solid var(--fault); }
 @media (max-width: 760px) {
   .jm-metrics { grid-template-columns: repeat(2, 1fr); }
   .jm-hero { padding: 32px 0 24px; }
+}
+@media (max-width: 480px) {
+  /* Keep the header on one tidy row: smaller brand, tighter dashboard button,
+     and let the JUDGE MODE pill wrap under the wordmark rather than splitting. */
+  .jm-top { gap: 10px; padding: 16px 2px; }
+  .jm-brand { font-size: 0.95rem; display: flex; flex-wrap: wrap; align-items: center; row-gap: 4px; }
+  .jm-brand em { margin-left: 8px; font-size: 0.55rem; letter-spacing: 1.5px; padding: 2px 8px; }
+  .jm-link { font-size: 0.82rem; padding: 7px 12px; }
 }
 
 .nav-judge {

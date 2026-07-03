@@ -644,6 +644,13 @@ python3 eval/run_eval.py --detector llm
 # → Scores from actual LLM reasoning, not hardcoded answers
 ```
 
+> **Running Path 4 yourself? Use a billing-enabled key.** Free-tier Gemini
+> keys are capped at **20 requests/day** for `gemini-2.5-flash`
+> (`GenerateRequestsPerDayPerProjectPerModel-FreeTier`); the 10-system run
+> exceeds a partially-used bucket, and every 429'd system returns empty —
+> which reads as artificially low recall. The error log names the quota when
+> this happens. (Cost on a paid key: paise per system.)
+
 **What each path proves — and its honest limits:**
 - **Path 1 (structured baseline)** is a *data-integrity check*. It compares pre-extracted triples to ground truth and is **1.000 by construction** — it proves the plumbing, not detection skill. We label it as such rather than headline it.
 - **Path 2 (text eval)** is an *extraction-layer robustness check*: it recovers all 50 deviations from raw markdown across 12 projects with different naming/standards/formats. It runs on our own corpus, so it proves the engine parses real-world variety — not that it generalises to unseen documents.

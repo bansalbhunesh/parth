@@ -30,6 +30,9 @@ eval-multi:  ## Run multi-project eval (12 projects, 11 countries)
 eval-multi-llm:  ## Run REAL LLM eval across all 12 projects (needs API key)
 	python3 eval/multi_project_eval.py --detector llm
 
+eval-real:  ## LLM layer over the real-datasheet pairs (needs API key; ~14 calls)
+	python3 eval/real_pairs_llm.py
+
 eval-all:  ## Run all three eval paths
 	@echo "=== Baseline Eval ===" && python3 eval/run_eval.py --detector baseline
 	@echo "\n=== Text Eval ===" && python3 eval/text_eval.py

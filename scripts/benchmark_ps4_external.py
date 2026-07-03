@@ -27,7 +27,7 @@ sys.path.insert(0, str(L.ROOT))
 from backend.analyze import _resilient_fallback, run_analysis  # noqa: E402
 
 PER_PAIR_COLUMNS = [
-    "pair_id", "system_type", "mode_used", "not_run", "latency_ms",
+    "pair_id", "system_type", "modality", "mode_used", "not_run", "error_type", "latency_ms",
     "positives", "negatives", "contested", "tp_exact", "tp_semantic",
     "fp", "fn_semantic", "neg_false_alerts", "error",
 ]
@@ -42,10 +42,17 @@ def _read_pair(pair_id: str):
 def run_one(pair_id: str, labels: list[dict], mode: str) -> dict:
     owner, sub = _read_pair(pair_id)
     system_id = pair_id.upper()
-    err = None
+    modality = labels[0].get("modality", "text") if labels else "text"
+    err = err_type = None
     not_run = False
     t0 = time.time()
-    if mode == "rule":
+    if modality == "image":
+        # image/OCR case — not evaluated by the text/rule path; recorded not_run
+        # (a miss in the PRIMARY metric) rather than fabricating a prediction.
+        findings, mode_used, not_run, latency = [], "image_pending", True, 0
+        err = "modality=image; requires vision run (pending OCR/vision support)"
+        err_type = "image_pending"
+    elif mode == "rule":
         findings = _resilient_fallback(owner, sub, system_id)
         mode_used = "rule"
         latency = round((time.time() - t0) * 1000)
@@ -61,12 +68,14 @@ def run_one(pair_id: str, labels: list[dict], mode: str) -> dict:
             findings, mode_used, not_run = [], "error", True
             latency = round((time.time() - t0) * 1000)
             err = f"{type(exc).__name__}: {str(exc)[:200]}"
+            err_type = type(exc).__name__
 
     sem = L.score_pair(labels, findings, L.matches_semantic)
     exa = L.score_pair(labels, findings, L.matches_exact)
     return {
         "pair_id": pair_id,
         "system_type": labels[0]["system_type"] if labels else "other",
+        "modality": modality, "error_type": err_type,
         "mode_used": mode_used, "not_run": not_run, "latency_ms": latency,
         "positives": sem["positives"], "negatives": sem["negatives"], "contested": sem["contested"],
         "tp_semantic": sem["tp"], "tp_exact": exa["tp"], "fp": sem["fp"], "fn_semantic": sem["fn"],
@@ -104,8 +113,23 @@ def _write_run(run_dir: pathlib.Path, results: list[dict], meta: dict) -> dict:
         for r in results:
             if r.get("error"):
                 f.write(json.dumps({"pair_id": r["pair_id"], "error": r["error"]}) + "\n")
+    # per_label_results.csv (per-label TP/FP/FN visibility)
+    labs = load_labels_flat()
+    caught_s, caught_e = set(), set()
+    for r in results:
+        if not r["not_run"]:
+            caught_s.update(r.get("matched_semantic", []))
+            caught_e.update(r.get("matched_exact", []))
+    with (run_dir / "per_label_results.csv").open("w", encoding="utf-8", newline="") as f:
+        wl = csv.writer(f)
+        wl.writerow(["label_id", "pair_id", "system_type", "label_type", "difficulty",
+                     "modality", "caught_semantic", "caught_exact"])
+        for lb in labs:
+            wl.writerow([lb["label_id"], lb["pair_id"], lb["system_type"], lb["label_type"],
+                         lb["difficulty"], lb.get("modality", "text"),
+                         int(lb["label_id"] in caught_s), int(lb["label_id"] in caught_e)])
     # summary.json
-    agg = L.aggregate(results, load_labels_flat())
+    agg = L.aggregate(results, labs)
     summary = {**meta, **agg}
     (run_dir / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     return summary
@@ -154,6 +178,10 @@ def main() -> int:
             "count_not_run_as_miss": bool(cfg.get("count_not_run_as_miss", True)),
             "evidence_label": "deterministic_offline" if args.mode == "rule" else "live_model",
         }
+        meta["config_sha256"] = L.sha256_text(json.dumps(
+            {k: meta[k] for k in ("mode", "provider", "model", "benchmark_version",
+                                  "labels_freeze_sha256", "include_contested_in_primary",
+                                  "count_not_run_as_miss")}, sort_keys=True))
         last_summary = _write_run(run_dir, results, meta)
         pr = last_summary
         print(f"[run{k}] {args.mode} {provider}/{model} -> "

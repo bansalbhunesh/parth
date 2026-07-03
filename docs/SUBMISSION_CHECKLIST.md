@@ -6,9 +6,9 @@
 
 ## Hard deadline
 
-- [x] **Phase 2 submission deadline confirmed on Unstop:** `2026-07-27` (exact hour TBC on the dashboard — treat as morning IST until confirmed)
-- [ ] Submit by **26 July evening** (leave a full night of slack for cold starts, upload retries, form surprises).
-- [ ] Freeze window: **no risky changes after 24 July** — final 3 days are verify/rehearse/record only.
+- [x] **Phase 2 submission deadline (live Unstop record):** `2026-07-22, 23:59:21 IST` (re-confirm on the dashboard before submitting — organizers may adjust)
+- [ ] Submit by **21 July evening** (leave a full night of slack for cold starts, upload retries, form surprises).
+- [ ] Freeze window: **no risky changes after 19 July** — final 3 days (20–22 July) are verify/rehearse/record only.
 
 ## Deliverables
 
@@ -19,7 +19,7 @@
 | 3 | **Architecture document** | [`docs/ARCHITECTURE.md`](ARCHITECTURE.md) (+ `docs/pipeline-diagram.svg`) | ✅ |
 | 4 | **Impact model** (quantified business benefit) | [`docs/BUSINESS.md`](BUSINESS.md) — every figure cited | ✅ |
 | 5 | Pitch deck (if the form takes a file) | [`docs/Pramaan_Deck.pdf`](Pramaan_Deck.pdf) — 15 pages, regenerate with `python scripts/export_deck.py` after any deck edit | ✅ |
-| 6 | Live demo URL | `https://parth-tan.vercel.app/judge` (front) · `https://parth-3puc.onrender.com/health` (API) | ⬜ blocked on Render: paste the fresh `GEMINI_API_KEY` + Manual Deploy latest `main`. Key verified locally 2026-07-03: deep probe 5 findings/23s · GXT5 pair 5 findings/16s (llm) · scanned-PDF OCR 3 findings/18.5s (llm) — OCR stays in the demo |
+| 6 | Live demo URL | `https://parth-tan.vercel.app/judge` (front) · `https://parth-3puc.onrender.com/health` (API) | ⬜ blocked on Render: paste the fresh `GEMINI_API_KEY` + Manual Deploy latest `main`. Key verified locally 2026-07-03: deep probe 5 findings/23s · GXT5 pair 5 findings/16s (llm). **OCR note:** OCR runs only where Tesseract is installed (the `Dockerfile.backend` image); the default Render Python deploy does not include it and returns a clear "OCR unavailable" message — either ship the Tesseract image or drop OCR claims before submission (P1) |
 | 7 | Team details | 1–4 members, one team per person — from the Unstop registration | ⬜ confirm roster matches registration |
 
 ## Pre-submission gates (run in this order, same day)

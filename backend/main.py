@@ -1081,6 +1081,27 @@ def project_blast_radius(project_id: str, dev_id: str):
         return {"available": False, "error": str(exc)}
 
 
+@app.get("/projects/{project_id}/remediation/{dev_id}")
+def project_remediation(project_id: str, dev_id: str, cost_per_week_lakh: float = 200.0):
+    """What-if remediation simulator: how the schedule slip (and cost) of a
+    deviation changes with the week it is caught — flat-zero until the cliff,
+    then climbing one-for-one. Deterministic; the LLM never touches it."""
+    if os.getenv("PRAMAAN_GRAPH", "1") == "0":
+        return {"available": False}
+    try:
+        dev_id = _safe_id(dev_id, "dev_id")
+        pg, g = _assemble_project_graph(project_id)
+        if g is None:
+            return {"available": False}
+        sim = pg.simulate_remediation(g, dev_id, cost_per_week_lakh=cost_per_week_lakh)
+        if sim is None:
+            return {"available": False}
+        return {"available": True, **sim}
+    except Exception as exc:
+        log.warning("Remediation sim failed for %s/%s: %s", project_id, dev_id, exc)
+        return {"available": False, "error": str(exc)}
+
+
 @app.get("/projects/eval/aggregate")
 def projects_eval_aggregate():
     try:

@@ -1812,6 +1812,49 @@ table.reg .row-critical { border-left: 2px solid var(--fault); }
 }
 .nav-judge:hover { background: var(--lead-glow); }
 
+/* --- What-if remediation simulator --- */
+.remsim {
+  margin-top: 18px;
+  padding: 20px 22px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel, rgba(255, 255, 255, 0.015));
+}
+.remsim-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.remsim-tag {
+  font-family: var(--mono, monospace); font-size: 0.66rem; letter-spacing: 2px;
+  color: var(--lead); text-transform: uppercase;
+}
+.remsim-dev { font-family: var(--mono, monospace); font-size: 0.72rem; color: var(--muted); }
+.remsim-lead { margin: 10px 0 16px; color: var(--muted); font-size: 0.92rem; line-height: 1.5; }
+.remsim-lead strong { color: var(--fg, #e8eef2); }
+.remsim-chart { width: 100%; height: auto; display: block; }
+.remsim-area { fill: rgba(255, 77, 77, 0.08); stroke: none; }
+.remsim-line { fill: none; stroke: var(--fault, #ff4d4d); stroke-width: 2; }
+.remsim-cliff { stroke: var(--ok, #35c98b); stroke-width: 1; stroke-dasharray: 3 3; opacity: 0.55; }
+.remsim-cliff-lbl { fill: var(--ok, #35c98b); font-size: 8.5px; font-family: var(--mono, monospace); opacity: 0.8; }
+.remsim-cursor { stroke: var(--lead, #36d6e7); stroke-width: 1.2; }
+.remsim-dot { fill: var(--lead, #36d6e7); stroke: var(--bg, #0a0d11); stroke-width: 1.5; }
+.remsim-marker { font-size: 8.5px; font-family: var(--mono, monospace); font-weight: 600; }
+.remsim-axis { fill: var(--muted); font-size: 8.5px; font-family: var(--mono, monospace); }
+.remsim-range {
+  width: 100%; margin: 10px 0 4px; accent-color: var(--lead, #36d6e7); cursor: pointer;
+}
+.remsim-readout { display: flex; gap: 26px; flex-wrap: wrap; margin: 8px 0 4px; }
+.remsim-readout > div { display: flex; flex-direction: column; }
+.remsim-k { font-size: 0.66rem; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.remsim-v { font-family: var(--mono, monospace); font-size: 1.25rem; font-weight: 700; }
+.remsim-v.bad { color: var(--fault, #ff4d4d); }
+.remsim-v.good { color: var(--ok, #35c98b); }
+.remsim-note {
+  margin: 12px 0 0; padding: 10px 12px; border-left: 3px solid var(--ok, #35c98b);
+  background: rgba(53, 201, 139, 0.06); border-radius: 0 8px 8px 0;
+  font-size: 0.86rem; color: var(--muted); line-height: 1.5;
+}
+.remsim-note strong { color: var(--ok, #35c98b); }
+.remsim-assumption { margin: 12px 0 0; font-size: 0.74rem; color: var(--muted); opacity: 0.75; line-height: 1.45; }
+@media (max-width: 480px) { .remsim-readout { gap: 16px; } .remsim-v { font-size: 1.05rem; } }
+
 /* Accessibility: honour the user's reduced-motion preference. The dashboard runs
    many looping / scroll-triggered animations (live-pulse, scan-sweep, count-ups,
    cursor-blink); for users who opt out we drop them to near-instant so the content

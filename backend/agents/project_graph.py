@@ -210,6 +210,100 @@ def blast_radius(g: nx.MultiDiGraph, dev_id: str) -> dict | None:
     }
 
 
+def simulate_remediation(
+    g: nx.MultiDiGraph,
+    dev_id: str,
+    cost_per_week_lakh: float = 200.0,
+    step: int = 1,
+) -> dict | None:
+    """What-if remediation: sweep the week the deviation is *caught* and report
+    the resulting schedule slip (and its cost) at each point. Makes the core
+    lead-time number causal and interactive.
+
+    The mechanics are the same deterministic arithmetic as blast_radius:
+        fix_complete(catch_week) = catch_week + fix_lead
+        slip(catch_week)         = max(0, fix_complete - cx_planned_week)
+    so slip is flat-zero until a *cliff* week, then climbs one-for-one. The
+    cliff — `zero_slip_deadline = cx_planned - fix_lead` — is the last week you
+    can still catch this deviation and take no schedule hit at all.
+
+    Three labelled scenarios anchor the curve: caught at the design review
+    (early), caught by Pramaan (on upload — `week_caught`), and caught at
+    commissioning (the status quo — the test itself, too late). The headline is
+    the honest, causal restatement of the lead-time metric:
+        slip_avoided = slip(commissioning) - slip(pramaan)
+
+    Cost is a transparently-stated translation (`cost_per_week_lakh`, a project
+    assumption), never a hidden number: weeks are the defensible unit.
+    """
+    br = blast_radius(g, dev_id)
+    if br is None:
+        return None
+    nid = dev_id if dev_id.startswith("DEV:") else f"DEV:{dev_id}"
+    d = g.nodes[nid]
+
+    fix_lead = float(br["weeks_at_risk"])
+    cx_planned = float(br["cx_planned_week"])
+    week_caught = float(d.get("week_caught") or 0)
+
+    def slip_at(catch_week: float) -> float:
+        return max(0.0, (catch_week + fix_lead) - cx_planned)
+
+    def cost_of(slip_weeks: float) -> float:
+        return round(slip_weeks * cost_per_week_lakh, 1)
+
+    zero_slip_deadline = max(0.0, cx_planned - fix_lead)
+
+    # Scenario anchors. Design review is a nominal early gate (week 4 or upload,
+    # whichever is earlier); commissioning is the test week itself (status quo).
+    design_week = min(4.0, week_caught)
+    scenarios = {
+        "design_review": design_week,
+        "pramaan": week_caught,
+        "commissioning": cx_planned,
+    }
+    scenario_rows = {
+        name: {
+            "catch_week": round(w, 1),
+            "slip_weeks": round(slip_at(w), 1),
+            "cost_lakh": cost_of(slip_at(w)),
+        }
+        for name, w in scenarios.items()
+    }
+
+    slip_avoided = round(slip_at(cx_planned) - slip_at(week_caught), 1)
+    cost_avoided = cost_of(slip_at(cx_planned)) - cost_of(slip_at(week_caught))
+
+    # A sweep for the interactive slider: catch_week from 0 to the commissioning
+    # week, slip + cost at each step.
+    hi = int(round(cx_planned))
+    curve = [
+        {"catch_week": w, "slip_weeks": round(slip_at(w), 1),
+         "cost_lakh": cost_of(slip_at(w))}
+        for w in range(0, hi + 1, max(1, step))
+    ]
+
+    return {
+        "deviation": br["deviation"],
+        "component": br["component"],
+        "fix_lead_weeks": round(fix_lead, 1),
+        "cx_planned_week": round(cx_planned, 1),
+        "zero_slip_deadline_week": round(zero_slip_deadline, 1),
+        "long_lead_trap": zero_slip_deadline <= week_caught and slip_at(week_caught) > 0,
+        "cost_per_week_lakh": cost_per_week_lakh,
+        "scenarios": scenario_rows,
+        "slip_avoided_weeks": slip_avoided,
+        "cost_avoided_lakh": round(cost_avoided, 1),
+        "curve": curve,
+        "assumption": (
+            f"Slip is deterministic: catch_week + {round(fix_lead, 1)}wk fix lead "
+            f"vs the week-{round(cx_planned, 1)} commissioning test. Cost translates "
+            f"at {cost_per_week_lakh} lakh/week (a stated project assumption); "
+            "weeks are the defensible unit."
+        ),
+    }
+
+
 def as_graph(g: nx.MultiDiGraph) -> dict:
     """Node/edge form for visualization, mirroring cx_graph.as_graph()."""
     nodes = [{"id": n, "kind": g.nodes[n].get("kind"), "label": g.nodes[n].get("label")}

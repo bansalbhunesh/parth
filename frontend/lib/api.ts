@@ -227,6 +227,51 @@ export interface BlastRadius {
   worst_milestone_slip: number; caught_in_time: boolean; reach_size: number;
 }
 
+export interface RemediationScenario { catch_week: number; slip_weeks: number; cost_lakh: number }
+export interface RemediationSim {
+  available: boolean;
+  deviation?: string; component?: string;
+  fix_lead_weeks: number; cx_planned_week: number; zero_slip_deadline_week: number;
+  long_lead_trap: boolean; cost_per_week_lakh: number;
+  scenarios: { design_review: RemediationScenario; pramaan: RemediationScenario; commissioning: RemediationScenario };
+  slip_avoided_weeks: number; cost_avoided_lakh: number;
+  curve: RemediationScenario[]; assumption: string;
+}
+
+// Mirrors the live engine output for Meghdoot DEV-001 (the UPS-battery hero
+// deviation) so a cold, no-backend load renders the same simulator a warm one
+// serves. Long-lead trap: fix_lead 40wk > cx week 38.
+export const FALLBACK_REMEDIATION: RemediationSim = {
+  available: true, deviation: "DEV-001", component: "UPS-02",
+  fix_lead_weeks: 40, cx_planned_week: 38, zero_slip_deadline_week: 0,
+  long_lead_trap: true, cost_per_week_lakh: 200,
+  scenarios: {
+    design_review: { catch_week: 4, slip_weeks: 6, cost_lakh: 1200 },
+    pramaan: { catch_week: 11, slip_weeks: 13, cost_lakh: 2600 },
+    commissioning: { catch_week: 38, slip_weeks: 40, cost_lakh: 8000 },
+  },
+  slip_avoided_weeks: 27, cost_avoided_lakh: 5400,
+  curve: Array.from({ length: 39 }, (_, w) => {
+    const slip = Math.max(0, w + 40 - 38);
+    return { catch_week: w, slip_weeks: slip, cost_lakh: slip * 200 };
+  }),
+  assumption: "Slip is deterministic: catch_week + 40wk fix lead vs the week-38 commissioning test. Cost translates at 200 lakh/week (a stated project assumption); weeks are the defensible unit.",
+};
+
+export async function getRemediation(devId = "DEV-001", projectId = "meghdoot"): Promise<RemediationSim> {
+  try {
+    const r = await fetch(`${API}/projects/${projectId}/remediation/${devId}`, fetchOpts({ next: { revalidate: 600 } }));
+    if (!r.ok) throw new Error(String(r.status));
+    const d = await r.json();
+    if (!d || d.available === false || !Array.isArray(d.curve) || !d.scenarios) {
+      return FALLBACK_REMEDIATION;
+    }
+    return d as RemediationSim;
+  } catch {
+    return FALLBACK_REMEDIATION;
+  }
+}
+
 export async function getSchedule(projectId = "meghdoot"): Promise<ScheduleAnalysis> {
   try {
     const r = await fetch(`${API}/projects/${projectId}/schedule`, fetchOpts({ next: { revalidate: 600 } }));

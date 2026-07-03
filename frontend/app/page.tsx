@@ -1,9 +1,10 @@
-import { getRegister, getCxPlan, getSchedule, getSupplyChain, getProjectGraph, Deviation, CxPlan } from "../lib/api";
+import { getRegister, getCxPlan, getSchedule, getSupplyChain, getProjectGraph, getRemediation, Deviation, CxPlan } from "../lib/api";
 import DeviationRegister from "../components/DeviationRegister";
 import CommissioningTwin from "../components/CommissioningTwin";
 import ScheduleRisk from "../components/ScheduleRisk";
 import SupplyChainPanel from "../components/SupplyChainPanel";
 import ProjectGraphView from "../components/ProjectGraph";
+import RemediationSimulator from "../components/RemediationSimulator";
 import CopilotPanel from "../components/CopilotPanel";
 import StatsBar from "../components/StatsBar";
 import PipelineViz from "../components/PipelineViz";
@@ -202,8 +203,8 @@ function TotalSavingsHero() {
 export const revalidate = 600;
 
 export default async function Page() {
-  const [rows, cxPlan, schedule, supply, graph] = await Promise.all([
-    getRegister(), getCxPlan(), getSchedule(), getSupplyChain(), getProjectGraph(),
+  const [rows, cxPlan, schedule, supply, graph, remediation] = await Promise.all([
+    getRegister(), getCxPlan(), getSchedule(), getSupplyChain(), getProjectGraph(), getRemediation(),
   ]);
   const hero = rows.find((r) => r.component === "UPS-02") ?? rows[0];
   const critical = rows.filter((r) => r.severity === "Critical").length;
@@ -347,6 +348,9 @@ export default async function Page() {
       </h2>
       <ScrollReveal>
         <ErrorBoundary><ProjectGraphView graph={graph} /></ErrorBoundary>
+      </ScrollReveal>
+      <ScrollReveal>
+        <ErrorBoundary><RemediationSimulator sim={remediation} /></ErrorBoundary>
       </ScrollReveal>
 
       <h2 className="section" id="standards">

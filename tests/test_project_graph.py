@@ -10,6 +10,7 @@ from backend.agents.project_graph import (
     assemble,
     blast_radius,
     graph_stats,
+    simulate_remediation,
 )
 
 DEVS = [{
@@ -89,6 +90,46 @@ class TestBlastRadius:
     def test_unknown_deviation_returns_none(self):
         g = assemble(DEVS, CX_PLAN)
         assert blast_radius(g, "DEV-999") is None
+
+
+class TestRemediationSimulator:
+    def test_slip_avoided_equals_lead_time(self):
+        """The causal payoff: catching on upload (week 11) vs at commissioning
+        (week 38) avoids exactly the deviation's lead time. Long-lead item:
+        fix_lead 40 > cx 38, so slip never zeroes but early catch cuts it."""
+        g = assemble(DEVS, CX_PLAN, supply_chain={"items": [
+            {"component": "UPS-02", "vendor": "Vertiv", "lead_time_weeks": 40}]})
+        sim = simulate_remediation(g, "DEV-001")
+        assert sim["fix_lead_weeks"] == 40
+        assert sim["cx_planned_week"] == 38
+        # pramaan slip 11+40-38=13; commissioning slip 38+40-38=40; avoided 27
+        assert sim["scenarios"]["pramaan"]["slip_weeks"] == 13
+        assert sim["scenarios"]["commissioning"]["slip_weeks"] == 40
+        assert sim["slip_avoided_weeks"] == 27
+        assert sim["long_lead_trap"] is True
+
+    def test_short_lead_has_zero_slip_region_and_cliff(self):
+        """A short-lead deviation is flat-zero until the cliff, then climbs."""
+        g = assemble(DEVS, CX_PLAN)  # level-4 typical lead = 25
+        sim = simulate_remediation(g, "DEV-001")
+        assert sim["fix_lead_weeks"] == 25
+        # cliff = cx 38 - lead 25 = 13; catching by week 13 => zero slip
+        assert sim["zero_slip_deadline_week"] == 13
+        assert sim["long_lead_trap"] is False
+        early = [p for p in sim["curve"] if p["catch_week"] <= 13]
+        assert all(p["slip_weeks"] == 0 for p in early)
+        assert sim["curve"][-1]["slip_weeks"] > 0  # climbs after the cliff
+
+    def test_cost_translates_and_is_labelled(self):
+        g = assemble(DEVS, CX_PLAN)
+        sim = simulate_remediation(g, "DEV-001", cost_per_week_lakh=100.0)
+        s = sim["scenarios"]["commissioning"]
+        assert s["cost_lakh"] == round(s["slip_weeks"] * 100.0, 1)
+        assert "assumption" in sim and "defensible unit" in sim["assumption"]
+
+    def test_unknown_deviation_returns_none(self):
+        g = assemble(DEVS, CX_PLAN)
+        assert simulate_remediation(g, "DEV-999") is None
 
 
 class TestGraceful:

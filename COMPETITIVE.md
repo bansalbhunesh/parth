@@ -12,7 +12,7 @@ across all tracks**. Scored on hard, checkable signals, the visible field has:
 | Signal | Visible field (~70 repos, all tracks) | Pramaan |
 |---|---|---|
 | CI pipeline | **0** | ✅ green (tests + 3 evals + tsc + build + Docker smoke + ruff) |
-| Test suite | **1** (minimal) | ✅ 448 tests |
+| Test suite | **1** (minimal) | ✅ 466 tests |
 | Eval harness with ground truth | **0** | ✅ 4 paths + no-key real-pairs harness |
 | Quantified impact model | **0** | ✅ `docs/BUSINESS.md`, every figure cited |
 | Live deployment | 3 | ✅ 2 (Vercel + Render) |
@@ -114,7 +114,7 @@ of the following is in their public feature set — and together they are the mo
    fails" — the number that converts a finding into a dated, prioritised action
    and a board-level schedule-risk metric.
 3. **Open, reproducible eval + real-world result.** A public test harness, a
-   448-test suite, and a **27/27-recall result on real third-party datasheets**
+   466-test suite, and a **27/27-recall result on real third-party datasheets**
    ([`eval/REAL_PAIRS_EVAL.md`](eval/REAL_PAIRS_EVAL.md)). Closed SaaS asks you to
    trust the marketing; we ship the proof.
 4. **No-silent-zero resilience.** A deterministic detector that still returns the

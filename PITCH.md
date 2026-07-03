@@ -81,7 +81,7 @@
 
 > "This isn't a demo that works once. The eval scores two ways so we never inflate
 > a number; clean systems are seeded as true negatives to prove we don't over-flag;
-> 448 tests, CI green. And when the AI model is rate-limited — which *will* happen —
+> 466 tests, CI green. And when the AI model is rate-limited — which *will* happen —
 > a rule-based engine still catches the headline shortfalls. **No silent zeros.**
 > We engineered for the bad day, not just the stage."
 

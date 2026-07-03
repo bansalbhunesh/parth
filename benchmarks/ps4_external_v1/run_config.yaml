@@ -1,0 +1,23 @@
+# ps4_external_v1 — run configuration
+# Flat "key: value" only. Parsed by scripts/benchmark_lib.py:load_config() with a
+# tiny stdlib reader (no pyyaml dependency, so it works in CI).
+
+benchmark: ps4_external_v1
+benchmark_version: 1.0.0
+
+# data locations (relative to benchmarks/ps4_external_v1/)
+labels_file: labels/labels.jsonl
+pairs_dir: pairs
+manifest_file: manifest.csv
+freeze_file: labels/labels_freeze.json
+
+# scoring policy
+include_contested_in_primary: false   # contested labels excluded from primary metrics
+count_not_run_as_miss: true           # timeouts / rule-fallback count as misses in PRIMARY recall
+semantic_matching: true               # report exact AND semantic; primary uses semantic
+
+# run defaults
+default_mode: rule                    # rule | llm
+default_provider: gemini
+default_repeat: 1
+llm_timeout_seconds: 60

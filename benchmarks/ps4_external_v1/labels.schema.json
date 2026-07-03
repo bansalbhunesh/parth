@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PS4 external benchmark — label",
+  "description": "One labeled check. Human-readable contract; enforced by scripts/benchmark_lib.py:validate_labels (stdlib). Frozen before model runs; edits require a benchmark_version bump (see labels/labels_freeze.json).",
+  "type": "object",
+  "required": ["pair_id", "label_id", "system_type", "label_type", "difficulty", "component", "parameter", "expected_finding", "source_basis", "status"],
+  "additionalProperties": false,
+  "properties": {
+    "pair_id": {"type": "string"},
+    "label_id": {"type": "string", "description": "Unique, e.g. P001-L01"},
+    "system_type": {"enum": ["ups", "battery", "generator", "transformer", "switchgear", "ats_sts", "pdu_rpp", "crac_crah", "chiller", "cooling_tower", "bms", "fire_suppression", "rack_aisle", "cabling", "metering_power_quality", "refrigerant", "networking", "other"]},
+    "label_type": {"enum": ["positive_deviation", "clean_negative", "omission", "ambiguous_contested", "adversarial_instruction", "ocr_extraction_case"]},
+    "difficulty": {"enum": ["direct_value", "unit_conversion", "derived_arithmetic", "domain_recall", "categorical_reasoning", "omission_detection", "table_or_layout", "scanned_or_image", "adversarial_noise"]},
+    "component": {"type": "string"},
+    "parameter": {"type": "string"},
+    "required_value": {"type": "string"},
+    "submitted_value": {"type": "string"},
+    "deviation_type": {"type": "string", "description": "below_requirement | above_limit | wrong_category | omission | contested | none"},
+    "severity": {"type": "string", "description": "high | medium | low | info | none"},
+    "expected_finding": {"type": "string"},
+    "evidence_required": {"type": "object", "properties": {"document": {"type": "string"}, "page_or_section": {"type": "string"}, "quote_or_span": {"type": "string"}}},
+    "evidence_submitted": {"type": "object", "properties": {"document": {"type": "string"}, "page_or_section": {"type": "string"}, "quote_or_span": {"type": "string"}}},
+    "expected_commissioning_test": {"type": "string"},
+    "schedule_impact_category": {"type": "string"},
+    "source_basis": {"enum": ["primary_source_document", "public_product_value", "owner_design_basis_team_authored", "team_authored_requirement", "team_authored_submittal", "team_authored_from_public_values", "synthetic_negative", "adversarial_team_authored", "simulation_assumption"]},
+    "status": {"enum": ["draft", "frozen"]},
+    "reviewer_notes": {"type": "string"},
+    "contested": {"type": "boolean"}
+  }
+}

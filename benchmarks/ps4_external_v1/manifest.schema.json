@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PS4 external benchmark — source manifest row",
+  "description": "One row per source document. Human-readable contract; enforced by scripts/benchmark_lib.py:validate_manifest (stdlib, no jsonschema dependency in CI).",
+  "type": "object",
+  "required": ["source_id", "pair_id", "file_name", "system_type", "document_role", "source_origin", "sha256"],
+  "additionalProperties": false,
+  "properties": {
+    "source_id": {"type": "string", "description": "Unique id, e.g. pair_001-owner"},
+    "pair_id": {"type": "string"},
+    "file_name": {"type": "string", "description": "Path relative to the benchmark root"},
+    "system_type": {"enum": ["ups", "battery", "generator", "transformer", "switchgear", "ats_sts", "pdu_rpp", "crac_crah", "chiller", "cooling_tower", "bms", "fire_suppression", "rack_aisle", "cabling", "metering_power_quality", "refrigerant", "networking", "other"]},
+    "document_role": {"enum": ["owner_requirement", "vendor_submittal", "datasheet", "standard_summary", "test_report", "negative_control", "adversarial_document", "image_or_scanned", "other"]},
+    "document_type": {"type": "string", "description": "markdown | pdf | png | html | ..."},
+    "source_origin": {"enum": ["primary_vendor_public", "government_public", "owner_design_basis_team_authored", "team_authored_from_public_values", "synthetic_negative", "adversarial_team_authored", "secondary_reference", "unknown_do_not_use_for_claims"]},
+    "source_url": {"type": "string", "description": "Required when source_origin=primary_vendor_public. Never fabricate."},
+    "source_owner": {"type": "string"},
+    "retrieval_date": {"type": "string", "description": "ISO date; required for primary/government origins"},
+    "version_or_revision": {"type": "string"},
+    "sha256": {"type": "string", "description": "sha256 of the local file (checked against disk)"},
+    "license_or_usage_basis": {"type": "string"},
+    "primary_or_secondary": {"enum": ["primary", "secondary"]},
+    "contains_proprietary_standard_text": {"enum": ["yes", "no"]},
+    "notes": {"type": "string"}
+  }
+}

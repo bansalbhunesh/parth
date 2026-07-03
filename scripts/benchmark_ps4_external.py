@@ -151,12 +151,16 @@ def main() -> int:
     ap.add_argument("--model", default=os.getenv("GEMINI_MODEL", "gemini-2.5-flash"))
     ap.add_argument("--repeat", type=int, default=int(cfg.get("default_repeat", 1)))
     ap.add_argument("--pairs", default="", help="comma-separated pair ids (default: all)")
+    ap.add_argument("--pair-limit", type=int, default=0, help="cap number of pairs (0 = all); for smoke runs")
+    ap.add_argument("--sample", default="", help="comma-separated pair ids to sample (alias of --pairs)")
     args = ap.parse_args()
 
     labels = L.load_labels()
     by_pair = L.group_labels_by_pair(labels)
-    wanted = {p.strip() for p in args.pairs.split(",") if p.strip()}
+    wanted = {p.strip() for p in (args.pairs + "," + args.sample).split(",") if p.strip()}
     pair_ids = sorted(by_pair) if not wanted else [p for p in sorted(by_pair) if p in wanted]
+    if args.pair_limit and args.pair_limit > 0:
+        pair_ids = pair_ids[:args.pair_limit]
 
     freeze = json.loads((L.BENCH / "labels" / "labels_freeze.json").read_text(encoding="utf-8"))
     provider = "rule" if args.mode == "rule" else args.provider

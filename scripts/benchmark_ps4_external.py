@@ -1,0 +1,169 @@
+#!/usr/bin/env python3
+"""benchmark_ps4_external.py — run the PS4 external benchmark and score it.
+
+  python scripts/benchmark_ps4_external.py --mode rule
+  python scripts/benchmark_ps4_external.py --mode llm --provider gemini --repeat 3
+
+Rule mode uses the deterministic detector only (no key). LLM mode uses the live
+analysis path; a pair that falls back to the rule engine or errors is recorded
+`not_run` (never fabricated) and counts as a miss in the PRIMARY metric. Each run
+writes a self-contained directory under runs/.
+"""
+
+import argparse
+import csv
+import json
+import os
+import pathlib
+import re
+import sys
+import time
+from datetime import datetime, timezone
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import benchmark_lib as L  # noqa: E402
+
+sys.path.insert(0, str(L.ROOT))
+from backend.analyze import _resilient_fallback, run_analysis  # noqa: E402
+
+PER_PAIR_COLUMNS = [
+    "pair_id", "system_type", "mode_used", "not_run", "latency_ms",
+    "positives", "negatives", "contested", "tp_exact", "tp_semantic",
+    "fp", "fn_semantic", "neg_false_alerts", "error",
+]
+
+
+def _read_pair(pair_id: str):
+    d = L.BENCH / "pairs" / pair_id
+    return (d / "owner_requirement.md").read_text(encoding="utf-8"), \
+           (d / "vendor_submittal.md").read_text(encoding="utf-8")
+
+
+def run_one(pair_id: str, labels: list[dict], mode: str) -> dict:
+    owner, sub = _read_pair(pair_id)
+    system_id = pair_id.upper()
+    err = None
+    not_run = False
+    t0 = time.time()
+    if mode == "rule":
+        findings = _resilient_fallback(owner, sub, system_id)
+        mode_used = "rule"
+        latency = round((time.time() - t0) * 1000)
+    else:
+        try:
+            res = run_analysis(owner, sub, system_id)
+            findings = res.deviations
+            mode_used = res.mode
+            latency = res.elapsed_ms
+            if res.mode != "llm":
+                not_run = True  # fell back to the rule engine — not an LLM result
+        except Exception as exc:  # record the failure, never fabricate a prediction
+            findings, mode_used, not_run = [], "error", True
+            latency = round((time.time() - t0) * 1000)
+            err = f"{type(exc).__name__}: {str(exc)[:200]}"
+
+    sem = L.score_pair(labels, findings, L.matches_semantic)
+    exa = L.score_pair(labels, findings, L.matches_exact)
+    return {
+        "pair_id": pair_id,
+        "system_type": labels[0]["system_type"] if labels else "other",
+        "mode_used": mode_used, "not_run": not_run, "latency_ms": latency,
+        "positives": sem["positives"], "negatives": sem["negatives"], "contested": sem["contested"],
+        "tp_semantic": sem["tp"], "tp_exact": exa["tp"], "fp": sem["fp"], "fn_semantic": sem["fn"],
+        "neg_false_alerts": sem["neg_false_alerts"],
+        "matched_semantic": sem["matched_labels"], "matched_exact": exa["matched_labels"],
+        "missed_semantic": sem["missed_labels"],
+        "error": err,
+        "input_sha256": L.sha256_text(owner + "\n---\n" + sub),
+        "output_sha256": L.sha256_text(json.dumps(findings, sort_keys=True, ensure_ascii=False)),
+        "_findings": findings,
+    }
+
+
+def _write_run(run_dir: pathlib.Path, results: list[dict], meta: dict) -> dict:
+    run_dir.mkdir(parents=True, exist_ok=True)
+    # run_config.yaml (flat)
+    (run_dir / "run_config.yaml").write_text(
+        "".join(f"{k}: {v}\n" for k, v in meta.items()), encoding="utf-8")
+    # predictions.jsonl
+    with (run_dir / "predictions.jsonl").open("w", encoding="utf-8") as f:
+        for r in results:
+            f.write(json.dumps({
+                "pair_id": r["pair_id"], "mode_used": r["mode_used"], "not_run": r["not_run"],
+                "latency_ms": r["latency_ms"], "input_sha256": r["input_sha256"],
+                "output_sha256": r["output_sha256"], "findings": r["_findings"],
+            }, ensure_ascii=False) + "\n")
+    # per_pair_results.csv
+    with (run_dir / "per_pair_results.csv").open("w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=PER_PAIR_COLUMNS)
+        w.writeheader()
+        for r in results:
+            w.writerow({k: r.get(k) for k in PER_PAIR_COLUMNS})
+    # errors.jsonl
+    with (run_dir / "errors.jsonl").open("w", encoding="utf-8") as f:
+        for r in results:
+            if r.get("error"):
+                f.write(json.dumps({"pair_id": r["pair_id"], "error": r["error"]}) + "\n")
+    # summary.json
+    agg = L.aggregate(results, load_labels_flat())
+    summary = {**meta, **agg}
+    (run_dir / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    return summary
+
+
+def load_labels_flat() -> list[dict]:
+    return L.load_labels()
+
+
+def _sanitize(s: str) -> str:
+    return re.sub(r"[^A-Za-z0-9.-]+", "-", s)
+
+
+def main() -> int:
+    cfg = L.load_config()
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--mode", choices=["rule", "llm"], default=cfg.get("default_mode", "rule"))
+    ap.add_argument("--provider", default=cfg.get("default_provider", "gemini"))
+    ap.add_argument("--model", default=os.getenv("GEMINI_MODEL", "gemini-2.5-flash"))
+    ap.add_argument("--repeat", type=int, default=int(cfg.get("default_repeat", 1)))
+    ap.add_argument("--pairs", default="", help="comma-separated pair ids (default: all)")
+    args = ap.parse_args()
+
+    labels = L.load_labels()
+    by_pair = L.group_labels_by_pair(labels)
+    wanted = {p.strip() for p in args.pairs.split(",") if p.strip()}
+    pair_ids = sorted(by_pair) if not wanted else [p for p in sorted(by_pair) if p in wanted]
+
+    freeze = json.loads((L.BENCH / "labels" / "labels_freeze.json").read_text(encoding="utf-8"))
+    provider = "rule" if args.mode == "rule" else args.provider
+    model = "rule-engine" if args.mode == "rule" else args.model
+
+    last_summary = {}
+    for k in range(1, args.repeat + 1):
+        results = [run_one(pid, by_pair[pid], args.mode) for pid in pair_ids]
+        stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        run_dir = L.BENCH / "runs" / f"{stamp}_{_sanitize(provider)}_{_sanitize(model)}_run{k}"
+        meta = {
+            "benchmark": "ps4_external_v1",
+            "benchmark_version": freeze.get("benchmark_version"),
+            "labels_freeze_sha256": freeze.get("labels_freeze_sha256"),
+            "mode": args.mode, "provider": provider, "model": model,
+            "repeat_index": k, "repeats_total": args.repeat,
+            "timestamp_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "include_contested_in_primary": bool(cfg.get("include_contested_in_primary", False)),
+            "count_not_run_as_miss": bool(cfg.get("count_not_run_as_miss", True)),
+            "evidence_label": "deterministic_offline" if args.mode == "rule" else "live_model",
+        }
+        last_summary = _write_run(run_dir, results, meta)
+        pr = last_summary
+        print(f"[run{k}] {args.mode} {provider}/{model} -> "
+              f"primary recall (sem) {pr['primary_recall_semantic']} "
+              f"({pr['primary_tp']}/{pr['positive_labels']}), "
+              f"FP {pr['false_positives_total']}, "
+              f"clean-neg false-alert {pr['clean_negative_false_alert_rate']}, "
+              f"not_run {pr['pairs_not_run']}, wrote {run_dir.relative_to(L.ROOT).as_posix()}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

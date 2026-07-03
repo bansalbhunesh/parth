@@ -59,13 +59,13 @@ to a sequential runner if LangGraph isn't installed.
 
 - **Benchmark (breadth):** a deterministic 12-project synthetic corpus — 11
   countries, 6 tier standards — for honest, repeatable measurement.
-- **Real evidence (reality):** **11 fully-sourced real pairs** in
-  [`../data/samples/real/`](../data/samples/real/) — Vertiv GXT5 + Cummins QSK60,
+- **Cited evidence (reality):** **15 team-authored pairs** (values cited from public
+  sources) in [`../data/samples/real/`](../data/samples/real/) — Vertiv GXT5 + Cummins QSK60,
   STULZ CyberAir 3 DX, ABB MNS, FM-200/Novec, Carrier-class chiller, EUROBAT VRLA,
   IEC 60076-11 transformer, NFPA 75 cabling — vs Uptime / NFPA 110/2001/75 / EPA
   40 CFR 60 / ASHRAE TC9.9 / EU F-Gas / IEC 61439/61641/60076 / TIA-942. Every
-  value cited in `PROVENANCE.md`. **19 deviations + 0 false positives across eleven
-  systems, none seeded**, all LLM-verified in a single batch (`gemini-2.5-flash`).
+  value cited in `PROVENANCE.md`. **27 hard deviation claims — 4 deterministic-offline,
+  23 live-model — not seeded**; live results vary by model and day.
 
 ## Evaluation
 
@@ -76,7 +76,7 @@ Four paths against the same ground truth, different inputs:
 4. **Real-LLM + real pairs** — capability (the number that matters).
 
 Two-way scoring (exact + semantic) so numbers are never inflated; true negatives
-prove low false-positive rate. **466 tests · GitHub Actions CI green.**
+prove low false-positive rate. **480+ tests · GitHub Actions CI green.**
 
 ## Resilience & ops
 
@@ -102,7 +102,7 @@ No secrets in the repo (env-only keys); request validation (`Field` length caps)
 | Frontend | Next.js 15, React 19, TypeScript — Vercel |
 | PDF | pdfplumber (primary) + PyMuPDF (fallback) |
 | Retrieval | TF-IDF (demo) → pgvector / Qdrant (scale) |
-| Eval / CI | 4 eval paths · 466 tests · GitHub Actions |
+| Eval / CI | 4 eval paths · 480+ tests · GitHub Actions |
 
 ## Scale — demonstrated
 

@@ -1,11 +1,15 @@
-# Real-World Eval — 11 Sourced Datasheet Pairs
+# Real-World Eval — 15 Team-Authored Datasheet Pairs (values cited from public sources)
 
-The number that matters most: **a recall result on real third-party equipment, not
-the synthetic benchmark.** All eight pairs were analysed by `gemini-2.5-flash` over
-the raw documents in a **single batch run (8/8 returned `mode:"llm"`)**. Sources for
-every value: [`../data/samples/real/PROVENANCE.md`](../data/samples/real/PROVENANCE.md).
+The signal that matters most: **a live-model result on team-authored pairs whose
+values are cited from public product datasheets and standards** — distinct from the
+synthetic corpus. These are **not** a frozen, independent, one-to-one-scored
+benchmark: the pairs were authored by the team, some ground-truth labels were added
+after a model run (see the BMS note below), and free-tier quota means not every pair
+runs every time. Live numbers below are **single-run observations on the stated date
+and model**, not evergreen guarantees. Values sourced in
+[`../data/samples/real/PROVENANCE.md`](../data/samples/real/PROVENANCE.md).
 
-## Result (original 8-pair batch) — 17/17 recall, 0 false positives
+## Result (original 8-pair batch, single run) — 17 hard claims recovered, 0 false positives on that run
 
 | # | System | Real source | Deviation (LLM-recovered) |
 |---|--------|-------------|---------------------------|
@@ -19,8 +23,8 @@ every value: [`../data/samples/real/PROVENANCE.md`](../data/samples/real/PROVENA
 | 8 | Cabling | NFPA 75 / TIA-942 | **plenum rating CMP→CMR** |
 | | **TOTAL** | **8 pairs** | **17 / 17 recovered** |
 
-- **Recall = 17/17 = 1.000** on real, sourced datasheets, in one batch.
-- **0 false positives** — every compliant/exceeding value was correctly cleared
+- **17 of 17 hard claims recovered in that single run** (recall varies run-to-run with the model/quota; this is not a frozen score).
+- **0 false positives on that run** — every compliant/exceeding value was correctly cleared
   (IP54 ≥ IP42, 415 V, 10 s start, EC fans, 24 °C supply, Class-F insulation,
   Dyn11, 6% impedance, Cat6A, OM4/OS2). The model does **not** over-flag.
 - **Genuine reasoning:** it derived `4000 ÷ 103 = 38.83 h` and recalled three
@@ -89,24 +93,23 @@ honest numbers instead:
    Counting the contested case against it lands precision at **≈0.9**, not 1.000.
    We report it that way *on purpose*.
 
-> **Live re-verification (gemini-2.5-flash, 2026-06-28, 11 pairs).** Every one of
-> the **19 hard deviations was recovered — recall 1.000** — including the derived
-> fuel calc (4000 gal ÷ 103 GPH = 38.83 h < 48 h) computed by the model itself and
-> the recalled refrigerant GWPs (R410A 2088, R134a 1430, R407C 3220). **Zero false
+> **Live run (gemini-2.5-flash, 2026-06-28, 11 pairs).** On that run the model
+> recovered all **19 hard claims that executed** — including the derived fuel calc
+> (4000 gal ÷ 103 GPH = 38.83 h < 48 h) computed by the model itself and the
+> recalled refrigerant GWPs (R410A 2088, R134a 1430, R407C 3220), with **no false
 > positives** on the documented compliant values (10 s NFPA start, IP54, 415 V,
-> EC fans). The model also surfaced real secondary shortfalls the benchmark
-> under-listed (raised-floor *ultimate* load 3000 → 2500 lbf alongside the design
-> load) and correctly flagged the contested within-allowable ASHRAE setpoint as a
-> design choice. Scoring that single contested case as the self-reported miss is
-> what puts precision at ≈0.9. Recall on hard, falsifiable facts is the number to
-> trust — and it is 1.000.
+> EC fans). It also surfaced secondary shortfalls the benchmark under-listed and
+> correctly flagged the contested within-allowable ASHRAE setpoint as a design
+> choice. **Caveat:** this is a single run on one model/day, over team-authored
+> pairs; it is not a frozen, independent benchmark and the numbers vary run-to-run.
 
-> Pitch framing: don't headline the perfect synthetic score. Say **"19 genuine
-> deviations on real Vertiv / Cummins / STULZ / ABB / Tate / Schneider documents
-> the model had never seen — recall 1.000, zero false positives, live-verified on
-> gemini-2.5-flash — and one contested ASHRAE case we score ourselves at ~0.9
-> because honest experts disagree."** That sentence survives a skeptical ML judge;
-> "F1 = 1.000 everywhere" does not.
+> Pitch framing (honest): **"27 hard deviation claims across 15 team-authored pairs
+> — values cited from public Vertiv / Cummins / STULZ / ABB / Tate / Schneider
+> figures. 4 are checked deterministically offline; the other 23 require a live model
+> and vary run-to-run, so we report them with not-run pairs counted, plus one
+> contested ASHRAE case we score against ourselves."** That survives a skeptical ML
+> judge; "recall 1.000, zero false positives on datasheets the model had never seen"
+> does not — the pairs are team-authored and some labels were model-surfaced.
 
 ---
 
@@ -118,25 +121,29 @@ new LLM-layer harness:
 
 ```bash
 make eval-real          # or: python eval/real_pairs_llm.py --pairs rack-pdu,aspirating-detection,bms-controller
-# → HARD recall (executed): 8/8 = 1.000 · pairs with extra finds: 0
-#   (7/7 for pairs 12–14; pair 15's derived 24 x 26.5 = 636 > 600 kWh caught first-try)
+# The scorer now prints BOTH an executed-only recall and a PRIMARY recall that
+# counts not-run (quota/outage) pairs as misses, with one-to-one TP/FP/FN per pair.
+# Numbers vary run-to-run on a free-tier key.
 ```
 
 Model: `gemini-2.5-flash`. Two notes in the spirit of this dossier:
 
-1. **The model out-audited our answer key.** On the BMS pair the first live
-   run surfaced two genuine consequences of the B-AAC profile shortfall we
-   had not listed (head-end-independent supervision; integral IP↔MS/TP
-   routing). We adopted both into ground truth and re-verified — the stricter
-   key is the one we score against.
+1. **The model out-audited our answer key — at a cost to independence.** On the
+   BMS pair the first live run surfaced two genuine consequences of the B-AAC
+   profile shortfall we had not listed (head-end-independent supervision; integral
+   IP↔MS/TP routing). We adopted both into ground truth. **Honesty caveat:** labels
+   added *after* seeing the model's output are no longer independent of the model,
+   so recall credit for those two should be read with that caveat.
 2. **Decomposition tolerance.** The model sometimes reports the autonomy fact
    as one summary finding, sometimes per-function (scheduling / trending /
    alarming). The matcher accepts either decomposition of the same physical
    fact; it never double-counts.
 
-Running total: **27 hard deviations recovered across 15 pairs, recall 1.000,
-0 false positives** (19 verified June 2026 + 8 verified 2026-07-03), plus the
-one deliberately contested ASHRAE case that keeps our self-score honest.
+Running total across dated single runs: **27 hard deviation claims across 15
+team-authored pairs** — 4 checked deterministically offline, 23 recovered on live
+runs (19 on 2026-06-28 + 8 on 2026-07-03), 0 false positives on those runs — plus
+the one deliberately contested ASHRAE case that keeps our self-score honest. These
+are run-specific observations, not a frozen benchmark score.
 
 Same day, the **full Meghdoot LLM eval was re-verified on a clean key**
 (`gemini-2.5-flash`, 10 paced calls, zero 429s): **P/R/F1 = 1.000 on both

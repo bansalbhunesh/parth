@@ -77,18 +77,18 @@
 > rating that *exceeds* the requirement. Every value we used is citable. Nothing
 > seeded."
 
-## [2:15–2:35] — Built for the bad day (production-grade)
+## [2:15–2:35] — Built for the bad day (resilient)
 
 > "This isn't a demo that works once. The eval scores two ways so we never inflate
 > a number; clean systems are seeded as true negatives to prove we don't over-flag;
-> 466 tests, CI green. And when the AI model is rate-limited — which *will* happen —
+> full CI green (tests + lint + build). And when the AI model is rate-limited — which *will* happen —
 > a rule-based engine still catches the headline shortfalls. **No silent zeros.**
 > We engineered for the bad day, not just the stage."
 
 ## [2:35–3:00] — Impact + close
 
-> "What does that buy? Manual cross-checking is **weeks** of one engineer's time.
-> Pramaan does it in **minutes**, with a full audit trail you can hand to the
+> "What does that buy? Manual cross-checking takes an engineer significant time.
+> Pramaan aims to cut that to **minutes** (the hours saved are not yet measured in a study), with a full audit trail you can hand to the
 > commissioning authority. On an 800-crore project, catching these early avoids
 > **crores** of rework — and protects a schedule where every week of delay is real
 > revenue lost. Pramaan turns *'did they build what we specified?'* into a
@@ -101,9 +101,9 @@
 
 **"Is your data synthetic?"**
 > "Our 12-project *benchmark* is — deliberately, so we can measure breadth across
-> geographies. But you just watched it work on **real Vertiv and Cummins
-> datasheets**, and we ship three such pairs with every number sourced. Benchmark
-> for breadth; real datasheets for reality."
+> geographies. But you just watched it work on a **Vertiv/Cummins pair whose values
+> are cited from published datasheets**, and we ship fifteen such pairs, every value
+> traced. Benchmark for breadth; cited public values for reality."
 
 **"Isn't this just a Gemini wrapper?"**
 > "A wrapper doesn't divide 4,000 by 103 and reason about fuel autonomy, or recall
@@ -127,7 +127,7 @@
 ## The 10-second version (hallway / elevator)
 > "Pramaan reads the spec, the submittal, and the standard, and catches the vendor
 > deviation the day the document lands — not six months later in commissioning.
-> Real datasheets, real reasoning, and it tells you which test it'll fail."
+> Cited public values, real reasoning, and it tells you which test it'll fail."
 
 ## Three things to never skip
 1. **Lead with the money** — Indian data-centre capex and the seven-figure slip.

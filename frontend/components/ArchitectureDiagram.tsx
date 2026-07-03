@@ -202,8 +202,8 @@ export default function ArchitectureDiagram() {
         {[
           { icon: "01", title: "Deterministic eval", desc: "P/R/F1 = 1.000 against labelled ground truth", color: "#35c98b" },
           { icon: "02", title: "Citation chain", desc: "Every finding traces to spec clause + standard + submittal", color: "#5b8cff" },
-          { icon: "03", title: "Zero false positives", desc: "3 true-negative systems (FIRE, BUSWAY, PDU) verified clean", color: "#36d6e7" },
-          { icon: "04", title: "149 weeks saved", desc: "Total lead time across all 7 deviations caught at Week 11", color: "#ffb020" },
+          { icon: "03", title: "Zero false positives (offline)", desc: "3 true-negative systems (FIRE, BUSWAY, PDU) verified clean by the no-key rule engine", color: "#36d6e7" },
+          { icon: "04", title: "149 lead-time weeks", desc: "Total lead time across all 7 deviations caught at Week 11 (not calendar delay avoided)", color: "#ffb020" },
         ].map((p, i) => (
           <div key={i} className={`arch2-prop ${visible ? "arch2-card-visible" : ""}`} style={{ transitionDelay: `${1200 + i * 100}ms` }}>
             <div className="arch2-prop-num" style={{ color: p.color }}>{p.icon}</div>

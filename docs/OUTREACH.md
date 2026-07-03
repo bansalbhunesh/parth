@@ -75,10 +75,10 @@ customer-validation score more than any further code.
 > I built **Pramaan**: it reads a vendor submittal against the design basis and
 > the governing standards (Uptime, NFPA, ASHRAE, IEC…) and flags every deviation
 > **the day the submittal arrives** — then tells you which commissioning test it
-> would fail and how many weeks early you caught it. On a real Vertiv UPS + Cummins
-> genset pair it flagged a 7-min battery vs a 10-min Tier-IV spec, a 95.9% vs 96%
-> efficiency miss, a missing THD value, and EPA Tier 2 vs Tier 4 — and it even
-> reads **scanned, image-only** submittals via OCR.
+> would fail and how many weeks early you caught it. On a Vertiv-UPS + Cummins-genset
+> pair (values cited from published datasheets) it flagged a 7-min battery vs a 10-min Tier-IV spec, a 95.9% vs 96%
+> efficiency miss, a missing THD value, and EPA Tier 2 vs Tier 4 — and it can also
+> read **scanned, image-only** submittals via OCR where Tesseract is installed.
 >
 > I'm not selling anything. I'd just like 60 seconds of honest reaction:
 > **does this match a real pain you've seen, and would catching it on submittal

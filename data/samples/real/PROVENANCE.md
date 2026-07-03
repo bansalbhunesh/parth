@@ -1,10 +1,12 @@
-# Provenance — Real-Datasheet Test Pair
+# Provenance — Team-Authored Evaluation Pairs (values cited from public sources)
 
-Unlike the synthetic corpus (where deviations are seeded), **every value in this
-pair is a real, published figure** from a manufacturer datasheet or a governing
-standard. The deviations are genuine: a real product's real specs falling short
-of a real standard requirement. Numbers are facts (not reproduced datasheet
-prose), each traceable below.
+Unlike the synthetic corpus (where deviations are seeded), these pairs are
+**team-authored documents whose values are cited from public manufacturer
+datasheets and governing standards**. They are realistic engineering documents
+written in natural language — not downloaded, immutable vendor files. Each value is
+traceable to a cited public source below. Some pairs mix a hard published ceiling
+with a realistic proposal choice; those are flagged inline as "scenario" in the
+honesty notes rather than presented as fixed datasheet maxima.
 
 ## Vendor products (submittal side)
 
@@ -37,7 +39,7 @@ prose), each traceable below.
 
 ## The genuine deviations (real spec vs real product)
 
-| # | Parameter | Required (standard) | Provided (real datasheet) | Note |
+| # | Parameter | Required (standard) | Provided (cited datasheet value) | Note |
 |---|-----------|---------------------|---------------------------|------|
 | 1 | UPS battery autonomy | ≥ 10 min | **7 min** (GXT5-1000) | Real 3-min shortfall |
 | 2 | UPS online efficiency | ≥ 96% | **95.9%** online (99% is ECO) | Real 0.1% shortfall; ECO not creditable |
@@ -46,8 +48,8 @@ prose), each traceable below.
 | 5 | Generator fuel autonomy | ≥ 48 h | **38.8 h** (4,000 gal ÷ 103 GPH) | Real derived shortfall |
 | — | Generator start time | ≤ 10 s | 10 s (NFPA 110 Type 10) | **Compliant** — true negative |
 
-Five genuine deviations and one true negative — none seeded, all grounded in
-published figures. The start-time true negative checks the system does not
+Five genuine deviations and one true negative — grounded in cited public figures,
+not the seeded corpus. The start-time true negative checks the system does not
 false-positive on a compliant value.
 
 ## What the pipeline recovers
@@ -179,13 +181,13 @@ never stated — genuine domain knowledge, not string-matching.
 
 ---
 
-**Together, the eight real pairs give 17 genuine deviations + 0 false positives**
-(recall 1.000, single batch run — see [`../../eval/REAL_PAIRS_EVAL.md`](../../eval/REAL_PAIRS_EVAL.md))
+**Together, the eight pairs carry 17 hard deviation claims** (a single live run
+found 0 false positives — see [`../../../eval/REAL_PAIRS_EVAL.md`](../../../eval/REAL_PAIRS_EVAL.md))
 across UPS, generator, cooling, LV switchgear, fire suppression, chiller, battery,
-transformer, and cabling — sourced to Vertiv, Cummins, STULZ, ABB, FM-200/Novec,
+transformer, and cabling — values cited to Vertiv, Cummins, STULZ, ABB, FM-200/Novec,
 Carrier-class, EUROBAT, IEC/NFPA/TIA-942, and the standards Uptime Tier IV, NFPA
 110/2001/75, EPA 40 CFR 60, ASHRAE 90.1/TC9.9, EU F-Gas, US AIM Act, IEC
-61439/61641/60076, IEEE 1188. **None seeded.**
+61439/61641/60076, IEEE 1188. **Values cited from public sources, not seeded.**
 
 ---
 
@@ -217,7 +219,7 @@ and 1000 A current are correctly **not** flagged.
 
 This pair exists so the benchmark is **not** a suspicious 1.000 everywhere. Counting
 the contested case against the system yields a precision near **0.9** (live-verified, gemini-2.5-flash) — reported
-openly (see [`../../eval/REAL_PAIRS_EVAL.md`](../../eval/REAL_PAIRS_EVAL.md)). The
+openly (see [`../../../eval/REAL_PAIRS_EVAL.md`](../../../eval/REAL_PAIRS_EVAL.md)). The
 offline detector deliberately does **not** fire on it (a confident rule has no
 business adjudicating a judgment call); it is reserved for the reasoning layer.
 
@@ -234,18 +236,18 @@ business adjudicating a judgment call); it is reserved for the reasoning layer.
 - **(C) Contested** — reasonable experts disagree: the 30 °C supply setpoint.
   *(1 deviation.)*
 
-**Eleven real pairs, ~21 deviation claims, every value traced to a published
-source. None seeded.**
+**Eleven pairs, ~21 deviation claims, every value traced to a cited public
+source. Not seeded.**
 
 ## Pairs 12–14 — added 2026-07-03 (PDU / ASD / BMS controller)
 
-Offline-checked (zero false positives — the compliant values below are
-correctly cleared) and **live-verified 2026-07-03** (`make eval-real`,
-gemini-2.5-flash): **7/7 hard deviations recovered, 0 findings beyond ground
-truth**. The first live run also surfaced two *additional* genuine
-consequences of the BMS profile shortfall (head-end autonomy, integral IP
-routing) that we then added to the ground truth — the model out-audited our
-initial answer key, and we kept the stricter version.
+Offline-checked (0 false positives on the deterministic subset — the compliant
+values below are correctly cleared) and **live-checked on 2026-07-03, single run**
+(`make eval-real`, gemini-2.5-flash): **7/7 hard claims recovered, 0 findings beyond
+ground truth on that run**. That run also surfaced two *additional* consequences of
+the BMS profile shortfall (head-end autonomy, integral IP routing) that we then
+added to the ground truth. **Caveat:** labels added after seeing the model output
+are no longer independent of it.
 
 **Pair 12 — Rack PDU** (`design_basis_pdu.md` + `submittal_pdu_px3_1000.md`)
 - **Raritan PX3-1493V, PX3-1000 "Monitored" series**: energy metering at the
@@ -307,6 +309,7 @@ initial answer key, and we kept the stricter version.
   26.5 <= 50 kWh per unit, 1,000 mm >= 914 mm separation, rack-level UL 9540A
   data provided.
 
-**Fifteen real pairs, 27 hard deviation claims + 1 contested, every value
-traced to a published source. None seeded. 19 live-verified June 2026 +
-8 live-verified 2026-07-03 (gemini-2.5-flash), 0 false positives.**
+**Fifteen team-authored pairs, 27 hard deviation claims + 1 contested, every value
+traced to a cited public source. Not seeded. 4 checked deterministically offline;
+23 recovered on dated single live runs (19 on 2026-06-28 + 8 on 2026-07-03,
+gemini-2.5-flash), 0 false positives on those runs — not a frozen benchmark.**

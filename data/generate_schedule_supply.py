@@ -9,7 +9,7 @@ a level, sequential across levels) -> RFS (ready-for-service, the L5 milestone).
 
 Supply model: one long-lead shipment per major system present (UPS/GEN/SWGR/COOL),
 with a 10-stage pipeline summing to a real 2024-26 lead time, the same vendors as
-the repo's real datasheet pairs, and a couple of deliberately at-risk items.
+the repo's team-authored evaluation pairs, and a couple of deliberately at-risk items.
 
 Run: python data/generate_schedule_supply.py   (writes into each project dir)
 """

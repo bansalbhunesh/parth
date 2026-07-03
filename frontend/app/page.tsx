@@ -415,7 +415,7 @@ export default async function Page() {
           EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4
         </div>
         <div className="footer-meta">
-          12 Projects &middot; 11 Countries &middot; 50 Deviations &middot; 1,024 Weeks Saved &middot; Real-datasheet recall 1.000, 0 FP &middot; Synthetic F1 1.000 by construction
+          12 Projects &middot; 11 Countries &middot; 50 Synthetic Deviations &middot; 1,024 Lead-time-weeks (synthetic sum) &middot; 15 Team-authored Pairs &middot; Offline 0 FP &middot; Synthetic F1 1.000 by construction
         </div>
       </div>
     </main>

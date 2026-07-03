@@ -1,6 +1,14 @@
 # Pramaan — Deep Code-Grounded Audit & Hardening Log
 _ET AI Hackathon 2026 · Problem Statement 4 · audit + fixes dated 2026-06-28_
 
+> **⚠️ Superseded (2026-07-03):** this internal 2026-06-28 audit predates the fresh
+> external-judge audit. Its *pitch recommendations* (e.g. "recall 1.000, zero false
+> positives, documents the model had never seen") are **no longer endorsed** — the
+> current honest framing lives in README / PROVENANCE / `eval/REAL_PAIRS_EVAL.md`:
+> team-authored pairs with cited public values, 4 deterministic-offline + 23
+> live-model claims, results reported with not-run pairs counted. Retained as a
+> historical record only.
+
 This is a **code-grounded** audit: every claim below was verified against the
 actual source (file:line), not against the marketing prose. It then records the
 fixes applied in the same pass. The headline brief: Pramaan was already a

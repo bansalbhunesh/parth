@@ -59,11 +59,11 @@ export default async function JudgePage() {
         </div>
         <div className="jm-metric">
           <div className="jm-metric-val lead">1,024</div>
-          <div className="jm-metric-label">weeks of lead time saved</div>
+          <div className="jm-metric-label">lead-time weeks (synthetic portfolio sum)</div>
         </div>
         <div className="jm-metric">
-          <div className="jm-metric-val ok">1.000</div>
-          <div className="jm-metric-label">recall on real, unseen datasheets · 0 FP · ~0.9 precision</div>
+          <div className="jm-metric-val ok">15</div>
+          <div className="jm-metric-label">team-authored eval pairs · 4 offline-checked · 23 live-model</div>
         </div>
         <div className="jm-metric">
           <div className="jm-metric-val accent">12 · 11</div>
@@ -73,13 +73,13 @@ export default async function JudgePage() {
 
       <section className="jm-section">
         <div className="jm-section-head">
-          <h2>Try it live — on a document we’ve never seen</h2>
+          <h2>Try it live — reasoning over a document, not keywords</h2>
           <p>
-            Hit <strong>“Load real document ★”</strong> (a real Vertiv UPS datasheet
-            vs a design basis), or upload your own spec + submittal. Pramaan reasons
+            Hit <strong>“Load real document ★”</strong> (a Vertiv-datasheet-derived
+            submittal vs a design basis), or upload your own spec + submittal. Pramaan reasons
             out the non-compliances from scratch and cites the standard, the
             commissioning test, and the lead time for each. Every value in our
-            real-pairs benchmark is independently sourced —{" "}
+            evaluation pairs is cited to a public source —{" "}
             <a
               href="https://github.com/bansalbhunesh/parth/blob/main/data/samples/real/PROVENANCE.md"
               target="_blank"

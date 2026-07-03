@@ -21,9 +21,10 @@ quote arrives** — when fixing it is a one-line email, not a schedule disaster.
 each issue it says *which test it will fail and how many weeks early you caught it*.
 
 ## Why it's believable (not a slide)
-We pointed it at **real spec sheets from real vendors** — Vertiv, Cummins, STULZ,
-ABB and others — against the real industry standards. It found **19 genuine problems
-out of 19, with zero false alarms.** It even did engineering on its own: it divided
+We pointed it at **spec sheets whose values are cited from real vendors** — Vertiv, Cummins, STULZ,
+ABB and others — against the real industry standards. Across 15 team-authored pairs it targets **27 hard
+deviation claims — 4 checked deterministically offline, the rest by the live model — with results
+reported honestly.** It even did engineering on its own: it divided
 a fuel tank by a burn rate to prove a generator couldn't last the required time, and
 it knew the environmental rating of a refrigerant the spec sheet never printed. Try
 it live: **parth-tan.vercel.app/judge**.

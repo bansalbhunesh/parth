@@ -1,12 +1,12 @@
 # Real-Document Result — Live LLM Analysis
 
-**Proof that Pramaan works on a genuine third-party document it has never seen.**
+**A live run on a third-party Vertiv datasheet (values from Vertiv's published figures), outside the seeded corpus.**
 
-On 2026-06-27 the deployed app analysed a **real Vertiv Liebert GXT MT UPS
-datasheet** (downloaded from vertiv.com, 270 KB PDF) against the edge data-centre
+On 2026-06-27 the deployed app analysed a **Vertiv Liebert GXT MT UPS
+datasheet** (values from Vertiv's published figures) against the edge data-centre
 design basis (`design_basis_edge.pdf`). Running live in `llm mode`
-(`gemini-2.5-pro`), it recovered **8 genuine deviations** — nothing in this pair
-came from the seeded corpus.
+(`gemini-2.5-pro`), that single run recovered **8 deviations** — nothing in this
+pair came from the seeded corpus. (Live results vary run-to-run.)
 
 | # | Component | Parameter | Required | Provided | Severity | Standard | Cx test | Lead |
 |---|-----------|-----------|----------|----------|----------|----------|---------|------|
@@ -49,8 +49,8 @@ not pattern-matching:
 - **It read intent, not keywords.** The management card is offered as "optional";
   the basis requires it included — flagged as an incomplete proposal (#8).
 - Each finding carries a **severity, a cited standard, a predicted commissioning
-  test, and a lead-time-to-failure** — the full audit chain, on a document the
-  system had never encountered.
+  test, and a lead-time-to-failure** — the full audit chain, on a document outside
+  the seeded corpus.
 
 ## Reproduce it
 

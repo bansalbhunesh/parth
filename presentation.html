@@ -533,7 +533,7 @@
     Spec-to-Site Deviation Sentinel + Commissioning Risk Twin
   </p>
   <p class="fade-up" style="color:var(--muted); margin-top:10px; font-size:0.9rem;">
-    <em>Pramaan (प्रमाण) — Sanskrit for <strong style="color:var(--cyan);">proof</strong>. Named on purpose: every number here is reproducible.</em>
+    <em>Pramaan (प्रमाण) — Sanskrit for <strong style="color:var(--cyan);">proof</strong>. Named on purpose: the deterministic numbers reproduce offline; live-model results are reported honestly, not as a fixed score.</em>
   </p>
   <div class="metric-row fade-up" style="margin-top:40px;">
     <div class="metric"><div class="metric-val accent">50</div><div class="metric-label">Deviations Caught</div></div>
@@ -678,7 +678,7 @@
     </div>
   </div>
   <p class="fade-up" style="color:var(--muted); font-size:0.85rem; margin-top:16px;">
-    <strong>The number that matters:</strong> 11 sourced real datasheet pairs — 27 deviations (recall 1.000), 0 false positives, and a self-scored &approx;0.9 on one contested ASHRAE case (live-verified, gemini-2.5-flash). We report ~0.9, not a suspicious 1.000.
+    <strong>The signal that matters:</strong> 15 team-authored evaluation pairs (values cited from public sources) — 27 hard deviation claims, of which 4 are checked deterministically offline and 23 require live-model evaluation, plus one contested ASHRAE case scored against us. Live results are reported with not-run pairs counted, not as a suspicious 1.000.
   </p>
 </div>
 
@@ -812,7 +812,7 @@
 <div class="slide">
   <span class="tag tag-green fade-up">EVAL HARNESS</span>
   <h2 class="fade-up">Reproducibility checks + proof on real documents</h2>
-  <p class="subtitle fade-up" style="margin-bottom:28px;">Paths 1&ndash;2 are seeded-corpus integrity checks (1.000 <em>by construction</em>, not detection skill); Path 3 &mdash; real, unseen datasheets &mdash; is the credibility signal.</p>
+  <p class="subtitle fade-up" style="margin-bottom:28px;">Paths 1&ndash;2 are seeded-corpus integrity checks (1.000 <em>by construction</em>, not detection skill); Path 3 &mdash; team-authored pairs with values cited from public sources &mdash; is the credibility signal.</p>
   <div class="grid grid-3 fade-up" style="max-width:950px;">
     <div class="card">
       <h3 style="color:var(--cyan);">Path 1: Structured</h3>
@@ -828,9 +828,9 @@
     </div>
     <div class="card">
       <h3 style="color:var(--gold);">Path 3: LLM Agent</h3>
-      <p style="color:var(--muted); font-size:0.85rem; margin-top:8px;">Real, unseen datasheets → LLM reasoning → deviations</p>
-      <div class="card-value green" style="margin-top:12px;">Recall 1.000</div>
-      <p style="color:var(--muted); font-size:0.8rem;">27/27 hard · 0 FP · ~0.9 precision (live-verified)</p>
+      <p style="color:var(--muted); font-size:0.85rem; margin-top:8px;">Team-authored pairs (cited public values) → LLM reasoning → deviations</p>
+      <div class="card-value green" style="margin-top:12px;">15 pairs</div>
+      <p style="color:var(--muted); font-size:0.8rem;">27 hard claims · 4 offline · 23 live-model · 1 contested</p>
     </div>
   </div>
   <p class="fade-up" style="color:var(--muted); font-size:0.85rem; margin-top:16px;">
@@ -841,12 +841,12 @@
 <!-- SLIDE 9b: Verifiability -->
 <div class="slide">
   <span class="tag tag-cyan fade-up">DON'T TRUST US — RUN IT</span>
-  <h2 class="fade-up">Every Number on These Slides Reproduces Offline</h2>
+  <h2 class="fade-up">The Deterministic Numbers Reproduce Offline</h2>
   <p class="subtitle fade-up" style="margin-bottom:28px;">One command. No API key. A judge's laptop is enough.</p>
   <div class="card fade-up" style="max-width:720px; text-align:left;">
     <p style="font-family:var(--mono); color:var(--cyan); font-size:1.05rem;">git clone &middot; make verify</p>
     <ul class="features" style="max-width:unset; margin-top:12px;">
-      <li><strong>466 tests</strong> — API, agents, security, resilience, real pairs</li>
+      <li><strong>480+ tests</strong> — API, agents, security, resilience, real pairs</li>
       <li><strong>3 eval harnesses</strong> — every headline metric regenerated</li>
       <li><strong>Type-check + production build</strong> — CI green, publicly visible</li>
       <li><strong>No-key real-datasheet harness</strong> — <code style="font-family:var(--mono);">eval/real_pairs_offline.py</code></li>
@@ -900,11 +900,11 @@
     </div>
     <div class="rubric-card">
       <h3><span class="green">Business Impact</span></h3>
-      <p>1,024 weeks of early detection across 50 findings in 12 projects. Interactive ROI calculator shows ₹1,788 lakhs avoided on ₹800 Cr project.</p>
+      <p>1,024 lead-time-weeks summed across 50 synthetic findings (a portfolio sum of lookup-table lead times, not calendar delay avoided). ROI calculator is an illustrative scenario model: ₹1,788 lakhs avoided on a ₹800 Cr project under stated assumptions.</p>
     </div>
     <div class="rubric-card">
       <h3><span class="purple">Technical Excellence</span></h3>
-      <p>Synthetic portfolio is 1.000 by construction (breadth check); the real signal is 15 sourced datasheet pairs — 27 deviations (recall 1.000), 0 false positives, self-scored &approx;0.9 on one contested case. 435 tests. 28 endpoints. Independent text + real-LLM evaluation.</p>
+      <p>Synthetic portfolio is 1.000 by construction (breadth check); the real signal is 15 team-authored pairs (cited public values) — 27 hard deviation claims (4 deterministic-offline, 23 live-model), one contested case scored against us. 28 endpoints. Independent text + live-LLM evaluation.</p>
     </div>
     <div class="rubric-card">
       <h3><span class="gold">Scalability & UX</span></h3>
@@ -974,7 +974,7 @@
     </div>
     <div class="card">
       <div class="card-value accent">&lt; 30</div>
-      <div class="card-label">Payback (Days)</div>
+      <div class="card-label">Payback (Days, scenario)</div>
     </div>
   </div>
   <p class="subtitle fade-up" style="margin-top:28px;">
@@ -995,8 +995,8 @@
   </h1>
   <div class="glow-line fade-up"></div>
   <p class="subtitle fade-up">
-    50 deviations &middot; 1,024 weeks saved &middot; 12 projects &middot; 11 countries<br>
-    Real-doc: 0 false positives &middot; self-scored ~0.9 &middot; 466 tests
+    50 synthetic deviations &middot; 1,024 lead-time-weeks (synthetic sum) &middot; 12 projects &middot; 11 countries<br>
+    Offline: 0 false positives &middot; self-scored ~0.9 on 1 contested case &middot; 15 team-authored pairs
   </p>
   <div class="final-cta fade-up">
     <a class="cta-btn cta-primary" href="https://parth-tan.vercel.app" target="_blank">▶ Live Demo</a>

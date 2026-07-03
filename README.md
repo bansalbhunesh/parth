@@ -15,11 +15,11 @@
 <p align="center">
   <img src="https://img.shields.io/badge/projects-12-a855f7?style=flat-square&labelColor=1a1020" alt="12 projects">
   <img src="https://img.shields.io/badge/deviations_caught-50-ff4d4d?style=flat-square&labelColor=1a0f12" alt="50 deviations">
-  <img src="https://img.shields.io/badge/weeks_saved-1024-36d6e7?style=flat-square&labelColor=0d1a1e" alt="1024 weeks">
-  <img src="https://img.shields.io/badge/real_datasheet_pairs-15-35c98b?style=flat-square&labelColor=0d1a14" alt="15 real pairs">
-  <img src="https://img.shields.io/badge/real--doc_false_positives-0-35c98b?style=flat-square&labelColor=0d1a14" alt="0 false positives on real docs">
+  <img src="https://img.shields.io/badge/lead--time_weeks-1024-36d6e7?style=flat-square&labelColor=0d1a1e" alt="1024 lead-time weeks (synthetic portfolio sum)">
+  <img src="https://img.shields.io/badge/evaluation_pairs-15-35c98b?style=flat-square&labelColor=0d1a14" alt="15 team-authored evaluation pairs">
+  <img src="https://img.shields.io/badge/offline_false_positives-0-35c98b?style=flat-square&labelColor=0d1a14" alt="0 false positives on the deterministic offline checks">
   <img src="https://img.shields.io/badge/honest_precision-0.9-ffb020?style=flat-square&labelColor=1a1508" alt="Honest precision 0.9">
-  <img src="https://img.shields.io/badge/tests-466-5b8cff?style=flat-square&labelColor=111820" alt="466 tests">
+  <img src="https://img.shields.io/badge/tests-480%2B-5b8cff?style=flat-square&labelColor=111820" alt="480+ tests">
   <img src="https://img.shields.io/badge/agents-5-5b8cff?style=flat-square&labelColor=111820" alt="5 agents">
   <img src="https://img.shields.io/badge/countries-11-ffb020?style=flat-square&labelColor=1a1508" alt="11 countries">
   <img src="https://img.shields.io/github/actions/workflow/status/bansalbhunesh/parth/ci.yml?style=flat-square&labelColor=111820&label=CI" alt="CI">
@@ -60,7 +60,7 @@
 ## ⚡ Judges: start here (2 minutes)
 
 1. **See it catch a real deviation** → [Judge Mode](https://parth-tan.vercel.app/judge): click **Load real document ★**, hit **Analyze**, watch it derive 38.8 h of fuel autonomy from a real Cummins datasheet and name the commissioning test that fails.
-2. **Don't take our word for any number** → `git clone … && make verify` — 466 tests, three eval harnesses, and the frontend type-check reproduce every headline figure offline, no API key. A no-key harness for the real-datasheet result: `python eval/real_pairs_offline.py`.
+2. **Don't take our word for any number** → `git clone … && make verify` — the unit-test suite, the deterministic eval harnesses, and the frontend type-check reproduce offline with no API key. The **live-model** real-datasheet findings (23 of the 27 hard claims) vary run-to-run and are reported as such, not as a fixed score. No-key deterministic harness: `python eval/real_pairs_offline.py`.
 3. **The 3-minute pitch video** → *(link lands here on submission)* · script: [`PITCH.md`](PITCH.md)
 4. **Business case in one page** → [`docs/BUSINESS.md`](docs/BUSINESS.md) — what one caught deviation is worth ($10–40M/month of commissioning slip).
 5. **Every value in the real pairs is citable** → [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md).
@@ -100,9 +100,9 @@
 
 > **$30 billion is flowing into Indian data centres on the way to 2 GW by 2026 — and 9 in 10 large builds slip schedule, most expensively at commissioning.** One undetected vendor deviation can mean **$10–40M a month** of delay on a 50 MW build. Pramaan catches it **the day the submittal lands** — when the fix is a one-line RFI, not a seven-figure slip. → [`docs/BUSINESS.md`](docs/BUSINESS.md)
 >
-> **It reasons over real documents — not keywords.** Across **15 sourced datasheet pairs** — Vertiv, Cummins, STULZ, ABB, Tate ConCore, Schneider Canalis, **Raritan, Xtralis VESDA, Distech** — against real standards (Uptime, NFPA, EPA, ASHRAE, IEC, CISCA), it recovered **27 genuine deviations — recall 1.000 — + 0 false positives, none seeded** — including arithmetic it did itself (4,000 gal ÷ 103 GPH = **38.8 h** vs 48 required) and refrigerant/agent GWPs it **recalled from domain knowledge** (R-410A 2,088, R-134a 1,430, FM-200 3,220) the datasheets never stated. Two of those are **hard product-ceiling shortfalls** (ConCore 1250 = 1,250 lbf vs 1,500 required; Canalis KTA10 = 50 kA vs 65). We deliberately keep **one contested case and score ourselves ≈ 0.9 (live-verified, gemini-2.5-flash: 27/27 hard deviations recovered) — not a suspicious 1.000.** Every value sourced → [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md)
+> **It reasons over documents — not keywords.** Across **15 team-authored evaluation pairs** whose values are cited from public product datasheets and standards — Vertiv, Cummins, STULZ, ABB, Tate ConCore, Schneider Canalis, **Raritan, Xtralis VESDA, Distech** (Uptime, NFPA, EPA, ASHRAE, IEC, CISCA) — it targets **27 hard deviation claims: 4 are checked deterministically offline (no key); the remaining 23 require live-model evaluation** and vary by model and day. Live runs have recovered arithmetic it did itself (4,000 gal ÷ 103 GPH = **38.8 h** vs 48 required) and refrigerant/agent GWPs it **recalled from domain knowledge** (R-410A 2,088, R-134a 1,430, FM-200 3,220) the datasheets never stated. Two claims are **hard product-ceiling shortfalls** (ConCore 1250 = 1,250 lbf vs 1,500 required; Canalis KTA10 = 50 kA vs 65). We deliberately keep **one contested case and score it against ourselves — not a suspicious 1.000.** Live results are reported with not-run pairs counted; every value is traced in → [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md)
 >
-> **And it's production-grade.** Each finding cites the standard, predicts the commissioning test it will fail, and the weeks of lead time. When the AI is rate-limited, a rule-based engine still catches the headline shortfalls — **no silent zeros.** Benchmarked across 12 projects / 11 countries for breadth · 466 tests · CI green.
+> **And it's engineered to degrade gracefully.** Each finding cites the standard, predicts the commissioning test it will fail, and the weeks of lead time. When the AI is rate-limited, a rule-based engine still catches the headline shortfalls — **no silent zeros.** Benchmarked across 12 projects / 11 countries for breadth · full CI (tests + lint + build) green. *(This is a prototype, not a hardened production service — no auth, rate-limiting, or tenant isolation yet.)*
 >
 > **The one-line moat:** other tools stop at the spec-vs-submittal mismatch — Pramaan names the exact *commissioning test* that deviation will fail and the *weeks of lead time* to fix it first, a domain-informed rule + LLM hybrid that turns a design-review miss into a scheduled, preventable commissioning failure. **And it generalises:** any *specification → vendor submittal → acceptance-test* domain — pharma GMP qualification, aerospace AS9100, medical-device V&V, switchgear type-testing — is the same problem. Data-centre EPC is simply the highest-stakes instance we proved it on.
 
@@ -116,13 +116,15 @@
 2. In **Live Analysis**, click **“Load real document ★”** — or upload your own spec + submittal PDFs.
 3. Hit **Analyze**. Watch it stream the reasoning, then list each deviation with its severity, the standard it cites, the commissioning test it predicts will fail, and the lead time.
 
-Ready-made demo pairs ship in [`data/samples/`](data/samples/): a UPS edge pair, a **real Vertiv datasheet**, a standby-generator pair, and **fifteen fully-sourced real pairs** (Vertiv, Cummins, STULZ, ABB, FM-200/Novec, Carrier-class, EUROBAT, IEC 60076-11 transformer, NFPA 75 cabling, Tate ConCore raised-floor, Schneider Canalis busway, ASHRAE supply-air setpoint — every value citable in [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md)). Drop any pair into the analyzer.
+Ready-made demo pairs ship in [`data/samples/`](data/samples/): a UPS edge pair, a Vertiv-datasheet-derived pair, a standby-generator pair, and **fifteen team-authored evaluation pairs** whose values are cited from public sources (Vertiv, Cummins, STULZ, ABB, FM-200/Novec, Carrier-class, EUROBAT, IEC 60076-11 transformer, NFPA 75 cabling, Tate ConCore raised-floor, Schneider Canalis busway, ASHRAE supply-air setpoint — every value traced in [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md)). Drop any pair into the analyzer.
 
-> **It even reads scanned paper.** Real submittals arrive as stamped, scanned,
-> image-only PDFs. Try [`data/samples/real/scanned/submittal_ups_scanned.pdf`](data/samples/real/scanned/submittal_ups_scanned.pdf)
-> (no text layer) against `design_basis_helios.md` — Pramaan OCRs it and detects
-> the deviations anyway; where OCR isn't available it says so plainly rather than
-> returning a silent zero. Details: [`eval/OCR_SCANNED_PDF.md`](eval/OCR_SCANNED_PDF.md).
+> **It can read scanned paper where OCR is installed.** Real submittals arrive as
+> stamped, scanned, image-only PDFs. With Tesseract present (the `Dockerfile.backend`
+> image) Pramaan OCRs [`data/samples/real/scanned/submittal_ups_scanned.pdf`](data/samples/real/scanned/submittal_ups_scanned.pdf)
+> (no text layer) against `design_basis_helios.md` and detects the deviations. **The
+> default hosted demo (Render / docker-compose) does not bundle Tesseract**, so it
+> returns a clear "OCR unavailable" message rather than a silent zero. Details:
+> [`eval/OCR_SCANNED_PDF.md`](eval/OCR_SCANNED_PDF.md).
 
 > Health at a glance: **[`/health`](https://parth-3puc.onrender.com/health)** shows whether the LLM is wired (`"ready": true`); **[`/llm-check`](https://parth-3puc.onrender.com/llm-check)** makes a real call and reports the exact status. The app **degrades gracefully** — every endpoint returns 200 and the dashboard renders from bundled data even with no API key.
 
@@ -230,7 +232,7 @@ real-document run is captured in
 | Cx prediction | **1.000** | ≥ 0.85 |
 | Citation faithfulness | N/A | ≥ 0.95 |
 
-<sub>**Baseline column = a by-construction integrity check** — it compares pre-extracted triples to ground truth, so P/R/F1 read 1.000 *by construction*, and **baseline Cx is echoed from the answer key, not predicted**. The honest capability signal is the **real-datasheet eval** (recall 1.000, ~0.9 precision, 0 FP) and the LLM-agent column — we label this rather than headline it.</sub>
+<sub>**Baseline column = a by-construction integrity check** — it compares pre-extracted triples to ground truth, so P/R/F1 read 1.000 *by construction*, and **baseline Cx is echoed from the answer key, not predicted**. The honest capability signal is the **team-authored evaluation pairs** (4 checked deterministically offline with 0 false positives on those; the remaining 23 live-model, reported with not-run pairs counted) and the LLM-agent column — we label this rather than headline it.</sub>
 
 </td>
 <td>
@@ -277,15 +279,16 @@ Pramaan is evaluated across **12 project datasets** spanning different tiers, ge
 
 ```bash
 python3 eval/multi_project_eval.py
-# → 12 projects, 50 deviations, P=1.000 R=1.000 F1=1.000, 1024 weeks saved
+# → 12 projects, 50 deviations, P=1.000 R=1.000 F1=1.000, 1024 lead-time-weeks summed (synthetic)
 
 python3 eval/multi_project_eval.py --json
 ```
 
 > **Real-LLM verified, not just structural.** The table above is the offline
 > baseline. With a real frontier model (`gemini-2.5-pro`) reasoning over the
-> **raw documents** from scratch, Pramaan recovers **50/50 deviations across all
-> 12 projects — Recall 1.000, Precision 1.000, F1 1.000.** Full provenance,
+> **raw documents** from scratch, a live run recovered **50/50 deviations across all
+> 12 projects — Recall/Precision/F1 = 1.000 on this synthetic portfolio** (a breadth
+> check, *not* external accuracy; live results vary run-to-run). Full provenance,
 > per-model breakdown, and the two issues real runs surfaced (and how we fixed
 > them) are documented in [`eval/REAL_WORLD_RESULTS.md`](eval/REAL_WORLD_RESULTS.md).
 > Reproduce: `python3 eval/multi_project_eval.py --detector llm` (needs an API key).
@@ -332,8 +335,10 @@ python3 eval/multi_project_eval.py --json
 >    variant" escape — plus one deliberately **contested** ASHRAE setpoint (30 °C,
 >    within allowable but above recommended) we score against ourselves.
 >
-> **27 genuine deviations + 0 false positives across eleven systems, none seeded** —
-> sources for every number in [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md).
+> **27 hard deviation claims across fifteen team-authored pairs** — 4 checked
+> deterministically offline (0 false positives on those), 23 requiring live-model
+> evaluation; values derived from cited public sources, not the seeded corpus.
+> Full traceability in [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md).
 
 **Key diversity dimensions:**
 - **Climate**: tropical (Mumbai), mild (Pune), cold (Oslo), desert (Dubai), temperate (Oregon), subtropical (Shanghai), continental (Frankfurt, Toronto), maritime (Tokyo, London), arid (Sydney), tropical (São Paulo)
@@ -349,13 +354,13 @@ python3 eval/multi_project_eval.py --json
 python3 data/generate_corpus.py                    # Project Meghdoot (primary)
 python3 data/generate_projects.py                  # 11 additional projects
 
-# 2. Run the 466-test suite (no API key needed)
-python3 -m pytest tests/ -q                       # → 466 passed
+# 2. Run the test suite (480+ tests, no API key needed)
+python3 -m pytest tests/ -q                       # → 481 passed (local; count varies slightly by Python version)
 
 # 3. Prove the pipeline + eval harness (3 independent paths)
 python3 eval/run_eval.py --detector baseline      # → P/R/F1 = 1.000, 267 weeks saved
 python3 eval/text_eval.py                         # → Raw-markdown input path: regex extraction → F1=1.000
-python3 eval/multi_project_eval.py                # → 12 projects, F1=1.000, 1024 weeks saved
+python3 eval/multi_project_eval.py                # → 12 projects, F1=1.000, 1024 lead-time-weeks summed (synthetic)
 
 # 4. The real run — LLM recovers deviations from RAW unstructured documents
 export GEMINI_API_KEY=your_key_here
@@ -374,7 +379,7 @@ cd frontend && npm install && npm run dev          # → localhost:3000
 curl http://localhost:8000/export/audit/html > evidence.html
 ```
 
-> **No API key?** The dashboard runs fully with ground-truth fallback data. All 29 API endpoints return 200. Both eval harnesses (structured + text-based), the corpus, and the frontend work offline. 466 tests pass without any external dependencies.
+> **No API key?** The dashboard runs fully with ground-truth fallback data. All 29 API endpoints return 200. Both eval harnesses (structured + text-based), the corpus, and the frontend work offline. 480+ tests pass without any external dependencies.
 >
 > **Or just open the live demo:** [parth-tan.vercel.app](https://parth-tan.vercel.app) (frontend) · [parth-3puc.onrender.com](https://parth-3puc.onrender.com/health) (API)
 
@@ -405,7 +410,7 @@ docker compose up --build
 # Option 2: Makefile
 make setup          # Install all dependencies
 make corpus         # Generate 12 project datasets
-make test           # Run 466 tests
+make test           # Run 480+ tests
 make eval-all       # Run all 3 eval paths
 make verify         # One-command: tests + all evals + type check
 make run            # Start backend API
@@ -592,7 +597,7 @@ pramaan/
 │       └── api.ts                 # API client + SSE parser + bundled fallback data
 ├── scripts/
 │   └── verify_live.py             # Pre-demo gate: is the DEPLOYED stack demo-ready?
-└── tests/                         # 19 test files, 466 tests
+└── tests/                         # 21 test files, 480+ tests
     ├── test_api.py                # API tests (sync + streaming + upload + llm-check)
     ├── test_agents.py             # Agent unit tests (ingestion, extraction, cx, reconciliation)
     ├── test_corpus.py             # Corpus integrity tests (JSON/Markdown validation)
@@ -605,7 +610,7 @@ pramaan/
     └── …                          # real-pairs, OCR, retrieval-loop, self-critique, hardening
 ```
 
-**60+ source files · 16,800+ lines of code · 466 tests · 12 projects · 28+ endpoints**
+**60+ source files · 16,800+ lines of code · 480+ tests · 12 projects · 28+ endpoints**
 
 ---
 
@@ -647,7 +652,7 @@ python3 eval/text_eval.py
 
 # Path 3: Multi-project aggregate — proves generalization across 11 countries
 python3 eval/multi_project_eval.py
-# → 12 projects, 50 deviations, P=1.000, R=1.000, F1=1.000, 1024 weeks saved
+# → 12 projects, 50 deviations, P=1.000, R=1.000, F1=1.000, 1024 lead-time-weeks summed (synthetic)
 
 # Path 4: LLM agent — recovers deviations from raw unstructured documents
 python3 eval/run_eval.py --detector llm
@@ -665,7 +670,7 @@ python3 eval/run_eval.py --detector llm
 - **Path 1 (structured baseline)** is a *data-integrity check*. It compares pre-extracted triples to ground truth and is **1.000 by construction** — it proves the plumbing, not detection skill. We label it as such rather than headline it.
 - **Path 2 (text eval)** is an *extraction-layer robustness check*: it recovers all 50 deviations from raw markdown across 12 projects with different naming/standards/formats. It runs on our own corpus, so it proves the engine parses real-world variety — not that it generalises to unseen documents.
 - **Path 4 (LLM eval) is the capability proof.** A frontier model (`gemini-2.5-flash` / `2.5-pro`) reasons over the raw documents from scratch and recovers the deviations — including derived arithmetic (3 kVA × 0.8 PF → 2.4 kW) and value omissions — with semantic + strict scoring. This is the number that matters.
-- The strongest evidence is **outside the benchmark entirely**: a real third-party Vertiv datasheet the system had never seen ([`REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md)).
+- A further check sits **outside the synthetic corpus**: a Vertiv-datasheet-derived document with values cited from Vertiv's published figures ([`REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md)).
 
 **What it measures:**
 - **Precision** — are the detected deviations real? (no false positives)
@@ -681,9 +686,9 @@ python3 eval/run_eval.py --detector llm
 
 | Rubric Dimension | Pramaan Feature | Evidence |
 |------------------|-----------------|----------|
-| **Innovation** | Goes past AI submittal review (the commercial state of the art — BuildSync, Spec-ID, InspectMind) by predicting **which commissioning test each deviation will fail, and how many weeks early** — cross-referencing spec + submittal + governing standard with a full citation chain. Proven on a **real third-party Vertiv datasheet**, not just our own data | 5 specialized agents, LangGraph orchestration, citation chain, commissioning-risk twin, [`REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md) |
-| **Business Impact** | 1,024 weeks of early detection across 50 findings in 12 projects prevents seven-figure schedule slips | Interactive ROI calculator, cost-of-delay timeline, before/after comparison |
-| **Technical Excellence** | Dual eval harness (structured + text-based). The synthetic portfolio scores 1.000 **by construction** (we label it a plumbing/breadth check, not a flex); the honest signal is **11 real sourced datasheet pairs — 27 deviations (recall 1.000), 0 false positives, and a self-scored ≈0.9 on one contested ASHRAE case**, live-verified (`gemini-2.5-flash`, recall 1.000 on hard deviations). 466-test suite | Independent text-extraction + real-LLM eval, semantic + strict scoring, no-key offline harness (`eval/real_pairs_offline.py`), 25+ standards |
+| **Innovation** | Goes past AI submittal review (the commercial state of the art — BuildSync, Spec-ID, InspectMind) by predicting **which commissioning test each deviation will fail, and how many weeks early** — cross-referencing spec + submittal + governing standard with a full citation chain. Demonstrated beyond the synthetic corpus (values cited from public datasheets) | LangGraph orchestration, deterministic domain services, citation chain, commissioning-risk twin, [`REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md) |
+| **Business Impact** | 1,024 lead-time-weeks summed across 50 synthetic findings (a portfolio sum of lookup-table lead times, *not* calendar delay avoided) illustrates the cost-of-late-detection thesis | Interactive ROI calculator (scenario model), cost-of-delay timeline, before/after comparison |
+| **Technical Excellence** | Dual eval harness (structured + text-based). The synthetic portfolio scores 1.000 **by construction** (we label it a plumbing/breadth check, not a flex); the honest signal is **15 team-authored evaluation pairs — 27 hard deviation claims (4 deterministic-offline, 23 live-model), one contested ASHRAE case scored against us**; live results reported with not-run pairs counted, not as a fixed 1.000. Full test + lint + build CI | Independent text-extraction + live-LLM eval, semantic + strict scoring, no-key offline harness (`eval/real_pairs_offline.py`), 25+ standards |
 | **Robustness** | Graceful degradation everywhere — no API key, malformed PDFs, cold backend all return 200; `/llm-check` surfaces the true LLM status | 50-test resilience suite, ISR-cached frontend, deterministic fallback |
 | **Scalability** | 12 projects → enterprise portfolio via multi-project eval + batch ingest + vector store | Multi-project dashboard, architecture diagram, scale story |
 | **UX** | Two surfaces: a focused **Judge Mode** (90-second proof) and a 22-section deep-dive dashboard, both ISR-cached for instant loads, streaming AI | `/judge` + full dashboard, live PDF upload, dark theme, responsive |
@@ -708,12 +713,12 @@ python3 eval/run_eval.py --detector llm
 | Time | Action | What to say |
 |------|--------|-------------|
 | 0:00 | Open `/judge` | "Pramaan reads vendor submittals against the design basis and catches deviations the day the document lands — not in commissioning, six months too late." |
-| 0:12 | Point to the 4 metric cards | "50 deviations across 12 projects in 11 countries for breadth, 1,024 weeks of lead time saved. But here's the number that matters: **27 genuine deviations — recall 1.000 — and zero false positives on real Vertiv, Cummins, ABB and Tate documents the model had never seen** — and one contested case we score ourselves at ~0.9, because honest experts disagree." |
+| 0:12 | Point to the 4 metric cards | "50 synthetic deviations across 12 projects for breadth, and 1,024 lead-time-weeks summed. But here's the honest signal: **27 hard deviation claims across 15 team-authored pairs — 4 checked deterministically offline, 23 by the live model — with values cited from public Vertiv, Cummins, ABB and Tate figures** — plus one contested case we score against ourselves, because honest experts disagree." |
 | 0:25 | Click **Load real document ★** | "This isn't our test data. This is a real Vertiv UPS datasheet, downloaded from their website — paired with a design basis." |
 | 0:35 | Hit **Analyze** | "Watch it reason over the raw PDFs and find the non-compliances from scratch." |
 | 0:50 | Point at the results | "Eight deviations. It derived 2.4 kW from 3 kVA × 0.8 PF. It flagged 88% online efficiency — not the ECO-mode headline. It caught a *missing* THD value. And the vendor stamped this 'fully compliant.'" |
 | 1:05 | The kill shot | "Same two PDFs, no LLM key — the regex fallback finds **zero**. Pattern-matching can't do this. Reasoning can. That gap is the product." |
-| 1:20 | Scroll to portfolio | "And it's not one lucky datasheet — 15 real sourced pairs across UPS, generator, cooling, switchgear, raised floor and busway. The 12-project synthetic portfolio is the breadth test — clean by construction, and we label it that way." |
+| 1:20 | Scroll to portfolio | "And it's not one lucky datasheet — 15 team-authored pairs (values cited from public sources) across UPS, generator, cooling, switchgear, raised floor and busway. The 12-project synthetic portfolio is the breadth test — clean by construction, and we label it that way." |
 | 1:30 | Close | "One click to the full dashboard if you want the eval harness, the commissioning twin, the audit export." |
 
 ### The deep-dive (full dashboard, when judges want rigour)
@@ -751,5 +756,5 @@ python3 eval/run_eval.py --detector llm
 <p align="center">
   <strong>PRA<span style="color:#36d6e7">MAAN</span></strong><br>
   <em>EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4</em><br>
-  <sub>5 AI Agents &middot; 12 Projects &middot; 11 Countries &middot; 28 Endpoints &middot; 50 Deviations &middot; 1,024 Weeks Saved &middot; 466 Tests &middot; 15 Real Pairs &middot; Real-doc 0 FP &middot; Honest ~0.9</sub>
+  <sub>12 Projects &middot; 11 Countries &middot; 28 Endpoints &middot; 50 Synthetic Deviations &middot; 1,024 Lead-time-weeks (synthetic sum) &middot; 15 Team-authored Pairs &middot; Offline 0 FP &middot; Honest ~0.9 &middot; CI green</sub>
 </p>

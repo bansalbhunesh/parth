@@ -12,7 +12,7 @@ across all tracks**. Scored on hard, checkable signals, the visible field has:
 | Signal | Visible field (~70 repos, all tracks) | Pramaan |
 |---|---|---|
 | CI pipeline | **0** | ✅ green (tests + 3 evals + tsc + build + Docker smoke + ruff) |
-| Test suite | **1** (minimal) | ✅ 466 tests |
+| Test suite | **1** (minimal) | ✅ 480+ tests |
 | Eval harness with ground truth | **0** | ✅ 4 paths + no-key real-pairs harness |
 | Quantified impact model | **0** | ✅ `docs/BUSINESS.md`, every figure cited |
 | Live deployment | 3 | ✅ 2 (Vercel + Render) |
@@ -44,7 +44,7 @@ novel, and we no longer claim it is.
 | **Lead-time-to-failure** (weeks early, quantified) | ✗ | ✅ per-deviation `lead_time_weeks` |
 | Open, reproducible **eval harness** (P/R/F1 + ground truth) | ✗ (closed SaaS) | ✅ 3 paths + real-LLM |
 | **Graceful degradation** when the LLM is down (no silent zero) | n/a | ✅ rule-based fallback + 60s cap |
-| **Reads scanned / image-only submittals** (the paper EPCs actually email) | partial | ✅ OCR fallback + honest message when unavailable |
+| **Reads scanned / image-only submittals** (the paper EPCs actually email) | partial | ◑ OCR where Tesseract is installed (Docker image); honest "OCR unavailable" message on the default hosted demo |
 | Self-hostable / inspectable (MIT, full source) | ✗ | ✅ |
 
 **Our moat is the commissioning-risk twin + lead-time quantification + an open,
@@ -114,15 +114,18 @@ of the following is in their public feature set — and together they are the mo
    fails" — the number that converts a finding into a dated, prioritised action
    and a board-level schedule-risk metric.
 3. **Open, reproducible eval + real-world result.** A public test harness, a
-   466-test suite, and a **27/27-recall result on real third-party datasheets**
+   test suite, and a **cited-value evaluation on 15 team-authored third-party pairs**
+   (4 checked deterministically offline, 23 live-model)
    ([`eval/REAL_PAIRS_EVAL.md`](eval/REAL_PAIRS_EVAL.md)). Closed SaaS asks you to
-   trust the marketing; we ship the proof.
+   trust the marketing; we ship the harness.
 4. **No-silent-zero resilience.** A deterministic detector that still returns the
    headline deviations when the LLM is rate-limited or absent — a property a
    cloud-only black box cannot offer on-prem or air-gapped sites.
 5. **Reads the documents that actually arrive.** Real submittals are stamped paper
-   scanned to image-only PDFs. Pramaan OCRs them ([`eval/OCR_SCANNED_PDF.md`](eval/OCR_SCANNED_PDF.md));
-   when OCR isn't available it says so plainly instead of returning a silent zero.
+   scanned to image-only PDFs. Pramaan OCRs them where Tesseract is installed (the
+   `Dockerfile.backend` image — [`eval/OCR_SCANNED_PDF.md`](eval/OCR_SCANNED_PDF.md));
+   the default hosted demo does not bundle Tesseract and says so plainly instead of
+   returning a silent zero.
 
 The category proves the *demand* is real and buyers already pay for adjacent
 tooling. Pramaan's wedge is the **commissioning-risk layer on top** — the part

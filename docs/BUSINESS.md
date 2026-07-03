@@ -107,6 +107,10 @@ stated so the method survives scrutiny even if you swap the inputs.
 The cost to *serve* an analysis is rupees; the cost of the deviation it catches is
 millions. That gap is both the sales pitch and the margin profile.
 
+> **Honesty note:** the price points, margin, ROI multiple, and payback above are
+> **modeled pricing hypotheses** — not validated by a paid pilot, LOI, or customer.
+> Treat the ROI calculator as a sensitivity scenario, not realized savings.
+
 ## 7. Sensitivity — does the case survive pessimistic inputs?
 
 The headline asymmetry is robust, not cherry-picked. Stress every input downward:

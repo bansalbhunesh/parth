@@ -10,10 +10,12 @@ across four normally-siloed domains:
         -> schedule (which milestone slips, by how many weeks)
           -> procurement (which supplier is the long pole of the fix)
 
-`blast_radius(dev)` walks the impact edges and reports exactly that chain. Every
-edge is standards-cited and every number comes from the data — the graph is fully
-deterministic and runs offline; the language model (elsewhere) never draws an edge
-and never moves a date, it only narrates the blast radius.
+`blast_radius(dev)` walks the impact edges and reports exactly that chain. The
+deviation -> standard -> Cx-test edges carry standard citations; the structural,
+schedule, and supply edges are deterministic data relationships (not standards-
+derived). Every number comes from the data — the graph is fully deterministic and
+runs offline; the language model (elsewhere) never draws an edge and never moves a
+date, it only narrates the blast radius.
 
 Graceful by design: missing layers are simply omitted; the deviation -> standard
 -> Cx-test core always renders.

@@ -40,10 +40,10 @@
 - **Visual:** the live `/judge` stream (record it; do NOT use a static slide if you can demo live).
 - **Speaker note:** stop talking for 1 second after the 38.8h finding lands.
 
-### Slide 6 — It's real, and it's honest
-- **11 sourced real pairs:** Vertiv · Cummins · STULZ · ABB · FM-200 · Carrier · EUROBAT · transformer · cabling · Tate ConCore · Schneider Canalis · ASHRAE setpoint
+### Slide 6 — It's cited, and it's honest
+- **15 team-authored pairs (values cited from public sources):** Vertiv · Cummins · STULZ · ABB · FM-200 · Carrier · EUROBAT · transformer · cabling · Tate ConCore · Schneider Canalis · ASHRAE setpoint
 - vs real standards: Uptime · NFPA · EPA · ASHRAE · IEC · TIA-942
-- **19 deviations + 0 false positives across 11 systems — none seeded**
+- **27 hard deviation claims — 4 deterministic-offline, 23 live-model; values cited, not seeded**
 - Knew R410A's GWP (2,088); *cleared* IP54 that exceeds spec
 - **Visual:** the PROVENANCE.md source table.
 - **Speaker note:** "every value is citable" — this is the anti-vaporware slide.
@@ -62,15 +62,15 @@
 - **Speaker note:** honest positioning earns trust; name the competitors first.
 
 ### Slide 9 — Business impact (the asymmetry)
-- One missed deviation: **$4–25M** delay → fix on submittal day = **one RFI**
-- Analysis costs **~paise** → **10–100× ROI** on a single prevented slip
-- Manual review **weeks** → Pramaan **minutes**, full audit trail to the CxA
-- **Visual:** the millions-vs-paise asymmetry; ROI calculator; before/after timeline.
+- One missed deviation: **$4–25M** delay → fix on submittal day = **one RFI** *(scenario figures)*
+- Analysis costs **~paise** → an illustrative **10–100× ROI** on a single prevented slip *(modeled, not customer-validated)*
+- Aims to move detection from commissioning to submittal-day review, full audit trail to the CxA *(manual-hours reduction not yet measured)*
+- **Visual:** the millions-vs-paise asymmetry; ROI calculator (scenario); before/after timeline.
 - **Speaker note:** the asymmetry *is* the business case → `docs/BUSINESS.md`.
 
-### Slide 10 — Production-grade
+### Slide 10 — Engineered to degrade gracefully
 - **No silent zeros** — rule-based fallback when the AI is rate-limited
-- **466 tests · CI green · deployed** (Vercel + Render)
+- **Full CI green · deployed** (Vercel + Render)
 - Two-way scoring · true negatives · `/llm-check` live status
 - **Visual:** green CI badge + the resilience flow.
 - **Speaker note:** "engineered for the bad day, not just the stage."

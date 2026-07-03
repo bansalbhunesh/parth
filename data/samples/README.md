@@ -3,8 +3,8 @@
 These are **realistic engineering documents written in natural prose + table
 format** — deliberately unlike the structured generator corpus
 (`**UPS-02** — battery_runtime_min: shall be **10 min**`). They prove Pramaan's
-reconciliation generalises to documents it has never seen, in formats no regex
-was tuned for. Drop them into the **Live Analysis** panel (or POST to
+reconciliation generalises to documents outside the structured generator corpus,
+in formats no regex was tuned for. Drop them into the **Live Analysis** panel (or POST to
 `/analyze/upload`) and the LLM recovers the buried non-compliances from scratch.
 
 > Requires an LLM key (the deterministic regex fallback is corpus-specific and

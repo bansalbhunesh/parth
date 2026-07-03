@@ -543,3 +543,27 @@ class TestVisionEndpoint:
         d = r.json()
         assert d["mode"] == "vision-unavailable"
         assert d["count"] == 0
+
+
+class TestGlobalErrorGuard:
+    """No endpoint can crash the response: unexpected errors become a clean
+    JSON 500; HTTPExceptions (404 etc.) still flow normally."""
+
+    def test_unexpected_error_returns_clean_500(self):
+        from fastapi.testclient import TestClient as _TC
+
+        from backend.main import app
+
+        @app.get("/_boom_test")
+        def _boom():
+            raise RuntimeError("kaboom secret-ish")
+        c = _TC(app, raise_server_exceptions=False)
+        r = c.get("/_boom_test")
+        assert r.status_code == 500
+        body = r.json()
+        assert body["ok"] is False and body["error"] == "internal_error"
+        assert "kaboom" not in str(body)  # no leak of the raw message
+
+    def test_http_exception_still_404s(self):
+        r = client.post("/ingest/NOPE_NOT_A_SYSTEM")
+        assert r.status_code in (400, 404)

@@ -54,6 +54,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@app.exception_handler(Exception)
+async def _never_crash(request, exc):  # noqa: ANN001
+    """Last-resort guard: any endpoint that raises an unexpected error returns
+    a clean JSON 500 with a stable shape (never a stack trace, never a secret
+    leaked into the body) so the live demo can't be broken by one bad path.
+    HTTPExceptions still flow through FastAPI's own handler."""
+    from fastapi.responses import JSONResponse
+    log.error("Unhandled error on %s %s: %s",
+              request.method, request.url.path, str(exc)[:300])
+    return JSONResponse(status_code=500, content={
+        "ok": False,
+        "error": "internal_error",
+        "detail": "This request failed unexpectedly; the rest of the API is unaffected.",
+    })
+
 # Reject oversized request bodies before FastAPI buffers them. An UploadFile
 # spools the FULL multipart body to a temp file during request parsing — *before*
 # the handler's _read_capped runs — so the 15 MB read cap protects memory but not

@@ -16,7 +16,9 @@ const PAD_B = 26;
 const PAD_T = 12;
 
 export default function RemediationSimulator({ sim }: { sim: RemediationSim }) {
-  const maxWeek = sim.cx_planned_week;
+  // Guard degenerate data (a deviation with no Cx test → cx_planned 0): never
+  // divide by zero in the chart or hand the range a max of 0.
+  const maxWeek = Math.max(1, sim.cx_planned_week);
   const [catchWeek, setCatchWeek] = useState(Math.round(sim.scenarios.pramaan.catch_week));
 
   const maxSlip = useMemo(

@@ -43,8 +43,12 @@ def _static_stats(manifest, labels):
     systems = sorted({lb["system_type"] for lb in labels})
     origins = Counter(r.get("source_origin", "") for r in manifest)
     primary = sum(v for k, v in origins.items() if k in _PRIMARY)
+    primary_derived = sum(1 for r in manifest if (r.get("primary_or_secondary") or "") == "primary_derived")
+    with_url = sum(1 for r in manifest if (r.get("source_url") or "").strip())
     with_hash = sum(1 for r in manifest if (r.get("sha256") or "").strip())
     return {
+        "primary_source_derived": primary_derived,
+        "docs_with_verified_url": with_url,
         "sources": len(manifest),
         "pairs": len({lb["pair_id"] for lb in labels}),
         "labels": len(labels),
@@ -112,9 +116,12 @@ def main() -> int:
         "contested_labels": {"value": st["contested"], "evidence_label": "team_authored"},
         "systems_covered": st["systems_covered"],
         "difficulty_mix": st["difficulty_mix"],
-        "provenance": {"primary_sources": st["primary_sources"],
+        "provenance": {"primary_source_files": st["primary_sources"],
+                       "primary_source_derived": st["primary_source_derived"],
+                       "docs_with_verified_url": st["docs_with_verified_url"],
                        "team_authored_sources": st["team_authored_sources"],
                        "sha256_completeness": st["provenance_completeness_sha256"]},
+        "review_status": "single_author_frozen_pending_review",
         "rule_baseline": card_metric(rule),
         "llm_result": card_metric(llm),
         "cost_estimate": {"value": None, "evidence_label": "not_yet_measured"},
@@ -162,8 +169,12 @@ _Generated {datetime.now(timezone.utc).isoformat(timespec='seconds')} · run
 | Contested labels | {st['contested']} | `team_authored` |
 | Systems covered | {len(st['systems_covered'])} ({', '.join(st['systems_covered'])}) | — |
 | Provenance SHA-256 completeness | {st['provenance_completeness_sha256']} | `measured` |
-| Primary-source docs | {st['primary_sources']} | `measured` |
+| Primary-source files (stored) | {st['primary_sources']} | `measured` |
+| Primary-source-derived docs (cited public refs) | {st['primary_source_derived']} | `measured` |
+| Docs with verified public URL | {st['docs_with_verified_url']} | `measured` |
 | Team-authored docs | {st['team_authored_sources']} | `measured` |
+
+**Review status:** single_author_frozen_pending_review (no two-reviewer adjudication claimed).
 
 **Difficulty mix (positive labels):** {st['difficulty_mix']}
 

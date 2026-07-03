@@ -1,22 +1,22 @@
 {
   "benchmark": "ps4_external_v1",
-  "benchmark_version": "1.1.0",
-  "generated_utc": "2026-07-03T16:12:54+00:00",
+  "benchmark_version": "1.2.0",
+  "generated_utc": "2026-07-03T20:06:10+00:00",
   "status": "seed (framework complete; 40-50 pairs target \u2014 see backlog)",
   "pairs": {
-    "value": 43,
+    "value": 53,
     "evidence_label": "team_authored"
   },
   "positive_labels": {
-    "value": 52,
+    "value": 63,
     "evidence_label": "team_authored"
   },
   "clean_negatives": {
-    "value": 57,
+    "value": 64,
     "evidence_label": "team_authored"
   },
   "contested_labels": {
-    "value": 1,
+    "value": 2,
     "evidence_label": "team_authored"
   },
   "systems_covered": [
@@ -40,31 +40,43 @@
   ],
   "difficulty_mix": {
     "adversarial_noise": 6,
-    "categorical_reasoning": 13,
-    "derived_arithmetic": 2,
+    "categorical_reasoning": 17,
+    "derived_arithmetic": 4,
     "direct_value": 6,
-    "domain_recall": 4,
-    "omission_detection": 6,
+    "domain_recall": 6,
+    "omission_detection": 8,
     "scanned_or_image": 6,
-    "table_or_layout": 7,
+    "table_or_layout": 8,
     "unit_conversion": 2
   },
   "provenance": {
-    "primary_sources": 0,
-    "team_authored_sources": 86,
+    "primary_source_files": 0,
+    "primary_source_derived": 10,
+    "docs_with_verified_url": 5,
+    "team_authored_sources": 106,
     "sha256_completeness": 1.0
   },
+  "review_status": "single_author_frozen_pending_review",
   "rule_baseline": {
-    "primary_recall_semantic": 0.1346,
-    "primary_recall_exact": 0.1346,
+    "primary_recall_semantic": 0.1111,
+    "primary_recall_exact": 0.1111,
     "primary_tp": 7,
-    "positive_labels": 52,
+    "positive_labels": 63,
     "false_positives_total": 0,
     "clean_negative_false_alert_rate": 0.0,
     "pairs_not_run": 5,
     "evidence_label": "deterministic_offline"
   },
-  "llm_result": null,
+  "llm_result": {
+    "primary_recall_semantic": 0.0,
+    "primary_recall_exact": 0.0,
+    "primary_tp": 0,
+    "positive_labels": 63,
+    "false_positives_total": 0,
+    "clean_negative_false_alert_rate": 0.0,
+    "pairs_not_run": 5,
+    "evidence_label": "live_model"
+  },
   "cost_estimate": {
     "value": null,
     "evidence_label": "not_yet_measured"

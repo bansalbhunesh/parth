@@ -2,47 +2,47 @@
   "benchmark": "ps4_external_v1",
   "benchmark_version": "1.2.0",
   "labels_freeze_sha256": "f13a4f72895d8ef31df1fe716ad5a73526f109a152b9060e38cd1e5179710b12",
-  "mode": "rule",
-  "provider": "rule",
-  "model": "rule-engine",
+  "mode": "llm",
+  "provider": "gemini",
+  "model": "gemini-2.5-flash",
   "repeat_index": 1,
   "repeats_total": 1,
   "timestamp_utc": "2026-07-03T20:06:09+00:00",
   "include_contested_in_primary": false,
   "count_not_run_as_miss": true,
-  "evidence_label": "deterministic_offline",
-  "config_sha256": "325948bfc5dfeea74b284ed5bd875d2fe56f48a22c615fb7fcf8502306445df4",
-  "pairs_total": 53,
-  "pairs_run": 48,
+  "evidence_label": "live_model",
+  "config_sha256": "2d7d72922b7e5ddd298058d464ef456a94149b1ca3ca5706794a6bbe1a53ece3",
+  "pairs_total": 5,
+  "pairs_run": 0,
   "pairs_not_run": 5,
   "not_run_pair_ids": [
-    "pair_039",
-    "pair_040",
-    "pair_041",
-    "pair_042",
-    "pair_043"
+    "pair_001",
+    "pair_006",
+    "pair_016",
+    "pair_019",
+    "pair_021"
   ],
   "positive_labels": 63,
   "clean_negative_labels": 64,
   "contested_labels": 2,
-  "primary_recall_semantic": 0.1111,
-  "primary_recall_exact": 0.1111,
-  "primary_tp": 7,
-  "primary_fn": 56,
-  "secondary_recall_semantic": 0.1228,
-  "secondary_positives": 57,
+  "primary_recall_semantic": 0.0,
+  "primary_recall_exact": 0.0,
+  "primary_tp": 0,
+  "primary_fn": 63,
+  "secondary_recall_semantic": null,
+  "secondary_positives": 0,
   "false_positives_total": 0,
   "clean_negative_false_alerts": 0,
   "clean_negative_false_alert_rate": 0.0,
-  "error_or_timeout_pairs": 5,
-  "error_rate": 0.0943,
-  "latency_p50_ms": 0.0,
-  "latency_p95_ms": 1.0,
+  "error_or_timeout_pairs": 0,
+  "error_rate": 0.0,
+  "latency_p50_ms": null,
+  "latency_p95_ms": null,
   "per_difficulty": {
     "direct_value": {
       "positives": 6,
-      "caught": 3,
-      "recall": 0.5
+      "caught": 0,
+      "recall": 0.0
     },
     "categorical_reasoning": {
       "positives": 17,
@@ -66,13 +66,13 @@
     },
     "omission_detection": {
       "positives": 8,
-      "caught": 1,
-      "recall": 0.125
+      "caught": 0,
+      "recall": 0.0
     },
     "adversarial_noise": {
       "positives": 6,
-      "caught": 3,
-      "recall": 0.5
+      "caught": 0,
+      "recall": 0.0
     },
     "table_or_layout": {
       "positives": 8,
@@ -88,23 +88,23 @@
   "per_system": {
     "ups": {
       "positives": 7,
-      "caught": 4,
-      "recall": 0.5714
+      "caught": 0,
+      "recall": 0.0
     },
     "metering_power_quality": {
       "positives": 2,
-      "caught": 1,
-      "recall": 0.5
+      "caught": 0,
+      "recall": 0.0
     },
     "switchgear": {
       "positives": 8,
-      "caught": 1,
-      "recall": 0.125
+      "caught": 0,
+      "recall": 0.0
     },
     "generator": {
       "positives": 6,
-      "caught": 1,
-      "recall": 0.1667
+      "caught": 0,
+      "recall": 0.0
     },
     "crac_crah": {
       "positives": 2,

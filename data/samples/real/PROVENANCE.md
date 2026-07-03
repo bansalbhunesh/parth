@@ -236,3 +236,50 @@ business adjudicating a judgment call); it is reserved for the reasoning layer.
 
 **Eleven real pairs, ~21 deviation claims, every value traced to a published
 source. None seeded.**
+
+## Pairs 12–14 — added 2026-07-03 (PDU / ASD / BMS controller)
+
+Offline-checked (zero false positives — the compliant values below are
+correctly cleared). **Live LLM verification pending** (free-tier daily quota);
+until that run lands, headline counts elsewhere still cite the original
+19-live-verified set.
+
+**Pair 12 — Rack PDU** (`design_basis_pdu.md` + `submittal_pdu_px3_1000.md`)
+- **Raritan PX3-1493V, PX3-1000 "Monitored" series**: energy metering at the
+  **inlet** (unit level); per-outlet metering and **outlet switching are
+  PX3-5000-series features**, not available on the 1000 series. Billing-grade
+  **±1 %** metering certified to **ISO/IEC 62053-21**; rated for **60 °C**
+  operation; Zero-U 3-phase, 24 outlets. — Raritan PX3 data sheet
+  (DPC-RAR-PX3) + raritan.com PX3 tech-specs / product selector
+  (PX3-1493V listing).
+- Deviations: required **per-outlet metering** → provided **inlet-only**;
+  required **switched outlets** → **unswitched**. Cleared (compliant): ±1 %
+  billing-grade accuracy (meets ±1 % requirement), 60 °C rating (exceeds the
+  45 °C hot-aisle requirement), Zero-U 3-phase form factor, sensor support.
+
+**Pair 13 — Aspirating smoke detection** (`design_basis_asd.md` +
+`submittal_vesda_vlc.md`)
+- **Xtralis VESDA VLC (LaserCOMPACT)**: published maximum protected area
+  **800 m² (8,000 sq ft)**; sensitivity range **0.005–20 % obs/m**; 24 V dc.
+  — xtralis.com VLC product page + VLC product guide (doc 10280).
+- Deviation: required **one detector covering the 1,600 m²** hall zone →
+  provided **800 m²** published ceiling (a LaserPLUS/VESDA-E-class unit, not
+  the compact, is the correct fit). Cleared (compliant): 0.005 % obs/m
+  sensitivity floor, EN 54-20 listing, 24 V dc supply.
+
+**Pair 14 — BMS supervisory controller** (`design_basis_bms_controller.md` +
+`submittal_bms_ecb600.md`)
+- **Distech Controls ECB-600**: **BTL-listed B-AAC** (BACnet Advanced
+  Application Controller), communicating on **BACnet MS/TP LAN**; fully
+  programmable, 28 points. — Distech ECB-600 datasheet / reseller listings
+  (jacksonsystems.com "BACnet B-AAC 28-Point Programmable Controller").
+- BACnet device-profile definitions (B-BC = field-programmable **building
+  controller**, the supervisory/routing profile; B-AAC = advanced
+  **application** controller) — BTL listed-products definitions
+  (bacnetinternational.net) / ASHRAE 135 Annex L.
+- Deviations: required **B-BC** profile → provided **B-AAC**; required native
+  **BACnet/IP** at the controller → provided **MS/TP**. Cleared (compliant):
+  full field-programmability (required and provided).
+
+**Fourteen real pairs, ~26 deviation claims, every value traced to a published
+source. None seeded.**

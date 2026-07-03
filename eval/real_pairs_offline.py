@@ -101,6 +101,26 @@ MANIFEST = [
     dict(id="thermal-setpoint", spec="design_basis_thermal_setpoint.md", submittal="submittal_crah_setpoint.md",
          devs=[dict(param="supply_air_temp_c", required="27", provided="30", detection="contested",
                     source="30C supply: within ASHRAE A1 allowable (<=32) but above recommended (<=27)")]),
+    # --- Added 2026-07-03 (PDU / ASD / BMS) — offline-checked; live LLM
+    # verification pending free-tier quota reset. Every value citable in
+    # PROVENANCE.md; categorical shortfalls are real product-line facts. ---
+    dict(id="rack-pdu", spec="design_basis_pdu.md", submittal="submittal_pdu_px3_1000.md",
+         devs=[
+             dict(param="outlet_metering", required="per-outlet", provided="inlet only", detection="llm",
+                  source="Raritan PX3-1000 'Monitored' series = inlet metering; per-outlet is the PX3-5000 series"),
+             dict(param="outlet_switching", required="switched outlets", provided="not available", detection="llm",
+                  source="PX3-1000 series outlets are unswitched; switching is a PX3-5000 series feature"),
+         ]),
+    dict(id="aspirating-detection", spec="design_basis_asd.md", submittal="submittal_vesda_vlc.md",
+         devs=[dict(param="coverage_m2", required="1600", provided="800", detection="llm",
+                    source="Xtralis VESDA VLC (LaserCOMPACT) published max coverage 800 m2 vs 1600 m2 hall zone")]),
+    dict(id="bms-controller", spec="design_basis_bms_controller.md", submittal="submittal_bms_ecb600.md",
+         devs=[
+             dict(param="bacnet_profile", required="B-BC", provided="B-AAC", detection="llm",
+                  source="Distech ECB-600 BTL-listed B-AAC vs required B-BC building-controller profile"),
+             dict(param="network_transport", required="BACnet/IP", provided="BACnet MS/TP", detection="llm",
+                  source="ECB-600 communicates on BACnet MS/TP LAN vs required native BACnet/IP"),
+         ]),
 ]
 
 

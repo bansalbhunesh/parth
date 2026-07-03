@@ -77,3 +77,26 @@ def test_real_pair_files_exist(pair):
     assert (REAL / pair["spec"]).exists()
     assert (REAL / pair["submittal"]).exists()
     assert pair["devs"], "every real pair must declare at least one ground-truth deviation"
+
+
+def test_pdu_pair_no_offline_false_positives():
+    """PX3-1000: billing-grade ±1% and 60C rating are COMPLIANT — must clear.
+    The two real shortfalls (no outlet metering / no switching) are categorical
+    product-line facts, recoverable only by the LLM layer."""
+    devs = _devs("design_basis_pdu.md", "submittal_pdu_px3_1000.md", "PDU-RACK")
+    assert devs == []
+
+
+def test_asd_pair_no_offline_false_positives():
+    """VESDA VLC: the 0.005 %obs/m sensitivity and EN 54-20 listing are
+    compliant — must clear. The 800 vs 1600 m2 coverage ceiling is the
+    LLM-layer catch."""
+    devs = _devs("design_basis_asd.md", "submittal_vesda_vlc.md", "ASD")
+    assert devs == []
+
+
+def test_bms_pair_no_offline_false_positives():
+    """ECB-600: programmability requirement is met — must clear. B-AAC vs B-BC
+    profile and MS/TP vs IP transport are categorical LLM-layer catches."""
+    devs = _devs("design_basis_bms_controller.md", "submittal_bms_ecb600.md", "BMSC")
+    assert devs == []

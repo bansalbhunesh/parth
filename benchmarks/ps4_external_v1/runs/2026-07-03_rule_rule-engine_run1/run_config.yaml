@@ -1,0 +1,12 @@
+benchmark: ps4_external_v1
+benchmark_version: 1.0.0
+labels_freeze_sha256: 53ca66b1281da28a784e8ddc04a671ff5243b6d46f654a01606aa23414bfd8c7
+mode: rule
+provider: rule
+model: rule-engine
+repeat_index: 1
+repeats_total: 1
+timestamp_utc: 2026-07-03T15:00:38+00:00
+include_contested_in_primary: False
+count_not_run_as_miss: True
+evidence_label: deterministic_offline

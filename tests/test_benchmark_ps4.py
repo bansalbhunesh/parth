@@ -1,0 +1,136 @@
+"""Tests for the PS4 external validation benchmark (benchmarks/ps4_external_v1).
+
+Covers manifest/label validation, duplicate rejection, clean-negative handling,
+one-to-one matching, false-positive counting, timeout-as-miss accounting,
+contested exclusion, report generation without provider keys, and the guarantee
+that the benchmark uses none of the seeded ground_truth.json labels.
+"""
+
+import pathlib
+import sys
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "scripts"))
+
+import benchmark_lib as L  # noqa: E402
+
+
+def _pos(pair_id, lid, req, sub, comp="battery autonomy", param="runtime_minutes",
+         ltype="positive_deviation", diff="direct_value", system="ups"):
+    return {
+        "pair_id": pair_id, "label_id": lid, "system_type": system,
+        "label_type": ltype, "difficulty": diff, "component": comp, "parameter": param,
+        "required_value": req, "submitted_value": sub, "expected_finding": "x",
+        "evidence_required": {"document": "owner_requirement.md", "quote_or_span": "q"},
+        "evidence_submitted": {"document": "vendor_submittal.md", "quote_or_span": "q"},
+        "source_basis": "owner_design_basis_team_authored", "status": "frozen", "contested": False,
+    }
+
+
+def _find(comp, param, req, prov):
+    return {"component": comp, "parameter": param, "required_value": req, "provided_value": prov}
+
+
+# ── manifest / label validation ──────────────────────────────────────
+def test_seed_manifest_and_labels_are_valid():
+    assert L.validate_manifest(L.load_manifest()) == []
+    assert L.validate_labels(L.load_labels()) == []
+
+
+def test_manifest_flags_missing_and_bad_fields(tmp_path):
+    rows = [{"source_id": "", "system_type": "nope", "document_role": "owner_requirement",
+             "source_origin": "primary_vendor_public", "file_name": "", "sha256": "",
+             "source_url": "", "retrieval_date": ""}]
+    errs = L.validate_manifest(rows, root=tmp_path)
+    assert any("missing source_id" in e for e in errs)
+    assert any("invalid system_type" in e for e in errs)
+    assert any("requires a source_url" in e for e in errs)
+
+
+def test_label_schema_and_duplicate_rejection():
+    dup = L.validate_labels([_pos("p", "D1", "10", "8"), _pos("p", "D1", "10", "8")])
+    assert any("duplicate label_id" in e for e in dup)
+    bad = _pos("p", "B1", "10", "8")
+    bad["label_type"] = "not_a_type"
+    assert any("invalid label_type" in e for e in L.validate_labels([bad]))
+    missing_ev = _pos("p", "B2", "10", "8")
+    missing_ev["evidence_required"] = {}
+    assert any("evidence_required" in e for e in L.validate_labels([missing_ev]))
+
+
+# ── scoring: one-to-one, FP, clean-negative, contested ───────────────
+def test_one_to_one_no_double_credit():
+    labs = [_pos("p", "L1", "10", "8"), _pos("p", "L2", "10", "8")]
+    s = L.score_pair(labs, [_find("UPS", "battery_runtime_min", "10", "8")], L.matches_semantic)
+    assert s["tp"] == 1 and s["fn"] == 1 and s["fp"] == 0
+
+
+def test_false_positive_counting_never_negative():
+    labs = [_pos("p", "L1", "10", "8")]
+    finds = [_find("UPS", "battery_runtime_min", "10", "8"),
+             _find("humidity", "rh", "40", "70"), _find("voltage", "v", "400", "380")]
+    s = L.score_pair(labs, finds, L.matches_semantic)
+    assert s["tp"] == 1 and s["fp"] == 2 and s["fp"] >= 0
+
+
+def test_clean_negative_not_counted_positive_and_false_alert():
+    neg = {**_pos("p", "N1", "10", "10"), "label_type": "clean_negative"}
+    s = L.score_pair([neg], [], L.matches_semantic)
+    assert s["positives"] == 0 and s["negatives"] == 1 and s["neg_false_alerts"] == 0
+    s2 = L.score_pair([neg], [_find("UPS", "battery_runtime_min", "10", "8")], L.matches_semantic)
+    assert s2["neg_false_alerts"] == 1 and s2["fp"] == 1
+
+
+def test_contested_excluded_from_primary_unless_configured():
+    con = {**_pos("p", "C1", "27", "30", comp="supply-air", param="supply_air_temp_c"),
+           "label_type": "ambiguous_contested", "contested": True}
+    f = _find("CRAH", "supply_air_temp_c", "27", "30")
+    s = L.score_pair([con], [f], L.matches_semantic, include_contested=False)
+    assert s["positives"] == 0 and s["contested"] == 1
+    s2 = L.score_pair([con], [f], L.matches_semantic, include_contested=True)
+    assert s2["positives"] == 1 and s2["tp"] == 1
+
+
+# ── aggregation: not-run counted as miss in primary ──────────────────
+def test_timeout_not_run_counted_as_miss_in_primary():
+    labels = [_pos("pa", "L1", "10", "8"), _pos("pb", "L2", "5", "8", param="thd")]
+    run = {"pair_id": "pa", "not_run": False, "fp": 0, "neg_false_alerts": 0,
+           "matched_semantic": ["L1"], "matched_exact": ["L1"], "latency_ms": 10}
+    not_run = {"pair_id": "pb", "not_run": True, "fp": 0, "neg_false_alerts": 0,
+               "matched_semantic": [], "matched_exact": [], "latency_ms": None}
+    agg = L.aggregate([run, not_run], labels)
+    assert agg["primary_recall_semantic"] == 0.5      # pb's positive counted as a miss
+    assert agg["secondary_recall_semantic"] == 1.0    # pb excluded from secondary
+    assert agg["pairs_not_run"] == 1
+
+
+# ── independence from the seeded corpus ──────────────────────────────
+def test_no_seeded_ground_truth_labels_used():
+    import benchmark_manifest_check as C
+    seeded = C._ground_truth_ids()
+    bench = {lb["label_id"] for lb in L.load_labels()}
+    assert seeded and not (seeded & bench)   # seeded corpus exists, but no id overlap
+    assert C.main() == 0
+
+
+# ── scripts run without provider keys (no fabrication) ───────────────
+def test_hash_and_report_run_without_keys(monkeypatch, tmp_path):
+    for k in ("GEMINI_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GROQ_API_KEY"):
+        monkeypatch.delenv(k, raising=False)
+    import benchmark_hash_sources as H
+    import benchmark_report as R
+    monkeypatch.setattr(R, "REPORTS", tmp_path / "reports")  # don't clobber committed reports
+    assert H.main() == 0
+    assert R.main() == 0
+    assert (tmp_path / "reports" / "benchmark_card.json").exists()
+
+
+def test_rule_mode_run_one_no_key(monkeypatch):
+    for k in ("GEMINI_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GROQ_API_KEY"):
+        monkeypatch.delenv(k, raising=False)
+    import benchmark_ps4_external as B
+    labels = L.group_labels_by_pair(L.load_labels())["pair_001"]
+    r = B.run_one("pair_001", labels, "rule")
+    assert r["mode_used"] == "rule" and r["not_run"] is False
+    assert r["tp_semantic"] == 1        # battery 10 -> 8 caught by the rule engine
+    assert r["fp"] == 0

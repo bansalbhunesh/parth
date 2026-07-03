@@ -639,6 +639,12 @@ The demo corpus models **10 systems** with **33 requirements**. The architecture
 
 ## Eval Harness
 
+> **Independent external benchmark (in progress):** a new, provenance-tracked
+> benchmark with frozen labels, clean negatives, adversarial cases, and one-to-one
+> scoring lives under [`benchmarks/ps4_external_v1`](benchmarks/ps4_external_v1) —
+> metrics are reported with provenance, evidence labels, and explicit limitations
+> (seed pairs are team-authored; not an external-accuracy claim yet).
+
 The eval harness runs **four paths**. Paths 1–3 are reproducibility / integrity checks on our **seeded** corpus (so their 1.000 is *by construction* — scale, not detection skill); Path 4 (and the real-datasheet eval outside the benchmark) is the actual capability proof:
 
 ```bash

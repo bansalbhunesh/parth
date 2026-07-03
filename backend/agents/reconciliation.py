@@ -150,7 +150,15 @@ REQUIRED_DEV_KEYS = {"component", "parameter", "required_value", "provided_value
 
 def _validate_deviations(raw) -> list[dict]:
     if isinstance(raw, dict):
-        raw = raw.get("deviations", [])
+        if "deviations" in raw:
+            raw = raw["deviations"]
+        elif REQUIRED_DEV_KEYS <= raw.keys():
+            # Some models (esp. via gateways) return a single deviation as a
+            # bare object instead of a one-element array — recover it rather
+            # than reading it as zero findings.
+            raw = [raw]
+        else:
+            raw = []
     if not isinstance(raw, list):
         log.warning("LLM returned non-list type: %s", type(raw).__name__)
         return []

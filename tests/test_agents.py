@@ -167,6 +167,21 @@ class TestReconciliationValidation:
         result = _validate_deviations(raw)
         assert len(result) == 1
 
+    def test_validate_single_deviation_object(self):
+        """Some models (via gateways) return one deviation as a bare object
+        instead of a one-element array — recover it, don't read it as zero."""
+        from backend.agents.reconciliation import _validate_deviations
+        raw = {"component": "LV_SWITCHGEAR", "parameter": "short_circuit_kA",
+               "required_value": 65, "provided_value": 50}
+        result = _validate_deviations(raw)
+        assert len(result) == 1
+        assert result[0]["parameter"] == "short_circuit_kA"
+
+    def test_validate_dict_without_deviation_keys(self):
+        """A non-deviation dict (e.g. an error envelope) yields no findings."""
+        from backend.agents.reconciliation import _validate_deviations
+        assert _validate_deviations({"status": "ok", "note": "none found"}) == []
+
     def test_validate_empty_list(self):
         from backend.agents.reconciliation import _validate_deviations
         result = _validate_deviations([])

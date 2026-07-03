@@ -235,7 +235,11 @@ def _openai(prompt, system, json_mode):
         if system:
             messages.append({"role": "system", "content": system})
         messages.append({"role": "user", "content": prompt})
-        kwargs = {"model": model_name, "messages": messages, "temperature": 0.1}
+        # Cap output generously: gateways (OpenRouter etc.) often default to a
+        # small max_tokens, which silently truncates a multi-finding reconcile
+        # JSON mid-array and makes it unparseable. Match the Claude budget.
+        kwargs = {"model": model_name, "messages": messages, "temperature": 0.1,
+                  "max_tokens": int(os.getenv("OPENAI_MAX_TOKENS", "4000"))}
         if json_mode and os.getenv("OPENAI_JSON_MODE", "0") == "1":
             kwargs["response_format"] = {"type": "json_object"}
         resp = client.chat.completions.create(**kwargs)
@@ -322,6 +326,7 @@ def _openai_stream(prompt, system):
         messages.append({"role": "user", "content": prompt})
         stream = client.chat.completions.create(
             model=model_name, messages=messages, temperature=0.1, stream=True,
+            max_tokens=int(os.getenv("OPENAI_MAX_TOKENS", "4000")),
         )
         for chunk in stream:
             delta = chunk.choices[0].delta.content

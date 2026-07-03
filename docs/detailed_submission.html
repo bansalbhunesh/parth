@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pramaan — Detailed Technical Submission</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm 16mm 16mm; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    color: #14212b; font-size: 10.4pt; line-height: 1.5; margin: 0;
+  }
+  h1 { font-size: 21pt; margin: 0 0 2pt; color: #0b3a4a; }
+  h2 { font-size: 13pt; margin: 16pt 0 4pt; color: #0b6a86;
+       border-bottom: 1.5px solid #cfe6ee; padding-bottom: 2pt; }
+  h3 { font-size: 10.8pt; margin: 9pt 0 2pt; color: #0b3a4a; }
+  p, li { margin: 3pt 0; }
+  ul { margin: 3pt 0 3pt 0; padding-left: 16pt; }
+  li { margin: 2pt 0; }
+  code { font-family: "Consolas", monospace; font-size: 9pt; background: #eef4f7;
+         padding: 0 3px; border-radius: 3px; }
+  .sub { color: #52616b; font-size: 9.2pt; margin-top: 1pt; }
+  .lede { font-size: 11pt; color: #223; margin: 8pt 0; }
+  .grid { display: flex; flex-wrap: wrap; gap: 6pt; margin: 6pt 0; }
+  .fact { flex: 1 1 30%; background: #f3f8fa; border: 1px solid #dceaf0;
+          border-radius: 5px; padding: 6pt 8pt; }
+  .fact b { display:block; color:#0b6a86; font-size: 8.6pt; text-transform: uppercase; letter-spacing:.4px; }
+  table { width: 100%; border-collapse: collapse; margin: 5pt 0; font-size: 9.2pt; }
+  th, td { border: 1px solid #d5e3ea; padding: 3.5pt 5pt; text-align: left; vertical-align: top; }
+  th { background: #eaf3f7; color: #0b3a4a; }
+  .lab { font-size: 7.6pt; font-weight: 700; text-transform: uppercase; letter-spacing:.4px;
+         padding: 0.5px 5px; border-radius: 8px; white-space: nowrap; }
+  .lab.meas { background:#dff5e6; color:#12683a; }
+  .lab.syn  { background:#e6e9fb; color:#33409a; }
+  .lab.scen { background:#fdeecf; color:#8a5a00; }
+  .lab.live { background:#e2f2fb; color:#0b5a86; }
+  .lab.det  { background:#e9f7f4; color:#0b6a5a; }
+  .legend { font-size: 8.6pt; color:#52616b; margin: 4pt 0 0; }
+  .foot { margin-top: 12pt; font-size: 8.4pt; color: #6b7880; border-top: 1px solid #dbe6ec; padding-top: 5pt; }
+  .pb { page-break-before: always; }
+  strong.k { color: #0b3a4a; }
+</style>
+</head>
+<body>
+
+<h1>Pramaan — EPC Deviation Intelligence</h1>
+<div class="sub">Spec-to-Site Deviation Sentinel + Commissioning Risk Twin &middot; ET AI Hackathon 2026 &middot; Problem Statement 4</div>
+<div class="sub">Repository: <code>github.com/bansalbhunesh/parth</code> &middot; Live: <code>parth-tan.vercel.app/judge</code> &middot; API: <code>parth-3puc.onrender.com/health</code></div>
+<div class="sub">Phase-2 deadline (live Unstop record): <strong>2026-07-22, 23:59:21 IST</strong></div>
+
+<p class="lede"><strong class="k">The wedge:</strong> Pramaan converts a spec/submittal mismatch into a cited commissioning failure mode and the schedule window to act — <em>before</em> the failed test becomes a project delay. Not "RAG + agents + dashboard"; the trace from owner requirement &rarr; deviation &rarr; commissioning test &rarr; lead-time-to-failure, with evidence at each step.</p>
+
+<p class="legend"><strong>Evidence labels used throughout this document:</strong>
+<span class="lab meas">measured</span> observed in a run/test &nbsp;
+<span class="lab syn">synthetic</span> authored corpus, true by construction &nbsp;
+<span class="lab det">deterministic&nbsp;offline</span> reproducible with no API key &nbsp;
+<span class="lab live">live-model</span> varies run-to-run &nbsp;
+<span class="lab scen">scenario</span> modeled assumption, not validated.</p>
+
+<h2>1. The problem</h2>
+<p>In a hyperscale data-centre EPC build, the <strong>design basis</strong>, <strong>vendor submittals</strong>, and <strong>governing standards</strong> live in different systems and are reviewed by different people. A vendor deviation missed at submittal review resurfaces months later at commissioning — as a failed acceptance test, rework, and schedule slip. Found on submittal day it is a one-line RFI; found at commissioning it is a schedule event.</p>
+<p class="sub">Market context <span class="lab scen">scenario</span>: India data-centre capex is large and growing (IBEF, secondary research: ~US$10B in 2025 toward ~US$22B by 2030; JLL primary release is more conservative — 791 MW added by 2026, US$5.7B investment). These frame the opportunity; they are not Pramaan-specific results.</p>
+
+<h2>2. What Pramaan does</h2>
+<ul>
+  <li>Reconciles a design specification against a vendor submittal and the governing standards, and reports each genuine deviation with the standard it violates.</li>
+  <li>For each deviation, predicts the <strong>commissioning test</strong> that will fail and the <strong>lead-time-in-weeks</strong> to fix it if caught now — the commissioning-risk twin.</li>
+  <li>Renders an evidence chain (required value, submitted value, source citation, confidence) and exports an audit trail for the commissioning authority.</li>
+  <li>Degrades gracefully: when the LLM is unavailable, an independent rule-based detector still catches the headline numeric shortfalls — no silent zeros, and never the answer key (see §5).</li>
+</ul>
+
+<h2>3. Architecture (as actually executed)</h2>
+<p>Pramaan is <strong>one compliance/Cx reasoning graph plus three connected deterministic intelligence services</strong> — not five co-operating AI agents. The runtime compliance graph is:</p>
+<p><code>ingest &rarr; load_standards &rarr; validate &rarr; reconcile &rarr; retrieve &rarr; critique &rarr; cx_predict &rarr; format_output</code></p>
+<ul>
+  <li><code>validate</code> is a routing gate; <code>reconcile</code>/<code>retrieve</code>/<code>critique</code> form a bounded retrieval + reflexion loop; <code>cx_predict</code> maps each deviation to its commissioning test via a rule table (no per-deviation LLM call).</li>
+  <li>The standalone <strong>extraction</strong> module is <em>not</em> in the executed graph, and the <strong>RFI Copilot</strong> is a separate API workflow — stated plainly rather than diagrammed as active agents.</li>
+  <li>The three deterministic services — <strong>schedule risk</strong> (graph CPM + seeded beta-PERT Monte Carlo), <strong>supply chain</strong> (closed-form ETA/risk over static data), and the <strong>project/Cx graph</strong> — are separate endpoints, not agents in the compliance graph.</li>
+</ul>
+
+<h2>4. Deployment &amp; live behaviour</h2>
+<div class="grid">
+  <div class="fact"><b>Live demo <span class="lab meas">measured</span></b>Judge page + API return 200; a live Gemini text comparison and image (vision) analysis both returned valid findings during an external audit.</div>
+  <div class="fact"><b>Latency <span class="lab meas">measured</span></b>Model calls run ~13–33 s; the UI streams reasoning and caps the wait, degrading to the rule engine on timeout.</div>
+  <div class="fact"><b>OCR <span class="lab meas">measured</span></b>OCR runs only where Tesseract is installed (the <code>Dockerfile.backend</code> image). The default Render/Compose deploy does not bundle it and returns a clear "OCR unavailable" message.</div>
+</div>
+
+<h2 class="pb">5. Scientific integrity of the analysis path</h2>
+<p>User-facing analysis <strong>never substitutes the answer key</strong>. When the LLM pipeline returns empty (throttled / no key), the corpus endpoints degrade to the independent rule detector over the same spec + submittal, labelled <code>analysis_mode:"rule"</code>, or report <code>analysis_mode:"unavailable"</code> — never the seeded ground-truth labels. The seeded fixture is reachable only via an explicit <code>?seeded_demo=true</code> opt-in, stamped <code>analysis_mode:"seeded_demo"</code> with a disclaimer. The copilot's offline fallback is labelled <code>mode:"offline-fallback"</code>. This is verified by automated tests that assert seeded identifiers never leak into the default path.</p>
+
+<h2>6. Evaluation methodology &amp; results</h2>
+<h3>6a. Synthetic portfolio — breadth check <span class="lab syn">synthetic</span></h3>
+<p>A 12-project, 11-country synthetic corpus with <strong>seeded</strong> deviations gives repeatable breadth coverage. Its P/R/F1 read <strong>1.000 by construction</strong> — it exercises the plumbing across formats and standards; it is <em>not</em> evidence of external accuracy, and we label it that way rather than headline it.</p>
+<h3>6b. Team-authored evaluation pairs — the credibility signal</h3>
+<p>Fifteen team-authored pairs whose values are <strong>cited from public product datasheets and standards</strong> (Vertiv, Cummins, STULZ, ABB, Tate ConCore, Schneider Canalis, Raritan, Xtralis VESDA, Distech, and others). They are realistic engineering documents, <em>not</em> downloaded immutable vendor files. Across them are <strong>27 hard deviation claims + 1 deliberately contested case</strong>.</p>
+<table>
+  <tr><th>Layer</th><th>What it proves</th><th>Result</th></tr>
+  <tr><td>Deterministic offline <span class="lab det">deterministic&nbsp;offline</span></td><td>Rule detector recovers headline numeric shortfalls with no API key; clears compliant/true-negative values</td><td>4 of the 27 hard claims + true-negatives; <strong>0 false positives</strong>, reproducible (<code>python eval/real_pairs_offline.py</code>)</td></tr>
+  <tr><td>Live-model <span class="lab live">live-model</span></td><td>Frontier model recovers the reasoning-dependent remainder (derived arithmetic, recalled GWPs, categorical/omission findings)</td><td>The other 23 hard claims require a live model; recall/precision <strong>vary run-to-run</strong> and are reported per dated run, not as a fixed score</td></tr>
+</table>
+<p><strong class="k">Honest scoring.</strong> The live scorer now performs <strong>one-to-one (bipartite) matching</strong> — each finding is credited to at most one ground-truth label and vice-versa, so a single broad finding cannot inflate recall, and unmatched findings are counted as false positives (never a negative "extra"). It reports <strong>two</strong> recall numbers: an <em>executed-only</em> recall and a <em>primary</em> recall that counts not-run (quota/outage) pairs as misses. One case (a 30&deg;C supply-air setpoint, within ASHRAE A1 allowable but above recommended) is deliberately contested and scored against us, so the honest precision sits near ~0.9, not a suspicious 1.000.</p>
+<p class="sub"><strong>Independence caveat.</strong> On one BMS pair, a live run surfaced two consequences we had not listed and we adopted them into ground truth; labels added after seeing the model's output are no longer independent of it, and we say so. A fully independent, frozen, primary-source benchmark with pre-registered labels is the next validation milestone.</p>
+
+<h3>6c. Example deviations (illustrative, from the team-authored pairs)</h3>
+<table>
+  <tr><th>Parameter</th><th>Required (standard)</th><th>Submitted (cited value)</th><th>Layer</th></tr>
+  <tr><td>UPS battery autonomy</td><td>&ge; 10 min (Uptime Tier IV)</td><td>7 min (Vertiv GXT5-1000)</td><td><span class="lab det">offline</span></td></tr>
+  <tr><td>UPS online efficiency</td><td>&ge; 96%</td><td>95.9% online (99% is ECO)</td><td><span class="lab det">offline</span></td></tr>
+  <tr><td>Generator on-site fuel</td><td>&ge; 48 h</td><td>38.8 h (derived: 4,000 gal &divide; 103 GPH)</td><td><span class="lab live">live-model</span></td></tr>
+  <tr><td>Generator emissions</td><td>EPA Tier 4</td><td>EPA Tier 2 (Cummins QSK60)</td><td><span class="lab live">live-model</span></td></tr>
+  <tr><td>Refrigerant GWP</td><td>&le; 750 (EU F-Gas)</td><td>R-410A GWP 2,088 (model-recalled)</td><td><span class="lab live">live-model</span></td></tr>
+  <tr><td>Raised-floor point load</td><td>&ge; 1,500 lbf</td><td>1,250 lbf (Tate ConCore 1250 ceiling)</td><td><span class="lab det">offline</span></td></tr>
+  <tr><td>Busway short-time withstand</td><td>&ge; 65 kA/1 s</td><td>50 kA/1 s (Schneider Canalis KTA10)</td><td><span class="lab det">offline</span></td></tr>
+  <tr><td>Supply-air setpoint (contested)</td><td>&le; 27 &deg;C recommended</td><td>30 &deg;C (within A1 allowable)</td><td><span class="lab scen">contested</span></td></tr>
+</table>
+<p class="sub">Compliant values (e.g. IP54 &ge; IP42, 415 V, 10 s NFPA start) are deliberately present and are <em>not</em> flagged &mdash; a precision / true-negative check.</p>
+
+<h3>6d. Reproduce it</h3>
+<ul>
+  <li><code>python -m pytest tests -q</code> &mdash; 480+ tests, no API key <span class="lab meas">measured</span></li>
+  <li><code>python eval/real_pairs_offline.py</code> &mdash; deterministic offline recall + 0 false positives, exits 0 <span class="lab det">deterministic&nbsp;offline</span></li>
+  <li><code>make eval-real</code> &mdash; the live-model layer; prints executed-only <em>and</em> primary recall with per-pair TP/FP/FN <span class="lab live">live-model</span></li>
+  <li><code>python scripts/verify_live.py</code> &mdash; end-to-end checks against the deployment <span class="lab live">live-model</span></li>
+</ul>
+
+<h2>7. Business impact</h2>
+<p>The asymmetry is real: an undetected deviation can become a multi-week commissioning slip, while an analysis costs cents. But the <strong>pricing, ROI multiple, payback, and margin figures are modeled hypotheses <span class="lab scen">scenario</span></strong> — not validated by a paid pilot, LOI, or customer, and the ROI calculator is a sensitivity model, not realized savings. We have <strong>not yet</strong> run a timed manual-coordination study, so we make no measured hours-saved claim. The defensible business statement today: "The cost of late nonconformance can be high; Pramaan is designed to move detection to submittal review."</p>
+
+<h2>8. Engineering quality</h2>
+<div class="grid">
+  <div class="fact"><b>Tests <span class="lab meas">measured</span></b>480+ automated tests (481 locally); backend coverage ~81%. Full CI: Python tests + lint, frontend types/tests/build, Docker.</div>
+  <div class="fact"><b>Resilience <span class="lab det">deterministic&nbsp;offline</span></b>No API key, malformed PDFs, cold backend all return 200; <code>/llm-check</code> surfaces the true LLM status.</div>
+  <div class="fact"><b>Reproducibility <span class="lab det">deterministic&nbsp;offline</span></b>Deterministic evals and unit tests run offline; live-model results are labelled and vary run-to-run.</div>
+</div>
+<p class="sub"><strong>Prototype, not a hardened production service.</strong> There is no authentication, rate limiting, tenant isolation, or upload/dependency hardening yet; synchronous LLM calls and single-instance free-tier hosting are not a production-load story. These are named limitations, not claims.</p>
+
+<h2>9. Security, standards &amp; IP posture</h2>
+<ul>
+  <li>No API keys are committed; credentials are external secrets. Path-traversal, malformed-input, output-escaping, and upload-size tests exist; error bodies never leak stack traces.</li>
+  <li>Third-party standards content is a team-authored paraphrase from public/secondary references — proprietary standard text is not redistributed; product/standard names are trademarks of their owners and Pramaan is not endorsed by them.</li>
+  <li>Known follow-ups (P1): auth + rate limits on public LLM endpoints, upload/dependency hardening, and a <code>THIRD_PARTY_NOTICES.md</code> with per-artifact source/version/hash.</li>
+</ul>
+
+<h2>10. Honest limitations &amp; roadmap</h2>
+<ul>
+  <li><strong>Schedule risk is simulation</strong>, not field-calibrated prediction; deviation probabilities and "actual delays" are seeded, not empirical.</li>
+  <li><strong>Supply-chain intelligence is illustrative</strong> — closed-form over static data, no live shipment/route feed yet.</li>
+  <li><strong>No measured coordination-hours study</strong> yet; the 45-day figure was a UI constant and is not presented as a result.</li>
+  <li><strong>Next milestones:</strong> a frozen independent benchmark (primary-source PDFs, hashes, pre-registered labels, clean negatives, one-to-one TP/FP/FN with variance); a timed human baseline; auth + rate limiting; and either shipping OCR in the hosted image or dropping OCR claims.</li>
+</ul>
+
+<h2 class="pb">11. Rubric mapping (PS4 weights: 25 / 25 / 20 / 15 / 15)</h2>
+<table>
+  <tr><th>Criterion</th><th>How Pramaan addresses it</th><th>Honest status</th></tr>
+  <tr><td>Innovation (25%)</td><td>Spec &rarr; deviation &rarr; commissioning test &rarr; lead-time chain; a distinctive wedge beyond submittal review</td><td>Strong &mdash; the moat is the Cx-test / lead-time link, not module count</td></tr>
+  <tr><td>Business impact (25%)</td><td>Cost-of-late-nonconformance thesis; scenario ROI model</td><td><span class="lab scen">scenario</span> no measured hours-saved study yet</td></tr>
+  <tr><td>Technical excellence (20%)</td><td>Real LangGraph + LLM, schedule simulation, 480+ tests, CI, live LLM/vision</td><td><span class="lab meas">measured</span> answer-key fallback removed; scorer corrected</td></tr>
+  <tr><td>Scalability (15%)</td><td>Modular, containerized; deterministic services run at ~142 systems/s</td><td>Prototype: no auth / persistence / queue; throughput is rule execution, not LLM</td></tr>
+  <tr><td>User experience (15%)</td><td>Focused Judge Mode + streaming reasoning; polished desktop UI</td><td>Known mobile / a11y / latency follow-ups (P1)</td></tr>
+</table>
+
+<h2>12. Anticipated judge questions (honest answers)</h2>
+<p><strong class="k">Is the data real?</strong> The 12-project portfolio is synthetic regression data. The evaluation pairs are team-authored with values cited from public product figures; 4 claims are checked deterministically offline, 23 require a live model. A fully independent, frozen benchmark is the next milestone.</p>
+<p><strong class="k">Is schedule risk predictive?</strong> Today it is a seeded CPM / Monte-Carlo scenario engine, not calibrated on field actuals. That calibration is the next validation step.</p>
+<p><strong class="k">Why "agents"?</strong> The LLM is used only for cross-document semantic reconciliation; validation, Cx mapping, schedule propagation, and guardrails are deterministic so outputs stay inspectable. It is one reasoning graph plus three deterministic services, not five agents.</p>
+<p><strong class="k">What did users save?</strong> We make no measured field-savings claim yet; a timed human baseline is planned.</p>
+
+<div class="foot">
+  Evidence-safe proof points: "480+ automated tests pass; backend coverage ~81%." · "The public deployment performed a live Gemini text and vision analysis during an external audit." · "The schedule service runs seeded CPM/Monte-Carlo simulation; delay results are simulated, not field predictions." · "The 12-project portfolio is synthetic regression coverage." · Every metric above carries an evidence label. Results are observations at the audited commit, not evergreen badges.
+</div>
+
+</body>
+</html>

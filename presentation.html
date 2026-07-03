@@ -536,9 +536,9 @@
     <em>Pramaan (प्रमाण) — Sanskrit for <strong style="color:var(--cyan);">proof</strong>. Named on purpose: the deterministic numbers reproduce offline; live-model results are reported honestly, not as a fixed score.</em>
   </p>
   <div class="metric-row fade-up" style="margin-top:40px;">
-    <div class="metric"><div class="metric-val accent">50</div><div class="metric-label">Deviations Caught</div></div>
-    <div class="metric"><div class="metric-val green">1,024</div><div class="metric-label">Weeks Saved</div></div>
-    <div class="metric"><div class="metric-val purple">1.000</div><div class="metric-label">Real-doc Recall</div></div>
+    <div class="metric"><div class="metric-val accent">50</div><div class="metric-label">Deviations (synthetic)</div></div>
+    <div class="metric"><div class="metric-val green">1,024</div><div class="metric-label">Lead-time-weeks (synthetic sum)</div></div>
+    <div class="metric"><div class="metric-val purple">15</div><div class="metric-label">Team-authored pairs (cited)</div></div>
     <div class="metric"><div class="metric-val gold">12</div><div class="metric-label">Projects</div></div>
   </div>
 </div>
@@ -590,7 +590,7 @@
   <div class="bg-gradient bg-g2"></div>
   <span class="tag tag-green fade-up">THE HEADLINE</span>
   <div class="big-number fade-up">267<span class="big-number-unit">weeks</span></div>
-  <p class="subtitle fade-up" style="margin-top:20px;">of total lead time saved across 14 deviations</p>
+  <p class="subtitle fade-up" style="margin-top:20px;">of lead-time-weeks summed across 14 findings (synthetic corpus — not calendar delay avoided)</p>
   <div class="glow-line fade-up"></div>
   <div class="quote fade-up" style="margin-top:24px;">
     Pramaan caught a critical BMS monitoring single-point-of-failure <strong>33 weeks</strong> before it would have failed the full-facility failover drill. That's the difference between a one-line email and a seven-figure schedule slip.
@@ -660,7 +660,7 @@
     </div>
     <div class="card">
       <div class="card-value green">0</div>
-      <div class="card-label">False Positives</div>
+      <div class="card-label">False Positives (synthetic)</div>
     </div>
   </div>
   <div class="grid grid-3 fade-up" style="max-width:700px; margin-top:16px;">
@@ -673,7 +673,7 @@
       <div class="card-label">Cx Tests Mapped</div>
     </div>
     <div class="card">
-      <div class="card-value accent">160+</div>
+      <div class="card-value accent">480+</div>
       <div class="card-label">Automated Tests</div>
     </div>
   </div>
@@ -762,7 +762,7 @@
     </div>
   </div>
   <div class="metric-row fade-up" style="margin-top:28px;">
-    <div class="metric"><div class="metric-val green">1,024</div><div class="metric-label">Total Weeks Saved</div></div>
+    <div class="metric"><div class="metric-val green">1,024</div><div class="metric-label">Lead-time-weeks (synthetic)</div></div>
     <div class="metric"><div class="metric-val accent">256</div><div class="metric-label">Total MW</div></div>
     <div class="metric"><div class="metric-val purple">25+</div><div class="metric-label">Standards Covered</div></div>
   </div>
@@ -834,7 +834,8 @@
     </div>
   </div>
   <p class="fade-up" style="color:var(--muted); font-size:0.85rem; margin-top:16px;">
-    <code style="font-family:var(--mono); color:var(--cyan);">make eval-all</code> — two reproducibility checks + the real-document proof
+    <code style="font-family:var(--mono); color:var(--cyan);">make eval-all</code> — deterministic checks + the live-model layer.
+    <br><strong>Evidence labels used throughout:</strong> measured · synthetic (by construction) · scenario · live-model (varies run-to-run) · deterministic offline.
   </p>
 </div>
 

@@ -1,18 +1,18 @@
 {
   "benchmark": "ps4_external_v1",
-  "benchmark_version": "1.0.0",
-  "generated_utc": "2026-07-03T15:06:51+00:00",
+  "benchmark_version": "1.1.0",
+  "generated_utc": "2026-07-03T16:12:54+00:00",
   "status": "seed (framework complete; 40-50 pairs target \u2014 see backlog)",
   "pairs": {
-    "value": 16,
+    "value": 43,
     "evidence_label": "team_authored"
   },
   "positive_labels": {
-    "value": 12,
+    "value": 52,
     "evidence_label": "team_authored"
   },
   "clean_negatives": {
-    "value": 3,
+    "value": 57,
     "evidence_label": "team_authored"
   },
   "contested_labels": {
@@ -20,37 +20,48 @@
     "evidence_label": "team_authored"
   },
   "systems_covered": [
+    "ats_sts",
     "battery",
+    "bms",
     "cabling",
+    "chiller",
+    "cooling_tower",
     "crac_crah",
+    "fire_suppression",
     "generator",
     "metering_power_quality",
+    "networking",
+    "pdu_rpp",
+    "rack_aisle",
     "refrigerant",
     "switchgear",
+    "transformer",
     "ups"
   ],
   "difficulty_mix": {
-    "adversarial_noise": 1,
-    "categorical_reasoning": 2,
+    "adversarial_noise": 6,
+    "categorical_reasoning": 13,
     "derived_arithmetic": 2,
-    "direct_value": 3,
-    "domain_recall": 1,
-    "omission_detection": 2,
-    "unit_conversion": 1
+    "direct_value": 6,
+    "domain_recall": 4,
+    "omission_detection": 6,
+    "scanned_or_image": 6,
+    "table_or_layout": 7,
+    "unit_conversion": 2
   },
   "provenance": {
     "primary_sources": 0,
-    "team_authored_sources": 32,
+    "team_authored_sources": 86,
     "sha256_completeness": 1.0
   },
   "rule_baseline": {
-    "primary_recall_semantic": 0.4167,
-    "primary_recall_exact": 0.4167,
-    "primary_tp": 5,
-    "positive_labels": 12,
+    "primary_recall_semantic": 0.1346,
+    "primary_recall_exact": 0.1346,
+    "primary_tp": 7,
+    "positive_labels": 52,
     "false_positives_total": 0,
     "clean_negative_false_alert_rate": 0.0,
-    "pairs_not_run": 0,
+    "pairs_not_run": 5,
     "evidence_label": "deterministic_offline"
   },
   "llm_result": null,

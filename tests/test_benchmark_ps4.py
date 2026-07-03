@@ -134,3 +134,24 @@ def test_rule_mode_run_one_no_key(monkeypatch):
     assert r["mode_used"] == "rule" and r["not_run"] is False
     assert r["tp_semantic"] == 1        # battery 10 -> 8 caught by the rule engine
     assert r["fp"] == 0
+
+
+def test_image_pair_recorded_not_run_never_fabricated():
+    import benchmark_ps4_external as B
+    labels = L.group_labels_by_pair(L.load_labels())["pair_039"]
+    r = B.run_one("pair_039", labels, "rule")
+    assert r["not_run"] is True and r["modality"] == "image"
+    assert r["error_type"] == "image_pending" and r["tp_semantic"] == 0  # not evaluated by the text path
+
+
+def test_labels_carry_review_status_and_modality():
+    labels = L.load_labels()
+    assert labels
+    assert all(lb.get("review_status") == "single_author_frozen_pending_review" for lb in labels)
+    assert all(lb.get("modality") in ("text", "image") for lb in labels)
+
+
+def test_multi_label_pair_has_multiple_checks():
+    by = L.group_labels_by_pair(L.load_labels())
+    assert len(by["pair_018"]) >= 5          # chiller pair carries several independent checks
+    assert sum(1 for lb in L.load_labels() if lb["label_type"] == "clean_negative") >= 15

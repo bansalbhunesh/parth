@@ -1,2 +1,2 @@
 run,mode,provider,model,primary_recall_semantic,primary_recall_exact,secondary_recall_semantic,primary_tp,positive_labels,false_positives_total,clean_negative_false_alert_rate,pairs_not_run,error_rate,latency_p50_ms,latency_p95_ms
-2026-07-03_rule_rule-engine_run1,rule,rule,rule-engine,0.4167,0.4167,0.4167,5,12,0,0.0,0,0.0,0.0,6.0
+2026-07-03_rule_rule-engine_run1,rule,rule,rule-engine,0.1346,0.1346,0.1522,7,52,0,0.0,5,0.1163,0.0,1.0

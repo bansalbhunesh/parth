@@ -31,3 +31,5 @@ select = ["E", "F", "I", "W"]
 [tool.ruff.lint.per-file-ignores]
 # Corpus generator: long standards-text literals are data, not code style.
 "data/generate_projects.py" = ["E501"]
+# Benchmark seed authoring: long owner/submittal document literals are data.
+"scripts/benchmark_seed_pairs.py" = ["E501"]

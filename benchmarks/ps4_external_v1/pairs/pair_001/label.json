@@ -1,0 +1,32 @@
+[
+  {
+    "pair_id": "pair_001",
+    "system_type": "ups",
+    "label_id": "P001-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "direct_value",
+    "component": "battery autonomy",
+    "parameter": "runtime_minutes",
+    "required_value": "10 min",
+    "submitted_value": "8 min",
+    "deviation_type": "below_requirement",
+    "severity": "high",
+    "expected_finding": "Submitted UPS battery autonomy (8 min) is below the owner requirement (10 min).",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "at least 10 minutes at full design load"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Rated battery runtime: 8 minutes"
+    },
+    "expected_commissioning_test": "UPS battery autonomy discharge test (IST)",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

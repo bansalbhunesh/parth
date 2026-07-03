@@ -1,0 +1,32 @@
+[
+  {
+    "pair_id": "pair_009",
+    "system_type": "cabling",
+    "label_id": "P009-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "categorical_reasoning",
+    "component": "plenum cable fire rating",
+    "parameter": "cable_fire_rating",
+    "required_value": "CMP",
+    "submitted_value": "CMR",
+    "deviation_type": "wrong_category",
+    "severity": "medium",
+    "expected_finding": "Provided CMR-rated cable does not meet the CMP (plenum) requirement for plenum pathways.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "shall be CMP (plenum) rated"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "cable fire rating: CMR (riser)"
+    },
+    "expected_commissioning_test": "Cable listing / fire-rating documentation review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

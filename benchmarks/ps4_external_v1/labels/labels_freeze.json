@@ -1,0 +1,9 @@
+{
+  "benchmark": "ps4_external_v1",
+  "benchmark_version": "1.0.0",
+  "frozen_on": "2026-07-03",
+  "label_count": 16,
+  "pair_count": 16,
+  "labels_freeze_sha256": "53ca66b1281da28a784e8ddc04a671ff5243b6d46f654a01606aa23414bfd8c7",
+  "note": "Single-author frozen seed labels. Two-reviewer adjudication is a backlog step; editing labels after a run must bump benchmark_version."
+}

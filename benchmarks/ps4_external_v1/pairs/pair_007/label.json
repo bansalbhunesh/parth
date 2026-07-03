@@ -1,0 +1,32 @@
+[
+  {
+    "pair_id": "pair_007",
+    "system_type": "battery",
+    "label_id": "P007-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "derived_arithmetic",
+    "component": "fire-area li-ion energy",
+    "parameter": "fire_area_kwh",
+    "required_value": "600 kWh",
+    "submitted_value": "636 kWh",
+    "deviation_type": "above_limit",
+    "severity": "high",
+    "expected_finding": "Aggregate li-ion energy (24 × 26.5 kWh = 636 kWh) exceeds the 600 kWh per-fire-area cap.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "shall not exceed 600 kWh"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "24 racks, each 26.5 kWh"
+    },
+    "expected_commissioning_test": "Fire-area energy / NFPA 855 documentation review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "24*26.5 = 636 kWh",
+    "contested": false
+  }
+]

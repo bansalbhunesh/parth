@@ -1,0 +1,32 @@
+[
+  {
+    "pair_id": "pair_006",
+    "system_type": "generator",
+    "label_id": "P006-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "derived_arithmetic",
+    "component": "on-site fuel autonomy",
+    "parameter": "fuel_hours",
+    "required_value": "48 h",
+    "submitted_value": "38.8 h",
+    "deviation_type": "below_requirement",
+    "severity": "high",
+    "expected_finding": "Derived on-site fuel autonomy (4,000 gal / 103 GPH = 38.8 h) is below the 48 h requirement.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "at least 48 hours of runtime at 100% load"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "4,000 US gallons ... 103 GPH"
+    },
+    "expected_commissioning_test": "Fuel-endurance / load-bank test",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "4000/103 = 38.83 h",
+    "contested": false
+  }
+]

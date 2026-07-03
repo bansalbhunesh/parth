@@ -1,0 +1,32 @@
+[
+  {
+    "pair_id": "pair_015",
+    "system_type": "crac_crah",
+    "label_id": "P015-L01",
+    "label_type": "ambiguous_contested",
+    "difficulty": "categorical_reasoning",
+    "component": "supply-air setpoint",
+    "parameter": "supply_air_temp_c",
+    "required_value": "27 C recommended",
+    "submitted_value": "30 C",
+    "deviation_type": "contested",
+    "severity": "info",
+    "expected_finding": "Contested: 30 °C is above the 27 °C recommended but within the A1 allowable band; a CxA could rule either way.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "should not exceed 27 °C"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "supply-air setpoint: 30 °C"
+    },
+    "expected_commissioning_test": "Thermal set-point review (judgment call)",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": true
+  }
+]

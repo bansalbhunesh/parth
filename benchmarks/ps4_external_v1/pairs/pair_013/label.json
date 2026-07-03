@@ -1,0 +1,32 @@
+[
+  {
+    "pair_id": "pair_013",
+    "system_type": "crac_crah",
+    "label_id": "P013-L01",
+    "label_type": "clean_negative",
+    "difficulty": "categorical_reasoning",
+    "component": "cooling redundancy",
+    "parameter": "redundancy",
+    "required_value": "N+1",
+    "submitted_value": "N+1",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — N+1 redundancy provided as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "N+1 redundant"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "configuration: N+1"
+    },
+    "expected_commissioning_test": "Concurrent-maintainability / redundancy review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

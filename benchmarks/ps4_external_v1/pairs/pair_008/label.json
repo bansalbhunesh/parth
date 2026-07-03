@@ -1,0 +1,32 @@
+[
+  {
+    "pair_id": "pair_008",
+    "system_type": "refrigerant",
+    "label_id": "P008-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "domain_recall",
+    "component": "refrigerant GWP",
+    "parameter": "refrigerant_gwp",
+    "required_value": "750",
+    "submitted_value": "R-410A (GWP 2088)",
+    "deviation_type": "above_limit",
+    "severity": "high",
+    "expected_finding": "R-410A has a GWP of ~2,088, above the 750 owner limit (value not stated in the submittal).",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "GWP shall be ≤ 750"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Refrigerant charge: R-410A"
+    },
+    "expected_commissioning_test": "Refrigerant / F-Gas compliance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "R-410A GWP = 2088 (IPCC AR4)",
+    "contested": false
+  }
+]

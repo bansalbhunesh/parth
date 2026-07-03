@@ -1,0 +1,32 @@
+[
+  {
+    "pair_id": "pair_003",
+    "system_type": "switchgear",
+    "label_id": "P003-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "direct_value",
+    "component": "short-circuit withstand",
+    "parameter": "icw_ka",
+    "required_value": "65 kA",
+    "submitted_value": "50 kA",
+    "deviation_type": "below_requirement",
+    "severity": "high",
+    "expected_finding": "Submitted short-circuit withstand (50 kA) is below the required 65 kA.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "at least 65 kA for 1 second"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "short-circuit withstand: 50 kA"
+    },
+    "expected_commissioning_test": "Switchgear type-test verification / factory test review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

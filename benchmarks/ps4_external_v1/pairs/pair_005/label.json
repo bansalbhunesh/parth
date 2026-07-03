@@ -1,0 +1,32 @@
+[
+  {
+    "pair_id": "pair_005",
+    "system_type": "crac_crah",
+    "label_id": "P005-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "unit_conversion",
+    "component": "supply airflow",
+    "parameter": "airflow_cfm",
+    "required_value": "2500 CFM",
+    "submitted_value": "4000 m3/h",
+    "deviation_type": "below_requirement",
+    "severity": "medium",
+    "expected_finding": "Submitted 4,000 m³/h (~2,354 CFM) is below the required 2,500 CFM once converted.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "at least 2,500 CFM"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "supply airflow: 4,000 m³/h"
+    },
+    "expected_commissioning_test": "Airflow / capacity acceptance test",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "4000 m3/h / 1.699 = 2354 CFM",
+    "contested": false
+  }
+]

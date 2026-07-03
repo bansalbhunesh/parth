@@ -49,6 +49,14 @@
 
 ---
 
+<p align="center">
+  <img src="docs/demo.gif" alt="Pramaan judge mode: load a real vendor document, hit Analyze, watch the AI stream its reasoning and return cited deviations — 2N vs N+1 redundancy and a battery-autonomy shortfall, each with the standard and commissioning test" width="900">
+  <br>
+  <sub>The real flow, uncut: <strong>Load real document ★ → Analyze → cited findings in ~19 s</strong> — try it yourself in <a href="https://parth-tan.vercel.app/judge">Judge Mode</a>.</sub>
+</p>
+
+---
+
 ## ⚡ Judges: start here (2 minutes)
 
 1. **See it catch a real deviation** → [Judge Mode](https://parth-tan.vercel.app/judge): click **Load real document ★**, hit **Analyze**, watch it derive 38.8 h of fuel autonomy from a real Cummins datasheet and name the commissioning test that fails.

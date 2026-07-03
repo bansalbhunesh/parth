@@ -68,7 +68,7 @@
 
 ## [1:50–2:15] — It's real, and it's honest
 
-> "And it's not our data. We built **fourteen** of these from actual published
+> "And it's not our data. We built **fifteen** of these from actual published
 > spec sheets — **Vertiv, Cummins, STULZ, ABB, Raritan, Xtralis, Distech** —
 > against real standards: Uptime, NFPA, EPA, ASHRAE, IEC, BACnet/BTL. On the
 > cooling unit it even **knew R410A's global-warming
@@ -81,7 +81,7 @@
 
 > "This isn't a demo that works once. The eval scores two ways so we never inflate
 > a number; clean systems are seeded as true negatives to prove we don't over-flag;
-> 446 tests, CI green. And when the AI model is rate-limited — which *will* happen —
+> 448 tests, CI green. And when the AI model is rate-limited — which *will* happen —
 > a rule-based engine still catches the headline shortfalls. **No silent zeros.**
 > We engineered for the bad day, not just the stage."
 

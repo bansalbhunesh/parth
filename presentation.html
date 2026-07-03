@@ -678,7 +678,7 @@
     </div>
   </div>
   <p class="fade-up" style="color:var(--muted); font-size:0.85rem; margin-top:16px;">
-    <strong>The number that matters:</strong> 11 sourced real datasheet pairs — 26 deviations (recall 1.000), 0 false positives, and a self-scored &approx;0.9 on one contested ASHRAE case (live-verified, gemini-2.5-flash). We report ~0.9, not a suspicious 1.000.
+    <strong>The number that matters:</strong> 11 sourced real datasheet pairs — 27 deviations (recall 1.000), 0 false positives, and a self-scored &approx;0.9 on one contested ASHRAE case (live-verified, gemini-2.5-flash). We report ~0.9, not a suspicious 1.000.
   </p>
 </div>
 
@@ -830,7 +830,7 @@
       <h3 style="color:var(--gold);">Path 3: LLM Agent</h3>
       <p style="color:var(--muted); font-size:0.85rem; margin-top:8px;">Real, unseen datasheets → LLM reasoning → deviations</p>
       <div class="card-value green" style="margin-top:12px;">Recall 1.000</div>
-      <p style="color:var(--muted); font-size:0.8rem;">26/26 hard · 0 FP · ~0.9 precision (live-verified)</p>
+      <p style="color:var(--muted); font-size:0.8rem;">27/27 hard · 0 FP · ~0.9 precision (live-verified)</p>
     </div>
   </div>
   <p class="fade-up" style="color:var(--muted); font-size:0.85rem; margin-top:16px;">
@@ -846,7 +846,7 @@
   <div class="card fade-up" style="max-width:720px; text-align:left;">
     <p style="font-family:var(--mono); color:var(--cyan); font-size:1.05rem;">git clone &middot; make verify</p>
     <ul class="features" style="max-width:unset; margin-top:12px;">
-      <li><strong>446 tests</strong> — API, agents, security, resilience, real pairs</li>
+      <li><strong>448 tests</strong> — API, agents, security, resilience, real pairs</li>
       <li><strong>3 eval harnesses</strong> — every headline metric regenerated</li>
       <li><strong>Type-check + production build</strong> — CI green, publicly visible</li>
       <li><strong>No-key real-datasheet harness</strong> — <code style="font-family:var(--mono);">eval/real_pairs_offline.py</code></li>
@@ -904,7 +904,7 @@
     </div>
     <div class="rubric-card">
       <h3><span class="purple">Technical Excellence</span></h3>
-      <p>Synthetic portfolio is 1.000 by construction (breadth check); the real signal is 14 sourced datasheet pairs — 26 deviations (recall 1.000), 0 false positives, self-scored &approx;0.9 on one contested case. 435 tests. 28 endpoints. Independent text + real-LLM evaluation.</p>
+      <p>Synthetic portfolio is 1.000 by construction (breadth check); the real signal is 15 sourced datasheet pairs — 27 deviations (recall 1.000), 0 false positives, self-scored &approx;0.9 on one contested case. 435 tests. 28 endpoints. Independent text + real-LLM evaluation.</p>
     </div>
     <div class="rubric-card">
       <h3><span class="gold">Scalability & UX</span></h3>
@@ -996,7 +996,7 @@
   <div class="glow-line fade-up"></div>
   <p class="subtitle fade-up">
     50 deviations &middot; 1,024 weeks saved &middot; 12 projects &middot; 11 countries<br>
-    Real-doc: 0 false positives &middot; self-scored ~0.9 &middot; 446 tests
+    Real-doc: 0 false positives &middot; self-scored ~0.9 &middot; 448 tests
   </p>
   <div class="final-cta fade-up">
     <a class="cta-btn cta-primary" href="https://parth-tan.vercel.app" target="_blank">▶ Live Demo</a>

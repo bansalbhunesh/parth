@@ -110,7 +110,7 @@ honest numbers instead:
 
 ---
 
-## Update 2026-07-03 — pairs 12–14 live-verified (11 → 14 pairs)
+## Update 2026-07-03 — pairs 12–15 live-verified (11 → 15 pairs)
 
 Three new fully-sourced pairs (rack PDU / aspirating smoke detection / BMS
 controller — see PROVENANCE pairs 12–14) were added and live-verified via the
@@ -118,7 +118,8 @@ new LLM-layer harness:
 
 ```bash
 make eval-real          # or: python eval/real_pairs_llm.py --pairs rack-pdu,aspirating-detection,bms-controller
-# → HARD recall (executed): 7/7 = 1.000 · pairs with extra finds: 0
+# → HARD recall (executed): 8/8 = 1.000 · pairs with extra finds: 0
+#   (7/7 for pairs 12–14; pair 15's derived 24 x 26.5 = 636 > 600 kWh caught first-try)
 ```
 
 Model: `gemini-2.5-flash`. Two notes in the spirit of this dossier:
@@ -133,6 +134,11 @@ Model: `gemini-2.5-flash`. Two notes in the spirit of this dossier:
    alarming). The matcher accepts either decomposition of the same physical
    fact; it never double-counts.
 
-Running total: **26 hard deviations recovered across 14 pairs, recall 1.000,
-0 false positives** (19 verified June 2026 + 7 verified 2026-07-03), plus the
+Running total: **27 hard deviations recovered across 15 pairs, recall 1.000,
+0 false positives** (19 verified June 2026 + 8 verified 2026-07-03), plus the
 one deliberately contested ASHRAE case that keeps our self-score honest.
+
+Same day, the **full Meghdoot LLM eval was re-verified on a clean key**
+(`gemini-2.5-flash`, 10 paced calls, zero 429s): **P/R/F1 = 1.000 on both
+semantic and strict scoring, citation faithfulness 1.000** — the June result
+reproduces in July on the current model.

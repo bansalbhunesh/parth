@@ -287,6 +287,26 @@ initial answer key, and we kept the stricter version.
   operates under a supervisory controller) and **integral IP↔MS/TP routing**
   not provided. Cleared (compliant): full field-programmability.
 
-**Fourteen real pairs, 26 hard deviation claims + 1 contested, every value
+## Pair 15 — added + live-verified 2026-07-03 (Li-ion ESS, NFPA 855)
+
+**Pair 15 — Lithium-ion UPS battery room** (`design_basis_liion_ess.md` +
+`submittal_liion_128s.md`)
+- **Samsung SDI 128S** lithium-ion UPS battery rack: nameplate **26.5 kWh**
+  per rack (128S configuration); the 128S/136S family was the **first Li-ion
+  cabinet to complete the UL 9540A rack-level test**. — Samsung SDI LIB
+  product specification (136S/128S) via Eaton/Vertiv/Mitsubishi Critical
+  brochures; energy-storage.news coverage of the 9540A first.
+- **NFPA 855 prescriptive limits**: <= 50 kWh per ESS unit, >= 914 mm (3 ft)
+  separation, and **<= 600 kWh of Li-ion per fire area**; UL 9540/9540A
+  listing and test-data requirements. — NFPA 855 (2020/2023 editions),
+  cleanpower.org & Mayfield Renewables code summaries.
+- **The deviation is an aggregate the submittal never states**: 24 racks x
+  26.5 kWh = **636 kWh > 600 kWh** fire-area cap — the model must do the
+  multiplication itself (same reasoning class as the fuel-autonomy division).
+  Live-verified 2026-07-03: **caught, 0 extra findings.** Cleared (compliant):
+  26.5 <= 50 kWh per unit, 1,000 mm >= 914 mm separation, rack-level UL 9540A
+  data provided.
+
+**Fifteen real pairs, 27 hard deviation claims + 1 contested, every value
 traced to a published source. None seeded. 19 live-verified June 2026 +
-7 live-verified 2026-07-03 (gemini-2.5-flash), 0 false positives.**
+8 live-verified 2026-07-03 (gemini-2.5-flash), 0 false positives.**

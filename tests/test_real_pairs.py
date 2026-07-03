@@ -100,3 +100,11 @@ def test_bms_pair_no_offline_false_positives():
     profile and MS/TP vs IP transport are categorical LLM-layer catches."""
     devs = _devs("design_basis_bms_controller.md", "submittal_bms_ecb600.md", "BMSC")
     assert devs == []
+
+
+def test_ess_pair_no_offline_false_positives():
+    """Samsung 128S: 26.5 kWh/rack (<=50), 1000 mm (>=914) and UL 9540A data
+    are COMPLIANT — must clear. The 24 x 26.5 = 636 > 600 kWh fire-area
+    aggregate is a derived-arithmetic LLM-layer catch."""
+    devs = _devs("design_basis_liion_ess.md", "submittal_liion_128s.md", "ESS")
+    assert devs == []

@@ -135,6 +135,16 @@ MANIFEST = [
                   source="ECB-600 is an MS/TP field device; integral IP routing "
                          "is the B-BC supervisory role"),
          ]),
+    # Pair 15 (added 2026-07-03): the deviation is an AGGREGATE the submittal
+    # never states — 24 racks x 26.5 kWh = 636 kWh > the 600 kWh NFPA 855
+    # fire-area cap. The model must derive the multiplication itself (same
+    # class as the fuel-autonomy division). Per-rack 26.5 <= 50, 1000 mm
+    # >= 914, and rack-level UL 9540A data all correctly clear.
+    dict(id="liion-ess", spec="design_basis_liion_ess.md", submittal="submittal_liion_128s.md",
+         devs=[dict(param="fire_area_aggregate_kwh", required="600", provided="636",
+                    detection="llm",
+                    source="derived 24 x 26.5 kWh (Samsung SDI 128S nameplate) = 636 kWh "
+                           "> NFPA 855 600 kWh li-ion cap per fire area")]),
 ]
 
 

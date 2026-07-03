@@ -155,6 +155,44 @@ def complete_json(prompt: str, system: str = ""):
         raise LLMError(f"LLM returned unparseable JSON: {exc}") from exc
 
 
+def complete_vision(prompt: str, image_bytes: bytes, mime_type: str,
+                    system: str = "") -> str:
+    """Reason over an IMAGE + prompt. Gemini-only: it is the sole multimodal
+    provider (the Qwen/Groq legs are text). No text-model failover applies —
+    if Gemini vision is unreachable this raises LLMError and the caller
+    degrades to the deterministic engine (which reads the text layer / OCR).
+    Vision is a capability we prove on real documents, not a live demo crutch."""
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        raise LLMError("Vision requires GEMINI_API_KEY (the only multimodal provider)")
+    model_name = os.getenv("GEMINI_VISION_MODEL", os.getenv("GEMINI_MODEL", "gemini-2.5-flash"))
+    log.info("Gemini vision call: model=%s, image_bytes=%d, prompt_len=%d",
+             model_name, len(image_bytes), len(prompt))
+    try:
+        from google import genai
+        client = genai.Client(api_key=api_key)
+        image_part = genai.types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
+        config = genai.types.GenerateContentConfig(
+            temperature=0.1,
+            system_instruction=system or None,
+            response_mime_type="application/json",
+        )
+        for attempt in range(3):
+            try:
+                resp = client.models.generate_content(
+                    model=model_name, contents=[image_part, prompt], config=config,
+                )
+                return resp.text
+            except Exception as exc:
+                if _is_transient(exc) and attempt < 2:
+                    time.sleep(1.5 * (attempt + 1))
+                    continue
+                raise
+    except Exception as exc:
+        log.error("Gemini vision error: %s", _redact(str(exc)))
+        raise LLMError(f"Gemini vision call failed: {_redact(str(exc))}") from exc
+
+
 _NUM_RE = re.compile(r"\d+(?:\.\d+)?")
 
 

@@ -232,6 +232,39 @@ def analyze_upload(
     }
 
 
+@app.post("/analyze/vision")
+def analyze_vision(
+    spec_file: UploadFile = File(...),
+    submittal_image: UploadFile = File(...),
+    system_id: str = "CUSTOM",
+):
+    """Reconcile a text spec against a submittal supplied AS AN IMAGE — Gemini
+    vision reads values straight from the picture (datasheet page, table, or
+    drawing). Gemini-only (no text-model failover); on any failure returns
+    mode='vision-unavailable' with no findings. Gate off with PRAMAAN_VISION=0.
+    Capability evidence: data/samples/real/VISION_RESULT.md."""
+    if os.getenv("PRAMAAN_VISION", "1") == "0":
+        return {"available": False, "reason": "vision_disabled"}
+    from backend.analyze import run_vision_analysis
+    spec_name = spec_file.filename or "spec"
+    img_name = submittal_image.filename or "submittal"
+    spec_data = _read_capped(spec_file, spec_name)
+    img_data = _read_capped(submittal_image, img_name)
+    spec_text = (extract_pdf_bytes(spec_data, spec_name)
+                 if spec_name.lower().endswith(".pdf")
+                 else spec_data.decode("utf-8", errors="replace"))
+    mime = submittal_image.content_type or "image/png"
+    result = run_vision_analysis(spec_text, img_data, mime, system_id)
+    return {
+        "system": system_id,
+        "submittal_image": img_name,
+        "mode": result.mode,
+        "deviations": result.deviations,
+        "count": len(result.deviations),
+        "elapsed_ms": result.elapsed_ms,
+    }
+
+
 @app.post("/analyze/upload/stream")
 def analyze_upload_stream(
     spec_file: UploadFile = File(...),

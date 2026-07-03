@@ -500,3 +500,46 @@ class TestLLMCheck:
         assert data["ok"] is True
         assert data["probe"] == "tiny"
         assert "deep=1" in data["hint"]
+
+
+class TestVisionEndpoint:
+    """Vision path: Gemini reads the submittal from an image. Mocked so CI has
+    no live-LLM dependency; the real capability is proven in VISION_RESULT.md."""
+
+    def test_vision_disabled_flag(self, monkeypatch):
+        monkeypatch.setenv("PRAMAAN_VISION", "0")
+        r = client.post("/analyze/vision", files={
+            "spec_file": ("spec.md", b"required 65 kA", "text/markdown"),
+            "submittal_image": ("s.png", b"\x89PNG_fake", "image/png"),
+        })
+        assert r.json()["available"] is False
+
+    def test_vision_success_returns_findings(self, monkeypatch):
+        import backend.llm as llm_mod
+        monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+        fake = '[{"component":"SWGR","parameter":"icw_ka","required_value":"65","provided_value":"50"}]'
+        monkeypatch.setattr(llm_mod, "complete_vision",
+                            lambda p, img, mime, system="": fake)
+        r = client.post("/analyze/vision", files={
+            "spec_file": ("spec.md", b"Icw required 65 kA", "text/markdown"),
+            "submittal_image": ("s.png", b"\x89PNG_fake_bytes", "image/png"),
+        })
+        d = r.json()
+        assert d["mode"] == "vision"
+        assert d["count"] == 1
+        assert d["deviations"][0]["parameter"] == "icw_ka"
+
+    def test_vision_unavailable_degrades_no_raise(self, monkeypatch):
+        import backend.llm as llm_mod
+        monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+
+        def boom(p, img, mime, system=""):
+            raise llm_mod.LLMError("429 quota on vision")
+        monkeypatch.setattr(llm_mod, "complete_vision", boom)
+        r = client.post("/analyze/vision", files={
+            "spec_file": ("spec.md", b"x", "text/markdown"),
+            "submittal_image": ("s.png", b"\x89PNG", "image/png"),
+        })
+        d = r.json()
+        assert d["mode"] == "vision-unavailable"
+        assert d["count"] == 0

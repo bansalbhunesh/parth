@@ -64,6 +64,7 @@
 3. **The 3-minute pitch video** → *(link lands here on submission)* · script: [`PITCH.md`](PITCH.md)
 4. **Business case in one page** → [`docs/BUSINESS.md`](docs/BUSINESS.md) — what one caught deviation is worth ($10–40M/month of commissioning slip).
 5. **Every value in the real pairs is citable** → [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md).
+6. **It reads the drawing, not just text** → [`data/samples/real/VISION_RESULT.md`](data/samples/real/VISION_RESULT.md): given a datasheet **image**, Gemini vision read the values from the picture and caught all 3 deviations (incl. a missing-capability omission), clearing the compliant IP rating.
 
 ---
 

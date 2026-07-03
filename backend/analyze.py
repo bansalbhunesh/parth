@@ -269,6 +269,59 @@ def run_analysis(
     return AnalysisResult(deviations=devs, mode=mode, elapsed_ms=elapsed)
 
 
+_VISION_PROMPT = """You are given a design specification (text) and a vendor
+submittal supplied AS AN IMAGE (a datasheet page, table, or drawing). Read the
+values directly from the image — do not assume a text transcript exists.
+
+Cross-reference every specified requirement against the values visible in the
+image and against the governing standards. Report each genuine deviation.
+
+=== DESIGN SPECIFICATION ===
+{spec}
+
+=== GOVERNING STANDARDS ===
+{standards}
+
+The vendor submittal is the attached image. Return a JSON array of deviations,
+each: component, parameter, required_value, provided_value, unit, standard_ref,
+spec_clause, severity (Critical/Major/Minor), rationale. Only real deviations;
+if a visible value meets or exceeds the requirement, do not flag it.
+"""
+
+
+def run_vision_analysis(
+    spec_text: str,
+    image_bytes: bytes,
+    mime_type: str,
+    system_id: str = "CUSTOM",
+) -> AnalysisResult:
+    """Reconcile a text spec against a submittal supplied AS AN IMAGE, using
+    Gemini vision to read values straight from the picture (not OCR→text). This
+    is the 'reads the drawing' capability. Gemini-only; on any failure it
+    degrades to mode='vision-unavailable' with no findings rather than raising —
+    the caller can then fall back to the text/OCR path."""
+    t0 = time.time()
+    standards = _all_standards_text(max_chars_per=1800)
+    prompt = _VISION_PROMPT.format(spec=spec_text, standards=standards)
+    try:
+        from backend.llm import _extract_json, complete_vision
+        raw = _LLM_POOL.submit(
+            lambda: _extract_json(complete_vision(prompt, image_bytes, mime_type, SYSTEM_PROMPT))
+        ).result(timeout=_LLM_TIMEOUT_S)
+        devs = _validate_deviations(raw)
+        for d in devs:
+            _enrich_cx(d, system_id)
+        mode = "vision"
+    except concurrent.futures.TimeoutError:
+        log.warning("Vision analysis exceeded %.0fs", _LLM_TIMEOUT_S)
+        devs, mode = [], "vision-unavailable"
+    except Exception as exc:
+        log.warning("Vision analysis failed: %s", exc)
+        devs, mode = [], "vision-unavailable"
+    elapsed = round((time.time() - t0) * 1000)
+    return AnalysisResult(deviations=devs, mode=mode, elapsed_ms=elapsed)
+
+
 def run_streaming_analysis(
     spec_text: str,
     submittal_text: str,

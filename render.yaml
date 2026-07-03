@@ -22,9 +22,19 @@ services:
         value: "60"
       - key: GEMINI_API_KEY
         sync: false   # set this secret in the Render dashboard
-      # --- Alternative: OpenAI-compatible gateway (paid reseller) ---
-      # To use a gateway instead, set PRAMAAN_LLM=openai and provide:
-      #   OPENAI_API_KEY, OPENAI_BASE_URL (the /v1 root),
-      #   OPENAI_MODEL (must be a model the gateway actually serves),
-      #   OPENAI_JSON_MODE=1  (so responses parse reliably).
-      # Confirm the model exists on that gateway before relying on it.
+      # --- Automatic failover leg: OpenAI-compatible Qwen gateway (OpenRouter) ---
+      # Gemini stays PRIMARY (PRAMAAN_LLM=gemini above). If Gemini quota/429s
+      # or times out, complete() fails over to this gateway automatically, then
+      # to the rule-engine floor. Only active once OPENAI_API_KEY is set below —
+      # until then the chain is [gemini] and behaviour is unchanged.
+      # Verified 2026-07-03: qwen3-235b scored 9/11 (0.82) on the real pairs.
+      - key: OPENAI_BASE_URL
+        value: https://openrouter.ai/api/v1
+      - key: OPENAI_MODEL
+        value: qwen/qwen3-235b-a22b-2507
+      - key: OPENAI_JSON_MODE
+        value: "1"
+      - key: OPENAI_MAX_TOKENS
+        value: "4000"   # gateways default low and truncate multi-finding JSON
+      - key: OPENAI_API_KEY
+        sync: false   # set the OpenRouter key (sk-or-...) in the Render dashboard

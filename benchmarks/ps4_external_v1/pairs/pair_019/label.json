@@ -1,0 +1,162 @@
+[
+  {
+    "pair_id": "pair_019",
+    "system_type": "pdu_rpp",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P019-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "categorical_reasoning",
+    "component": "outlet metering",
+    "parameter": "metering_scope",
+    "required_value": "per-outlet",
+    "submitted_value": "inlet-only",
+    "deviation_type": "wrong_category",
+    "severity": "medium",
+    "expected_finding": "Metering is inlet-only; per-outlet metering is required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "per-outlet energy metering"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Metering: inlet-level only"
+    },
+    "expected_commissioning_test": "Metering capability review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_019",
+    "system_type": "pdu_rpp",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P019-L02",
+    "label_type": "positive_deviation",
+    "difficulty": "categorical_reasoning",
+    "component": "outlet switching",
+    "parameter": "switching",
+    "required_value": "switched",
+    "submitted_value": "unswitched",
+    "deviation_type": "wrong_category",
+    "severity": "medium",
+    "expected_finding": "Outlets are unswitched; switched outlets are required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "individually switched"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Outlets: unswitched"
+    },
+    "expected_commissioning_test": "Outlet control capability review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_019",
+    "system_type": "pdu_rpp",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P019-L03",
+    "label_type": "positive_deviation",
+    "difficulty": "table_or_layout",
+    "component": "branch B1 load",
+    "parameter": "branch_load_a",
+    "required_value": "32 A",
+    "submitted_value": "40 A",
+    "deviation_type": "above_limit",
+    "severity": "high",
+    "expected_finding": "Per the load schedule, branch B1 connected load (40 A) exceeds its 32 A rating.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "not exceed its 32 A rating"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§2",
+      "quote_or_span": "B1 | 32 A | 40 A"
+    },
+    "expected_commissioning_test": "Branch-circuit load verification",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_019",
+    "system_type": "pdu_rpp",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P019-L04",
+    "label_type": "clean_negative",
+    "difficulty": "categorical_reasoning",
+    "component": "form factor",
+    "parameter": "form_factor",
+    "required_value": "Zero-U 3-phase 415 V",
+    "submitted_value": "Zero-U 3-phase 415 V",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — form factor as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Zero-U 3-phase 415 V"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Zero-U 3-phase 415 V"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_019",
+    "system_type": "pdu_rpp",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P019-L05",
+    "label_type": "clean_negative",
+    "difficulty": "categorical_reasoning",
+    "component": "environmental sensors",
+    "parameter": "sensor_ports",
+    "required_value": "provided",
+    "submitted_value": "provided",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — sensor ports provided.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "provided"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "provided"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

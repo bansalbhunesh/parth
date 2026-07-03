@@ -2,6 +2,8 @@
   {
     "pair_id": "pair_007",
     "system_type": "battery",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
     "label_id": "P007-L01",
     "label_type": "positive_deviation",
     "difficulty": "derived_arithmetic",

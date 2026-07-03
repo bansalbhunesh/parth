@@ -1,0 +1,98 @@
+[
+  {
+    "pair_id": "pair_031",
+    "system_type": "generator",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P031-L01",
+    "label_type": "clean_negative",
+    "difficulty": "categorical_reasoning",
+    "component": "emissions tier",
+    "parameter": "epa_tier",
+    "required_value": "EPA Tier 4",
+    "submitted_value": "EPA Tier 4",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — Tier 4 as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "EPA Tier 4"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "EPA Tier 4"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_031",
+    "system_type": "generator",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P031-L02",
+    "label_type": "clean_negative",
+    "difficulty": "direct_value",
+    "component": "on-site fuel",
+    "parameter": "fuel_hours",
+    "required_value": "48 hours",
+    "submitted_value": "72 hours",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 72 >= 48 h.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "48 hours"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "72 hours"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_031",
+    "system_type": "generator",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P031-L03",
+    "label_type": "clean_negative",
+    "difficulty": "direct_value",
+    "component": "start time",
+    "parameter": "start_time_sec",
+    "required_value": "10 s",
+    "submitted_value": "8 s",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 8 <= 10 s.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "10 s"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "8 s"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

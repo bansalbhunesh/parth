@@ -1,0 +1,194 @@
+[
+  {
+    "pair_id": "pair_017",
+    "system_type": "transformer",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P017-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "categorical_reasoning",
+    "component": "harmonic rating",
+    "parameter": "k_factor",
+    "required_value": "K-13",
+    "submitted_value": "K-1",
+    "deviation_type": "below_requirement",
+    "severity": "high",
+    "expected_finding": "Provided K-1 transformer is not rated for the non-linear loads that require K-13.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "shall be K-13"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Harmonic rating: K-1"
+    },
+    "expected_commissioning_test": "Transformer harmonic type-test review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_017",
+    "system_type": "transformer",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P017-L02",
+    "label_type": "omission",
+    "difficulty": "omission_detection",
+    "component": "basic impulse level",
+    "parameter": "bil_kv",
+    "required_value": "stated",
+    "submitted_value": "Not stated",
+    "deviation_type": "omission",
+    "severity": "medium",
+    "expected_finding": "Submittal omits the required BIL rating.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "BIL shall be stated"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "(BIL not provided)"
+    },
+    "expected_commissioning_test": "Insulation coordination review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_017",
+    "system_type": "transformer",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P017-L03",
+    "label_type": "clean_negative",
+    "difficulty": "categorical_reasoning",
+    "component": "vector group",
+    "parameter": "vector_group",
+    "required_value": "Dyn11",
+    "submitted_value": "Dyn11",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — Dyn11 as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Dyn11"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Dyn11"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_017",
+    "system_type": "transformer",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P017-L04",
+    "label_type": "clean_negative",
+    "difficulty": "direct_value",
+    "component": "impedance",
+    "parameter": "impedance_pct",
+    "required_value": "6%",
+    "submitted_value": "6%",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 6% as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "6%"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "6%"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_017",
+    "system_type": "transformer",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P017-L05",
+    "label_type": "clean_negative",
+    "difficulty": "categorical_reasoning",
+    "component": "insulation class",
+    "parameter": "insulation_class",
+    "required_value": "Class F",
+    "submitted_value": "Class F",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — Class F as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Class F"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Class F"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_017",
+    "system_type": "transformer",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P017-L06",
+    "label_type": "clean_negative",
+    "difficulty": "direct_value",
+    "component": "rated frequency",
+    "parameter": "frequency_hz",
+    "required_value": "50 Hz",
+    "submitted_value": "50 Hz",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 50 Hz as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "50 Hz"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "50 Hz"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

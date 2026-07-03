@@ -1,0 +1,66 @@
+[
+  {
+    "pair_id": "pair_040",
+    "system_type": "pdu_rpp",
+    "modality": "image",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P040-L01",
+    "label_type": "ocr_extraction_case",
+    "difficulty": "scanned_or_image",
+    "component": "branch B1 load",
+    "parameter": "branch_load_a",
+    "required_value": "32 A",
+    "submitted_value": "40 A",
+    "deviation_type": "above_limit",
+    "severity": "high",
+    "expected_finding": "In the scanned schedule, branch B1 load (40 A) exceeds its 32 A rating.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "not exceed rating"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.png",
+      "page_or_section": "image",
+      "quote_or_span": "Branch B1 ... Load 40A"
+    },
+    "expected_commissioning_test": "Branch-circuit load verification",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_040",
+    "system_type": "pdu_rpp",
+    "modality": "image",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P040-L02",
+    "label_type": "clean_negative",
+    "difficulty": "scanned_or_image",
+    "component": "form factor",
+    "parameter": "form_factor",
+    "required_value": "Zero-U 3-phase",
+    "submitted_value": "Zero-U 3-phase",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — form factor as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Zero-U 3-phase"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.png",
+      "page_or_section": "§1",
+      "quote_or_span": "Zero-U 3-phase"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

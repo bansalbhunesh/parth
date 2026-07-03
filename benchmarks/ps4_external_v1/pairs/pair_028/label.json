@@ -1,0 +1,162 @@
+[
+  {
+    "pair_id": "pair_028",
+    "system_type": "cabling",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P028-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "categorical_reasoning",
+    "component": "plenum cable fire rating",
+    "parameter": "cable_fire_rating",
+    "required_value": "CMP",
+    "submitted_value": "CMR",
+    "deviation_type": "wrong_category",
+    "severity": "medium",
+    "expected_finding": "CMR cable does not meet the CMP (plenum) requirement.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "shall use CMP cable"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Cable fire rating: CMR"
+    },
+    "expected_commissioning_test": "Cable listing review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_028",
+    "system_type": "cabling",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P028-L02",
+    "label_type": "omission",
+    "difficulty": "omission_detection",
+    "component": "fire-test listing",
+    "parameter": "fire_listing",
+    "required_value": "provided",
+    "submitted_value": "Not stated",
+    "deviation_type": "omission",
+    "severity": "medium",
+    "expected_finding": "Submittal omits the required UL 910 fire-test listing.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "fire-test listing (UL 910)"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "(no fire-test listing)"
+    },
+    "expected_commissioning_test": "Fire-listing documentation review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_028",
+    "system_type": "cabling",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P028-L03",
+    "label_type": "clean_negative",
+    "difficulty": "categorical_reasoning",
+    "component": "copper category",
+    "parameter": "copper_cat",
+    "required_value": "Cat6A",
+    "submitted_value": "Cat6A",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — Cat6A as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Cat6A"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Cat6A"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_028",
+    "system_type": "cabling",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P028-L04",
+    "label_type": "clean_negative",
+    "difficulty": "direct_value",
+    "component": "bend radius",
+    "parameter": "bend_radius",
+    "required_value": "4x diameter",
+    "submitted_value": "4x diameter",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — bend radius as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "4x diameter"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "4x diameter"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_028",
+    "system_type": "cabling",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P028-L05",
+    "label_type": "clean_negative",
+    "difficulty": "categorical_reasoning",
+    "component": "jacket",
+    "parameter": "jacket",
+    "required_value": "LSZH",
+    "submitted_value": "LSZH",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — LSZH as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "LSZH"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "LSZH"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

@@ -1,0 +1,66 @@
+[
+  {
+    "pair_id": "pair_041",
+    "system_type": "switchgear",
+    "modality": "image",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P041-L01",
+    "label_type": "ocr_extraction_case",
+    "difficulty": "scanned_or_image",
+    "component": "short-circuit withstand",
+    "parameter": "icw_ka",
+    "required_value": "65 kA",
+    "submitted_value": "50 kA",
+    "deviation_type": "below_requirement",
+    "severity": "high",
+    "expected_finding": "In the scanned nameplate, Icw is 50 kA, below the 65 kA requirement.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": ">= 65 kA / 1 s"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.png",
+      "page_or_section": "image",
+      "quote_or_span": "Icw: 50 kA / 1 s"
+    },
+    "expected_commissioning_test": "Switchgear type-test review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_041",
+    "system_type": "switchgear",
+    "modality": "image",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P041-L02",
+    "label_type": "clean_negative",
+    "difficulty": "scanned_or_image",
+    "component": "internal separation",
+    "parameter": "form",
+    "required_value": "Form 4b",
+    "submitted_value": "Form 4b",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — Form 4b as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Form 4b"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.png",
+      "page_or_section": "§1",
+      "quote_or_span": "Form 4b"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

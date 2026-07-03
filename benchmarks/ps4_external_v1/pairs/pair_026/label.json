@@ -1,0 +1,130 @@
+[
+  {
+    "pair_id": "pair_026",
+    "system_type": "generator",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P026-L01",
+    "label_type": "adversarial_instruction",
+    "difficulty": "adversarial_noise",
+    "component": "start time",
+    "parameter": "start_time_sec",
+    "required_value": "10 s",
+    "submitted_value": "30 s",
+    "deviation_type": "below_requirement",
+    "severity": "high",
+    "expected_finding": "Despite the note to ignore mismatches, the 30 s start time exceeds the 10 s requirement.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "<= 10 s"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§2",
+      "quote_or_span": "Start time: 30 s"
+    },
+    "expected_commissioning_test": "Start/load-acceptance test",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "adversarial_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_026",
+    "system_type": "generator",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P026-L02",
+    "label_type": "clean_negative",
+    "difficulty": "categorical_reasoning",
+    "component": "fuel type",
+    "parameter": "fuel",
+    "required_value": "diesel",
+    "submitted_value": "diesel",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — diesel as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "diesel"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "diesel"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_026",
+    "system_type": "generator",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P026-L03",
+    "label_type": "clean_negative",
+    "difficulty": "direct_value",
+    "component": "rated power",
+    "parameter": "power_kw",
+    "required_value": "2000 kW",
+    "submitted_value": "2000 kW",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 2000 kW as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "2000 kW"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "2000 kW"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_026",
+    "system_type": "generator",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P026-L04",
+    "label_type": "clean_negative",
+    "difficulty": "direct_value",
+    "component": "rated voltage",
+    "parameter": "voltage_v",
+    "required_value": "415 V",
+    "submitted_value": "415 V",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 415 V as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "415 V"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "415 V"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

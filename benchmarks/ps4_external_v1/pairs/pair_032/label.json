@@ -1,0 +1,98 @@
+[
+  {
+    "pair_id": "pair_032",
+    "system_type": "switchgear",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P032-L01",
+    "label_type": "clean_negative",
+    "difficulty": "direct_value",
+    "component": "short-circuit withstand",
+    "parameter": "icw_ka",
+    "required_value": "65 kA",
+    "submitted_value": "65 kA",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 65 = 65 kA.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "65 kA"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "65 kA"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_032",
+    "system_type": "switchgear",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P032-L02",
+    "label_type": "clean_negative",
+    "difficulty": "categorical_reasoning",
+    "component": "internal separation",
+    "parameter": "form",
+    "required_value": "Form 4b",
+    "submitted_value": "Form 4b",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — Form 4b as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Form 4b"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Form 4b"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_032",
+    "system_type": "switchgear",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P032-L03",
+    "label_type": "clean_negative",
+    "difficulty": "categorical_reasoning",
+    "component": "ingress protection",
+    "parameter": "ip_rating",
+    "required_value": "IP42",
+    "submitted_value": "IP54",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — IP54 exceeds IP42.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "IP42"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "IP54"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

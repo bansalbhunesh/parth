@@ -1,0 +1,162 @@
+[
+  {
+    "pair_id": "pair_020",
+    "system_type": "bms",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P020-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "categorical_reasoning",
+    "component": "BACnet profile",
+    "parameter": "bacnet_profile",
+    "required_value": "B-BC",
+    "submitted_value": "B-AAC",
+    "deviation_type": "below_requirement",
+    "severity": "high",
+    "expected_finding": "Provided B-AAC application controller does not meet the required B-BC building-controller profile.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "profile B-BC"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "BTL profile: B-AAC"
+    },
+    "expected_commissioning_test": "BTL profile / integration review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_020",
+    "system_type": "bms",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P020-L02",
+    "label_type": "positive_deviation",
+    "difficulty": "categorical_reasoning",
+    "component": "network transport",
+    "parameter": "transport",
+    "required_value": "BACnet/IP",
+    "submitted_value": "MS/TP",
+    "deviation_type": "wrong_category",
+    "severity": "high",
+    "expected_finding": "Transport is BACnet MS/TP; native BACnet/IP is required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Native transport shall be BACnet/IP"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Transport: BACnet MS/TP"
+    },
+    "expected_commissioning_test": "Network integration review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_020",
+    "system_type": "bms",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P020-L03",
+    "label_type": "positive_deviation",
+    "difficulty": "table_or_layout",
+    "component": "Modbus support",
+    "parameter": "modbus_support",
+    "required_value": "supported",
+    "submitted_value": "not supported",
+    "deviation_type": "wrong_category",
+    "severity": "medium",
+    "expected_finding": "The protocol matrix shows Modbus unsupported; both Modbus and BACnet are required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "both Modbus and BACnet"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§2",
+      "quote_or_span": "Modbus | No"
+    },
+    "expected_commissioning_test": "Protocol interoperability review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_020",
+    "system_type": "bms",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P020-L04",
+    "label_type": "clean_negative",
+    "difficulty": "direct_value",
+    "component": "point count",
+    "parameter": "points",
+    "required_value": "28",
+    "submitted_value": "28",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 28 points as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "28"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "28"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_020",
+    "system_type": "bms",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P020-L05",
+    "label_type": "clean_negative",
+    "difficulty": "direct_value",
+    "component": "control supply",
+    "parameter": "supply_v",
+    "required_value": "24 V dc",
+    "submitted_value": "24 V dc",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 24 V dc as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "24 V dc"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "24 V dc"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

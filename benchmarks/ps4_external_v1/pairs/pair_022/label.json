@@ -1,0 +1,162 @@
+[
+  {
+    "pair_id": "pair_022",
+    "system_type": "ats_sts",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P022-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "unit_conversion",
+    "component": "transfer time",
+    "parameter": "transfer_time",
+    "required_value": "100 ms",
+    "submitted_value": "4 s",
+    "deviation_type": "above_limit",
+    "severity": "high",
+    "expected_finding": "Transfer time 4 s (4000 ms) far exceeds the 100 ms requirement.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "<= 100 ms"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Transfer time: 4 s"
+    },
+    "expected_commissioning_test": "Transfer-time acceptance test",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_022",
+    "system_type": "ats_sts",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P022-L02",
+    "label_type": "positive_deviation",
+    "difficulty": "direct_value",
+    "component": "withstand rating",
+    "parameter": "withstand_ka",
+    "required_value": "65 kA",
+    "submitted_value": "50 kA",
+    "deviation_type": "below_requirement",
+    "severity": "high",
+    "expected_finding": "Withstand rating 50 kA is below the 65 kA requirement.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": ">= 65 kA"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Withstand rating: 50 kA"
+    },
+    "expected_commissioning_test": "Short-circuit withstand review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_022",
+    "system_type": "ats_sts",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P022-L03",
+    "label_type": "positive_deviation",
+    "difficulty": "categorical_reasoning",
+    "component": "pole configuration",
+    "parameter": "poles",
+    "required_value": "4-pole",
+    "submitted_value": "3-pole",
+    "deviation_type": "wrong_category",
+    "severity": "medium",
+    "expected_finding": "3-pole solid-neutral switch does not meet the 4-pole switched-neutral requirement.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "4-pole"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Poles: 3-pole"
+    },
+    "expected_commissioning_test": "Neutral-switching review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_022",
+    "system_type": "ats_sts",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P022-L04",
+    "label_type": "clean_negative",
+    "difficulty": "direct_value",
+    "component": "rated voltage",
+    "parameter": "voltage_v",
+    "required_value": "415 V",
+    "submitted_value": "415 V",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 415 V as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "415 V"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "415 V"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_022",
+    "system_type": "ats_sts",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P022-L05",
+    "label_type": "clean_negative",
+    "difficulty": "direct_value",
+    "component": "rated frequency",
+    "parameter": "frequency_hz",
+    "required_value": "50 Hz",
+    "submitted_value": "50 Hz",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 50 Hz as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "50 Hz"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "50 Hz"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

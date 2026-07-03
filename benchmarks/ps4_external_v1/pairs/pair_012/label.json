@@ -2,6 +2,8 @@
   {
     "pair_id": "pair_012",
     "system_type": "ups",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
     "label_id": "P012-L01",
     "label_type": "clean_negative",
     "difficulty": "direct_value",

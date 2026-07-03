@@ -1,0 +1,162 @@
+[
+  {
+    "pair_id": "pair_021",
+    "system_type": "fire_suppression",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P021-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "domain_recall",
+    "component": "agent GWP",
+    "parameter": "agent_gwp",
+    "required_value": "750",
+    "submitted_value": "FM-200 (GWP 3220)",
+    "deviation_type": "above_limit",
+    "severity": "high",
+    "expected_finding": "FM-200 (HFC-227ea) GWP (~3220) far exceeds the 750 limit.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "GWP shall be <= 750"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Agent: FM-200"
+    },
+    "expected_commissioning_test": "Agent / F-Gas compliance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_021",
+    "system_type": "fire_suppression",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P021-L02",
+    "label_type": "omission",
+    "difficulty": "omission_detection",
+    "component": "room integrity test",
+    "parameter": "integrity_test",
+    "required_value": "specified",
+    "submitted_value": "Not stated",
+    "deviation_type": "omission",
+    "severity": "medium",
+    "expected_finding": "Submittal omits the required room-integrity (fan) test.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "room-integrity (fan) test shall be specified"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "(no integrity test)"
+    },
+    "expected_commissioning_test": "Room-integrity test review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_021",
+    "system_type": "fire_suppression",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P021-L03",
+    "label_type": "clean_negative",
+    "difficulty": "direct_value",
+    "component": "discharge time",
+    "parameter": "discharge_s",
+    "required_value": "10 s",
+    "submitted_value": "10 s",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 10 s as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "10 s"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "10 s"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_021",
+    "system_type": "fire_suppression",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P021-L04",
+    "label_type": "clean_negative",
+    "difficulty": "direct_value",
+    "component": "design concentration",
+    "parameter": "concentration_pct",
+    "required_value": "7%",
+    "submitted_value": "7%",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 7% as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "7%"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "7%"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_021",
+    "system_type": "fire_suppression",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P021-L05",
+    "label_type": "clean_negative",
+    "difficulty": "direct_value",
+    "component": "cylinder pressure",
+    "parameter": "pressure_bar",
+    "required_value": "25 bar",
+    "submitted_value": "25 bar",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 25 bar as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "25 bar"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "25 bar"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

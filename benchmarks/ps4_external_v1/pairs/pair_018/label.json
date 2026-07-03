@@ -1,0 +1,194 @@
+[
+  {
+    "pair_id": "pair_018",
+    "system_type": "chiller",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P018-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "direct_value",
+    "component": "cooling capacity",
+    "parameter": "capacity_kw",
+    "required_value": "1000 kW",
+    "submitted_value": "850 kW",
+    "deviation_type": "below_requirement",
+    "severity": "high",
+    "expected_finding": "Rated capacity 850 kW is below the 1000 kW requirement.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "at least 1000 kW"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Rated cooling capacity: 850 kW"
+    },
+    "expected_commissioning_test": "Chiller capacity acceptance test",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_018",
+    "system_type": "chiller",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P018-L02",
+    "label_type": "positive_deviation",
+    "difficulty": "categorical_reasoning",
+    "component": "chiller redundancy",
+    "parameter": "redundancy",
+    "required_value": "N+1",
+    "submitted_value": "N",
+    "deviation_type": "below_requirement",
+    "severity": "high",
+    "expected_finding": "Plant is N (no standby); N+1 is required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "N+1 redundant"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "configuration: N (no standby)"
+    },
+    "expected_commissioning_test": "Redundancy / concurrent-maint review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_018",
+    "system_type": "chiller",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P018-L03",
+    "label_type": "positive_deviation",
+    "difficulty": "domain_recall",
+    "component": "refrigerant GWP",
+    "parameter": "refrigerant_gwp",
+    "required_value": "750",
+    "submitted_value": "R-134a (GWP 1430)",
+    "deviation_type": "above_limit",
+    "severity": "high",
+    "expected_finding": "R-134a GWP (~1430) exceeds the 750 limit (value not stated in the submittal).",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "GWP shall be <= 750"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Refrigerant: R-134a"
+    },
+    "expected_commissioning_test": "Refrigerant / F-Gas compliance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_018",
+    "system_type": "chiller",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P018-L04",
+    "label_type": "omission",
+    "difficulty": "omission_detection",
+    "component": "performance test report",
+    "parameter": "test_report",
+    "required_value": "provided",
+    "submitted_value": "Not stated",
+    "deviation_type": "omission",
+    "severity": "medium",
+    "expected_finding": "Submittal omits the required factory performance test report.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "performance test report shall be provided"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "(no test report)"
+    },
+    "expected_commissioning_test": "Factory test documentation review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_018",
+    "system_type": "chiller",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P018-L05",
+    "label_type": "clean_negative",
+    "difficulty": "direct_value",
+    "component": "supply voltage",
+    "parameter": "voltage_v",
+    "required_value": "415 V",
+    "submitted_value": "415 V",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 415 V as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "415 V"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "415 V"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_018",
+    "system_type": "chiller",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P018-L06",
+    "label_type": "clean_negative",
+    "difficulty": "direct_value",
+    "component": "chilled-water flow",
+    "parameter": "flow_ls",
+    "required_value": "40 L/s",
+    "submitted_value": "45 L/s",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 45 >= 40 L/s.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "40 L/s"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "45 L/s"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

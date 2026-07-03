@@ -1,0 +1,130 @@
+[
+  {
+    "pair_id": "pair_024",
+    "system_type": "rack_aisle",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P024-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "categorical_reasoning",
+    "component": "aisle containment",
+    "parameter": "containment",
+    "required_value": "hot-aisle containment",
+    "submitted_value": "none",
+    "deviation_type": "wrong_category",
+    "severity": "high",
+    "expected_finding": "No aisle containment provided; hot-aisle containment is required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Hot-aisle containment"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Aisle containment: none"
+    },
+    "expected_commissioning_test": "Containment / airflow review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_024",
+    "system_type": "rack_aisle",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P024-L02",
+    "label_type": "positive_deviation",
+    "difficulty": "table_or_layout",
+    "component": "rack static load",
+    "parameter": "static_load_lbf",
+    "required_value": "1500 lbf",
+    "submitted_value": "1200 lbf",
+    "deviation_type": "below_requirement",
+    "severity": "medium",
+    "expected_finding": "Rack static load 1200 lbf is below the 1500 lbf requirement.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": ">= 1500 lbf"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "static load capacity: 1200 lbf"
+    },
+    "expected_commissioning_test": "Structural load review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_024",
+    "system_type": "rack_aisle",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P024-L03",
+    "label_type": "clean_negative",
+    "difficulty": "categorical_reasoning",
+    "component": "rack height",
+    "parameter": "height_u",
+    "required_value": "48U",
+    "submitted_value": "48U",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 48U as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "48U"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "48U"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_024",
+    "system_type": "rack_aisle",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P024-L04",
+    "label_type": "clean_negative",
+    "difficulty": "categorical_reasoning",
+    "component": "seismic bracing",
+    "parameter": "seismic",
+    "required_value": "Zone 4",
+    "submitted_value": "Zone 4",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — Zone 4 bracing as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Zone 4"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Zone 4"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

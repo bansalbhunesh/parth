@@ -1,0 +1,98 @@
+[
+  {
+    "pair_id": "pair_033",
+    "system_type": "crac_crah",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P033-L01",
+    "label_type": "clean_negative",
+    "difficulty": "categorical_reasoning",
+    "component": "cooling redundancy",
+    "parameter": "redundancy",
+    "required_value": "N+2",
+    "submitted_value": "N+2",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — N+2 as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "N+2"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "N+2"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_033",
+    "system_type": "crac_crah",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P033-L02",
+    "label_type": "clean_negative",
+    "difficulty": "direct_value",
+    "component": "supply-air temperature",
+    "parameter": "supply_air_temp_c",
+    "required_value": "27 C",
+    "submitted_value": "24 C",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 24 <= 27 C.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "27 C"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "24 C"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_033",
+    "system_type": "crac_crah",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P033-L03",
+    "label_type": "clean_negative",
+    "difficulty": "categorical_reasoning",
+    "component": "fan type",
+    "parameter": "fan_type",
+    "required_value": "EC variable-speed",
+    "submitted_value": "EC variable-speed",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — EC fans as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "EC variable-speed"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "EC variable-speed"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

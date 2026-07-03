@@ -1,0 +1,66 @@
+[
+  {
+    "pair_id": "pair_042",
+    "system_type": "chiller",
+    "modality": "image",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P042-L01",
+    "label_type": "ocr_extraction_case",
+    "difficulty": "scanned_or_image",
+    "component": "cooling capacity",
+    "parameter": "capacity_kw",
+    "required_value": "1000 kW",
+    "submitted_value": "850 kW",
+    "deviation_type": "below_requirement",
+    "severity": "high",
+    "expected_finding": "In the scanned data sheet, capacity 850 kW is below the 1000 kW requirement.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": ">= 1000 kW"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.png",
+      "page_or_section": "image",
+      "quote_or_span": "Rated capacity: 850 kW"
+    },
+    "expected_commissioning_test": "Chiller capacity acceptance test",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_042",
+    "system_type": "chiller",
+    "modality": "image",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P042-L02",
+    "label_type": "ocr_extraction_case",
+    "difficulty": "scanned_or_image",
+    "component": "refrigerant GWP",
+    "parameter": "refrigerant_gwp",
+    "required_value": "750",
+    "submitted_value": "R-134a (GWP 1430)",
+    "deviation_type": "above_limit",
+    "severity": "high",
+    "expected_finding": "The scanned refrigerant (R-134a, GWP ~1430) exceeds the 750 limit.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "<= 750"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.png",
+      "page_or_section": "image",
+      "quote_or_span": "Refrigerant: R-134a"
+    },
+    "expected_commissioning_test": "Refrigerant compliance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

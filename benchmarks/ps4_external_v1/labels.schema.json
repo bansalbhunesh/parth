@@ -24,6 +24,8 @@
     "schedule_impact_category": {"type": "string"},
     "source_basis": {"enum": ["primary_source_document", "public_product_value", "owner_design_basis_team_authored", "team_authored_requirement", "team_authored_submittal", "team_authored_from_public_values", "synthetic_negative", "adversarial_team_authored", "simulation_assumption"]},
     "status": {"enum": ["draft", "frozen"]},
+    "review_status": {"enum": ["single_author_frozen_pending_review", "reviewed_two_person", "adjudicated"]},
+    "modality": {"enum": ["text", "image"]},
     "reviewer_notes": {"type": "string"},
     "contested": {"type": "boolean"}
   }

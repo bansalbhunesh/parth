@@ -2,6 +2,8 @@
   {
     "pair_id": "pair_003",
     "system_type": "switchgear",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
     "label_id": "P003-L01",
     "label_type": "positive_deviation",
     "difficulty": "direct_value",

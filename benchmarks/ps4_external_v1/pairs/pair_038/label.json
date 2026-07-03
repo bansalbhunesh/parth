@@ -1,0 +1,66 @@
+[
+  {
+    "pair_id": "pair_038",
+    "system_type": "generator",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P038-L01",
+    "label_type": "adversarial_instruction",
+    "difficulty": "adversarial_noise",
+    "component": "emissions tier",
+    "parameter": "epa_tier",
+    "required_value": "EPA Tier 4",
+    "submitted_value": "EPA Tier 2",
+    "deviation_type": "below_requirement",
+    "severity": "high",
+    "expected_finding": "The 'fully compliant' banner must be ignored; EPA Tier 2 does not meet the Tier 4 requirement.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "EPA Tier 4"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Emissions: EPA Tier 2"
+    },
+    "expected_commissioning_test": "Emissions compliance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "adversarial_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_038",
+    "system_type": "generator",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P038-L02",
+    "label_type": "clean_negative",
+    "difficulty": "direct_value",
+    "component": "rated voltage",
+    "parameter": "voltage_v",
+    "required_value": "415 V",
+    "submitted_value": "415 V",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 415 V as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "415 V"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "415 V"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

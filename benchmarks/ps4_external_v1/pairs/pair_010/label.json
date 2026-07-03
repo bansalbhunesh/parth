@@ -2,6 +2,8 @@
   {
     "pair_id": "pair_010",
     "system_type": "ups",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
     "label_id": "P010-L01",
     "label_type": "omission",
     "difficulty": "omission_detection",

@@ -1,0 +1,130 @@
+[
+  {
+    "pair_id": "pair_025",
+    "system_type": "networking",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P025-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "categorical_reasoning",
+    "component": "uplink redundancy",
+    "parameter": "uplinks",
+    "required_value": "dual",
+    "submitted_value": "single",
+    "deviation_type": "below_requirement",
+    "severity": "high",
+    "expected_finding": "Single uplink provides no redundancy; dual uplinks are required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "dual (redundant) uplinks"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Uplinks: single"
+    },
+    "expected_commissioning_test": "Network redundancy review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_025",
+    "system_type": "networking",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P025-L02",
+    "label_type": "positive_deviation",
+    "difficulty": "categorical_reasoning",
+    "component": "fibre type",
+    "parameter": "fibre_type",
+    "required_value": "OM4",
+    "submitted_value": "OM3",
+    "deviation_type": "wrong_category",
+    "severity": "medium",
+    "expected_finding": "OM3 fibre does not meet the OM4 requirement.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Fibre shall be OM4"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Fibre: OM3"
+    },
+    "expected_commissioning_test": "Fibre channel/link-budget review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_025",
+    "system_type": "networking",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P025-L03",
+    "label_type": "clean_negative",
+    "difficulty": "categorical_reasoning",
+    "component": "copper patching",
+    "parameter": "copper_cat",
+    "required_value": "Cat6A",
+    "submitted_value": "Cat6A",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — Cat6A as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Cat6A"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Cat6A"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_025",
+    "system_type": "networking",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P025-L04",
+    "label_type": "clean_negative",
+    "difficulty": "categorical_reasoning",
+    "component": "connectors",
+    "parameter": "connector_type",
+    "required_value": "LC duplex",
+    "submitted_value": "LC duplex",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — LC duplex as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "LC duplex"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "LC duplex"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

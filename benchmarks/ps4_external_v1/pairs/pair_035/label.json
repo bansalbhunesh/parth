@@ -1,0 +1,66 @@
+[
+  {
+    "pair_id": "pair_035",
+    "system_type": "ups",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P035-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "adversarial_noise",
+    "component": "battery autonomy at full load",
+    "parameter": "runtime_minutes",
+    "required_value": "10 minutes",
+    "submitted_value": "5 minutes",
+    "deviation_type": "below_requirement",
+    "severity": "high",
+    "expected_finding": "The full-load runtime in the footnote (5 min) is below the 10-min full-load requirement; the headline 10 min is at 50% load.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "at full load"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "at full load the runtime is 5 minutes"
+    },
+    "expected_commissioning_test": "UPS autonomy discharge test at full load",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_035",
+    "system_type": "ups",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P035-L02",
+    "label_type": "clean_negative",
+    "difficulty": "categorical_reasoning",
+    "component": "topology",
+    "parameter": "topology",
+    "required_value": "online double-conversion",
+    "submitted_value": "online double-conversion",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — topology as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "online double-conversion"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "online double-conversion"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

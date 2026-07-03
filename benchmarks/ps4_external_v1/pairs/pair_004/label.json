@@ -2,6 +2,8 @@
   {
     "pair_id": "pair_004",
     "system_type": "generator",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
     "label_id": "P004-L01",
     "label_type": "positive_deviation",
     "difficulty": "categorical_reasoning",

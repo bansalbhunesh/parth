@@ -1,0 +1,162 @@
+[
+  {
+    "pair_id": "pair_027",
+    "system_type": "switchgear",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P027-L01",
+    "label_type": "positive_deviation",
+    "difficulty": "table_or_layout",
+    "component": "short-circuit withstand",
+    "parameter": "icw_ka",
+    "required_value": "65 kA",
+    "submitted_value": "50 kA",
+    "deviation_type": "below_requirement",
+    "severity": "high",
+    "expected_finding": "Type-test table shows Icw 50 kA, below the 65 kA requirement.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": ">= 65 kA / 1 s"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Icw (1 s) | 50 kA"
+    },
+    "expected_commissioning_test": "Switchgear type-test review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_027",
+    "system_type": "switchgear",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P027-L02",
+    "label_type": "positive_deviation",
+    "difficulty": "table_or_layout",
+    "component": "internal separation",
+    "parameter": "form",
+    "required_value": "Form 4b",
+    "submitted_value": "Form 3b",
+    "deviation_type": "below_requirement",
+    "severity": "high",
+    "expected_finding": "Type-test table shows Form 3b, below the Form 4b requirement.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Form 4b"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "Form | 3b"
+    },
+    "expected_commissioning_test": "Internal-separation review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "owner_design_basis_team_authored",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_027",
+    "system_type": "switchgear",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P027-L03",
+    "label_type": "clean_negative",
+    "difficulty": "categorical_reasoning",
+    "component": "ingress protection",
+    "parameter": "ip_rating",
+    "required_value": "IP42",
+    "submitted_value": "IP54",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — IP54 exceeds the IP42 minimum.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": ">= IP42"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "IP | IP54"
+    },
+    "expected_commissioning_test": "Ingress-protection review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_027",
+    "system_type": "switchgear",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P027-L04",
+    "label_type": "clean_negative",
+    "difficulty": "direct_value",
+    "component": "rated voltage",
+    "parameter": "voltage_v",
+    "required_value": "415 V",
+    "submitted_value": "415 V",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 415 V as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "415 V"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "415 V"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  },
+  {
+    "pair_id": "pair_027",
+    "system_type": "switchgear",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
+    "label_id": "P027-L05",
+    "label_type": "clean_negative",
+    "difficulty": "direct_value",
+    "component": "busbar rating",
+    "parameter": "busbar_a",
+    "required_value": "4000 A",
+    "submitted_value": "4000 A",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 4000 A as required.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "4000 A"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "§1",
+      "quote_or_span": "4000 A"
+    },
+    "expected_commissioning_test": "documentation / acceptance review",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "synthetic_negative",
+    "status": "frozen",
+    "reviewer_notes": "",
+    "contested": false
+  }
+]

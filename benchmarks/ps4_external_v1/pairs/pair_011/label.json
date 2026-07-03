@@ -2,6 +2,8 @@
   {
     "pair_id": "pair_011",
     "system_type": "switchgear",
+    "modality": "text",
+    "review_status": "single_author_frozen_pending_review",
     "label_id": "P011-L01",
     "label_type": "omission",
     "difficulty": "omission_detection",

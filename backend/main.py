@@ -274,24 +274,33 @@ def analyze_upload_stream(
 
 def _llm_status() -> dict:
     """Non-sensitive view of LLM wiring — never returns the key itself, only
-    whether one is present, so the live demo can be verified at a glance."""
+    whether one is present, so the live demo can be verified at a glance.
+
+    `ready` now reflects the whole failover chain: true if *any* configured
+    provider can answer (the demo has an LLM), false only when every provider
+    is unconfigured (the system runs on the deterministic rule-engine floor).
+    `provider`/`model` describe the *primary* for display; `chain` lists the
+    configured providers in the order they will be tried."""
     import os
+
+    from backend.llm import provider_chain
     provider = os.getenv("PRAMAAN_LLM", "gemini").lower()
+    chain = provider_chain()
     if provider == "openai":
-        key_set = bool(os.getenv("OPENAI_API_KEY"))
-        return {
+        base = {
             "provider": "openai",
-            "key_set": key_set,
+            "key_set": bool(os.getenv("OPENAI_API_KEY")),
             "model": os.getenv("OPENAI_MODEL", "gemini-2.0-flash"),
             "base_url_set": bool(os.getenv("OPENAI_BASE_URL")),
-            "ready": key_set,
         }
-    if provider == "claude":
-        key_set = bool(os.getenv("ANTHROPIC_API_KEY"))
-        return {"provider": "claude", "key_set": key_set, "ready": key_set}
-    key_set = bool(os.getenv("GEMINI_API_KEY"))
-    return {"provider": "gemini", "key_set": key_set,
-            "model": os.getenv("GEMINI_MODEL", "gemini-2.5-flash"), "ready": key_set}
+    elif provider == "claude":
+        base = {"provider": "claude", "key_set": bool(os.getenv("ANTHROPIC_API_KEY"))}
+    else:
+        base = {"provider": "gemini", "key_set": bool(os.getenv("GEMINI_API_KEY")),
+                "model": os.getenv("GEMINI_MODEL", "gemini-2.5-flash")}
+    base["chain"] = chain
+    base["ready"] = len(chain) > 0
+    return base
 
 
 @app.get("/health")
@@ -311,44 +320,62 @@ def health():
 
 
 @app.get("/llm-check")
-def llm_check(deep: bool = False):
+def llm_check(deep: bool = False, probe_all: bool = False):
     """Make a real LLM call and report the actual outcome. Unlike /health
-    (which only checks the key is present), this surfaces the true reason
+    (which only checks a key is present), this surfaces the true reason
     analysis falls back — e.g. out of credit, bad model, bad key — without
     ever returning the key itself.
 
-    A tiny probe can pass while reconcile-sized calls 429 (free-tier quotas
-    are token-weighted), so `?deep=1` sends the *same prompt the live demo
-    sends* — the bundled demo pair + standards context through the real
-    reconcile template, bounded by the same timeout pool — and reports the
-    honest mode, latency, and finding count. Pre-flight with deep=1."""
+    Reports the full provider failover chain: the configured providers in the
+    order they will be tried (gemini → gateway → claude), which one last
+    answered, the last failover reason, and — when no provider is configured —
+    that the system is running on the deterministic rule-engine floor.
+
+    `?deep=1` sends the *same reconcile-sized prompt the live demo sends* (a
+    tiny probe can pass while demo-sized calls 429 on token-weighted quotas),
+    bounded by the analyze timeout, and reports honest mode/latency/findings.
+    `?probe_all=1` tests every configured provider individually (uses one call
+    per provider — spend sparingly on free tiers)."""
+    from backend.llm import failover_report, probe_provider
     status = _llm_status()
     if not status.get("ready"):
-        return {"ok": False, "reason": "no_key_configured", **status}
+        return {"ok": False, "reason": "no_key_configured",
+                "on_rule_engine_floor": True, "failover": failover_report(),
+                **status}
     if deep:
-        return _llm_check_deep(status)
+        out = _llm_check_deep(status)
+        out["failover"] = failover_report()  # after the deep call, so it's live
+        return out
+    if probe_all:
+        probes = [probe_provider(p) for p in failover_report()["chain"]]
+        return {"ok": any(p["ok"] for p in probes), "probe": "per-provider",
+                "providers": probes, "failover": failover_report()}
     try:
         from backend.llm import complete
         out = complete("Reply with the single word: ok", json_mode=False)
+        report = failover_report()  # regenerate so last_successful is this call
         return {
             "ok": True,
             "probe": "tiny",
-            "provider": status["provider"],
+            "provider": report["last_successful_provider"] or status["provider"],
             "model": status.get("model"),
             "sample_response": (out or "").strip()[:80],
+            "failover": report,
             "hint": "A tiny probe can pass while demo-sized calls fail on "
                     "free-tier quotas — pre-flight with /llm-check?deep=1.",
         }
     except Exception as exc:  # noqa: BLE001 — we want the raw reason
+        from backend.llm import _redact
         return {
             "ok": False,
             "probe": "tiny",
             "provider": status["provider"],
             "model": status.get("model"),
-            "error": str(exc)[:400],
-            "hint": "Common causes: out of gateway credit (top up / switch to a "
-                    "free native GEMINI_API_KEY), wrong OPENAI_MODEL, or a "
-                    "revoked key.",
+            "error": _redact(str(exc))[:400],
+            "failover": failover_report(),
+            "hint": "Every configured provider failed. Common causes: all keys "
+                    "out of quota/credit, wrong OPENAI_MODEL, or revoked keys. "
+                    "The app still serves the deterministic rule-engine floor.",
         }
 
 

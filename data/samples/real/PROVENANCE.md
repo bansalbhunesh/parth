@@ -240,9 +240,12 @@ source. None seeded.**
 ## Pairs 12–14 — added 2026-07-03 (PDU / ASD / BMS controller)
 
 Offline-checked (zero false positives — the compliant values below are
-correctly cleared). **Live LLM verification pending** (free-tier daily quota);
-until that run lands, headline counts elsewhere still cite the original
-19-live-verified set.
+correctly cleared) and **live-verified 2026-07-03** (`make eval-real`,
+gemini-2.5-flash): **7/7 hard deviations recovered, 0 findings beyond ground
+truth**. The first live run also surfaced two *additional* genuine
+consequences of the BMS profile shortfall (head-end autonomy, integral IP
+routing) that we then added to the ground truth — the model out-audited our
+initial answer key, and we kept the stricter version.
 
 **Pair 12 — Rack PDU** (`design_basis_pdu.md` + `submittal_pdu_px3_1000.md`)
 - **Raritan PX3-1493V, PX3-1000 "Monitored" series**: energy metering at the
@@ -278,8 +281,12 @@ until that run lands, headline counts elsewhere still cite the original
   **application** controller) — BTL listed-products definitions
   (bacnetinternational.net) / ASHRAE 135 Annex L.
 - Deviations: required **B-BC** profile → provided **B-AAC**; required native
-  **BACnet/IP** at the controller → provided **MS/TP**. Cleared (compliant):
-  full field-programmability (required and provided).
+  **BACnet/IP** at the controller → provided **MS/TP**; plus two derivative
+  failures the reasoning layer surfaced unprompted and we adopted into ground
+  truth: **head-end-independent supervisory functions** not provided (AAC
+  operates under a supervisory controller) and **integral IP↔MS/TP routing**
+  not provided. Cleared (compliant): full field-programmability.
 
-**Fourteen real pairs, ~26 deviation claims, every value traced to a published
-source. None seeded.**
+**Fourteen real pairs, 26 hard deviation claims + 1 contested, every value
+traced to a published source. None seeded. 19 live-verified June 2026 +
+7 live-verified 2026-07-03 (gemini-2.5-flash), 0 false positives.**

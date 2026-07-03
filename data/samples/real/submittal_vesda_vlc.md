@@ -15,8 +15,8 @@ specifications.
 
 ## 2. Pipe network / interface
 
-- **Sampling network.** Single-zone compact aspirator with the standard VLC
-  pipe network per the ASPIRE design tool.
+- **Sampling network.** Engineered pipe network per the **ASPIRE** design
+  tool, sampling the ceiling void and the supply-air path of the zone served.
 - **Interfaces.** Relay outputs to the FACP; VESDAnet option for staged
   Alert / Action / Fire thresholds.
-- **Power.** **24 V dc** nominal.
+- **Power.** **24 V dc** from the monitored fire-power supply.

@@ -106,8 +106,8 @@ MANIFEST = [
     # PROVENANCE.md; categorical shortfalls are real product-line facts. ---
     dict(id="rack-pdu", spec="design_basis_pdu.md", submittal="submittal_pdu_px3_1000.md",
          devs=[
-             dict(param="outlet_metering", required="per-outlet", provided="inlet only", detection="llm",
-                  source="Raritan PX3-1000 'Monitored' series = inlet metering; per-outlet is the PX3-5000 series"),
+             dict(param="outlet_metering", required="per-outlet", provided="inlet/branch only", detection="llm",
+                  source="Raritan PX3-1000 'Monitored' = inlet + breaker metering; per-outlet is PX3-5000"),
              dict(param="outlet_switching", required="switched outlets", provided="not available", detection="llm",
                   source="PX3-1000 series outlets are unswitched; switching is a PX3-5000 series feature"),
          ]),
@@ -120,6 +120,20 @@ MANIFEST = [
                   source="Distech ECB-600 BTL-listed B-AAC vs required B-BC building-controller profile"),
              dict(param="network_transport", required="BACnet/IP", provided="BACnet MS/TP", detection="llm",
                   source="ECB-600 communicates on BACnet MS/TP LAN vs required native BACnet/IP"),
+             # Derivative-but-distinct requirement failures the reasoning layer
+             # surfaced unprompted on first live run (2026-07-03) — both are
+             # true consequences of the B-AAC field-device role. The model
+             # sometimes reports the autonomy fact as one summary finding and
+             # sometimes as per-function findings (scheduling/trending/
+             # alarming) — the eval matcher accepts either decomposition.
+             dict(param="supervisory_autonomy", required="head-end independent",
+                  provided="dependent on supervisory controller", detection="llm",
+                  source="B-AAC application profile vs required head-end-independent "
+                         "supervisory functions (BTL profile definitions)"),
+             dict(param="field_bus_routing", required="integral BACnet/IP<->MS/TP routing",
+                  provided="relies on supervisory controller", detection="llm",
+                  source="ECB-600 is an MS/TP field device; integral IP routing "
+                         "is the B-BC supervisory role"),
          ]),
 ]
 

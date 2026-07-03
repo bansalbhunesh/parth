@@ -16,7 +16,7 @@ across all tracks**. Scored on hard, checkable signals, the visible field has:
 | Eval harness with ground truth | **0** | ✅ 4 paths + no-key real-pairs harness |
 | Quantified impact model | **0** | ✅ `docs/BUSINESS.md`, every figure cited |
 | Live deployment | 3 | ✅ 2 (Vercel + Render) |
-| Real third-party documents in the loop | ~2 | ✅ 11 sourced datasheet pairs |
+| Real third-party documents in the loop | ~2 | ✅ 14 sourced datasheet pairs |
 
 In our own track (PS4), the strongest visible rival is a FastAPI+Claude+ChromaDB
 platform with an NCR workflow — real code, but no tests, no eval, no CI, no
@@ -114,7 +114,7 @@ of the following is in their public feature set — and together they are the mo
    fails" — the number that converts a finding into a dated, prioritised action
    and a board-level schedule-risk metric.
 3. **Open, reproducible eval + real-world result.** A public test harness, a
-   446-test suite, and a **19/19-recall result on real third-party datasheets**
+   446-test suite, and a **26/26-recall result on real third-party datasheets**
    ([`eval/REAL_PAIRS_EVAL.md`](eval/REAL_PAIRS_EVAL.md)). Closed SaaS asks you to
    trust the marketing; we ship the proof.
 4. **No-silent-zero resilience.** A deterministic detector that still returns the

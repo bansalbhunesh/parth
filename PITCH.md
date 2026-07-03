@@ -68,9 +68,10 @@
 
 ## [1:50–2:15] — It's real, and it's honest
 
-> "And it's not our data. We built **three** of these from actual published
-> spec sheets — **Vertiv, Cummins, STULZ, ABB** — against real standards: Uptime,
-> NFPA, EPA, ASHRAE, IEC. On the cooling unit it even **knew R410A's global-warming
+> "And it's not our data. We built **fourteen** of these from actual published
+> spec sheets — **Vertiv, Cummins, STULZ, ABB, Raritan, Xtralis, Distech** —
+> against real standards: Uptime, NFPA, EPA, ASHRAE, IEC, BACnet/BTL. On the
+> cooling unit it even **knew R410A's global-warming
 > potential is 2,088** and flagged it against the limit — the datasheet never said
 > the number. And it doesn't cry wolf: on the switchgear it **cleared** an IP-54
 > rating that *exceeds* the requirement. Every value we used is citable. Nothing

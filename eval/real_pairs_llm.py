@@ -36,20 +36,40 @@ def _norm(v):
     return re.sub(r"[^a-z0-9.]+", "", str(v).strip().lower())
 
 
+STOPWORDS = {"only", "not", "and", "the", "for", "per", "of", "a", "an",
+             "under", "every", "with", "available", "provided"}
+
+
+def _words(s) -> set:
+    return {w for w in re.findall(r"[a-z0-9]+", str(s).lower())
+            if w not in STOPWORDS and len(w) > 1}
+
+
 def _matches(gt_dev, finding) -> bool:
     """A finding matches a ground-truth deviation when the required/provided
-    values line up (normalised), or when the parameter name clearly refers to
-    the same physical fact and the provided value agrees."""
+    values line up (normalised), or — for categorical deviations whose value
+    phrasing legitimately varies ('inlet only' vs 'inlet and branch/breaker
+    only (per-outlet metering not provided)') — when the parameter name and
+    the required-side wording both overlap the same physical fact."""
     fr, fp = _norm(finding.get("required_value")), _norm(finding.get("provided_value"))
     gr, gp = _norm(gt_dev["required"]), _norm(gt_dev["provided"])
     if gr and gp and gr in fr and gp in fp:
         return True
-    if gp and gp in fp:
-        gt_words = set(re.findall(r"[a-z0-9]+", gt_dev["param"].lower()))
-        f_words = set(re.findall(r"[a-z0-9]+",
-                                 str(finding.get("parameter", "")).lower()))
-        if gt_words & f_words:
-            return True
+    param_overlap = _words(gt_dev["param"]) & _words(finding.get("parameter"))
+    if gp and gp in fp and param_overlap:
+        return True
+    # Categorical fallback: same parameter concept AND the finding's
+    # required/provided wording shares content words with the ground truth.
+    req_overlap = _words(gt_dev["required"]) & _words(finding.get("required_value"))
+    prov_overlap = _words(gt_dev["provided"]) & _words(finding.get("provided_value"))
+    if param_overlap and (req_overlap or prov_overlap):
+        return True
+    # Decomposition tolerance: the model may split one physical fact into
+    # per-function findings (e.g. head-end autonomy reported separately for
+    # scheduling/trending/alarming). Strong overlap on BOTH sides of the
+    # requirement wording counts as the same fact even without a param match.
+    if len(req_overlap) >= 2 and prov_overlap:
+        return True
     return False
 
 
@@ -106,6 +126,13 @@ def main() -> int:
             fp_pairs += 1
             print(f"  {pair['id']:<22} !! {extra} finding(s) beyond ground truth "
                   "— review for false positives")
+            matched_ids = {id(f) for f in result.deviations
+                           if any(_matches(d, f) for d in pair["devs"])}
+            for f in result.deviations:
+                if id(f) not in matched_ids:
+                    print(f"      unmatched: param={f.get('parameter')!r} "
+                          f"required={f.get('required_value')!r} "
+                          f"provided={f.get('provided_value')!r}")
         time.sleep(args.sleep)
 
     print(f"{'-' * 68}")

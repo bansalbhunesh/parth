@@ -7,8 +7,17 @@ single most common real-world input, and exactly the failure a judge can trigger
 by uploading their own scanned file.
 
 Pramaan handles it: when a PDF carries no usable text layer, it falls back to
-**OCR** (PyMuPDF rasterization → Tesseract). When the OCR toolchain is absent it
-degrades to an **honest, actionable message** rather than a silent zero or a 500.
+**OCR** (PyMuPDF rasterization → Tesseract). The same Tesseract path also reads
+**directly-uploaded raster images** (`.png/.jpg/.tiff/.webp`) through the normal
+text-reconcile upload. When the OCR toolchain is absent it degrades to an
+**honest, actionable message** rather than a silent zero or a 500.
+
+All of this lives in one dependency-guarded module, [`backend/agents/ocr_util.py`](../backend/agents/ocr_util.py),
+and **`GET /ocr-check` reports whether OCR is actually live in a given deployment**
+(`{"status":"ready", ...}` when the tesseract binary is present and OCR is enabled)
+— so a claim is never stronger than the running environment. Note the image OCR
+here (Tesseract → text) is distinct from the `/analyze/vision` path, where a
+vision LLM reads values straight from the picture.
 
 ## Try it
 
@@ -50,14 +59,21 @@ detection is unaffected; but we don't claim pixel-perfect transcription.
 
 ## Deployment
 
-- **Local / Docker:** [`Dockerfile.backend`](../Dockerfile.backend) installs
-  `tesseract-ocr`, so OCR works out of the box.
-- **Render Python runtime** (current `render.yaml`): no system Tesseract, so OCR
-  is unavailable there and the app shows the honest message above. Switch that
-  service to the Docker build to enable OCR in production.
-- **Config:** `PRAMAAN_OCR=0` disables it; `TESSERACT_CMD` points at the binary;
-  `TESSDATA_PREFIX` at the language data; `PRAMAAN_OCR_DPI` (default 300) trades
-  speed for accuracy.
+- **Local / Docker / docker-compose:** [`Dockerfile.backend`](../Dockerfile.backend)
+  and the root [`Dockerfile`](../Dockerfile) backend stage both `apt-get install
+  tesseract-ocr`, so OCR works out of the box.
+- **Render:** `render.yaml` now builds from `Dockerfile.backend`
+  (`runtime: docker`), so the hosted backend ships Tesseract and OCR runs in
+  production. *(Deploy step: after this change is merged, redeploy the Render
+  service and confirm `GET /ocr-check` returns `"status":"ready"`.)* A plain
+  Python buildpack cannot `apt-get`, so on any non-Docker host OCR degrades to
+  the honest "OCR unavailable" message above — `GET /ocr-check` tells you which
+  case you are in.
+- **Config:** `PRAMAAN_OCR_ENABLED=0` (alias `PRAMAAN_OCR=0`) disables OCR;
+  `TESSERACT_CMD` points at the binary; `TESSDATA_PREFIX` at the language data;
+  `PRAMAAN_OCR_DPI` (default 300) trades speed for accuracy; `PRAMAAN_MAX_PDF_PAGES`
+  (default 30) caps pages OCR'd per PDF; `PRAMAAN_MAX_IMAGE_PIXELS` (default 20M)
+  rejects oversize images (decompression-bomb guard).
 
 Tests: [`../tests/test_ocr.py`](../tests/test_ocr.py) — builds an image-only PDF
 in-memory, asserts OCR recovery (skipped where Tesseract is absent), and asserts

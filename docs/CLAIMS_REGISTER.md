@@ -37,6 +37,8 @@ scenario / pending / do-not-use.
 | 17 | Production maturity | **none** | — | pending | "prototype / hackathon build" | "production-grade", "enterprise-ready" | all | — | do-not-use |
 | 18 | Datasheet realism | **none** | — | team_authored | "fixtures, not real datasheets" | "real-datasheet accuracy", "tested on real unseen datasheets" | all | — | do-not-use |
 | 19 | Customer ROI | **none** | — | pending | (say nothing) | "customer ROI", "saves customers $X", "N% cost reduction" | none | — | do-not-use |
+| 20 | OCR (scanned PDF + image) | **text-first + Tesseract fallback** | `eval/OCR_SCANNED_PDF.md`, `tests/test_ocr.py`, `backend/agents/ocr_util.py` | measured | "reads scanned / image-only PDFs and uploaded images via Tesseract OCR where the tesseract binary is installed; text-first with an OCR fallback, best-effort" | "OCR works everywhere", "reads any scanned PDF", "pixel-perfect OCR", "lossless OCR", "100% OCR accuracy" | README, report, demo, docs | needs the tesseract system binary (shipped in the `Dockerfile.backend` image / Render Docker build); English-only, best-effort (not lossless — e.g. GXT5→GXTS); `GET /ocr-check` reports whether OCR is live in a given deployment | verified |
+| 21 | Vision (image via LLM) | **Gemini reads values from the picture** | `data/samples/real/VISION_RESULT.md`, `backend/analyze.py` | measured | "given a datasheet image, Gemini vision reads the values from the picture (a separate path from Tesseract OCR)" | "vision works on any image", "always reads images", "vision-grade accuracy" | README, docs, demo | Gemini-only (no text-model failover); degrades to `mode=vision-unavailable` on any error; demonstrated on one sample, not headlined as a benchmark number | scenario |
 
 ## Do NOT say (banned phrases — grep-enforced)
 
@@ -53,6 +55,10 @@ source, or video script:
 - "fully independent benchmark"
 - "two-reviewer adjudicated"
 - "stored primary-source benchmark"
+- "OCR works everywhere"
+- "reads any scanned PDF"
+- "pixel-perfect OCR" / "lossless OCR"
+- "100% OCR accuracy"
 
 ## Safe framing (paste-ready)
 

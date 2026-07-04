@@ -1,0 +1,27 @@
+run,pair_id,bucket,label_id,difficulty,parameter,required_value,submitted_value,ran
+2026-07-04_openai_google-gemini-3.1-flash-lite_run1,pair_005,unit conversion missed,P005-L01,unit_conversion,airflow_cfm,2500 CFM,4000 m3/h,True
+2026-07-04_openai_google-gemini-3.1-flash-lite_run1,pair_018,omission missed,P018-L04,omission_detection,test_report,provided,Not stated,True
+2026-07-04_openai_google-gemini-3.1-flash-lite_run1,pair_020,table/layout missed,P020-L03,table_or_layout,modbus_support,supported,not supported,True
+2026-07-04_openai_google-gemini-3.1-flash-lite_run1,pair_021,omission missed,P021-L02,omission_detection,integrity_test,specified,Not stated,True
+2026-07-04_openai_google-gemini-3.1-flash-lite_run1,pair_022,unit conversion missed,P022-L01,unit_conversion,transfer_time,100 ms,4 s,True
+2026-07-04_openai_google-gemini-3.1-flash-lite_run1,pair_028,omission missed,P028-L02,omission_detection,fire_listing,provided,Not stated,True
+2026-07-04_openai_google-gemini-3.1-flash-lite_run1,pair_049,omission missed,P049-L02,omission_detection,arc_test,IEC 61641,Not stated,True
+2026-07-04_openai_google-gemini-3.1-flash-lite_run1,pair_050,omission missed,P050-L02,omission_detection,ul_listing,provided,Not stated,True
+2026-07-04_openai_google-gemini-3.1-flash-lite_run2,pair_005,unit conversion missed,P005-L01,unit_conversion,airflow_cfm,2500 CFM,4000 m3/h,True
+2026-07-04_openai_google-gemini-3.1-flash-lite_run2,pair_018,omission missed,P018-L04,omission_detection,test_report,provided,Not stated,True
+2026-07-04_openai_google-gemini-3.1-flash-lite_run2,pair_020,table/layout missed,P020-L03,table_or_layout,modbus_support,supported,not supported,True
+2026-07-04_openai_google-gemini-3.1-flash-lite_run2,pair_021,omission missed,P021-L02,omission_detection,integrity_test,specified,Not stated,True
+2026-07-04_openai_google-gemini-3.1-flash-lite_run2,pair_022,unit conversion missed,P022-L01,unit_conversion,transfer_time,100 ms,4 s,True
+2026-07-04_openai_google-gemini-3.1-flash-lite_run2,pair_028,omission missed,P028-L02,omission_detection,fire_listing,provided,Not stated,True
+2026-07-04_openai_google-gemini-3.1-flash-lite_run2,pair_049,omission missed,P049-L02,omission_detection,arc_test,IEC 61641,Not stated,True
+2026-07-04_openai_google-gemini-3.1-flash-lite_run2,pair_050,omission missed,P050-L02,omission_detection,ul_listing,provided,Not stated,True
+2026-07-04_openai_google-gemini-3.1-flash-lite_run3,pair_005,unit conversion missed,P005-L01,unit_conversion,airflow_cfm,2500 CFM,4000 m3/h,True
+2026-07-04_openai_google-gemini-3.1-flash-lite_run3,pair_018,omission missed,P018-L04,omission_detection,test_report,provided,Not stated,True
+2026-07-04_openai_google-gemini-3.1-flash-lite_run3,pair_020,table/layout missed,P020-L03,table_or_layout,modbus_support,supported,not supported,True
+2026-07-04_openai_google-gemini-3.1-flash-lite_run3,pair_021,omission missed,P021-L02,omission_detection,integrity_test,specified,Not stated,True
+2026-07-04_openai_google-gemini-3.1-flash-lite_run3,pair_022,transient provider error / parse issue,P022-L01,unit_conversion,transfer_time,100 ms,4 s,False
+2026-07-04_openai_google-gemini-3.1-flash-lite_run3,pair_022,transient provider error / parse issue,P022-L02,direct_value,withstand_ka,65 kA,50 kA,False
+2026-07-04_openai_google-gemini-3.1-flash-lite_run3,pair_022,transient provider error / parse issue,P022-L03,categorical_reasoning,poles,4-pole,3-pole,False
+2026-07-04_openai_google-gemini-3.1-flash-lite_run3,pair_028,omission missed,P028-L02,omission_detection,fire_listing,provided,Not stated,True
+2026-07-04_openai_google-gemini-3.1-flash-lite_run3,pair_049,omission missed,P049-L02,omission_detection,arc_test,IEC 61641,Not stated,True
+2026-07-04_openai_google-gemini-3.1-flash-lite_run3,pair_050,omission missed,P050-L02,omission_detection,ul_listing,provided,Not stated,True

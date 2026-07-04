@@ -1,7 +1,7 @@
 {
   "benchmark": "ps4_external_v1",
   "benchmark_version": "1.2.0",
-  "generated_utc": "2026-07-03T20:06:10+00:00",
+  "generated_utc": "2026-07-03T22:03:55+00:00",
   "status": "seed (framework complete; 40-50 pairs target \u2014 see backlog)",
   "pairs": {
     "value": 53,
@@ -68,13 +68,13 @@
     "evidence_label": "deterministic_offline"
   },
   "llm_result": {
-    "primary_recall_semantic": 0.0,
-    "primary_recall_exact": 0.0,
-    "primary_tp": 0,
+    "primary_recall_semantic": 0.8095,
+    "primary_recall_exact": 0.6349,
+    "primary_tp": 51,
     "positive_labels": 63,
-    "false_positives_total": 0,
-    "clean_negative_false_alert_rate": 0.0,
-    "pairs_not_run": 5,
+    "false_positives_total": 31,
+    "clean_negative_false_alert_rate": 0.0625,
+    "pairs_not_run": 6,
     "evidence_label": "live_model"
   },
   "cost_estimate": {

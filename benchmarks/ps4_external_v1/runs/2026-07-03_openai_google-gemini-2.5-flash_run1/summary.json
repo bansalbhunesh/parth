@@ -2,20 +2,21 @@
   "benchmark": "ps4_external_v1",
   "benchmark_version": "1.2.0",
   "labels_freeze_sha256": "f13a4f72895d8ef31df1fe716ad5a73526f109a152b9060e38cd1e5179710b12",
-  "mode": "rule",
-  "provider": "rule",
-  "model": "rule-engine",
+  "mode": "llm",
+  "provider": "openai",
+  "model": "google/gemini-2.5-flash",
   "repeat_index": 1,
-  "repeats_total": 1,
-  "timestamp_utc": "2026-07-03T20:33:08+00:00",
+  "repeats_total": 3,
+  "timestamp_utc": "2026-07-03T21:34:07+00:00",
   "include_contested_in_primary": false,
   "count_not_run_as_miss": true,
-  "evidence_label": "deterministic_offline",
-  "config_sha256": "325948bfc5dfeea74b284ed5bd875d2fe56f48a22c615fb7fcf8502306445df4",
+  "evidence_label": "live_model",
+  "config_sha256": "b8e1e5c1910728e755fb334ab8026389435b3690e59e83fee97b06450666dc88",
   "pairs_total": 53,
-  "pairs_run": 48,
-  "pairs_not_run": 5,
+  "pairs_run": 47,
+  "pairs_not_run": 6,
   "not_run_pair_ids": [
+    "pair_031",
     "pair_039",
     "pair_040",
     "pair_041",
@@ -25,29 +26,29 @@
   "positive_labels": 63,
   "clean_negative_labels": 64,
   "contested_labels": 2,
-  "primary_recall_semantic": 0.1111,
-  "primary_recall_exact": 0.1111,
-  "primary_tp": 7,
-  "primary_fn": 56,
-  "secondary_recall_semantic": 0.1228,
+  "primary_recall_semantic": 0.7937,
+  "primary_recall_exact": 0.6508,
+  "primary_tp": 50,
+  "primary_fn": 13,
+  "secondary_recall_semantic": 0.8772,
   "secondary_positives": 57,
-  "false_positives_total": 0,
-  "clean_negative_false_alerts": 0,
-  "clean_negative_false_alert_rate": 0.0,
+  "false_positives_total": 19,
+  "clean_negative_false_alerts": 1,
+  "clean_negative_false_alert_rate": 0.0156,
   "error_or_timeout_pairs": 5,
   "error_rate": 0.0943,
-  "latency_p50_ms": 0.0,
-  "latency_p95_ms": 1.0,
+  "latency_p50_ms": 14219.0,
+  "latency_p95_ms": 26998.1,
   "per_difficulty": {
     "direct_value": {
       "positives": 6,
-      "caught": 3,
-      "recall": 0.5
+      "caught": 6,
+      "recall": 1.0
     },
     "categorical_reasoning": {
       "positives": 17,
-      "caught": 0,
-      "recall": 0.0
+      "caught": 17,
+      "recall": 1.0
     },
     "unit_conversion": {
       "positives": 2,
@@ -56,28 +57,28 @@
     },
     "derived_arithmetic": {
       "positives": 4,
-      "caught": 0,
-      "recall": 0.0
+      "caught": 4,
+      "recall": 1.0
     },
     "domain_recall": {
       "positives": 6,
-      "caught": 0,
-      "recall": 0.0
+      "caught": 5,
+      "recall": 0.8333
     },
     "omission_detection": {
       "positives": 8,
-      "caught": 1,
-      "recall": 0.125
+      "caught": 5,
+      "recall": 0.625
     },
     "adversarial_noise": {
       "positives": 6,
-      "caught": 3,
-      "recall": 0.5
+      "caught": 6,
+      "recall": 1.0
     },
     "table_or_layout": {
       "positives": 8,
-      "caught": 0,
-      "recall": 0.0
+      "caught": 7,
+      "recall": 0.875
     },
     "scanned_or_image": {
       "positives": 6,
@@ -88,88 +89,88 @@
   "per_system": {
     "ups": {
       "positives": 7,
-      "caught": 4,
-      "recall": 0.5714
+      "caught": 6,
+      "recall": 0.8571
     },
     "metering_power_quality": {
+      "positives": 2,
+      "caught": 2,
+      "recall": 1.0
+    },
+    "switchgear": {
+      "positives": 8,
+      "caught": 7,
+      "recall": 0.875
+    },
+    "generator": {
+      "positives": 6,
+      "caught": 5,
+      "recall": 0.8333
+    },
+    "crac_crah": {
       "positives": 2,
       "caught": 1,
       "recall": 0.5
     },
-    "switchgear": {
-      "positives": 8,
-      "caught": 1,
-      "recall": 0.125
-    },
-    "generator": {
-      "positives": 6,
-      "caught": 1,
-      "recall": 0.1667
-    },
-    "crac_crah": {
-      "positives": 2,
-      "caught": 0,
-      "recall": 0.0
-    },
     "battery": {
       "positives": 2,
-      "caught": 0,
-      "recall": 0.0
+      "caught": 2,
+      "recall": 1.0
     },
     "refrigerant": {
       "positives": 4,
-      "caught": 0,
-      "recall": 0.0
+      "caught": 4,
+      "recall": 1.0
     },
     "cabling": {
       "positives": 5,
-      "caught": 0,
-      "recall": 0.0
+      "caught": 3,
+      "recall": 0.6
     },
     "transformer": {
       "positives": 2,
-      "caught": 0,
-      "recall": 0.0
+      "caught": 2,
+      "recall": 1.0
     },
     "chiller": {
       "positives": 6,
-      "caught": 0,
-      "recall": 0.0
+      "caught": 2,
+      "recall": 0.3333
     },
     "pdu_rpp": {
       "positives": 5,
-      "caught": 0,
-      "recall": 0.0
+      "caught": 4,
+      "recall": 0.8
     },
     "bms": {
       "positives": 3,
-      "caught": 0,
-      "recall": 0.0
+      "caught": 2,
+      "recall": 0.6667
     },
     "fire_suppression": {
       "positives": 2,
-      "caught": 0,
-      "recall": 0.0
+      "caught": 2,
+      "recall": 1.0
     },
     "ats_sts": {
       "positives": 3,
-      "caught": 0,
-      "recall": 0.0
+      "caught": 2,
+      "recall": 0.6667
     },
     "cooling_tower": {
       "positives": 2,
-      "caught": 0,
-      "recall": 0.0
+      "caught": 2,
+      "recall": 1.0
     },
     "rack_aisle": {
       "positives": 2,
-      "caught": 0,
-      "recall": 0.0
+      "caught": 2,
+      "recall": 1.0
     },
     "networking": {
       "positives": 2,
-      "caught": 0,
-      "recall": 0.0
+      "caught": 2,
+      "recall": 1.0
     }
   }
 }

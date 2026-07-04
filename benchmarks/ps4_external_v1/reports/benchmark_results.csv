@@ -1,3 +1,6 @@
 run,mode,provider,model,primary_recall_semantic,primary_recall_exact,secondary_recall_semantic,primary_tp,positive_labels,false_positives_total,clean_negative_false_alert_rate,pairs_not_run,error_rate,latency_p50_ms,latency_p95_ms
-2026-07-03_gemini_gemini-2.5-flash_run1,llm,gemini,gemini-2.5-flash,0.0,0.0,,0,63,0,0.0,5,0.0,,
+2026-07-03_gemini_gemini-2.5-flash_run1,llm,gemini,gemini-2.5-flash,0.0159,0.0159,1.0,1,63,0,0.0,52,0.0943,31300.0,31300.0
+2026-07-03_openai_google-gemini-2.5-flash_run1,llm,openai,google/gemini-2.5-flash,0.7937,0.6508,0.8772,50,63,19,0.0156,6,0.0943,14219.0,26998.1
+2026-07-03_openai_google-gemini-2.5-flash_run2,llm,openai,google/gemini-2.5-flash,0.746,0.6032,0.8246,47,63,29,0.0312,6,0.0943,13991.0,29511.1
+2026-07-03_openai_google-gemini-2.5-flash_run3,llm,openai,google/gemini-2.5-flash,0.8095,0.6349,0.8947,51,63,31,0.0625,6,0.0943,15432.0,39778.0
 2026-07-03_rule_rule-engine_run1,rule,rule,rule-engine,0.1111,0.1111,0.1228,7,63,0,0.0,5,0.0943,0.0,1.0

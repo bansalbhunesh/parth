@@ -6,7 +6,7 @@ provider: rule
 model: rule-engine
 repeat_index: 1
 repeats_total: 1
-timestamp_utc: 2026-07-03T20:06:09+00:00
+timestamp_utc: 2026-07-03T20:33:08+00:00
 include_contested_in_primary: False
 count_not_run_as_miss: True
 evidence_label: deterministic_offline

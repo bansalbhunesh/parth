@@ -1,6 +1,6 @@
 # PS4 External Benchmark — Report (v1.2.0)
 
-_Generated 2026-07-03T20:06:10+00:00 · run
+_Generated 2026-07-03T22:03:55+00:00 · run
 `scripts/benchmark_report.py` to refresh. Every metric carries an evidence label._
 
 ## Composition
@@ -51,23 +51,23 @@ _Generated 2026-07-03T20:06:10+00:00 · run
 ### LLM-enhanced  
 `live_model`
 
-- Primary recall (semantic, not-run counted as miss): **0.0** (0/63)
-- Primary recall (exact): 0.0
-- Secondary recall (semantic, not-run excluded): None (over 0 positives)
-- False positives: **0** · clean-negative false-alert rate: **0.0**
-- Not-run pairs: 5 ['pair_001', 'pair_006', 'pair_016', 'pair_019', 'pair_021'] · error rate: 0.0
-- Latency p50/p95 (ms): None / None
+- Primary recall (semantic, not-run counted as miss): **0.8095** (51/63)
+- Primary recall (exact): 0.6349
+- Secondary recall (semantic, not-run excluded): 0.8947 (over 57 positives)
+- False positives: **31** · clean-negative false-alert rate: **0.0625**
+- Not-run pairs: 6 ['pair_033', 'pair_039', 'pair_040', 'pair_041', 'pair_042', 'pair_043'] · error rate: 0.0943
+- Latency p50/p95 (ms): 15432.0 / 39778.0
 
 | difficulty | caught | recall |
 |---|---|---|
-| adversarial_noise | 0/6 | 0.0 |
-| categorical_reasoning | 0/17 | 0.0 |
-| derived_arithmetic | 0/4 | 0.0 |
-| direct_value | 0/6 | 0.0 |
-| domain_recall | 0/6 | 0.0 |
-| omission_detection | 0/8 | 0.0 |
+| adversarial_noise | 6/6 | 1.0 |
+| categorical_reasoning | 17/17 | 1.0 |
+| derived_arithmetic | 4/4 | 1.0 |
+| direct_value | 6/6 | 1.0 |
+| domain_recall | 5/6 | 0.8333 |
+| omission_detection | 6/8 | 0.75 |
 | scanned_or_image | 0/6 | 0.0 |
-| table_or_layout | 0/8 | 0.0 |
+| table_or_layout | 7/8 | 0.875 |
 | unit_conversion | 0/2 | 0.0 |
 
 

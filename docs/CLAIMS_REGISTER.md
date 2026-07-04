@@ -7,7 +7,9 @@ source, detailed submission PDF source, and any future video/demo script.
 **Rule:** if a claim is not in this register, do not make it. Every quantitative
 claim must appear with its nearby limitation. Numbers are from
 `benchmarks/ps4_external_v1/reports/benchmark_card.json` (regenerate with
-`python scripts/benchmark_report.py`).
+`python scripts/benchmark_report.py`). Provenance governance (source origin,
+derived-vs-stored, standards-citation-only) is indexed in
+[`SOURCE_PROVENANCE.md`](SOURCE_PROVENANCE.md).
 
 Evidence types: `measured` (deterministic count/hash), `benchmarked` (from the
 3-pass featured run), `deterministic_offline` (rule engine), `team_authored`
@@ -40,6 +42,7 @@ scenario / pending / do-not-use.
 | 20 | OCR (scanned PDF + image) | **text-first + Tesseract fallback** | `eval/OCR_SCANNED_PDF.md`, `tests/test_ocr.py`, `backend/agents/ocr_util.py` | measured | "reads scanned / image-only PDFs and uploaded images via Tesseract OCR where the tesseract binary is installed; text-first with an OCR fallback, best-effort" | "OCR works everywhere", "reads any scanned PDF", "pixel-perfect OCR", "lossless OCR", "100% OCR accuracy" | README, report, demo, docs | needs the tesseract system binary (shipped in the `Dockerfile.backend` image / Render Docker build); English-only, best-effort (not lossless — e.g. GXT5→GXTS); `GET /ocr-check` reports whether OCR is live in a given deployment | verified |
 | 21 | Vision (image via LLM) | **Gemini reads values from the picture** | `data/samples/real/VISION_RESULT.md`, `backend/analyze.py` | measured | "given a datasheet image, Gemini vision reads the values from the picture (a separate path from Tesseract OCR)" | "vision works on any image", "always reads images", "vision-grade accuracy" | README, docs, demo | Gemini-only (no text-model failover); degrades to `mode=vision-unavailable` on any error; demonstrated on one sample, not headlined as a benchmark number | scenario |
 | 22 | LLM provider failover | **self-healing chain → deterministic floor** | `backend/llm.py`, `tests/test_failover.py`, `tests/test_failover_phase4.py`, `docs/LLM_FAILOVER_RUNBOOK.md` | measured | "on quota/429/rate-limit/timeout the demo fails over gemini → Qwen gateway → Groq → Claude → local Ollama → deterministic rule engine; only configured providers are tried; `/llm-check` shows the live chain and last failover" | "failover improves accuracy", "more accurate with failover", "never goes down", "100% uptime", "self-healing accuracy" | README, docs, demo, video | **reliability/availability only, NOT accuracy** — every leg is scored the same; the rule floor is deliberately low-recall (see #11) and computes from the real documents, never seeded labels; the Qwen gateway must be a genuinely separate quota (not Google's endpoint) | verified |
+| 23 | Public-demo security hardening | **auth (opt-in) + rate limits + upload validation** | `backend/security.py`, `backend/uploads.py`, `tests/test_security*.py`, `tests/test_upload_hardening.py`, `tests/test_prompt_injection.py`, `tests/test_no_secrets.py`, `docs/SECURITY_DEMO_RUNBOOK.md` | measured | "demo-hardened: optional token auth, per-IP rate limiting, MIME/magic-byte upload validation (rejects archives/executables/disguised/oversized/bomb images), prompt-injection-resistant prompts, and no secret leakage in status endpoints" | "production-grade", "enterprise-ready", "secure by default", "penetration-tested", "zero vulnerabilities", "DDoS protection", "hardened against all attacks" | README, docs, demo, video | **demo hardening, not production security** — rate limiting is single-instance/in-memory (no shared store), auth is an optional demo token (not access control), and the dependency audit fixed the in-scope upload-parser CVE while documenting dev-only/unshipped advisories | verified |
 
 ## Do NOT say (banned phrases — grep-enforced)
 
@@ -62,6 +65,8 @@ source, or video script:
 - "100% OCR accuracy"
 - "failover improves accuracy" / "more accurate with failover"
 - "never goes down" / "100% uptime"
+- "secure by default" / "penetration-tested" / "zero vulnerabilities"
+- "DDoS protection" / "hardened against all attacks"
 
 ## Safe framing (paste-ready)
 

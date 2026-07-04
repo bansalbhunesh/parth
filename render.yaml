@@ -57,3 +57,22 @@ services:
         value: llama-3.3-70b-versatile
       - key: GROQ_API_KEY
         sync: false   # set the Groq key (gsk_...) in the Render dashboard
+      # --- Public-demo security hardening (Phase 5) ---
+      # Rate limiting ON with generous per-hour caps (process-local; single
+      # instance). Demo token auth OFF by default so judges get an open demo —
+      # flip DEMO_AUTH_ENABLED=true and set DEMO_AUTH_TOKEN (as a synced secret)
+      # only if the demo starts getting abused. See docs/SECURITY_DEMO_RUNBOOK.md.
+      - key: PRAMAAN_RATE_LIMIT_ENABLED
+        value: "true"
+      - key: PRAMAAN_ANALYSIS_LIMIT_PER_HOUR
+        value: "20"
+      - key: PRAMAAN_UPLOAD_LIMIT_PER_HOUR
+        value: "10"
+      - key: PRAMAAN_DEEP_PROBE_LIMIT_PER_HOUR
+        value: "3"
+      - key: PRAMAAN_MAX_UPLOAD_MB
+        value: "20"
+      - key: DEMO_AUTH_ENABLED
+        value: "false"
+      # - key: DEMO_AUTH_TOKEN
+      #   sync: false   # set only if DEMO_AUTH_ENABLED is flipped to true

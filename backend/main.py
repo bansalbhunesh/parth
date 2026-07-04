@@ -6,16 +6,25 @@ import logging
 import os
 import time
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
+from backend import security
 from backend.agents.ingestion import extract_pdf_bytes, ingest_corpus
 from backend.agents.rfi_copilot import ask, ask_fallback, ask_stream
 from backend.analyze import run_analysis, run_streaming_analysis
 from backend.orchestrator import run_pipeline
 from backend.paths import CORPUS, PROJECTS_DIR
+from backend.uploads import validate_upload
+
+# Dependency bundles for the expensive / abusable endpoints. Auth is a no-op
+# unless DEMO_AUTH_ENABLED + DEMO_AUTH_TOKEN are set; rate limiting is on by
+# default with generous per-hour caps (disabled in the test suite via conftest).
+_PROTECT_ANALYSIS = [Depends(security.require_demo_auth), Depends(security.rl_analysis)]
+_PROTECT_UPLOAD = [Depends(security.require_demo_auth), Depends(security.rl_upload)]
+_PROTECT_LLMCHECK = [Depends(security.require_demo_auth)]
 
 logging.basicConfig(
     level=logging.INFO,
@@ -78,7 +87,10 @@ async def _never_crash(request, exc):  # noqa: ANN001
 # uploads that omit Content-Length fall through to uvicorn's own body limits.
 # Implemented as pure ASGI (not @app.middleware/BaseHTTPMiddleware) so it never
 # wraps or buffers the SSE StreamingResponses the demo relies on.
-MAX_REQUEST_BYTES = 20 * 1024 * 1024  # headroom over the 15 MB upload cap
+# Ceiling = the per-file cap plus 5 MB of multipart/field overhead, so a single
+# max-size document (plus a small companion) passes while a multi-GB body is
+# rejected before spooling. Read at import from the env cap (PRAMAAN_MAX_UPLOAD_MB).
+MAX_REQUEST_BYTES = security.max_upload_bytes() + 5 * 1024 * 1024
 
 
 class BodySizeLimitMiddleware:
@@ -171,18 +183,18 @@ def _sse_response(generator):
     )
 
 
-MAX_UPLOAD_BYTES = 15 * 1024 * 1024  # 15 MB — generous for datasheets, caps DoS
-
-
 def _check_size(data: bytes, name: str):
-    if len(data) > MAX_UPLOAD_BYTES:
-        raise HTTPException(413, f"{name} exceeds the {MAX_UPLOAD_BYTES // (1024*1024)} MB upload limit")
+    cap = security.max_upload_bytes()
+    if len(data) > cap:
+        raise HTTPException(413, f"{security.safe_name(name)} exceeds the "
+                                 f"{security.max_upload_mb()} MB upload limit")
 
 
 def _read_capped(file: UploadFile, name: str) -> bytes:
-    """Read at most MAX_UPLOAD_BYTES+1 bytes so an oversized upload is rejected
-    before it can be fully buffered into memory (size-after-read DoS)."""
-    data = file.file.read(MAX_UPLOAD_BYTES + 1)
+    """Read at most the byte cap +1 so an oversized upload is rejected before it
+    can be fully buffered into memory (size-after-read DoS). The cap is read
+    dynamically (env-configurable via PRAMAAN_MAX_UPLOAD_MB)."""
+    data = file.file.read(security.max_upload_bytes() + 1)
     _check_size(data, name)
     return data
 
@@ -202,6 +214,7 @@ def _extract_upload_doc(file: UploadFile) -> dict:
     name = file.filename or "upload"
     data = _read_capped(file, name)
     ctype = file.content_type or ""
+    validate_upload(name, ctype, data)  # MIME/ext/magic-byte allowlist
     doc = ocr_util.extract_document(data, name, ctype)
     if doc["text"].strip():
         return doc
@@ -230,19 +243,80 @@ def _extract_upload_text(file: UploadFile) -> str:
 
 # ── Analysis endpoints ──────────────────────────────────────────────
 
-@app.post("/analyze")
+@app.post("/analyze", dependencies=_PROTECT_ANALYSIS)
 def analyze(req: AnalyzeRequest):
-    result = run_analysis(req.spec_text, req.submittal_text, req.system_id)
+    # Routed through the input-hash cache: an identical spec+submittal (same
+    # model/prompt version) is computed once and reused (cached=true), so a
+    # flaky demo or a double-click never re-burns quota. Every response carries a
+    # request_id + input_hash for traceability.
+    from backend import jobs
+    view = jobs.analyze_cached(req.spec_text, req.submittal_text, req.system_id)
     return {
         "system": req.system_id,
-        "deviations": result.deviations,
-        "count": len(result.deviations),
-        "elapsed_ms": result.elapsed_ms,
-        "mode": result.mode,
+        "request_id": jobs.new_request_id(),
+        "input_hash": view["input_hash"],
+        "cached": view["cached"],
+        "deviations": view["deviations"],
+        "count": view["count"],
+        "elapsed_ms": view["elapsed_ms"],
+        "mode": view["mode"],
     }
 
 
-@app.post("/analyze/stream")
+# ── Job flow (async-style submit → poll → result) ───────────────────
+# Prototype-level scalability proof: bounded in-memory jobs + cache, no broker.
+# See backend/jobs.py and docs/SCALABILITY_PROOF.md.
+
+@app.post("/jobs/analyze", status_code=202, dependencies=_PROTECT_ANALYSIS)
+def submit_analyze_job(req: AnalyzeRequest):
+    """Submit an analysis as a background job; returns immediately (202) with a
+    job_id to poll. Same auth + analysis rate limit as /analyze."""
+    from backend import jobs
+    job = jobs.submit_job(req.spec_text, req.submittal_text, req.system_id,
+                          jobs.new_request_id())
+    return {
+        "job_id": job["job_id"],
+        "request_id": job["request_id"],
+        "input_hash": job["input_hash"],
+        "status": job["status"],
+        "poll": f"/jobs/{job['job_id']}",
+        "result": f"/jobs/{job['job_id']}/result",
+    }
+
+
+@app.get("/jobs/{job_id}", dependencies=[Depends(security.require_demo_auth)])
+def get_job(job_id: str):
+    """Lightweight status metadata for a job (no result body) — poll this."""
+    from backend import jobs
+    if not jobs.valid_job_id(job_id):
+        raise HTTPException(404, "Unknown or expired job id.")
+    st = jobs.job_status(job_id)
+    if st is None:
+        raise HTTPException(404, "Unknown or expired job id.")
+    return st
+
+
+@app.get("/jobs/{job_id}/result", dependencies=[Depends(security.require_demo_auth)])
+def get_job_result(job_id: str):
+    """The full analysis result once the job is done; 202 while still running,
+    404 for an unknown/expired id."""
+    from backend import jobs
+    if not jobs.valid_job_id(job_id):
+        raise HTTPException(404, "Unknown or expired job id.")
+    status, result = jobs.job_result(job_id)
+    if status is None:
+        raise HTTPException(404, "Unknown or expired job id.")
+    if status in ("queued", "running"):
+        return JSONResponse(status_code=202,
+                            content={"status": status, "job_id": job_id})
+    if status == "error" or result is None:
+        return JSONResponse(status_code=500,
+                            content={"status": "error", "job_id": job_id,
+                                     "error": "analysis failed"})
+    return {"status": "done", "job_id": job_id, **result}
+
+
+@app.post("/analyze/stream", dependencies=_PROTECT_ANALYSIS)
 def analyze_stream(req: AnalyzeRequest):
     def generate():
         yield "event: status\ndata: Loading standards knowledge base...\n\n"
@@ -251,7 +325,7 @@ def analyze_stream(req: AnalyzeRequest):
     return _sse_response(generate())
 
 
-@app.post("/analyze/upload")
+@app.post("/analyze/upload", dependencies=_PROTECT_UPLOAD)
 def analyze_upload(
     spec_file: UploadFile = File(...),
     submittal_file: UploadFile = File(...),
@@ -279,7 +353,7 @@ def analyze_upload(
     }
 
 
-@app.post("/analyze/vision")
+@app.post("/analyze/vision", dependencies=_PROTECT_UPLOAD)
 def analyze_vision(
     spec_file: UploadFile = File(...),
     submittal_image: UploadFile = File(...),
@@ -297,6 +371,8 @@ def analyze_vision(
     img_name = submittal_image.filename or "submittal"
     spec_data = _read_capped(spec_file, spec_name)
     img_data = _read_capped(submittal_image, img_name)
+    validate_upload(spec_name, spec_file.content_type or "", spec_data)
+    validate_upload(img_name, submittal_image.content_type or "", img_data)
     spec_text = (extract_pdf_bytes(spec_data, spec_name)
                  if spec_name.lower().endswith(".pdf")
                  else spec_data.decode("utf-8", errors="replace"))
@@ -312,7 +388,7 @@ def analyze_vision(
     }
 
 
-@app.post("/analyze/upload/stream")
+@app.post("/analyze/upload/stream", dependencies=_PROTECT_UPLOAD)
 def analyze_upload_stream(
     spec_file: UploadFile = File(...),
     submittal_file: UploadFile = File(...),
@@ -322,6 +398,10 @@ def analyze_upload_stream(
     sub_name = submittal_file.filename or "submittal"
     spec_data = _read_capped(spec_file, spec_name)
     sub_data = _read_capped(submittal_file, sub_name)
+    # Validate synchronously so a bad upload returns a clean 4xx before the SSE
+    # stream opens (never a partial event stream on a rejected file).
+    validate_upload(spec_name, spec_file.content_type or "", spec_data)
+    validate_upload(sub_name, submittal_file.content_type or "", sub_data)
 
     def generate():
         from backend.agents import ocr_util
@@ -414,7 +494,19 @@ def health():
         # UI badge built on this can never imply OCR works where it does not.
         # Cached probe (no subprocess per health check). See /ocr-check for detail.
         "ocr_available": ocr_util.tesseract_available_cached() and ocr_util.ocr_enabled(),
+        # Public-demo security posture: auth/rate-limit state + upload caps.
+        # Booleans/caps only — never the token, never a client IP. See /health
+        # consumers and docs/SECURITY_DEMO_RUNBOOK.md.
+        "security": security.security_status(),
+        # Prototype scalability proof: in-memory cache/job counters + the
+        # pipeline signature used in the input hash. No secrets.
+        "scalability": _scalability_status(),
     }
+
+
+def _scalability_status() -> dict:
+    from backend import jobs
+    return jobs.stats()
 
 
 @app.get("/ocr-check")
@@ -446,8 +538,8 @@ def ocr_check():
     }
 
 
-@app.get("/llm-check")
-def llm_check(deep: bool = False, probe_all: bool = False):
+@app.get("/llm-check", dependencies=_PROTECT_LLMCHECK)
+def llm_check(request: Request, deep: bool = False, probe_all: bool = False):
     """Make a real LLM call and report the actual outcome. Unlike /health
     (which only checks a key is present), this surfaces the true reason
     analysis falls back — e.g. out of credit, bad model, bad key — without
@@ -469,6 +561,10 @@ def llm_check(deep: bool = False, probe_all: bool = False):
         return {"ok": False, "reason": "no_key_configured",
                 "on_rule_engine_floor": True, "failover": failover_report(),
                 **status}
+    # The deep / per-provider probes make real (quota-spending) LLM calls, so
+    # they carry their own tight rate limit even when auth is off.
+    if deep or probe_all:
+        security.enforce_rate_limit(request, "deep_probe", security.deep_probe_limit())
     if deep:
         out = _llm_check_deep(status)
         out["failover"] = failover_report()  # after the deep call, so it's live
@@ -692,7 +788,7 @@ def deviations(seeded_demo: bool = False):
 
 # ── Copilot endpoints ───────────────────────────────────────────────
 
-@app.post("/copilot")
+@app.post("/copilot", dependencies=_PROTECT_ANALYSIS)
 def copilot(q: CopilotQuery):
     try:
         return ask(q.query)
@@ -702,7 +798,7 @@ def copilot(q: CopilotQuery):
         return ask_fallback(q.query, devs)
 
 
-@app.post("/copilot/stream")
+@app.post("/copilot/stream", dependencies=_PROTECT_ANALYSIS)
 def copilot_stream(q: CopilotQuery):
     def generate():
         try:

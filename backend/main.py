@@ -187,39 +187,45 @@ def _read_capped(file: UploadFile, name: str) -> bytes:
     return data
 
 
-# Raster-image extensions routed to Tesseract OCR (text-reconcile path). This is
-# SEPARATE from /analyze/vision, which reads an image with a vision LLM.
-_IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".tif", ".tiff", ".webp", ".bmp")
+def _extraction_meta(doc: dict) -> dict:
+    """The extraction metadata (method / ocr_used / truncated / warning / chars)
+    WITHOUT the text body — safe to return to the client for transparency."""
+    return {k: v for k, v in doc.items() if k != "text"}
+
+
+def _extract_upload_doc(file: UploadFile) -> dict:
+    """Read an upload and extract text WITH metadata (via ocr_util.extract_document).
+    Raises an honest 400 when a PDF / image yields no text (scanned + OCR
+    unavailable, or an illegible image); plain-text uploads pass through as-is.
+    Image OCR here is Tesseract-based and SEPARATE from /analyze/vision (LLM)."""
+    from backend.agents import ocr_util
+    name = file.filename or "upload"
+    data = _read_capped(file, name)
+    ctype = file.content_type or ""
+    doc = ocr_util.extract_document(data, name, ctype)
+    if doc["text"].strip():
+        return doc
+    lower = name.lower()
+    if lower.endswith(".pdf") or ctype == "application/pdf":
+        raise HTTPException(
+            400,
+            f"Could not read '{name}'. It looks like a scanned / image-only PDF "
+            "and OCR is unavailable in this deployment. Upload a text-based PDF, "
+            "or paste the document text directly into Live Analysis.",
+        )
+    if lower.endswith(ocr_util.IMAGE_EXTS) or ctype.startswith("image/"):
+        raise HTTPException(
+            400,
+            f"Could not read text from image '{name}'. OCR is unavailable in this "
+            "deployment, or the image carries no legible text. Paste the document "
+            "text directly, or use Vision mode (/analyze/vision), which reads "
+            "values from the image with an LLM.",
+        )
+    return doc  # plain text (possibly empty) — unchanged legacy behavior
 
 
 def _extract_upload_text(file: UploadFile) -> str:
-    name = file.filename or "upload"
-    data = _read_capped(file, name)
-    lower = name.lower()
-    ctype = file.content_type or ""
-    if lower.endswith(".pdf") or ctype == "application/pdf":
-        text = extract_pdf_bytes(data, name)
-        if not text:
-            raise HTTPException(
-                400,
-                f"Could not read '{name}'. It looks like a scanned / image-only PDF "
-                "and OCR is unavailable in this deployment. Upload a text-based PDF, "
-                "or paste the document text directly into Live Analysis.",
-            )
-        return text
-    if lower.endswith(_IMAGE_EXTS) or ctype.startswith("image/"):
-        from backend.agents import ocr_util
-        text = ocr_util.extract_text_from_image(data, ctype or "image/png")
-        if not text.strip():
-            raise HTTPException(
-                400,
-                f"Could not read text from image '{name}'. OCR is unavailable in this "
-                "deployment, or the image carries no legible text. Paste the document "
-                "text directly, or use Vision mode (/analyze/vision), which reads "
-                "values from the image with an LLM.",
-            )
-        return text
-    return data.decode("utf-8", errors="replace")
+    return _extract_upload_doc(file)["text"]
 
 
 # ── Analysis endpoints ──────────────────────────────────────────────
@@ -251,8 +257,9 @@ def analyze_upload(
     submittal_file: UploadFile = File(...),
     system_id: str = "CUSTOM",
 ):
-    spec_text = _extract_upload_text(spec_file)
-    submittal_text = _extract_upload_text(submittal_file)
+    spec_doc = _extract_upload_doc(spec_file)
+    submittal_doc = _extract_upload_doc(submittal_file)
+    spec_text, submittal_text = spec_doc["text"], submittal_doc["text"]
     result = run_analysis(spec_text, submittal_text, system_id)
     return {
         "system": system_id,
@@ -260,6 +267,11 @@ def analyze_upload(
         "submittal_filename": submittal_file.filename,
         "spec_preview": spec_text[:500],
         "submittal_preview": submittal_text[:500],
+        # How each document was read (text layer / OCR / image OCR) + any OCR caveat.
+        "extraction": {
+            "spec": _extraction_meta(spec_doc),
+            "submittal": _extraction_meta(submittal_doc),
+        },
         "deviations": result.deviations,
         "count": len(result.deviations),
         "elapsed_ms": result.elapsed_ms,
@@ -312,24 +324,27 @@ def analyze_upload_stream(
     sub_data = _read_capped(submittal_file, sub_name)
 
     def generate():
+        from backend.agents import ocr_util
         yield f"event: status\ndata: Extracting text from {_sse_safe(spec_name)}...\n\n"
-        if spec_name.lower().endswith(".pdf"):
-            spec_text = extract_pdf_bytes(spec_data, spec_name)
-        else:
-            spec_text = spec_data.decode("utf-8", errors="replace")
+        spec_doc = ocr_util.extract_document(spec_data, spec_name, spec_file.content_type or "")
 
         yield f"event: status\ndata: Extracting text from {_sse_safe(sub_name)}...\n\n"
-        if sub_name.lower().endswith(".pdf"):
-            submittal_text = extract_pdf_bytes(sub_data, sub_name)
-        else:
-            submittal_text = sub_data.decode("utf-8", errors="replace")
+        sub_doc = ocr_util.extract_document(sub_data, sub_name, submittal_file.content_type or "")
+
+        spec_text, submittal_text = spec_doc["text"], sub_doc["text"]
 
         if not spec_text or not submittal_text:
             yield ("event: error\ndata: Could not read one of the files — it may be a "
-                   "scanned / image-only PDF with OCR unavailable here. Upload a "
+                   "scanned / image-only PDF or image with OCR unavailable here. Upload a "
                    "text-based PDF or paste the text directly.\n\n")
             yield "event: done\ndata: {}\n\n"
             return
+
+        # Tell the client HOW each document was read, and warn if OCR was used.
+        yield ("event: extraction\ndata: "
+               f"{json.dumps({'spec': _extraction_meta(spec_doc), 'submittal': _extraction_meta(sub_doc)})}\n\n")
+        if spec_doc["ocr_used"] or sub_doc["ocr_used"]:
+            yield f"event: status\ndata: {_sse_safe(ocr_util.OCR_WARNING)}\n\n"
 
         yield f"event: preview\ndata: {json.dumps({'spec': spec_text[:500], 'submittal': submittal_text[:500]})}\n\n"
         yield "event: status\ndata: Loading standards knowledge base...\n\n"

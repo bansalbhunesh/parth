@@ -234,3 +234,62 @@ def test_pdf_page_cap_limits_pages(monkeypatch):
     # Page 2 must be excluded by the cap (OCR may be imperfect, so only assert
     # the second page's text is absent, not that the first is perfectly read).
     assert "BETAWORD" not in text.upper()
+
+
+# ── extract_document: unified extraction with metadata + warnings ───
+
+_DOC_KEYS = {"text", "method", "chars", "ocr_used", "truncated", "warning"}
+
+
+def test_extract_document_plain_text():
+    from backend.agents import ocr_util
+
+    doc = ocr_util.extract_document(b"UPS-02 runtime 7 min", "note.txt", "text/plain")
+    assert set(doc.keys()) == _DOC_KEYS
+    assert doc["method"] == "plain_text"
+    assert doc["ocr_used"] is False
+    assert doc["warning"] is None
+    assert "7 min" in doc["text"]
+
+
+def test_extract_document_text_pdf_no_ocr():
+    from backend.agents import ocr_util
+
+    pdf = _build_text_pdf("UPS-02 battery runtime minimum shall be 10 minutes at full load")
+    doc = ocr_util.extract_document(pdf, "digital.pdf", "application/pdf")
+    assert doc["method"] == "text_layer"
+    assert doc["ocr_used"] is False
+    assert doc["warning"] is None
+    assert doc["chars"] > 0
+
+
+def test_extract_document_image_ocr_disabled_is_none(monkeypatch):
+    from backend.agents import ocr_util
+
+    monkeypatch.setenv("PRAMAAN_OCR", "0")
+    doc = ocr_util.extract_document(_build_text_image(["ICW 50 kA"]), "s.png", "image/png")
+    assert doc["method"] == "none"
+    assert doc["text"] == ""
+    assert doc["ocr_used"] is False
+
+
+@pytest.mark.skipif(not _tesseract_available(), reason="tesseract binary not installed")
+def test_extract_document_scanned_pdf_flags_ocr():
+    from backend.agents import ocr_util
+
+    doc = ocr_util.extract_document(_build_scanned_pdf(SAMPLE), "scan.pdf", "application/pdf")
+    assert doc["method"] == "ocr_pdf"
+    assert doc["ocr_used"] is True
+    assert doc["warning"] and "OCR" in doc["warning"]
+    assert "Vertiv" in doc["text"]
+
+
+@pytest.mark.skipif(not _tesseract_available(), reason="tesseract binary not installed")
+def test_extract_document_image_flags_ocr():
+    from backend.agents import ocr_util
+
+    png = _build_text_image(["SWGR ICW 50 kA"])
+    doc = ocr_util.extract_document(png, "s.png", "image/png")
+    assert doc["method"] == "ocr_image"
+    assert doc["ocr_used"] is True
+    assert doc["warning"] and "OCR" in doc["warning"]

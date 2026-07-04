@@ -23,6 +23,7 @@ Env flags (all optional, safe defaults):
 import io
 import logging
 import os
+import re
 
 log = logging.getLogger("pramaan.ocr")
 
@@ -33,6 +34,14 @@ _OCR_MIN_CHARS = 20
 _DEFAULT_OCR_DPI = 300
 _DEFAULT_MAX_PDF_PAGES = 30
 _DEFAULT_MAX_IMAGE_PIXELS = 20_000_000  # ~20 MP; a 4000x5000 scan is 20 MP
+
+# Raster-image extensions that route to Tesseract OCR (text-reconcile path).
+IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".tif", ".tiff", ".webp", ".bmp")
+
+# Shown whenever text was produced by OCR rather than a native text layer, so a
+# reviewer knows to double-check figures. OCR is best-effort, not lossless.
+OCR_WARNING = ("Read via OCR — OCR is best-effort and not lossless (e.g. a 5 can "
+               "read as an S); verify critical values against the source document.")
 
 # Process-lifetime cache of the tesseract-availability probe, keyed by the
 # TESSERACT_CMD env value so a test/deploy that repoints the binary re-probes.
@@ -72,6 +81,14 @@ def max_image_pixels() -> int:
         return int(os.getenv("PRAMAAN_MAX_IMAGE_PIXELS", str(_DEFAULT_MAX_IMAGE_PIXELS)))
     except ValueError:
         return _DEFAULT_MAX_IMAGE_PIXELS
+
+
+def clean_text(text: str) -> str:
+    """Normalize whitespace/newlines (same rules the ingestion path uses)."""
+    text = re.sub(r"\r\n", "\n", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    text = re.sub(r"[ \t]+", " ", text)
+    return text.strip()
 
 
 def _apply_tesseract_cmd(pytesseract) -> None:
@@ -253,3 +270,60 @@ def extract_text_with_fallback(data: bytes, filename: str = "upload.pdf") -> str
     if len(ocr.strip()) > len(text.strip()):
         return ocr
     return text
+
+
+def _pdf_page_count(data: bytes) -> int:
+    try:
+        import fitz
+        with fitz.open(stream=data, filetype="pdf") as doc:
+            return doc.page_count
+    except Exception:
+        return 0
+
+
+def _doc_result(text: str, method: str, *, ocr_used: bool = False,
+                truncated: bool = False, warning: str | None = None) -> dict:
+    return {
+        "text": text,
+        "method": method,          # text_layer | ocr_pdf | ocr_image | plain_text | none
+        "chars": len(text),
+        "ocr_used": ocr_used,
+        "truncated": truncated,    # OCR stopped at the page cap
+        "warning": warning,        # human-readable caveat, or None
+    }
+
+
+def extract_document(data: bytes, filename: str = "upload", content_type: str = "") -> dict:
+    """Single entry point for upload extraction: routes PDFs, raster images, and
+    plain text to the right path and returns the cleaned text PLUS metadata
+    (extraction method, char count, whether OCR was used, whether it was
+    truncated at the page cap, and a warning to surface when OCR was used).
+
+    Never raises — an unreadable input returns method="none" with empty text so
+    the caller can emit an honest 400 / SSE error rather than a 500."""
+    name = filename or "upload"
+    lower = name.lower()
+    ctype = content_type or ""
+
+    if lower.endswith(".pdf") or ctype == "application/pdf":
+        text_layer = extract_text_from_pdf(data, name)
+        if len(text_layer.strip()) >= _OCR_MIN_CHARS:
+            return _doc_result(clean_text(text_layer), "text_layer")
+        ocr = ocr_pdf_bytes(data, name)
+        if len(ocr.strip()) > len(text_layer.strip()):
+            truncated = _pdf_page_count(data) > max_pdf_pages()
+            warning = OCR_WARNING
+            if truncated:
+                warning += f" Only the first {max_pdf_pages()} pages were OCR'd."
+            return _doc_result(clean_text(ocr), "ocr_pdf", ocr_used=True,
+                               truncated=truncated, warning=warning)
+        cleaned = clean_text(text_layer)
+        return _doc_result(cleaned, "text_layer" if cleaned else "none")
+
+    if lower.endswith(IMAGE_EXTS) or ctype.startswith("image/"):
+        img = clean_text(extract_text_from_image(data, ctype or "image/png"))
+        if img:
+            return _doc_result(img, "ocr_image", ocr_used=True, warning=OCR_WARNING)
+        return _doc_result("", "none")
+
+    return _doc_result(data.decode("utf-8", errors="replace"), "plain_text")

@@ -165,6 +165,22 @@ class TestOcrCheckAndImageUpload:
         assert "ocr_available" in d
         assert isinstance(d["ocr_available"], bool)
 
+    def test_upload_returns_extraction_metadata(self):
+        import io
+        spec = io.BytesIO(b"**UPS-02** -- battery runtime min: shall be **10 min**")
+        sub = io.BytesIO(b"**UPS-02** -- battery runtime min: **7 min**")
+        r = client.post("/analyze/upload", files=[
+            ("spec_file", ("spec.txt", spec, "text/plain")),
+            ("submittal_file", ("sub.txt", sub, "text/plain")),
+        ])
+        assert r.status_code == 200
+        ext = r.json()["extraction"]
+        assert ext["spec"]["method"] == "plain_text"
+        assert ext["submittal"]["ocr_used"] is False
+        assert ext["spec"]["warning"] is None
+        # metadata must NOT leak the document body
+        assert "text" not in ext["spec"]
+
     def test_image_upload_routes_through_ocr(self, monkeypatch):
         import backend.agents.ocr_util as ocr_util
         monkeypatch.setattr(ocr_util, "extract_text_from_image",
@@ -178,6 +194,11 @@ class TestOcrCheckAndImageUpload:
         d = r.json()
         assert d["submittal_filename"] == "submittal.png"
         assert "deviations" in d
+        # the image was OCR'd -> metadata says so and carries the OCR warning
+        sub_ext = d["extraction"]["submittal"]
+        assert sub_ext["method"] == "ocr_image"
+        assert sub_ext["ocr_used"] is True
+        assert sub_ext["warning"] and "OCR" in sub_ext["warning"]
 
     def test_image_upload_ocr_unavailable_returns_400(self, monkeypatch):
         import backend.agents.ocr_util as ocr_util

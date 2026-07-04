@@ -446,6 +446,30 @@ export async function getMetrics(): Promise<Record<string, unknown> | null> {
   }
 }
 
+export interface OcrStatus {
+  ocr_available: boolean;
+  ocr_enabled: boolean;
+  tesseract_installed: boolean;
+  tesseract_version: string | null;
+  image_ocr_supported: boolean;
+  pdf_ocr_supported: boolean;
+  max_pdf_pages: number;
+  max_image_pixels: number;
+  status: "ready" | "disabled" | "tesseract_not_installed";
+}
+
+// Whether this deployment can actually OCR scanned PDFs / uploaded images. Returns
+// null if the backend is unreachable — callers must then claim nothing about OCR.
+export async function getOcrCheck(): Promise<OcrStatus | null> {
+  try {
+    const r = await fetch(`${API}/ocr-check`, fetchOpts({ cache: "no-store" }));
+    if (!r.ok) throw new Error(String(r.status));
+    return (await r.json()) as OcrStatus;
+  } catch {
+    return null;
+  }
+}
+
 export async function getProjects(): Promise<ProjectSummary[]> {
   try {
     const r = await fetch(`${API}/projects`, fetchOpts({ cache: "no-store" }));

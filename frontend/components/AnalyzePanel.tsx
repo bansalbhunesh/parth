@@ -1,6 +1,7 @@
 "use client";
-import { useState, useRef, useCallback } from "react";
-import { streamAnalyze, streamUploadAnalyze } from "../lib/api";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { streamAnalyze, streamUploadAnalyze, getOcrCheck } from "../lib/api";
+import type { OcrStatus } from "../lib/api";
 
 const EXAMPLE_SPEC = `# Design Basis: UPS System
 - **UPS-02** — battery runtime min: shall be **10 min** (ref: UPTIME-TIER4; clause DB-4.3)
@@ -98,12 +99,14 @@ function DropZone({
   file,
   onFile,
   accept,
+  hint,
   disabled,
 }: {
   label: string;
   file: File | null;
   onFile: (f: File) => void;
   accept: string;
+  hint?: string;
   disabled: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -166,7 +169,7 @@ function DropZone({
             </svg>
           </div>
           <div className="dropzone-label">{label}</div>
-          <div className="dropzone-hint">Drop PDF/MD/TXT here or click to browse</div>
+          <div className="dropzone-hint">{hint ?? "Drop PDF/MD/TXT here or click to browse"}</div>
         </div>
       )}
     </div>
@@ -187,7 +190,23 @@ export default function AnalyzePanel() {
   const [streaming, setStreaming] = useState(false);
   const [specPreview, setSpecPreview] = useState("");
   const [subPreview, setSubPreview] = useState("");
+  const [ocr, setOcr] = useState<OcrStatus | null>(null);
   const abortRef = useRef(false);
+
+  // Probe whether THIS deployment can OCR, so the UI reflects reality instead of
+  // implying a capability the backend may not have. null = unknown → claim nothing.
+  useEffect(() => {
+    let alive = true;
+    getOcrCheck().then((s) => { if (alive) setOcr(s); });
+    return () => { alive = false; };
+  }, []);
+
+  // Only offer image upload when the backend can actually OCR images.
+  const imageOcrOk = ocr?.image_ocr_supported ?? false;
+  const acceptTypes = imageOcrOk ? ".pdf,.md,.txt,.png,.jpg,.jpeg,.tiff,.webp" : ".pdf,.md,.txt";
+  const dropHint = imageOcrOk
+    ? "Drop PDF/image/MD/TXT here or click to browse"
+    : "Drop PDF/MD/TXT here or click to browse";
 
   const canAnalyzeText = spec.length >= 10 && submittal.length >= 10;
   const canAnalyzePdf = specFile !== null && submittalFile !== null;
@@ -328,6 +347,30 @@ export default function AnalyzePanel() {
         </button>
       </div>
 
+      {mode === "pdf" && ocr && (
+        <div
+          style={{
+            display: "flex", alignItems: "center", gap: 7,
+            fontSize: 12, margin: "0 0 12px", lineHeight: 1.4,
+          }}
+        >
+          <span
+            aria-hidden="true"
+            style={{
+              width: 8, height: 8, borderRadius: "50%", flexShrink: 0,
+              background: ocr.ocr_available ? "#22c55e" : "#9ca3af",
+            }}
+          />
+          <span style={{ color: ocr.ocr_available ? "#16a34a" : "#8a8f98" }}>
+            {ocr.ocr_available
+              ? `OCR ready — scanned PDFs & images supported${ocr.tesseract_version ? ` (Tesseract ${ocr.tesseract_version})` : ""}`
+              : ocr.status === "disabled"
+                ? "OCR disabled in this deployment — upload text-based PDFs or paste the text"
+                : "OCR unavailable in this deployment — upload text-based PDFs or paste the text"}
+          </span>
+        </div>
+      )}
+
       {mode === "pdf" ? (
         <div className="analyze-editors">
           <div className="analyze-editor">
@@ -336,7 +379,8 @@ export default function AnalyzePanel() {
               label="Spec document"
               file={specFile}
               onFile={setSpecFile}
-              accept=".pdf,.md,.txt"
+              accept={acceptTypes}
+              hint={dropHint}
               disabled={loading}
             />
           </div>
@@ -346,7 +390,8 @@ export default function AnalyzePanel() {
               label="Submittal document"
               file={submittalFile}
               onFile={setSubmittalFile}
-              accept=".pdf,.md,.txt"
+              accept={acceptTypes}
+              hint={dropHint}
               disabled={loading}
             />
           </div>

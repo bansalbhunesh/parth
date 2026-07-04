@@ -1,0 +1,17 @@
+# Deterministic LF line endings for the benchmark so the manifest sha256 column
+# validates identically on every platform. CI runs on Linux (LF); without this,
+# Windows CRLF checkouts produce different file hashes than the committed blobs.
+*.md      text eol=lf
+*.json    text eol=lf
+*.jsonl   text eol=lf
+*.csv     text eol=lf
+*.yaml    text eol=lf
+*.yml     text eol=lf
+*.txt     text eol=lf
+.gitkeep  text eol=lf
+
+# Binary assets — never touch line endings (hashed raw).
+*.png     binary
+*.jpg     binary
+*.jpeg    binary
+*.pdf     binary

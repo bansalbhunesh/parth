@@ -245,14 +245,75 @@ def _extract_upload_text(file: UploadFile) -> str:
 
 @app.post("/analyze", dependencies=_PROTECT_ANALYSIS)
 def analyze(req: AnalyzeRequest):
-    result = run_analysis(req.spec_text, req.submittal_text, req.system_id)
+    # Routed through the input-hash cache: an identical spec+submittal (same
+    # model/prompt version) is computed once and reused (cached=true), so a
+    # flaky demo or a double-click never re-burns quota. Every response carries a
+    # request_id + input_hash for traceability.
+    from backend import jobs
+    view = jobs.analyze_cached(req.spec_text, req.submittal_text, req.system_id)
     return {
         "system": req.system_id,
-        "deviations": result.deviations,
-        "count": len(result.deviations),
-        "elapsed_ms": result.elapsed_ms,
-        "mode": result.mode,
+        "request_id": jobs.new_request_id(),
+        "input_hash": view["input_hash"],
+        "cached": view["cached"],
+        "deviations": view["deviations"],
+        "count": view["count"],
+        "elapsed_ms": view["elapsed_ms"],
+        "mode": view["mode"],
     }
+
+
+# ── Job flow (async-style submit → poll → result) ───────────────────
+# Prototype-level scalability proof: bounded in-memory jobs + cache, no broker.
+# See backend/jobs.py and docs/SCALABILITY_PROOF.md.
+
+@app.post("/jobs/analyze", status_code=202, dependencies=_PROTECT_ANALYSIS)
+def submit_analyze_job(req: AnalyzeRequest):
+    """Submit an analysis as a background job; returns immediately (202) with a
+    job_id to poll. Same auth + analysis rate limit as /analyze."""
+    from backend import jobs
+    job = jobs.submit_job(req.spec_text, req.submittal_text, req.system_id,
+                          jobs.new_request_id())
+    return {
+        "job_id": job["job_id"],
+        "request_id": job["request_id"],
+        "input_hash": job["input_hash"],
+        "status": job["status"],
+        "poll": f"/jobs/{job['job_id']}",
+        "result": f"/jobs/{job['job_id']}/result",
+    }
+
+
+@app.get("/jobs/{job_id}", dependencies=[Depends(security.require_demo_auth)])
+def get_job(job_id: str):
+    """Lightweight status metadata for a job (no result body) — poll this."""
+    from backend import jobs
+    if not jobs.valid_job_id(job_id):
+        raise HTTPException(404, "Unknown or expired job id.")
+    st = jobs.job_status(job_id)
+    if st is None:
+        raise HTTPException(404, "Unknown or expired job id.")
+    return st
+
+
+@app.get("/jobs/{job_id}/result", dependencies=[Depends(security.require_demo_auth)])
+def get_job_result(job_id: str):
+    """The full analysis result once the job is done; 202 while still running,
+    404 for an unknown/expired id."""
+    from backend import jobs
+    if not jobs.valid_job_id(job_id):
+        raise HTTPException(404, "Unknown or expired job id.")
+    status, result = jobs.job_result(job_id)
+    if status is None:
+        raise HTTPException(404, "Unknown or expired job id.")
+    if status in ("queued", "running"):
+        return JSONResponse(status_code=202,
+                            content={"status": status, "job_id": job_id})
+    if status == "error" or result is None:
+        return JSONResponse(status_code=500,
+                            content={"status": "error", "job_id": job_id,
+                                     "error": "analysis failed"})
+    return {"status": "done", "job_id": job_id, **result}
 
 
 @app.post("/analyze/stream", dependencies=_PROTECT_ANALYSIS)
@@ -437,7 +498,15 @@ def health():
         # Booleans/caps only — never the token, never a client IP. See /health
         # consumers and docs/SECURITY_DEMO_RUNBOOK.md.
         "security": security.security_status(),
+        # Prototype scalability proof: in-memory cache/job counters + the
+        # pipeline signature used in the input hash. No secrets.
+        "scalability": _scalability_status(),
     }
+
+
+def _scalability_status() -> dict:
+    from backend import jobs
+    return jobs.stats()
 
 
 @app.get("/ocr-check")

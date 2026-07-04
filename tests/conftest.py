@@ -23,10 +23,13 @@ os.environ["PRAMAAN_RATE_LIMIT_ENABLED"] = "0"
 
 
 @pytest.fixture(autouse=True)
-def _reset_rate_limits():
-    """Clear the process-local rate-limit counters around every test so limits
-    never leak between cases (they share one in-process store)."""
-    from backend import security
+def _reset_process_state():
+    """Clear the process-local rate-limit counters AND the job/result cache
+    around every test so neither leaks between cases (all share one in-process
+    store)."""
+    from backend import jobs, security
     security.reset_rate_limits()
+    jobs.reset()
     yield
     security.reset_rate_limits()
+    jobs.reset()

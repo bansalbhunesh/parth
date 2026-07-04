@@ -30,7 +30,7 @@
 <p align="center">
   <a href="https://parth-tan.vercel.app/judge"><img src="https://img.shields.io/badge/★_JUDGE_MODE-90--second_proof-ffb020?style=for-the-badge&labelColor=1a1508" alt="Judge Mode"></a>
   <a href="https://parth-tan.vercel.app"><img src="https://img.shields.io/badge/▶_LIVE_DEMO-parth--tan.vercel.app-00d4ff?style=for-the-badge&labelColor=0a0d11" alt="Live Demo"></a>
-  <a href="https://parth-3puc.onrender.com/health"><img src="https://img.shields.io/badge/API-parth--3puc.onrender.com-35c98b?style=for-the-badge&labelColor=0d1a14" alt="API"></a>
+  <a href="https://parth-1-ma30.onrender.com/health"><img src="https://img.shields.io/badge/API-parth--1--ma30.onrender.com-35c98b?style=for-the-badge&labelColor=0d1a14" alt="API"></a>
   <a href="presentation.html"><img src="https://img.shields.io/badge/📊_PRESENTATION-15_slides-a855f7?style=for-the-badge&labelColor=1a1020" alt="Presentation"></a>
 </p>
 
@@ -132,7 +132,7 @@ Ready-made demo pairs ship in [`data/samples/`](data/samples/): a UPS edge pair,
 > OCR is best-effort, not lossless (e.g. GXT5→GXTS). Details:
 > [`eval/OCR_SCANNED_PDF.md`](eval/OCR_SCANNED_PDF.md).
 
-> Health at a glance: **[`/health`](https://parth-3puc.onrender.com/health)** shows whether the LLM is wired (`"ready": true`); **[`/llm-check`](https://parth-3puc.onrender.com/llm-check)** makes a real call and reports the exact status. The app **degrades gracefully** — every endpoint returns 200 and the dashboard renders from bundled data even with no API key.
+> Health at a glance: **[`/health`](https://parth-1-ma30.onrender.com/health)** shows whether the LLM is wired (`"ready": true`); **[`/llm-check`](https://parth-1-ma30.onrender.com/llm-check)** makes a real call and reports the exact status. The app **degrades gracefully** — every endpoint returns 200 and the dashboard renders from bundled data even with no API key.
 
 ---
 
@@ -387,7 +387,7 @@ curl http://localhost:8000/export/audit/html > evidence.html
 
 > **No API key?** The dashboard runs fully with ground-truth fallback data. All 29 API endpoints return 200. Both eval harnesses (structured + text-based), the corpus, and the frontend work offline. 480+ tests pass without any external dependencies.
 >
-> **Or just open the live demo:** [parth-tan.vercel.app](https://parth-tan.vercel.app) (frontend) · [parth-3puc.onrender.com](https://parth-3puc.onrender.com/health) (API)
+> **Or just open the live demo:** [parth-tan.vercel.app](https://parth-tan.vercel.app) (frontend) · [parth-1-ma30.onrender.com](https://parth-1-ma30.onrender.com/health) (API)
 
 ### Deploy your own — environment variables
 
@@ -397,7 +397,7 @@ curl http://localhost:8000/export/audit/html > evidence.html
 | **Render** (backend) | `GEMINI_MODEL` | optional | defaults to `gemini-2.5-flash` (pinned in `render.yaml`; `2.0-flash` 429s on free keys). |
 | **Render** (backend) | `PRAMAAN_LLM_TIMEOUT` | optional | seconds the sync `/analyze` waits on the LLM before falling back (default `60`). |
 | **Render** (backend) | `PRAMAAN_SCHEDULE` / `PRAMAAN_SUPPLY` / `PRAMAAN_GRAPH` | optional | PS4 layers; default `1` (on). Set `0` to hide a section. |
-| **Vercel** (frontend) | `NEXT_PUBLIC_API` | **required** | set to the Render backend URL (e.g. `https://parth-3puc.onrender.com`). Inlined at build time. **Without it the frontend falls back to bundled data** (which mirrors live engine output, so the demo still renders correctly but is not live-served). |
+| **Vercel** (frontend) | `NEXT_PUBLIC_API` | **required** | set to the Render backend URL (e.g. `https://parth-1-ma30.onrender.com`). Inlined at build time. **Without it the frontend falls back to bundled data** (which mirrors live engine output, so the demo still renders correctly but is not live-served). |
 | **Render** (backend) | `OPENAI_API_KEY`/`OPENAI_BASE_URL`/`OPENAI_MODEL`, `GROQ_API_KEY` (+ optional `ANTHROPIC_API_KEY`) | resilience | **Automatic provider failover.** Configure more providers and the backend fails over on quota/429/timeout in order — **gemini → OpenAI-compatible gateway (Qwen) → Groq → claude → deterministic rule engine** — no redeploy, no code change. A single-key setup is unchanged. `/llm-check` shows the live chain, which provider last answered, and the last failover reason. **Failover is for reliability, not accuracy** — the rule engine remains the safe floor. Verified recall on the real pairs: Gemini 1.000 · Qwen3-235B 0.82 · Groq Llama-3.3-70B strong recall with a mild over-flag tendency (hence behind Qwen). |
 
 > Render free-tier services **suspend after extended inactivity** and cold-start on the first hit (~30–50 s). If `/health` returns a "Service Suspended" page, resume/redeploy the service from the Render dashboard before the demo.

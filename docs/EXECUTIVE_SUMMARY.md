@@ -38,9 +38,13 @@ it live: **parth-tan.vercel.app/judge**.
   every build does this check by hand today.
 
 ## What's proven vs what's next
-- **Proven:** works live on real equipment, with a real-world accuracy result, an
-  open and reproducible test suite, and a scale benchmark (665 systems/sec). It even
-  keeps working when the AI is rate-limited — it never returns a blank.
+- **Benchmarked (not field-validated):** an open, reproducible evaluation suite —
+  the independent ps4_external_v1 benchmark (53 team-authored pairs, 129 frozen
+  labels) reports mean semantic recall **0.862** / precision **0.953** across a
+  3-pass run, versus a **0.111** rule baseline. It also keeps working when the AI
+  is rate-limited — it never returns a blank. *(Benchmark result on team-authored
+  fixtures — not a real-world or field-validation claim; see
+  [`docs/CLAIMS_REGISTER.md`](CLAIMS_REGISTER.md).)*
 - **Next:** a paying pilot. The technology and the evidence are ready; we're seeking
   one data-centre owner or EPC to run it on a live submittal package.
 

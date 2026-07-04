@@ -1,0 +1,68 @@
+# Pramaan — Claims Register
+
+Single source of truth for what may and may not be claimed about Pramaan and the
+**ps4_external_v1 (v1.2)** benchmark, across README, benchmark report, deck
+source, detailed submission PDF source, and any future video/demo script.
+
+**Rule:** if a claim is not in this register, do not make it. Every quantitative
+claim must appear with its nearby limitation. Numbers are from
+`benchmarks/ps4_external_v1/reports/benchmark_card.json` (regenerate with
+`python scripts/benchmark_report.py`).
+
+Evidence types: `measured` (deterministic count/hash), `benchmarked` (from the
+3-pass featured run), `deterministic_offline` (rule engine), `team_authored`
+(fixture provenance), `pending` (not yet done). Status: verified / benchmarked /
+scenario / pending / do-not-use.
+
+## Claims table
+
+| # | Claim | Exact number / wording | Evidence source | Evidence type | Allowed wording | Banned wording | Venues | Nearby limitation (must appear) | Status |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | Benchmark size — pairs | **53 pairs** | manifest + labels (card.composition) | measured | "53 spec–submittal pairs" | "53 real datasheets", "53 vendor documents" | README, deck, video, demo, report | team-authored fixtures | verified |
+| 2 | Frozen labels | **129 frozen labels** | `labels_freeze.json` | measured | "129 frozen, provenance-tracked labels" | "129 human-adjudicated labels" | all | single-author frozen; reviewer-2 pending | verified |
+| 3 | Systems covered | **17 system types** | labels | measured | "17 datacenter system types (UPS, chiller, switchgear, …)" | "all datacenter systems" | all | — | verified |
+| 4 | Clean negatives | **64 clean negatives** | labels | measured | "64 clean-negative (compliant) controls" | — | all | — | verified |
+| 5 | Repeated evaluation | **3-pass run** | featured lite runs | benchmarked | "3-pass repeated evaluation" | "extensively benchmarked", "battle-tested" | all | one model, one gateway | benchmarked |
+| 6 | Recall | **mean semantic recall 0.862 (0.841–0.873)** | card.primary_result | benchmarked | "0.862 mean recall across 3 passes on the ps4_external_v1 benchmark" | "86% real-world accuracy", "detects 86% of field deviations", "100% recall" | report, deck, video, demo | team-authored benchmark; not field-validated | benchmarked |
+| 7 | Precision | **mean semantic precision 0.953** | card.primary_result | benchmarked | "0.953 mean precision on the benchmark" | "95% real-world precision" | report, deck, video, demo | benchmark only; 8 scorer/label FPs remain | benchmarked |
+| 8 | F1 | **mean semantic F1 0.905** | card.primary_result | benchmarked | "0.905 mean F1 on the benchmark" | "0.905 real-world F1" | report, deck, video, demo | benchmark only | benchmarked |
+| 9 | Clean-negative false-alert rate | **FAR 0.000** | card.primary_result | benchmarked | "0 false alerts on 64 clean-negative controls in this benchmark" | "zero false positives overall", "never false-alarms" | report, deck, video, demo | clean-negative controls only; 8 scorer/label FPs exist on positive pairs | benchmarked |
+| 10 | Latency | **p50 ~2.5 s** | lite summary.json | measured | "~2.5 s median latency per pair (gemini-3.1-flash-lite via gateway)" | "real-time", "instant" | report, deck, demo | gateway/model dependent | benchmarked |
+| 11 | Rule baseline | **recall 0.111 (7/63), 0 FP** | rule summary.json | deterministic_offline | "deterministic offline rule baseline: 7/63 recall, 0 false positives" | "the rule engine is production-accurate" | report, deck | low recall by design (a floor) | benchmarked |
+| 12 | Primary-source-derived docs | **10 (5 verified URLs)** | manifest | measured | "10 documents derived from public primary sources; 5 cite a verified public URL" | "10 stored primary-source PDFs", "10 real datasheets" | all | derived ≠ stored primary file | verified |
+| 13 | Fixture nature | **team-authored fixtures** | manifest source_origin | team_authored | "team-authored fixtures modeled on public reference values" | "real vendor datasheets", "real unseen submittals" | all | this IS the limitation | verified |
+| 14 | Reviewer status | **reviewer-2 pending** | `REVIEW_STATUS.md` | pending | "single-author frozen; automated consistency audit run (123/129 consistent, 6 flagged); two-person adjudication pending" | "two-reviewer adjudicated", "independently reviewed" | all | second human review not yet done | pending |
+| 15 | Stored primary sources | **stored primary PDFs pending** | BENCHMARK_PROTOCOL backlog | pending | "stored primary-source PDFs are a backlog item" | "stored primary-source benchmark", "sourced from real datasheets" | all | only citations/derivations exist today | pending |
+| 16 | Field validation | **none** | — | pending | "not yet validated in the field" | "field-validated", "real-world accuracy", "proven in production" | all (as a disclaimer) | — | do-not-use |
+| 17 | Production maturity | **none** | — | pending | "prototype / hackathon build" | "production-grade", "enterprise-ready" | all | — | do-not-use |
+| 18 | Datasheet realism | **none** | — | team_authored | "fixtures, not real datasheets" | "real-datasheet accuracy", "tested on real unseen datasheets" | all | — | do-not-use |
+| 19 | Customer ROI | **none** | — | pending | (say nothing) | "customer ROI", "saves customers $X", "N% cost reduction" | none | — | do-not-use |
+
+## Do NOT say (banned phrases — grep-enforced)
+
+These must never appear in README, benchmark report, deck source, detailed PDF
+source, or video script:
+
+- "real-world accuracy"
+- "real unseen datasheets"
+- "field-validated" / "field validated"
+- "production-grade"
+- "100% recall"
+- "zero false positives overall"
+- "customer ROI"
+- "fully independent benchmark"
+- "two-reviewer adjudicated"
+- "stored primary-source benchmark"
+
+## Safe framing (paste-ready)
+
+> "On the independent, frozen, provenance-tracked **ps4_external_v1** benchmark
+> (53 team-authored spec–submittal pairs, 129 single-author-frozen labels, 17
+> systems, 64 clean negatives), Pramaan's featured configuration
+> (`gemini-3.1-flash-lite`, 3-pass) reports **mean semantic recall 0.862
+> (0.841–0.873), precision 0.953, F1 0.905, and 0 false alerts on the 64 clean
+> negatives**, vs a deterministic rule baseline of 0.111. Fixtures are
+> team-authored (10 derived from public primary sources, 5 with verified URLs);
+> labels are single-author frozen with two-person adjudication and stored
+> primary-source PDFs still pending. This is a benchmark result, **not** a
+> real-world-accuracy or field-validation claim."

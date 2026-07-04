@@ -489,7 +489,7 @@ def llm_check(deep: bool = False, probe_all: bool = False):
             "sample_response": (out or "").strip()[:80],
             "failover": report,
             "hint": "A tiny probe can pass while demo-sized calls fail on "
-                    "free-tier quotas — pre-flight with /llm-check?deep=1.",
+                    "free-tier quotas - pre-flight with /llm-check?deep=1.",
         }
     except Exception as exc:  # noqa: BLE001 — we want the raw reason
         from backend.llm import _redact
@@ -551,13 +551,13 @@ def _llm_check_deep(status: dict) -> dict:
         return {"ok": False, **base,
                 "elapsed_ms": round((_time.time() - t0) * 1000),
                 "error": f"reconcile-sized call exceeded {_LLM_TIMEOUT_S:.0f}s "
-                         "— the demo would fall back to the rule-based engine",
+                         "- the demo would fall back to the rule-based engine",
                 "hint": "Free-tier congestion; retry, or swap in a fresh key."}
     except Exception as exc:  # noqa: BLE001 — we want the raw reason
         return {"ok": False, **base,
                 "elapsed_ms": round((_time.time() - t0) * 1000),
                 "error": str(exc)[:400],
-                "hint": "The tiny probe may still pass — this failure class "
+                "hint": "The tiny probe may still pass - this failure class "
                         "(usually 429 quota) only shows on demo-sized prompts. "
                         "Swap in a fresh GEMINI_API_KEY and re-check."}
 

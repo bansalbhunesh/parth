@@ -1,0 +1,13 @@
+benchmark: ps4_external_v1
+benchmark_version: 1.2.0
+labels_freeze_sha256: f13a4f72895d8ef31df1fe716ad5a73526f109a152b9060e38cd1e5179710b12
+mode: llm
+provider: openai
+model: google/gemini-3.1-flash-lite
+repeat_index: 1
+repeats_total: 3
+timestamp_utc: 2026-07-04T06:49:23+00:00
+include_contested_in_primary: False
+count_not_run_as_miss: True
+evidence_label: live_model
+config_sha256: 513a56c7ccd793385b85272cdf10cc711959b19553282ac650e4e6d6c24df217

@@ -14,6 +14,9 @@ export const metadata = {
 export default async function JudgePage() {
   const [rows, schedule] = await Promise.all([getRegister(), getSchedule()]);
   const hero = rows.find((r) => r.component === "UPS-02") ?? rows[0];
+  // Track whatever backend this build points at (NEXT_PUBLIC_API), so the
+  // health link never goes stale when the backend URL changes.
+  const apiBase = process.env.NEXT_PUBLIC_API ?? "http://localhost:8000";
 
   return (
     <div className="jm-wrap">
@@ -157,7 +160,7 @@ export default async function JudgePage() {
       <footer className="jm-foot">
         <Link href="/" className="jm-foot-cta">Open the full 22-section dashboard →</Link>
         <div className="jm-foot-links">
-          <a href="https://parth-3puc.onrender.com/health" target="_blank" rel="noreferrer">API health</a>
+          <a href={`${apiBase}/health`} target="_blank" rel="noreferrer">API health</a>
           <span>·</span>
           <a href="https://github.com/bansalbhunesh/parth" target="_blank" rel="noreferrer">Source</a>
         </div>

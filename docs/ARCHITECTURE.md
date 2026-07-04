@@ -5,7 +5,7 @@ system that cross-references a design basis, a vendor submittal, and the
 governing standards — flags every deviation the day the submittal lands, and
 predicts which commissioning test it will fail and how many weeks early.
 
-Live: **frontend** parth-tan.vercel.app · **API** parth-3puc.onrender.com
+Live: **frontend** parth-tan.vercel.app · **API** parth-1-ma30.onrender.com
 (`/health` shows the deployed commit; `/llm-check` reports live model status).
 
 ---

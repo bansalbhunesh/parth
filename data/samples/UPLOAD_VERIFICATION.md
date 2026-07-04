@@ -1,6 +1,6 @@
 # Live Upload Verification — Real PDF, Before vs After
 
-Captured against the deployed API (`https://parth-3puc.onrender.com`), not a
+Captured against the deployed API (`https://parth-1-ma30.onrender.com`), not a
 local run. Proves the real-document PDF upload now catches deviations where it
 previously returned zero.
 
@@ -44,7 +44,7 @@ diffs.
 
 ## Reproduce
 ```bash
-API=https://parth-3puc.onrender.com
+API=https://parth-1-ma30.onrender.com
 curl -s -X POST $API/analyze/upload \
   -F "spec_file=@data/samples/design_basis_edge.pdf;type=application/pdf" \
   -F "submittal_file=@data/samples/vendor_submittal_ups.md;type=text/markdown" \

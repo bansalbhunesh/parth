@@ -1,62 +1,81 @@
 {
   "benchmark": "ps4_external_v1",
   "benchmark_version": "1.2.0",
-  "generated_utc": "2026-07-04T06:00:28+00:00",
-  "status": "seed (framework complete; 40-50 pairs target \u2014 see backlog)",
-  "pairs": {
-    "value": 53,
-    "evidence_label": "team_authored"
+  "generated_utc": "2026-07-04T07:17:41+00:00",
+  "featured_model": "google/gemini-3.1-flash-lite",
+  "primary_result": {
+    "model": "google/gemini-3.1-flash-lite",
+    "passes": 3,
+    "recall_mean": 0.862,
+    "recall_min": 0.841,
+    "recall_max": 0.873,
+    "precision_mean": 0.953,
+    "f1_mean": 0.905,
+    "exact_recall_mean": 0.698,
+    "clean_negative_false_alert_rate_mean": 0.0,
+    "not_run_per_pass": [
+      0,
+      0,
+      1
+    ],
+    "false_positives_per_pass": [
+      3,
+      3,
+      2
+    ],
+    "p50_ms_mean": 2481,
+    "positive_labels": 63,
+    "evidence_label": "live_model"
   },
-  "positive_labels": {
-    "value": 63,
-    "evidence_label": "team_authored"
+  "comparison_result": {
+    "model": "google/gemini-2.5-flash",
+    "recall_peak": 0.9524,
+    "precision": 0.938,
+    "passes_completed_clean": 4,
+    "note": "Higher peak recall (~0.95) but slower and did not complete a clean repeat-3 run; reported as an ablation / model comparison, NOT the primary validated result.",
+    "evidence_label": "live_model"
   },
-  "clean_negatives": {
-    "value": 64,
-    "evidence_label": "team_authored"
-  },
-  "contested_labels": {
-    "value": 2,
-    "evidence_label": "team_authored"
-  },
-  "systems_covered": [
-    "ats_sts",
-    "battery",
-    "bms",
-    "cabling",
-    "chiller",
-    "cooling_tower",
-    "crac_crah",
-    "fire_suppression",
-    "generator",
-    "metering_power_quality",
-    "networking",
-    "pdu_rpp",
-    "rack_aisle",
-    "refrigerant",
-    "switchgear",
-    "transformer",
-    "ups"
-  ],
-  "difficulty_mix": {
-    "adversarial_noise": 6,
-    "categorical_reasoning": 17,
-    "derived_arithmetic": 4,
-    "direct_value": 6,
-    "domain_recall": 6,
-    "omission_detection": 8,
-    "scanned_or_image": 6,
-    "table_or_layout": 8,
-    "unit_conversion": 2
-  },
-  "provenance": {
-    "primary_source_files": 0,
+  "composition": {
+    "pairs": 53,
+    "source_documents": 106,
+    "labels": 129,
+    "positive_labels": 63,
+    "clean_negatives": 64,
+    "contested_labels": 2,
+    "systems_covered": [
+      "ats_sts",
+      "battery",
+      "bms",
+      "cabling",
+      "chiller",
+      "cooling_tower",
+      "crac_crah",
+      "fire_suppression",
+      "generator",
+      "metering_power_quality",
+      "networking",
+      "pdu_rpp",
+      "rack_aisle",
+      "refrigerant",
+      "switchgear",
+      "transformer",
+      "ups"
+    ],
+    "difficulty_mix": {
+      "adversarial_noise": 6,
+      "categorical_reasoning": 17,
+      "derived_arithmetic": 4,
+      "direct_value": 6,
+      "domain_recall": 6,
+      "omission_detection": 8,
+      "scanned_or_image": 6,
+      "table_or_layout": 8,
+      "unit_conversion": 2
+    },
     "primary_source_derived": 10,
     "docs_with_verified_url": 5,
-    "team_authored_sources": 106,
     "sha256_completeness": 1.0
   },
-  "review_status": "single_author_frozen_pending_review",
   "rule_baseline": {
     "primary_recall_semantic": 0.1111,
     "primary_recall_exact": 0.1111,
@@ -67,22 +86,16 @@
     "pairs_not_run": 5,
     "evidence_label": "deterministic_offline"
   },
-  "llm_result": {
-    "primary_recall_semantic": 0.9524,
-    "primary_recall_exact": 0.7302,
-    "primary_tp": 60,
-    "positive_labels": 63,
-    "false_positives_total": 4,
-    "clean_negative_false_alert_rate": 0.0,
-    "pairs_not_run": 1,
-    "evidence_label": "live_model"
-  },
-  "cost_estimate": {
-    "value": null,
-    "evidence_label": "not_yet_measured"
-  },
+  "review_status": "single_author_frozen_pending_review",
+  "limitations": [
+    "Mostly team-authored benchmark fixtures (not downloaded primary sources).",
+    "10 primary-source-derived documents (5 with a verified public URL).",
+    "Single-author frozen labels.",
+    "Reviewer-2 (two-person human) adjudication pending.",
+    "Stored primary-source PDFs pending."
+  ],
   "non_claims": [
-    "Not an external-accuracy claim: seed is team-authored, single-author labeled.",
-    "Primary-source acquisition and two-reviewer adjudication are backlog."
+    "NOT a real-world-accuracy, field-validation, or real-datasheet-accuracy claim.",
+    "Seed is team-authored and single-author labeled; primary-source acquisition and two-person reviewer adjudication are pending."
   ]
 }

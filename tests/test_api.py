@@ -141,6 +141,77 @@ class TestPdfUploadEndpoints:
         assert "event: done" in body
 
 
+class TestOcrCheckAndImageUpload:
+    """/ocr-check reports the deployment's real OCR capability; the image-upload
+    branch routes raster images through Tesseract (mocked here so CI needs no
+    binary). The Gemini /analyze/vision path is a separate, untouched contract."""
+
+    def test_ocr_check_shape_and_invariant(self):
+        r = client.get("/ocr-check")
+        assert r.status_code == 200
+        d = r.json()
+        for k in ("ocr_available", "ocr_enabled", "tesseract_installed",
+                  "tesseract_version", "image_ocr_supported", "pdf_ocr_supported",
+                  "max_pdf_pages", "max_image_pixels", "status"):
+            assert k in d, f"/ocr-check missing {k}"
+        # ocr_available must equal binary-present AND enabled — never overclaim.
+        assert d["ocr_available"] == (d["tesseract_installed"] and d["ocr_enabled"])
+        assert d["status"] in ("ready", "disabled", "tesseract_not_installed")
+        assert isinstance(d["max_pdf_pages"], int) and d["max_pdf_pages"] > 0
+        assert isinstance(d["max_image_pixels"], int) and d["max_image_pixels"] > 0
+
+    def test_health_exposes_ocr_available(self):
+        d = client.get("/health").json()
+        assert "ocr_available" in d
+        assert isinstance(d["ocr_available"], bool)
+
+    def test_upload_returns_extraction_metadata(self):
+        import io
+        spec = io.BytesIO(b"**UPS-02** -- battery runtime min: shall be **10 min**")
+        sub = io.BytesIO(b"**UPS-02** -- battery runtime min: **7 min**")
+        r = client.post("/analyze/upload", files=[
+            ("spec_file", ("spec.txt", spec, "text/plain")),
+            ("submittal_file", ("sub.txt", sub, "text/plain")),
+        ])
+        assert r.status_code == 200
+        ext = r.json()["extraction"]
+        assert ext["spec"]["method"] == "plain_text"
+        assert ext["submittal"]["ocr_used"] is False
+        assert ext["spec"]["warning"] is None
+        # metadata must NOT leak the document body
+        assert "text" not in ext["spec"]
+
+    def test_image_upload_routes_through_ocr(self, monkeypatch):
+        import backend.agents.ocr_util as ocr_util
+        monkeypatch.setattr(ocr_util, "extract_text_from_image",
+                            lambda data, mime="image/png": "**SWGR-01** — icw: **50 kA**")
+        spec = b"**SWGR-01** -- icw: shall be **65 kA** (ref: DB; clause 1)"
+        r = client.post("/analyze/upload", files=[
+            ("spec_file", ("spec.md", spec, "text/markdown")),
+            ("submittal_file", ("submittal.png", b"\x89PNG_fake_bytes", "image/png")),
+        ])
+        assert r.status_code == 200
+        d = r.json()
+        assert d["submittal_filename"] == "submittal.png"
+        assert "deviations" in d
+        # the image was OCR'd -> metadata says so and carries the OCR warning
+        sub_ext = d["extraction"]["submittal"]
+        assert sub_ext["method"] == "ocr_image"
+        assert sub_ext["ocr_used"] is True
+        assert sub_ext["warning"] and "OCR" in sub_ext["warning"]
+
+    def test_image_upload_ocr_unavailable_returns_400(self, monkeypatch):
+        import backend.agents.ocr_util as ocr_util
+        monkeypatch.setattr(ocr_util, "extract_text_from_image",
+                            lambda data, mime="image/png": "")
+        r = client.post("/analyze/upload", files=[
+            ("spec_file", ("spec.md", b"**SWGR-01** -- icw: shall be **65 kA**", "text/markdown")),
+            ("submittal_file", ("submittal.png", b"\x89PNG_fake_bytes", "image/png")),
+        ])
+        assert r.status_code == 400
+        assert "image" in r.json()["detail"].lower()
+
+
 class TestExportEndpoints:
     def test_export_audit_json(self):
         r = client.get("/export/audit")

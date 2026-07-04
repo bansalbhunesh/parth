@@ -83,7 +83,7 @@
 <div class="grid">
   <div class="fact"><b>Live demo <span class="lab meas">measured</span></b>Judge page + API return 200; a live Gemini text comparison and image (vision) analysis both returned valid findings during an external audit.</div>
   <div class="fact"><b>Latency <span class="lab meas">measured</span></b>Model calls run ~13–33 s; the UI streams reasoning and caps the wait, degrading to the rule engine on timeout.</div>
-  <div class="fact"><b>OCR <span class="lab meas">measured</span></b>OCR runs only where Tesseract is installed (the <code>Dockerfile.backend</code> image). The default Render/Compose deploy does not bundle it and returns a clear "OCR unavailable" message.</div>
+  <div class="fact"><b>OCR <span class="lab meas">measured</span></b>Reads scanned / image-only PDFs and uploaded images via Tesseract OCR (text-first, best-effort). <code>render.yaml</code> now builds from the <code>Dockerfile.backend</code> image (Tesseract installed, verified 5.5.0 in-image), so OCR runs on the hosted backend; <code>GET /ocr-check</code> reports live status. Any host without Tesseract returns a clear "OCR unavailable" message.</div>
 </div>
 
 <h2 class="pb">5. Scientific integrity of the analysis path</h2>
@@ -147,7 +147,7 @@
   <li><strong>Schedule risk is simulation</strong>, not field-calibrated prediction; deviation probabilities and "actual delays" are seeded, not empirical.</li>
   <li><strong>Supply-chain intelligence is illustrative</strong> — closed-form over static data, no live shipment/route feed yet.</li>
   <li><strong>No measured coordination-hours study</strong> yet; the 45-day figure was a UI constant and is not presented as a result.</li>
-  <li><strong>Next milestones:</strong> a frozen independent benchmark (primary-source PDFs, hashes, pre-registered labels, clean negatives, one-to-one TP/FP/FN with variance); a timed human baseline; auth + rate limiting; and either shipping OCR in the hosted image or dropping OCR claims.</li>
+  <li><strong>Next milestones:</strong> a frozen independent benchmark (primary-source PDFs, hashes, pre-registered labels, clean negatives, one-to-one TP/FP/FN with variance); a timed human baseline; and auth + rate limiting. <em>(Done since: OCR now ships in the hosted image via the Render Docker build.)</em></li>
 </ul>
 
 <h2 class="pb">11. Rubric mapping (PS4 weights: 25 / 25 / 20 / 15 / 15)</h2>

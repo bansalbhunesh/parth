@@ -118,12 +118,18 @@
 
 Ready-made demo pairs ship in [`data/samples/`](data/samples/): a UPS edge pair, a Vertiv-datasheet-derived pair, a standby-generator pair, and **fifteen team-authored evaluation pairs** whose values are cited from public sources (Vertiv, Cummins, STULZ, ABB, FM-200/Novec, Carrier-class, EUROBAT, IEC 60076-11 transformer, NFPA 75 cabling, Tate ConCore raised-floor, Schneider Canalis busway, ASHRAE supply-air setpoint — every value traced in [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md)). Drop any pair into the analyzer.
 
-> **It can read scanned paper where OCR is installed.** Real submittals arrive as
-> stamped, scanned, image-only PDFs. With Tesseract present (the `Dockerfile.backend`
-> image) Pramaan OCRs [`data/samples/real/scanned/submittal_ups_scanned.pdf`](data/samples/real/scanned/submittal_ups_scanned.pdf)
-> (no text layer) against `design_basis_helios.md` and detects the deviations. **The
-> default hosted demo (Render / docker-compose) does not bundle Tesseract**, so it
-> returns a clear "OCR unavailable" message rather than a silent zero. Details:
+> **It can read scanned paper and uploaded images where OCR is installed.** Real
+> submittals arrive as stamped, scanned, image-only PDFs — and sometimes as a
+> phone photo. Pramaan is text-first with a **Tesseract OCR fallback** (scanned
+> PDFs *and* directly-uploaded `.png/.jpg` images), so it OCRs
+> [`data/samples/real/scanned/submittal_ups_scanned.pdf`](data/samples/real/scanned/submittal_ups_scanned.pdf)
+> (no text layer) against `design_basis_helios.md` and detects the deviations.
+> OCR needs the `tesseract` **system binary**, which the **`Dockerfile.backend`
+> image (now the Render build) installs**; the plain Python buildpack and
+> `docker-compose` root image do not, so there it returns a clear "OCR
+> unavailable" message rather than a silent zero. **`GET /ocr-check` reports
+> whether OCR is live in a given deployment** (`"status":"ready"` when it is).
+> OCR is best-effort, not lossless (e.g. GXT5→GXTS). Details:
 > [`eval/OCR_SCANNED_PDF.md`](eval/OCR_SCANNED_PDF.md).
 
 > Health at a glance: **[`/health`](https://parth-3puc.onrender.com/health)** shows whether the LLM is wired (`"ready": true`); **[`/llm-check`](https://parth-3puc.onrender.com/llm-check)** makes a real call and reports the exact status. The app **degrades gracefully** — every endpoint returns 200 and the dashboard renders from bundled data even with no API key.

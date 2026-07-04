@@ -1,14 +1,7 @@
-FROM python:3.11-slim AS backend
-
-WORKDIR /app
-COPY backend/requirements.txt backend/requirements.txt
-RUN pip install --no-cache-dir -r backend/requirements.txt
-COPY backend/ backend/
-COPY eval/ eval/
-COPY data/ data/
-
-EXPOSE 8000
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# NOTE: the backend image is built from Dockerfile.backend (it apt-installs the
+# tesseract-ocr binary for OCR). That single image is used by Render, docker-compose,
+# and CI, so there is exactly one OCR-capable backend definition. This file builds
+# only the frontend (docker-compose targets the `frontend` stage below).
 
 FROM node:20-alpine AS frontend-build
 

@@ -56,6 +56,12 @@ lint:  ## Run Python linting
 	python3 -m py_compile eval/multi_project_eval.py
 	@echo "All Python files compile clean"
 
+verify-ocr:  ## Prove OCR works locally (skips cleanly if tesseract absent)
+	python3 scripts/verify_ocr.py
+
+verify-ocr-docker:  ## Prove OCR works in the shipping backend image (needs Docker)
+	sh scripts/verify_ocr_docker.sh
+
 verify:  ## One-command verification: tests + all evals + frontend type check
 	@echo "╔══════════════════════════════════════════════════════════════╗"
 	@echo "║  PRAMAAN — Full Verification Suite                         ║"

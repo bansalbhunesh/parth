@@ -402,11 +402,24 @@ export async function streamAnalyze(
   }
 }
 
+export interface ExtractionMeta {
+  method: string;          // text_layer | ocr_pdf | ocr_image | plain_text | none
+  chars: number;
+  ocr_used: boolean;
+  truncated: boolean;
+  warning: string | null;
+}
+export interface UploadExtraction {
+  spec: ExtractionMeta;
+  submittal: ExtractionMeta;
+}
+
 export async function streamUploadAnalyze(
   formData: FormData,
   handlers: {
     onStatus: (status: string) => void;
     onPreview: (preview: { spec: string; submittal: string }) => void;
+    onExtraction?: (extraction: UploadExtraction) => void;
     onToken: (token: string) => void;
     onResult: (result: unknown) => void;
     onError: (err: string) => void;
@@ -423,6 +436,7 @@ export async function streamUploadAnalyze(
     await consumeSSE(r, {
       status: (data) => handlers.onStatus(data),
       preview: (data) => { try { handlers.onPreview(JSON.parse(data)); } catch {} },
+      extraction: (data) => { try { handlers.onExtraction?.(JSON.parse(data)); } catch {} },
       token: (data) => {
         try { handlers.onToken(JSON.parse(data)); } catch { handlers.onToken(data); }
       },
@@ -441,6 +455,30 @@ export async function getMetrics(): Promise<Record<string, unknown> | null> {
     const r = await fetch(`${API}/metrics`, fetchOpts({ cache: "no-store" }));
     if (!r.ok) throw new Error(String(r.status));
     return await r.json();
+  } catch {
+    return null;
+  }
+}
+
+export interface OcrStatus {
+  ocr_available: boolean;
+  ocr_enabled: boolean;
+  tesseract_installed: boolean;
+  tesseract_version: string | null;
+  image_ocr_supported: boolean;
+  pdf_ocr_supported: boolean;
+  max_pdf_pages: number;
+  max_image_pixels: number;
+  status: "ready" | "disabled" | "tesseract_not_installed";
+}
+
+// Whether this deployment can actually OCR scanned PDFs / uploaded images. Returns
+// null if the backend is unreachable — callers must then claim nothing about OCR.
+export async function getOcrCheck(): Promise<OcrStatus | null> {
+  try {
+    const r = await fetch(`${API}/ocr-check`, fetchOpts({ cache: "no-store" }));
+    if (!r.ok) throw new Error(String(r.status));
+    return (await r.json()) as OcrStatus;
   } catch {
     return null;
   }

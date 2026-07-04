@@ -3,8 +3,10 @@ version: "3.9"
 services:
   backend:
     build:
+      # Same OCR-capable image Render builds (Tesseract installed), so the compose
+      # demo has identical OCR behavior to production — one backend image, no drift.
       context: .
-      target: backend
+      dockerfile: Dockerfile.backend
     ports:
       - "8000:8000"
     environment:

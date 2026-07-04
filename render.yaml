@@ -1,13 +1,17 @@
 services:
   - type: web
     name: pramaan-backend
-    runtime: python
+    # Docker runtime (was: runtime: python). The native Python buildpack cannot
+    # apt-install system packages, so scanned-PDF / image OCR (which needs the
+    # `tesseract` binary) was a silent no-op on the hosted demo. Dockerfile.backend
+    # apt-installs tesseract-ocr, so building from it makes OCR actually work here.
+    # NOTE (deploy): after merging this, redeploy and confirm the live URL still
+    # serves (GET /health, and GET /ocr-check should report "status":"ready").
+    runtime: docker
+    dockerfilePath: ./Dockerfile.backend
+    dockerContext: .
     plan: free
-    buildCommand: pip install -r backend/requirements.txt
-    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
     envVars:
-      - key: PYTHON_VERSION
-        value: "3.11"
       # --- LLM via Google's native Gemini API (free tier) ---
       # The ONLY thing to set by hand in the Render dashboard is GEMINI_API_KEY
       # (an AI Studio key). gemini-2.5-flash is on the free tier; gemini-2.0-flash

@@ -366,20 +366,29 @@ def _llm_status() -> dict:
     configured providers in the order they will be tried."""
     import os
 
-    from backend.llm import provider_chain
-    provider = os.getenv("PRAMAAN_LLM", "gemini").lower()
+    from backend.llm import (
+        _gateway_base_url,
+        _gateway_model,
+        _key,
+        _resolve_alias,
+        provider_chain,
+    )
+    provider = _resolve_alias(os.getenv("PRAMAAN_LLM", "gemini").lower())
     chain = provider_chain()
     if provider == "openai":
         base = {
-            "provider": "openai",
-            "key_set": bool(os.getenv("OPENAI_API_KEY")),
-            "model": os.getenv("OPENAI_MODEL", "gemini-2.0-flash"),
-            "base_url_set": bool(os.getenv("OPENAI_BASE_URL")),
+            "provider": "qwen",
+            "key_set": bool(_key("openai")),
+            "model": _gateway_model(),
+            "base_url_set": bool(_gateway_base_url()),
         }
     elif provider == "claude":
-        base = {"provider": "claude", "key_set": bool(os.getenv("ANTHROPIC_API_KEY"))}
+        base = {"provider": "claude", "key_set": bool(_key("claude"))}
+    elif provider == "ollama":
+        base = {"provider": "ollama", "key_set": True,
+                "model": os.getenv("OLLAMA_MODEL", "llama3.1")}
     else:
-        base = {"provider": "gemini", "key_set": bool(os.getenv("GEMINI_API_KEY")),
+        base = {"provider": "gemini", "key_set": bool(_key("gemini")),
                 "model": os.getenv("GEMINI_MODEL", "gemini-2.5-flash")}
     base["chain"] = chain
     base["ready"] = len(chain) > 0

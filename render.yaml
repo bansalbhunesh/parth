@@ -24,6 +24,13 @@ services:
         value: gemini-2.5-flash
       - key: PRAMAAN_LLM_TIMEOUT
         value: "60"
+      # Explicit, deterministic failover order for the hosted demo. Ollama is a
+      # LOCAL leg (needs a local daemon), so it is intentionally NOT listed here
+      # — hosted Render has no Ollama, and it stays filtered out regardless.
+      # The env keys below use the older OPENAI_*/GROQ_* names; the code also
+      # accepts the canonical QWEN_GATEWAY_*/CLAUDE_* names (see .env.example).
+      - key: PRAMAAN_LLM_PROVIDER_ORDER
+        value: gemini,qwen,groq,claude
       - key: GEMINI_API_KEY
         sync: false   # set this secret in the Render dashboard
       # --- Automatic failover leg: OpenAI-compatible Qwen gateway (OpenRouter) ---

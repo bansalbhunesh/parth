@@ -1,16 +1,32 @@
 """
-LLM wrapper with an automatic provider failover chain.
+LLM wrapper with an automatic, self-healing provider failover chain.
 
-Priority order: gemini-2.5-flash → OpenAI-compatible gateway (e.g. Qwen) →
-Claude. `PRAMAAN_LLM` still selects the *primary* provider; on quota/429,
-timeouts, or any provider failure the chain walks to the next *configured*
-provider. When every provider fails (or none is configured) an LLMError is
-raised and the callers degrade to the deterministic rule engine — the safe
-floor. Failover is about reliability, not accuracy: eval labels, narration
-guards, and numeric grounding are identical regardless of which model answers.
+Headline order: gemini → Qwen / OpenAI-compatible gateway → Claude → local
+Ollama → the deterministic rule engine (the always-present floor). `PRAMAAN_LLM`
+still selects the *primary* provider; on quota/429, timeout, rate-limit, or any
+provider failure the chain walks to the next *configured* provider. When every
+LLM leg fails (or none is configured) an LLMError is raised and the callers
+degrade to the deterministic rule engine. Failover is about **reliability and
+availability, not accuracy**: eval labels, narration guards, and numeric
+grounding are identical regardless of which model answers, and the rule floor
+computes deviations from the actual documents — never seeded labels.
 
-Set GEMINI_API_KEY (and optionally OPENAI_API_KEY[+OPENAI_BASE_URL/MODEL],
-ANTHROPIC_API_KEY). No keys are committed, logged, or exposed.
+Configured providers only are attempted, so a Gemini-only deployment behaves
+exactly as before (a one-element chain). The order is overridable with
+PRAMAAN_LLM_PROVIDER_ORDER (comma-separated).
+
+Env keys (canonical name first, older alias still honoured):
+  gemini  GEMINI_API_KEY                          GEMINI_MODEL
+  qwen    QWEN_GATEWAY_API_KEY  (or OPENAI_API_KEY)   QWEN_GATEWAY_BASE_URL /
+          _MODEL  (or OPENAI_BASE_URL / OPENAI_MODEL)
+  groq    GROQ_API_KEY                             GROQ_MODEL
+  claude  CLAUDE_API_KEY        (or ANTHROPIC_API_KEY)  CLAUDE_MODEL
+  ollama  (keyless) LOCAL_LLM_ENABLED=1            OLLAMA_BASE_URL / OLLAMA_MODEL
+
+The Qwen gateway must be a genuinely separate provider/quota (e.g. OpenRouter),
+NOT Google's OpenAI-compatible endpoint — pointing it at Google would make the
+"backup" share Gemini's quota. /llm-check surfaces this (separate_quota=false).
+No keys or secret-bearing base URLs are ever committed, logged, or exposed.
 """
 
 import datetime
@@ -22,13 +38,34 @@ import time
 
 log = logging.getLogger("pramaan.llm")
 
-PROVIDER = os.getenv("PRAMAAN_LLM", "gemini")  # "gemini" | "claude" | "openai"
+PROVIDER = os.getenv("PRAMAAN_LLM", "gemini")  # primary provider id
 
-# Canonical failover order (primary is tried first, then the rest of this
-# list, skipping anything without a key configured). gemini primary, the
-# OpenAI-compatible gateway (Qwen) as first fallback, Groq (free tier, its own
-# quota) as second fallback for full insurance, then Claude.
-_CHAIN_ORDER = ["gemini", "openai", "groq", "claude"]
+# Canonical failover order. The primary (PRAMAAN_LLM) is tried first, then the
+# rest of this list, skipping any provider that is not configured. Headline
+# chain: gemini → Qwen/OpenAI-compatible gateway → Claude → local Ollama → the
+# deterministic rule engine (the always-present floor). Groq (its own free-tier
+# quota) sits between the gateway and Claude as an extra insurance leg the hosted
+# demo already uses; it is filtered out automatically when GROQ_API_KEY is unset,
+# so it never changes single-/dual-provider behaviour. Override the whole order
+# with PRAMAAN_LLM_PROVIDER_ORDER (comma-separated, unknown names dropped).
+_DEFAULT_ORDER = ["gemini", "openai", "groq", "claude", "ollama"]
+_CHAIN_ORDER = _DEFAULT_ORDER  # back-compat alias; runtime uses _chain_order()
+
+# Per-provider API-key env vars, in resolution order (first one set wins). The
+# canonical Phase-4 names come first; older names are kept as back-compat aliases
+# so a deployment already wired with OPENAI_*/ANTHROPIC_* keeps working unchanged.
+# Ollama is keyless (a local daemon) — gated by LOCAL_LLM_ENABLED, not a key.
+_KEY_ENVS = {
+    "gemini": ["GEMINI_API_KEY"],
+    "openai": ["QWEN_GATEWAY_API_KEY", "OPENAI_API_KEY"],
+    "groq": ["GROQ_API_KEY"],
+    "claude": ["CLAUDE_API_KEY", "ANTHROPIC_API_KEY"],
+    "ollama": [],
+}
+
+# Friendly aliases accepted in PRAMAAN_LLM / PRAMAAN_LLM_PROVIDER_ORDER for the
+# OpenAI-compatible gateway leg (its internal provider id is "openai").
+_PROVIDER_ALIASES = {"qwen": "openai", "gateway": "openai"}
 
 # Bounded retry for transient server-side failures (500/503/overloaded) on a
 # single provider before it fails over. 429/quota is NOT transient and is never
@@ -48,32 +85,107 @@ class LLMError(Exception):
     pass
 
 
+def _env_first(*names: str, default=None):
+    """First set (non-empty) value among env var `names`, else `default`."""
+    for n in names:
+        v = os.environ.get(n)
+        if v:
+            return v
+    return default
+
+
+def _truthy(v) -> bool:
+    return str(v).strip().lower() in {"1", "true", "yes", "on"} if v is not None else False
+
+
+def _key(provider: str):
+    """The configured API-key value for a provider (first alias that is set), or
+    None. Ollama is keyless, so this is always None for it."""
+    return _env_first(*_KEY_ENVS.get(provider, []))
+
+
 def _key_env(provider: str) -> str:
-    return {"gemini": "GEMINI_API_KEY", "openai": "OPENAI_API_KEY",
-            "groq": "GROQ_API_KEY", "claude": "ANTHROPIC_API_KEY"}[provider]
+    """Canonical (preferred) key env var NAME for a provider — used only in
+    human-readable messages, never to read a secret value."""
+    names = _KEY_ENVS.get(provider, [])
+    return names[0] if names else ""
+
+
+def _resolve_alias(p: str) -> str:
+    return _PROVIDER_ALIASES.get(p, p)
 
 
 def _configured(provider: str) -> bool:
-    return bool(os.environ.get(_key_env(provider)))
+    """A provider is usable if its key is set — or, for keyless Ollama, if
+    LOCAL_LLM_ENABLED is truthy."""
+    if provider == "ollama":
+        return _truthy(os.environ.get("LOCAL_LLM_ENABLED"))
+    return bool(_key(provider))
+
+
+def _chain_order() -> list[str]:
+    """The failover order to attempt: PRAMAAN_LLM_PROVIDER_ORDER if set
+    (comma-separated, unknown names dropped, `qwen`/`gateway` → the gateway
+    leg), else the canonical default. Duplicates removed, first wins."""
+    raw = os.getenv("PRAMAAN_LLM_PROVIDER_ORDER", "")
+    wanted = ([p.strip().lower() for p in raw.split(",") if p.strip()]
+              if raw.strip() else list(_DEFAULT_ORDER))
+    seen, order = set(), []
+    for p in wanted:
+        p = _resolve_alias(p)
+        if p in _KEY_ENVS and p not in seen:
+            seen.add(p)
+            order.append(p)
+    return order
 
 
 def provider_chain() -> list[str]:
     """Configured providers in priority order: the PRAMAAN_LLM primary first,
-    then the remaining canonical order. Single-key setups therefore behave
-    exactly as before — a one-element chain."""
-    primary = os.getenv("PRAMAAN_LLM", "gemini")
-    ordered = [primary] + [p for p in _CHAIN_ORDER if p != primary]
-    return [p for p in ordered if p in _CHAIN_ORDER and _configured(p)]
+    then the remaining order (env-overridable), skipping any provider that is not
+    configured. Single-key setups therefore behave exactly as before — a
+    one-element chain — because every other leg is filtered out."""
+    primary = _resolve_alias(os.getenv("PRAMAAN_LLM", "gemini").lower())
+    order = _chain_order()
+    ordered = ([primary] if primary in _KEY_ENVS else []) + [p for p in order if p != primary]
+    seen, chain = set(), []
+    for p in ordered:
+        if p not in seen and _configured(p):
+            seen.add(p)
+            chain.append(p)
+    return chain
 
 
 def _redact(text: str) -> str:
     """Strip any configured API key value out of a string before it can reach
-    a log line or an API response."""
-    for provider in _CHAIN_ORDER:
-        secret = os.environ.get(_key_env(provider))
+    a log line or an API response. Covers every provider's key aliases."""
+    for provider in _KEY_ENVS:
+        secret = _key(provider)
         if secret and secret in text:
             text = text.replace(secret, "***")
     return text
+
+
+def _is_google_gateway(base_url) -> bool:
+    """True if a gateway base URL points at Google's own endpoint — which would
+    make the 'Qwen backup' share Gemini's quota instead of being a genuinely
+    separate provider. Surfaced honestly in /llm-check rather than silently
+    accepted."""
+    if not base_url:
+        return False
+    b = str(base_url).lower()
+    return "googleapis.com" in b or "generativelanguage" in b or "google.com" in b
+
+
+def _gateway_base_url():
+    return _env_first("QWEN_GATEWAY_BASE_URL", "OPENAI_BASE_URL")
+
+
+def _gateway_model():
+    return _env_first("QWEN_GATEWAY_MODEL", "OPENAI_MODEL", default="gemini-2.0-flash")
+
+
+def _ollama_base() -> str:
+    return os.getenv("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
 
 
 def _is_transient(exc) -> bool:
@@ -403,16 +515,19 @@ def _openai_compatible(prompt, system, json_mode, *, label, api_key, base_url,
 
 
 def _openai(prompt, system, json_mode):
-    """OpenAI-compatible gateway — works with any /v1 endpoint (e.g. OpenRouter
-    proxying Qwen). Set OPENAI_API_KEY, OPENAI_BASE_URL (the /v1 root), and
-    OPENAI_MODEL."""
+    """Qwen / OpenAI-compatible gateway — any /v1 endpoint (e.g. OpenRouter
+    proxying Qwen). Canonical env: QWEN_GATEWAY_API_KEY, QWEN_GATEWAY_BASE_URL
+    (the /v1 root), QWEN_GATEWAY_MODEL (older OPENAI_* names still honoured).
+    Must be a genuinely separate provider/quota — NOT Google's OpenAI endpoint."""
     return _openai_compatible(
-        prompt, system, json_mode, label="OpenAI-compat",
-        api_key=os.environ.get("OPENAI_API_KEY"),
-        base_url=os.getenv("OPENAI_BASE_URL"),
-        model=os.getenv("OPENAI_MODEL", "gemini-2.0-flash"),
-        json_mode_on=os.getenv("OPENAI_JSON_MODE", "0") == "1",
-        max_tokens=int(os.getenv("OPENAI_MAX_TOKENS", "4000")))
+        prompt, system, json_mode, label="Qwen-gateway",
+        api_key=_key("openai"),
+        base_url=_gateway_base_url(),
+        model=_gateway_model(),
+        json_mode_on=_env_first("QWEN_GATEWAY_JSON_MODE", "OPENAI_JSON_MODE",
+                                default="0") == "1",
+        max_tokens=int(_env_first("QWEN_GATEWAY_MAX_TOKENS", "OPENAI_MAX_TOKENS",
+                                  default="4000")))
 
 
 def _groq(prompt, system, json_mode):
@@ -428,13 +543,31 @@ def _groq(prompt, system, json_mode):
         max_tokens=int(os.getenv("GROQ_MAX_TOKENS", "4000")))
 
 
+def _ollama(prompt, system, json_mode):
+    """Local Ollama via its OpenAI-compatible /v1 endpoint. Keyless (a local
+    daemon), so it needs no network quota — the last LLM leg before the
+    deterministic rule floor, keeping the demo answering even fully offline.
+    Gated by LOCAL_LLM_ENABLED. Set OLLAMA_BASE_URL (default
+    http://localhost:11434) and OLLAMA_MODEL (must be pulled locally)."""
+    if not _truthy(os.environ.get("LOCAL_LLM_ENABLED")):
+        raise LLMError("Local LLM disabled (set LOCAL_LLM_ENABLED=1)")
+    return _openai_compatible(
+        prompt, system, json_mode, label="Ollama",
+        api_key="ollama",  # local endpoint ignores it, but the client needs one
+        base_url=f"{_ollama_base()}/v1",
+        model=os.getenv("OLLAMA_MODEL", "llama3.1"),
+        json_mode_on=os.getenv("OLLAMA_JSON_MODE", "1") == "1",
+        max_tokens=int(os.getenv("OLLAMA_MAX_TOKENS", "4000")))
+
+
 def _claude(prompt, system, json_mode):
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        raise LLMError("ANTHROPIC_API_KEY not set")
+    api_key = _key("claude")
+    if not api_key:
+        raise LLMError("Claude API key not set (CLAUDE_API_KEY or ANTHROPIC_API_KEY)")
     log.info("Claude call: prompt_len=%d", len(prompt))
     try:
         import anthropic
-        client = anthropic.Anthropic()
+        client = anthropic.Anthropic(api_key=api_key)
         msg = client.messages.create(
             model=os.getenv("CLAUDE_MODEL", "claude-opus-4-8"),
             max_tokens=2000,
@@ -516,11 +649,23 @@ def _openai_compatible_stream(prompt, system, *, label, api_key, base_url,
 
 def _openai_stream(prompt, system):
     yield from _openai_compatible_stream(
-        prompt, system, label="OpenAI-compat",
-        api_key=os.environ.get("OPENAI_API_KEY"),
-        base_url=os.getenv("OPENAI_BASE_URL"),
-        model=os.getenv("OPENAI_MODEL", "gemini-2.0-flash"),
-        max_tokens=int(os.getenv("OPENAI_MAX_TOKENS", "4000")))
+        prompt, system, label="Qwen-gateway",
+        api_key=_key("openai"),
+        base_url=_gateway_base_url(),
+        model=_gateway_model(),
+        max_tokens=int(_env_first("QWEN_GATEWAY_MAX_TOKENS", "OPENAI_MAX_TOKENS",
+                                  default="4000")))
+
+
+def _ollama_stream(prompt, system):
+    if not _truthy(os.environ.get("LOCAL_LLM_ENABLED")):
+        raise LLMError("Local LLM disabled (set LOCAL_LLM_ENABLED=1)")
+    yield from _openai_compatible_stream(
+        prompt, system, label="Ollama",
+        api_key="ollama",  # local endpoint ignores it, but the client needs one
+        base_url=f"{_ollama_base()}/v1",
+        model=os.getenv("OLLAMA_MODEL", "llama3.1"),
+        max_tokens=int(os.getenv("OLLAMA_MAX_TOKENS", "4000")))
 
 
 def _groq_stream(prompt, system):
@@ -557,12 +702,13 @@ def _gemini_stream(prompt, system):
 
 
 def _claude_stream(prompt, system):
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        raise LLMError("ANTHROPIC_API_KEY not set")
+    api_key = _key("claude")
+    if not api_key:
+        raise LLMError("Claude API key not set (CLAUDE_API_KEY or ANTHROPIC_API_KEY)")
     log.info("Claude stream: prompt_len=%d", len(prompt))
     try:
         import anthropic
-        client = anthropic.Anthropic()
+        client = anthropic.Anthropic(api_key=api_key)
         with client.messages.stream(
             model=os.getenv("CLAUDE_MODEL", "claude-opus-4-8"),
             max_tokens=2000,
@@ -579,12 +725,13 @@ def _claude_stream(prompt, system):
 
 # --- Dispatch registration (after the provider functions exist) -------------
 _DISPATCH = {"gemini": _gemini, "openai": _openai, "groq": _groq,
-             "claude": _claude}
+             "claude": _claude, "ollama": _ollama}
 _STREAM_DISPATCH = {
     "gemini": _gemini_stream,
     "openai": _openai_stream,
     "groq": _groq_stream,
     "claude": _claude_stream,
+    "ollama": _ollama_stream,
 }
 
 
@@ -594,27 +741,42 @@ def _provider_public_meta(provider: str) -> dict:
     if provider == "gemini":
         return {"model": os.getenv("GEMINI_MODEL", "gemini-2.5-flash")}
     if provider == "openai":
-        return {"model": os.getenv("OPENAI_MODEL", "gemini-2.0-flash"),
-                "base_url_set": bool(os.getenv("OPENAI_BASE_URL"))}
+        base = _gateway_base_url()
+        # separate_quota is the honest check that the "Qwen backup" is a real,
+        # independent provider — false if it points at Google's own endpoint
+        # (which would just re-spend Gemini's quota) or has no base URL set.
+        return {"model": _gateway_model(),
+                "base_url_set": bool(base),
+                "separate_quota": bool(base) and not _is_google_gateway(base)}
     if provider == "groq":
         return {"model": os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")}
+    if provider == "ollama":
+        return {"model": os.getenv("OLLAMA_MODEL", "llama3.1"),
+                "base_url": _ollama_base(), "local": True}
     return {"model": os.getenv("CLAUDE_MODEL", "claude-opus-4-8")}
 
 
 def failover_report() -> dict:
     """Structured, secret-free view of the failover chain for /llm-check:
-    configured providers in priority order, each provider's non-secret config,
-    the last provider that answered, the last failover reason, and whether the
-    system currently has any LLM at all (else it runs on the rule-engine floor)."""
+    the resolved provider order, the configured subset actually tried (chain),
+    each provider's non-secret config, the last provider that answered, the last
+    failover reason, whether the system currently has any LLM at all, and that
+    the deterministic rule engine is always available as the floor."""
     chain = provider_chain()
+    order = _chain_order()
     return {
-        "primary": os.getenv("PRAMAAN_LLM", "gemini"),
+        "primary": _resolve_alias(os.getenv("PRAMAAN_LLM", "gemini").lower()),
+        "order": order,
         "chain": chain,
         "providers": {p: {"configured": _configured(p), **_provider_public_meta(p)}
-                      for p in _CHAIN_ORDER},
+                      for p in order},
         "last_successful_provider": FAILOVER_STATUS["last_successful_provider"],
         "last_failover": FAILOVER_STATUS["last_failover"],
         "on_rule_engine_floor": len(chain) == 0,
+        # The rule engine is always compiled in, so an answer is always available
+        # even when every LLM leg fails. Reliability, not accuracy: the floor is
+        # deterministic and intentionally conservative — never seeded labels.
+        "deterministic_fallback_available": True,
     }
 
 

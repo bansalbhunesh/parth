@@ -49,10 +49,12 @@ class TestInputSanitization:
         assert r.status_code in (200, 413, 422)
 
     def test_request_body_over_limit_rejected(self):
-        # >20 MB body is rejected with 413 by the ASGI body-size guard before the
+        # A body over the ASGI request-size ceiling is rejected with 413 before the
         # multipart parser can spool it to disk (DoS guard). Sends a real oversized
-        # body so the Content-Length the guard inspects is genuine.
-        oversized = "x" * (21 * 1024 * 1024)
+        # body (tracks MAX_REQUEST_BYTES so it stays correct if the cap changes) so
+        # the Content-Length the guard inspects is genuine.
+        from backend.main import MAX_REQUEST_BYTES
+        oversized = "x" * (MAX_REQUEST_BYTES + 4096)
         r = client.post("/analyze", json={"spec_text": oversized, "submittal_text": ""})
         assert r.status_code == 413
 

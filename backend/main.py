@@ -6,16 +6,24 @@ import logging
 import os
 import time
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
+from backend import security
 from backend.agents.ingestion import extract_pdf_bytes, ingest_corpus
 from backend.agents.rfi_copilot import ask, ask_fallback, ask_stream
 from backend.analyze import run_analysis, run_streaming_analysis
 from backend.orchestrator import run_pipeline
 from backend.paths import CORPUS, PROJECTS_DIR
+
+# Dependency bundles for the expensive / abusable endpoints. Auth is a no-op
+# unless DEMO_AUTH_ENABLED + DEMO_AUTH_TOKEN are set; rate limiting is on by
+# default with generous per-hour caps (disabled in the test suite via conftest).
+_PROTECT_ANALYSIS = [Depends(security.require_demo_auth), Depends(security.rl_analysis)]
+_PROTECT_UPLOAD = [Depends(security.require_demo_auth), Depends(security.rl_upload)]
+_PROTECT_LLMCHECK = [Depends(security.require_demo_auth)]
 
 logging.basicConfig(
     level=logging.INFO,
@@ -78,7 +86,10 @@ async def _never_crash(request, exc):  # noqa: ANN001
 # uploads that omit Content-Length fall through to uvicorn's own body limits.
 # Implemented as pure ASGI (not @app.middleware/BaseHTTPMiddleware) so it never
 # wraps or buffers the SSE StreamingResponses the demo relies on.
-MAX_REQUEST_BYTES = 20 * 1024 * 1024  # headroom over the 15 MB upload cap
+# Ceiling = the per-file cap plus 5 MB of multipart/field overhead, so a single
+# max-size document (plus a small companion) passes while a multi-GB body is
+# rejected before spooling. Read at import from the env cap (PRAMAAN_MAX_UPLOAD_MB).
+MAX_REQUEST_BYTES = security.max_upload_bytes() + 5 * 1024 * 1024
 
 
 class BodySizeLimitMiddleware:
@@ -171,18 +182,18 @@ def _sse_response(generator):
     )
 
 
-MAX_UPLOAD_BYTES = 15 * 1024 * 1024  # 15 MB — generous for datasheets, caps DoS
-
-
 def _check_size(data: bytes, name: str):
-    if len(data) > MAX_UPLOAD_BYTES:
-        raise HTTPException(413, f"{name} exceeds the {MAX_UPLOAD_BYTES // (1024*1024)} MB upload limit")
+    cap = security.max_upload_bytes()
+    if len(data) > cap:
+        raise HTTPException(413, f"{security.safe_name(name)} exceeds the "
+                                 f"{security.max_upload_mb()} MB upload limit")
 
 
 def _read_capped(file: UploadFile, name: str) -> bytes:
-    """Read at most MAX_UPLOAD_BYTES+1 bytes so an oversized upload is rejected
-    before it can be fully buffered into memory (size-after-read DoS)."""
-    data = file.file.read(MAX_UPLOAD_BYTES + 1)
+    """Read at most the byte cap +1 so an oversized upload is rejected before it
+    can be fully buffered into memory (size-after-read DoS). The cap is read
+    dynamically (env-configurable via PRAMAAN_MAX_UPLOAD_MB)."""
+    data = file.file.read(security.max_upload_bytes() + 1)
     _check_size(data, name)
     return data
 
@@ -230,7 +241,7 @@ def _extract_upload_text(file: UploadFile) -> str:
 
 # ── Analysis endpoints ──────────────────────────────────────────────
 
-@app.post("/analyze")
+@app.post("/analyze", dependencies=_PROTECT_ANALYSIS)
 def analyze(req: AnalyzeRequest):
     result = run_analysis(req.spec_text, req.submittal_text, req.system_id)
     return {
@@ -242,7 +253,7 @@ def analyze(req: AnalyzeRequest):
     }
 
 
-@app.post("/analyze/stream")
+@app.post("/analyze/stream", dependencies=_PROTECT_ANALYSIS)
 def analyze_stream(req: AnalyzeRequest):
     def generate():
         yield "event: status\ndata: Loading standards knowledge base...\n\n"
@@ -251,7 +262,7 @@ def analyze_stream(req: AnalyzeRequest):
     return _sse_response(generate())
 
 
-@app.post("/analyze/upload")
+@app.post("/analyze/upload", dependencies=_PROTECT_UPLOAD)
 def analyze_upload(
     spec_file: UploadFile = File(...),
     submittal_file: UploadFile = File(...),
@@ -279,7 +290,7 @@ def analyze_upload(
     }
 
 
-@app.post("/analyze/vision")
+@app.post("/analyze/vision", dependencies=_PROTECT_UPLOAD)
 def analyze_vision(
     spec_file: UploadFile = File(...),
     submittal_image: UploadFile = File(...),
@@ -312,7 +323,7 @@ def analyze_vision(
     }
 
 
-@app.post("/analyze/upload/stream")
+@app.post("/analyze/upload/stream", dependencies=_PROTECT_UPLOAD)
 def analyze_upload_stream(
     spec_file: UploadFile = File(...),
     submittal_file: UploadFile = File(...),
@@ -414,6 +425,10 @@ def health():
         # UI badge built on this can never imply OCR works where it does not.
         # Cached probe (no subprocess per health check). See /ocr-check for detail.
         "ocr_available": ocr_util.tesseract_available_cached() and ocr_util.ocr_enabled(),
+        # Public-demo security posture: auth/rate-limit state + upload caps.
+        # Booleans/caps only — never the token, never a client IP. See /health
+        # consumers and docs/SECURITY_DEMO_RUNBOOK.md.
+        "security": security.security_status(),
     }
 
 
@@ -446,8 +461,8 @@ def ocr_check():
     }
 
 
-@app.get("/llm-check")
-def llm_check(deep: bool = False, probe_all: bool = False):
+@app.get("/llm-check", dependencies=_PROTECT_LLMCHECK)
+def llm_check(request: Request, deep: bool = False, probe_all: bool = False):
     """Make a real LLM call and report the actual outcome. Unlike /health
     (which only checks a key is present), this surfaces the true reason
     analysis falls back — e.g. out of credit, bad model, bad key — without
@@ -469,6 +484,10 @@ def llm_check(deep: bool = False, probe_all: bool = False):
         return {"ok": False, "reason": "no_key_configured",
                 "on_rule_engine_floor": True, "failover": failover_report(),
                 **status}
+    # The deep / per-provider probes make real (quota-spending) LLM calls, so
+    # they carry their own tight rate limit even when auth is off.
+    if deep or probe_all:
+        security.enforce_rate_limit(request, "deep_probe", security.deep_probe_limit())
     if deep:
         out = _llm_check_deep(status)
         out["failover"] = failover_report()  # after the deep call, so it's live
@@ -692,7 +711,7 @@ def deviations(seeded_demo: bool = False):
 
 # ── Copilot endpoints ───────────────────────────────────────────────
 
-@app.post("/copilot")
+@app.post("/copilot", dependencies=_PROTECT_ANALYSIS)
 def copilot(q: CopilotQuery):
     try:
         return ask(q.query)
@@ -702,7 +721,7 @@ def copilot(q: CopilotQuery):
         return ask_fallback(q.query, devs)
 
 
-@app.post("/copilot/stream")
+@app.post("/copilot/stream", dependencies=_PROTECT_ANALYSIS)
 def copilot_stream(q: CopilotQuery):
     def generate():
         try:

@@ -37,6 +37,36 @@ def test_seed_manifest_and_labels_are_valid():
     assert L.validate_labels(L.load_labels()) == []
 
 
+# ── automated label audit (reviewer-2 QA, not a human) ───────────────
+def test_label_audit_flags_ungrounded_and_passes_valid():
+    import benchmark_label_audit as A
+    owner = "Battery autonomy shall be at least 10 minutes. Redundancy shall be N+1."
+    vendor = "Rated runtime: 8 minutes. Redundancy: N."
+    # grounded positive deviation -> no flags
+    ok = A.audit_label(_pos("p", "L1", 10, 8), owner, vendor, is_image=False)
+    assert ok == []
+    # required_value invented (1200 not in owner) -> flagged
+    bad = A.audit_label(_pos("p", "L2", 1200, 8), owner, vendor, is_image=False)
+    assert any("required_value" in f for f in bad)
+    # omission sentinel submitted value is NOT flagged as missing from vendor
+    om = A.audit_label(
+        _pos("p", "L3", "N+1", "Not stated", ltype="omission"), owner, vendor, is_image=False)
+    assert om == []
+
+
+def test_label_audit_runs_on_seed():
+    import benchmark_label_audit as A
+    labels = L.load_labels()
+    verdicts = 0
+    for lb in labels:
+        d = L.BENCH / "pairs" / lb["pair_id"]
+        owner = (d / "owner_requirement.md").read_text(encoding="utf-8")
+        vendor = (d / "vendor_submittal.md").read_text(encoding="utf-8")
+        A.audit_label(lb, owner, vendor, lb.get("modality") == "image")
+        verdicts += 1
+    assert verdicts == len(labels)
+
+
 def test_manifest_flags_missing_and_bad_fields(tmp_path):
     rows = [{"source_id": "", "system_type": "nope", "document_role": "owner_requirement",
              "source_origin": "primary_vendor_public", "file_name": "", "sha256": "",

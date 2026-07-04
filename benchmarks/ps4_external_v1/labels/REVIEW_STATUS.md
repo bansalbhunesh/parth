@@ -15,3 +15,17 @@ verdict; 0 adjudicated. When a second reviewer runs, follow
 `ADJUDICATION_PROTOCOL.md`, populate `reviewer_2.jsonl` + `adjudicated.jsonl`, set
 each label's `review_status` to `reviewed_two_person`/`adjudicated`, and bump
 `benchmark_version`.
+
+## Automated consistency audit (NOT a second human reviewer)
+
+`scripts/benchmark_label_audit.py` runs an independent, deterministic second-pass
+check of every label against its own pair documents (is the required_value
+grounded in the owner doc? the submitted_value in the vendor doc? does a positive
+deviation actually differ?). Results: `labels/automated_audit.jsonl`.
+
+This is **machine QA, not human adjudication** — it flags candidates for a human
+to review, it does not confirm correctness and does not substitute for the
+pending two-person review. Latest run: **123/129 consistent, 6 flagged**
+(labels whose submitted_value carries an added annotation or phrasing not
+literally present in the document). A human reviewer should adjudicate the
+flagged six as part of the reviewer-2 pass.

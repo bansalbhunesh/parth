@@ -14,6 +14,7 @@ from backend.agents.reconciliation import (
     SYSTEM_PROMPT,
     _all_standards_text,
     _check_citation_faithfulness,
+    _ground_findings,
     _validate_deviations,
 )
 
@@ -253,6 +254,7 @@ def run_analysis(
             timeout=_LLM_TIMEOUT_S)
         devs = _validate_deviations(raw)
         devs = _check_citation_faithfulness(devs, spec_text, submittal_text, standards)
+        devs = _ground_findings(devs, spec_text)  # drop hallucinated requirements
         for d in devs:
             _enrich_cx(d, system_id)  # rule-table only — no extra LLM calls
         mode = "llm"
@@ -309,6 +311,7 @@ def run_vision_analysis(
             lambda: _extract_json(complete_vision(prompt, image_bytes, mime_type, SYSTEM_PROMPT))
         ).result(timeout=_LLM_TIMEOUT_S)
         devs = _validate_deviations(raw)
+        devs = _ground_findings(devs, spec_text)  # drop hallucinated requirements
         for d in devs:
             _enrich_cx(d, system_id)
         mode = "vision"
@@ -349,6 +352,7 @@ def run_streaming_analysis(
         raw = _extract_json(full_text)
         devs = _validate_deviations(raw)
         devs = _check_citation_faithfulness(devs, spec_text, submittal_text, standards)
+        devs = _ground_findings(devs, spec_text)  # drop hallucinated requirements
         for d in devs:
             _enrich_cx(d, system_id)  # rule-table only — no extra LLM calls
         mode = "llm"

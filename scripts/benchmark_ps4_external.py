@@ -47,11 +47,26 @@ def run_one(pair_id: str, labels: list[dict], mode: str) -> dict:
     not_run = False
     t0 = time.time()
     if modality == "image":
-        # image/OCR case — not evaluated by the text/rule path; recorded not_run
-        # (a miss in the PRIMARY metric) rather than fabricating a prediction.
-        findings, mode_used, not_run, latency = [], "image_pending", True, 0
-        err = "modality=image; requires vision run (pending OCR/vision support)"
-        err_type = "image_pending"
+        png = L.BENCH / "pairs" / pair_id / "vendor_submittal.png"
+        if mode == "llm" and png.exists():
+            # Read values straight from the rendered image via the vision path.
+            try:
+                from backend.analyze import run_vision_analysis
+                res = run_vision_analysis(owner, png.read_bytes(), "image/png", system_id)
+                findings, mode_used, latency = res.deviations, res.mode, res.elapsed_ms
+                if res.mode != "vision":  # vision-unavailable → not an image result
+                    not_run = True
+                    err, err_type = "vision unavailable (provider/parse failure)", "vision_unavailable"
+            except Exception as exc:  # record the failure, never fabricate
+                findings, mode_used, not_run = [], "error", True
+                latency = round((time.time() - t0) * 1000)
+                err, err_type = f"{type(exc).__name__}: {str(exc)[:200]}", type(exc).__name__
+        else:
+            # rule mode (or no image on disk) — not evaluated here; recorded
+            # not_run (a PRIMARY-metric miss) rather than fabricating a prediction.
+            findings, mode_used, not_run, latency = [], "image_pending", True, 0
+            err = "modality=image; vision runs only in --mode llm"
+            err_type = "image_pending"
     elif mode == "rule":
         findings = _resilient_fallback(owner, sub, system_id)
         mode_used = "rule"

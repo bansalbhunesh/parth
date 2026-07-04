@@ -30,6 +30,12 @@ PROVIDER = os.getenv("PRAMAAN_LLM", "gemini")  # "gemini" | "claude" | "openai"
 # quota) as second fallback for full insurance, then Claude.
 _CHAIN_ORDER = ["gemini", "openai", "groq", "claude"]
 
+# Bounded retry for transient server-side failures (500/503/overloaded) on a
+# single provider before it fails over. 429/quota is NOT transient and is never
+# retried (see _is_transient). Env-configurable so tests can zero the backoff.
+_TRANSIENT_RETRIES = int(os.getenv("LLM_TRANSIENT_RETRIES", "2"))
+_RETRY_BACKOFF_S = float(os.getenv("LLM_RETRY_BACKOFF_S", "1.0"))
+
 # Observability for /llm-check — which provider last answered, and the last
 # failover with its (redacted) reason. Never stores secrets.
 FAILOVER_STATUS = {
@@ -76,6 +82,24 @@ def _is_transient(exc) -> bool:
     exhausted daily cap just wastes time."""
     s = str(exc).lower()
     return "503" in s or "unavailable" in s or "overloaded" in s or "internal" in s
+
+
+def _with_transient_retry(call, label):
+    """Run `call`, retrying up to `_TRANSIENT_RETRIES` times on transient
+    server-side errors (500/503/overloaded) with exponential backoff. 429/quota
+    is not transient and is never retried — it fails straight through so the
+    chain can fail over to the next provider or the rule floor."""
+    for attempt in range(_TRANSIENT_RETRIES + 1):
+        try:
+            return call()
+        except Exception as exc:  # noqa: BLE001
+            if attempt < _TRANSIENT_RETRIES and _is_transient(exc):
+                delay = _RETRY_BACKOFF_S * (2 ** attempt)
+                log.warning("%s transient error (%s) — retry %d/%d in %.1fs",
+                            label, str(exc)[:80], attempt + 1, _TRANSIENT_RETRIES, delay)
+                time.sleep(delay)
+                continue
+            raise
 
 
 def _salvage_json_objects(text: str) -> list:
@@ -207,13 +231,51 @@ def complete_json(prompt: str, system: str = ""):
         raise LLMError(f"LLM returned unparseable JSON: {exc}") from exc
 
 
+def _openai_compatible_vision(prompt, image_bytes, mime_type, system, *, label,
+                              api_key, base_url, model, max_tokens):
+    """Multimodal reasoning over an OpenAI-compatible /v1 gateway (e.g. aicredits
+    or OpenRouter proxying a multimodal model such as gemini-2.5-flash). The
+    image is passed inline as a base64 data URI in an image_url content part."""
+    if not api_key:
+        raise LLMError(f"{label} vision API key not set")
+    import base64
+    data_uri = f"data:{mime_type};base64,{base64.b64encode(image_bytes).decode()}"
+    log.info("%s vision call: model=%s, image_bytes=%d, prompt_len=%d",
+             label, model, len(image_bytes), len(prompt))
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key, base_url=base_url or None)
+        messages = []
+        if system:
+            messages.append({"role": "system", "content": system})
+        messages.append({"role": "user", "content": [
+            {"type": "text", "text": prompt},
+            {"type": "image_url", "image_url": {"url": data_uri}},
+        ]})
+        return _with_transient_retry(
+            lambda: client.chat.completions.create(
+                model=model, messages=messages, temperature=0.1, max_tokens=max_tokens
+            ).choices[0].message.content, label)
+    except Exception as exc:
+        log.error("%s vision error: %s", label, exc)
+        raise LLMError(f"{label} vision call failed: {exc}") from exc
+
+
 def complete_vision(prompt: str, image_bytes: bytes, mime_type: str,
                     system: str = "") -> str:
-    """Reason over an IMAGE + prompt. Gemini-only: it is the sole multimodal
-    provider (the Qwen/Groq legs are text). No text-model failover applies —
-    if Gemini vision is unreachable this raises LLMError and the caller
-    degrades to the deterministic engine (which reads the text layer / OCR).
-    Vision is a capability we prove on real documents, not a live demo crutch."""
+    """Reason over an IMAGE + prompt. Multimodal only: Gemini natively, or an
+    OpenAI-compatible multimodal gateway when `PRAMAAN_LLM=openai` (the Groq leg
+    is text). No text-model failover applies — if the multimodal provider is
+    unreachable this raises LLMError and the caller degrades to the
+    deterministic engine (which reads the text layer / OCR). Vision is a
+    capability we prove on real documents, not a live demo crutch."""
+    if os.getenv("PRAMAAN_LLM", "gemini") == "openai" and os.environ.get("OPENAI_API_KEY"):
+        return _openai_compatible_vision(
+            prompt, image_bytes, mime_type, system, label="OpenAI-compat",
+            api_key=os.environ.get("OPENAI_API_KEY"),
+            base_url=os.getenv("OPENAI_BASE_URL"),
+            model=os.getenv("OPENAI_VISION_MODEL", os.getenv("OPENAI_MODEL", "gemini-2.0-flash")),
+            max_tokens=int(os.getenv("OPENAI_MAX_TOKENS", "4000")))
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise LLMError("Vision requires GEMINI_API_KEY (the only multimodal provider)")
@@ -332,8 +394,9 @@ def _openai_compatible(prompt, system, json_mode, *, label, api_key, base_url,
                   "max_tokens": max_tokens}
         if json_mode and json_mode_on:
             kwargs["response_format"] = {"type": "json_object"}
-        resp = client.chat.completions.create(**kwargs)
-        return resp.choices[0].message.content
+        return _with_transient_retry(
+            lambda: client.chat.completions.create(**kwargs).choices[0].message.content,
+            label)
     except Exception as exc:
         log.error("%s API error: %s", label, exc)
         raise LLMError(f"{label} API call failed: {exc}") from exc

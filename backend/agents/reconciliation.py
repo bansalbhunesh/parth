@@ -5,6 +5,7 @@ basis, vendor submittal, and governing standards.
 
 import json
 import logging
+import re
 
 from backend.agents.commissioning import predict_cx_impact
 from backend.llm import LLMError, complete_json
@@ -143,6 +144,40 @@ def _check_citation_faithfulness(devs, spec_text, submittal_text, standards_text
         std_found = bool(std) and (std in all_text or std.replace("-", "") in all_text)
         d["citation_faithful"] = clause_found and std_found
     return devs
+
+
+def _ground_findings(devs, spec_text):
+    """Drop findings whose required_value is not present in the design basis —
+    the signature of a hallucinated requirement (the model confabulating a
+    'typical' Tier-III/IV value the spec never stated). A genuine deviation or
+    omission copies its required_value from the spec, so it survives.
+
+    A value is grounded if any of these hold against the spec: the whole value
+    (alnum-compacted) is a substring; OR every number in it appears as a
+    standalone token (so 'N+2' is NOT grounded by the '2' inside 'IP42'); OR
+    every 3+-letter word in it appears. This is the primary false-positive
+    control on the LLM path — the rule engine reads values straight from the
+    documents and is intentionally not filtered."""
+    spec_l = spec_text.lower()
+    spec_compact = re.sub(r"[^a-z0-9+]", "", spec_l)
+    kept = []
+    for d in devs:
+        rv = d.get("required_value")
+        if rv is None or str(rv).strip() == "":
+            d["grounded"] = False
+            continue
+        rv_s = str(rv).strip().lower()
+        compact = re.sub(r"[^a-z0-9+]", "", rv_s)
+        nums = re.findall(r"\d+\.?\d*", rv_s)
+        toks = [t for t in re.findall(r"[a-z]+", rv_s) if len(t) > 2]
+        ok = ((bool(compact) and compact in spec_compact)
+              or (bool(nums) and all(
+                  re.search(r"(?<!\d)" + re.escape(n) + r"(?!\d)", spec_l) for n in nums))
+              or (bool(toks) and all(t in spec_l for t in toks)))
+        d["grounded"] = ok
+        if ok:
+            kept.append(d)
+    return kept
 
 
 REQUIRED_DEV_KEYS = {"component", "parameter", "required_value", "provided_value"}

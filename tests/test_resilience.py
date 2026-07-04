@@ -144,6 +144,112 @@ class TestJSONExtraction:
             pass
 
 
+class TestGroundFindings:
+    """The grounding filter drops findings whose required_value the design
+    basis never states — the signature of a hallucinated requirement."""
+
+    SPEC = ("Battery autonomy shall be at least 10 minutes. Chiller plant shall "
+            "be N+1 redundant. Each branch load shall not exceed 32 A. Internal "
+            "separation shall be Form 4b.")
+
+    def _dev(self, **kw):
+        d = {"component": "X", "parameter": "p", "required_value": "", "provided_value": "?"}
+        d.update(kw)
+        return d
+
+    def test_grounded_numeric_kept(self):
+        from backend.agents.reconciliation import _ground_findings
+        out = _ground_findings([self._dev(required_value=10)], self.SPEC)
+        assert len(out) == 1 and out[0]["grounded"] is True
+
+    def test_prose_wrapped_numeric_kept(self):
+        # Model adds prose ("Connected load <= 32 A") but 32 is in the spec.
+        from backend.agents.reconciliation import _ground_findings
+        out = _ground_findings([self._dev(required_value="Connected load <= 32 A")], self.SPEC)
+        assert len(out) == 1
+
+    def test_hallucinated_numeric_dropped(self):
+        # 1200 kW module rating is nowhere in this spec.
+        from backend.agents.reconciliation import _ground_findings
+        out = _ground_findings([self._dev(required_value=1200)], self.SPEC)
+        assert out == []
+
+    def test_np2_not_grounded_by_ip42(self):
+        # "N+2" must NOT be grounded by a stray '2' inside 'IP42'.
+        from backend.agents.reconciliation import _ground_findings
+        spec = "Ingress protection shall be IP42. Chiller plant shall be N+1."
+        out = _ground_findings([self._dev(required_value="N+2")], spec)
+        assert out == []
+
+    def test_string_requirement_kept(self):
+        from backend.agents.reconciliation import _ground_findings
+        out = _ground_findings([self._dev(required_value="Form 4b")], self.SPEC)
+        assert len(out) == 1
+
+    def test_empty_required_value_dropped(self):
+        from backend.agents.reconciliation import _ground_findings
+        out = _ground_findings([self._dev(required_value="")], self.SPEC)
+        assert out == []
+
+    def test_real_omission_kept(self):
+        # Spec requires N+1; model reports it omitted -> required_value grounded.
+        from backend.agents.reconciliation import _ground_findings
+        out = _ground_findings(
+            [self._dev(parameter="redundancy", required_value="N+1",
+                       provided_value="Not specified")], self.SPEC)
+        assert len(out) == 1
+
+
+class TestTransientRetry:
+    """Transient 500/503 retries a bounded number of times; 429/quota does not."""
+
+    def test_retries_transient_then_succeeds(self):
+        import backend.llm as llm
+        llm._RETRY_BACKOFF_S = 0.0
+        calls = {"n": 0}
+
+        def flaky():
+            calls["n"] += 1
+            if calls["n"] < 2:
+                raise RuntimeError("500 Internal Server Error")
+            return "ok"
+
+        assert llm._with_transient_retry(flaky, "test") == "ok"
+        assert calls["n"] == 2
+
+    def test_quota_429_not_retried(self):
+        import backend.llm as llm
+        llm._RETRY_BACKOFF_S = 0.0
+        calls = {"n": 0}
+
+        def quota():
+            calls["n"] += 1
+            raise RuntimeError("429 RESOURCE_EXHAUSTED quota")
+
+        try:
+            llm._with_transient_retry(quota, "test")
+            assert False, "expected raise"
+        except RuntimeError:
+            pass
+        assert calls["n"] == 1  # no retries on quota
+
+    def test_non_transient_not_retried(self):
+        import backend.llm as llm
+        llm._RETRY_BACKOFF_S = 0.0
+        calls = {"n": 0}
+
+        def bad():
+            calls["n"] += 1
+            raise ValueError("bad request 400")
+
+        try:
+            llm._with_transient_retry(bad, "test")
+            assert False, "expected raise"
+        except ValueError:
+            pass
+        assert calls["n"] == 1
+
+
 class TestCommissioningFallback:
     """Cx predictor falls back cleanly for unknown deviations (no API key)."""
 

@@ -402,11 +402,24 @@ export async function streamAnalyze(
   }
 }
 
+export interface ExtractionMeta {
+  method: string;          // text_layer | ocr_pdf | ocr_image | plain_text | none
+  chars: number;
+  ocr_used: boolean;
+  truncated: boolean;
+  warning: string | null;
+}
+export interface UploadExtraction {
+  spec: ExtractionMeta;
+  submittal: ExtractionMeta;
+}
+
 export async function streamUploadAnalyze(
   formData: FormData,
   handlers: {
     onStatus: (status: string) => void;
     onPreview: (preview: { spec: string; submittal: string }) => void;
+    onExtraction?: (extraction: UploadExtraction) => void;
     onToken: (token: string) => void;
     onResult: (result: unknown) => void;
     onError: (err: string) => void;
@@ -423,6 +436,7 @@ export async function streamUploadAnalyze(
     await consumeSSE(r, {
       status: (data) => handlers.onStatus(data),
       preview: (data) => { try { handlers.onPreview(JSON.parse(data)); } catch {} },
+      extraction: (data) => { try { handlers.onExtraction?.(JSON.parse(data)); } catch {} },
       token: (data) => {
         try { handlers.onToken(JSON.parse(data)); } catch { handlers.onToken(data); }
       },

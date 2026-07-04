@@ -1,7 +1,7 @@
 "use client";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { streamAnalyze, streamUploadAnalyze, getOcrCheck } from "../lib/api";
-import type { OcrStatus } from "../lib/api";
+import type { OcrStatus, UploadExtraction } from "../lib/api";
 
 const EXAMPLE_SPEC = `# Design Basis: UPS System
 - **UPS-02** — battery runtime min: shall be **10 min** (ref: UPTIME-TIER4; clause DB-4.3)
@@ -191,6 +191,7 @@ export default function AnalyzePanel() {
   const [specPreview, setSpecPreview] = useState("");
   const [subPreview, setSubPreview] = useState("");
   const [ocr, setOcr] = useState<OcrStatus | null>(null);
+  const [extraction, setExtraction] = useState<UploadExtraction | null>(null);
   const abortRef = useRef(false);
 
   // Probe whether THIS deployment can OCR, so the UI reflects reality instead of
@@ -208,6 +209,12 @@ export default function AnalyzePanel() {
     ? "Drop PDF/image/MD/TXT here or click to browse"
     : "Drop PDF/MD/TXT here or click to browse";
 
+  // Show the OCR caveat when either uploaded document was read via OCR.
+  const ocrWarning =
+    extraction && (extraction.spec.ocr_used || extraction.submittal.ocr_used)
+      ? extraction.submittal.warning ?? extraction.spec.warning
+      : null;
+
   const canAnalyzeText = spec.length >= 10 && submittal.length >= 10;
   const canAnalyzePdf = specFile !== null && submittalFile !== null;
   const canAnalyze = mode === "text" ? canAnalyzeText : canAnalyzePdf;
@@ -221,6 +228,7 @@ export default function AnalyzePanel() {
     setStreamText("");
     setSpecPreview("");
     setSubPreview("");
+    setExtraction(null);
   };
 
   const finalize = () => {
@@ -241,6 +249,7 @@ export default function AnalyzePanel() {
     await streamUploadAnalyze(formData, {
       onStatus: setStatus,
       onPreview: (p) => { setSpecPreview(p.spec || ""); setSubPreview(p.submittal || ""); },
+      onExtraction: setExtraction,
       onToken: (token) => { if (!abortRef.current) setStreamText((prev) => prev + token); },
       onResult: (res) => { setResult(res as AnalyzeResult); setStreamText(""); setStreaming(false); },
       onError: (err) => setError(err),
@@ -432,6 +441,22 @@ export default function AnalyzePanel() {
       </button>
 
       {error && <div className="analyze-error">{error}</div>}
+
+      {ocrWarning && (
+        <div
+          role="status"
+          style={{
+            display: "flex", alignItems: "flex-start", gap: 8,
+            fontSize: 12.5, lineHeight: 1.45, margin: "12px 0 0",
+            padding: "9px 12px", borderRadius: 8,
+            border: "1px solid rgba(245,158,11,0.4)",
+            background: "rgba(245,158,11,0.10)", color: "#b45309",
+          }}
+        >
+          <span aria-hidden="true" style={{ flexShrink: 0 }}>⚠️</span>
+          <span>{ocrWarning}</span>
+        </div>
+      )}
 
       {loading && (
         <div className="analyze-loading">

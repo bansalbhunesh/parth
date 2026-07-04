@@ -7,7 +7,9 @@ source, detailed submission PDF source, and any future video/demo script.
 **Rule:** if a claim is not in this register, do not make it. Every quantitative
 claim must appear with its nearby limitation. Numbers are from
 `benchmarks/ps4_external_v1/reports/benchmark_card.json` (regenerate with
-`python scripts/benchmark_report.py`).
+`python scripts/benchmark_report.py`). Provenance governance (source origin,
+derived-vs-stored, standards-citation-only) is indexed in
+[`SOURCE_PROVENANCE.md`](SOURCE_PROVENANCE.md).
 
 Evidence types: `measured` (deterministic count/hash), `benchmarked` (from the
 3-pass featured run), `deterministic_offline` (rule engine), `team_authored`

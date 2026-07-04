@@ -3,7 +3,9 @@
 Pramaan uses third-party software, references published standards, and derives
 some benchmark values from public sources. This file acknowledges them. See
 [`docs/STANDARDS_AND_SOURCE_LIMITATIONS.md`](docs/STANDARDS_AND_SOURCE_LIMITATIONS.md)
-for what the benchmark provenance does and does not mean.
+for what the benchmark provenance does and does not mean, and
+[`docs/SOURCE_PROVENANCE.md`](docs/SOURCE_PROVENANCE.md) for the consolidated
+provenance-and-claim-governance index.
 
 ## Software dependencies
 

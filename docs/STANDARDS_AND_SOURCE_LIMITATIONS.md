@@ -2,6 +2,8 @@
 
 This document states exactly what the Pramaan documents and the ps4_external_v1
 benchmark are — and are not — so no reader (or judge) over-reads the provenance.
+For the consolidated provenance + claim-governance index (with per-manifest
+stats), see [`SOURCE_PROVENANCE.md`](SOURCE_PROVENANCE.md).
 
 ## Key distinctions (read these first)
 

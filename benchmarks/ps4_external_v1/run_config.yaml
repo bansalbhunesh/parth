@@ -3,7 +3,7 @@
 # tiny stdlib reader (no pyyaml dependency, so it works in CI).
 
 benchmark: ps4_external_v1
-benchmark_version: 1.0.0
+benchmark_version: 1.2.0
 
 # data locations (relative to benchmarks/ps4_external_v1/)
 labels_file: labels/labels.jsonl

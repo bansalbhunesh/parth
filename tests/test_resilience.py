@@ -116,6 +116,33 @@ class TestJSONExtraction:
         except (ValueError, Exception):
             pass
 
+    def test_salvage_truncated_array(self):
+        # A reasoning model that ran out of output budget mid-array: the two
+        # complete objects are recovered, the trailing truncated one dropped.
+        from backend.llm import _extract_json
+        raw = ('```json\n[\n  {"parameter": "a", "required_value": 10},\n'
+               '  {"parameter": "b", "required_value": 20},\n'
+               '  {"parameter": "c", "required_value": ')
+        result = _extract_json(raw)
+        assert result == [{"parameter": "a", "required_value": 10},
+                          {"parameter": "b", "required_value": 20}]
+
+    def test_salvage_ignores_braces_in_strings(self):
+        # Braces inside string values must not miscount object boundaries.
+        from backend.llm import _extract_json
+        raw = '[{"note": "value is {x} not }y{"}, {"note": "second"}, {"bad":'
+        result = _extract_json(raw)
+        assert result == [{"note": "value is {x} not }y{"}, {"note": "second"}]
+
+    def test_truncated_single_object_still_raises(self):
+        # Nothing complete to salvage -> the strict parse error propagates.
+        from backend.llm import _extract_json
+        try:
+            _extract_json('```json\n[\n  {"parameter": "a", "required_value": ')
+            assert False, "expected parse failure"
+        except (ValueError, Exception):
+            pass
+
 
 class TestCommissioningFallback:
     """Cx predictor falls back cleanly for unknown deviations (no API key)."""

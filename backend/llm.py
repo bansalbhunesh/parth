@@ -78,24 +78,76 @@ def _is_transient(exc) -> bool:
     return "503" in s or "unavailable" in s or "overloaded" in s or "internal" in s
 
 
+def _salvage_json_objects(text: str) -> list:
+    """Best-effort recovery of the complete top-level ``{...}`` objects from a
+    truncated or partially-malformed JSON array — e.g. a reasoning model that
+    exhausted its output budget mid-array. String-aware (braces inside string
+    values do not miscount), it returns the objects that parse and silently
+    drops a trailing truncated one. Called only after a strict parse fails, so
+    well-formed payloads are never affected."""
+    objs, depth, start = [], 0, None
+    in_str = esc = False
+    for k, c in enumerate(text):
+        if in_str:
+            if esc:
+                esc = False
+            elif c == "\\":
+                esc = True
+            elif c == '"':
+                in_str = False
+            continue
+        if c == '"':
+            in_str = True
+        elif c == "{":
+            if depth == 0:
+                start = k
+            depth += 1
+        elif c == "}":
+            if depth > 0:
+                depth -= 1
+                if depth == 0 and start is not None:
+                    try:
+                        objs.append(json.loads(text[start : k + 1]))
+                    except (ValueError, TypeError):
+                        pass
+                    start = None
+    return objs
+
+
 def _extract_json(text: str):
     text = text.strip()
     text = re.sub(r"^```(?:json)?", "", text).strip()
     text = re.sub(r"```$", "", text).strip()
-    for start, end in [("[", "]"), ("{", "}")]:
-        i = text.find(start)
-        if i == -1:
-            continue
-        depth, j = 0, i
-        while j < len(text):
-            if text[j] == start:
-                depth += 1
-            elif text[j] == end:
-                depth -= 1
-                if depth == 0:
-                    return json.loads(text[i : j + 1])
-            j += 1
-    return json.loads(text)
+    try:
+        for start, end in [("[", "]"), ("{", "}")]:
+            i = text.find(start)
+            if i == -1:
+                continue
+            depth, j = 0, i
+            while j < len(text):
+                if text[j] == start:
+                    depth += 1
+                elif text[j] == end:
+                    depth -= 1
+                    if depth == 0:
+                        return json.loads(text[i : j + 1])
+                j += 1
+            # An opening "[" that never closes is a truncated array: salvage the
+            # complete objects instead of letting the "{" branch return only the
+            # first one.
+            if start == "[":
+                salvaged = _salvage_json_objects(text[i:])
+                if salvaged:
+                    return salvaged
+        return json.loads(text)
+    except (ValueError, TypeError):
+        # Truncated/malformed payload (e.g. a reasoning model that ran out of
+        # output budget mid-array): salvage the complete objects rather than
+        # dropping the whole reconcile to the rule floor.
+        salvaged = _salvage_json_objects(text)
+        if salvaged:
+            return salvaged
+        raise
 
 
 _DISPATCH = {}  # populated after the per-provider functions are defined

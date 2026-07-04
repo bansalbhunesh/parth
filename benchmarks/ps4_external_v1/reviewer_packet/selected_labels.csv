@@ -1,0 +1,45 @@
+label_id,pair_id,system_type,label_type,difficulty,reason_selected
+P001-L01,pair_001,ups,positive_deviation,direct_value,difficulty coverage: direct_value
+P002-L01,pair_002,metering_power_quality,positive_deviation,direct_value,difficulty coverage: direct_value
+P003-L01,pair_003,switchgear,positive_deviation,direct_value,difficulty coverage: direct_value
+P004-L01,pair_004,generator,positive_deviation,categorical_reasoning,difficulty coverage: categorical_reasoning
+P005-L01,pair_005,crac_crah,positive_deviation,unit_conversion,unit-conversion case (representation-sensitive; only 2 in benchmark)
+P006-L01,pair_006,generator,positive_deviation,derived_arithmetic,audit-flagged — previously marked needs human judgment
+P007-L01,pair_007,battery,positive_deviation,derived_arithmetic,difficulty coverage: derived_arithmetic
+P008-L01,pair_008,refrigerant,positive_deviation,domain_recall,difficulty coverage: domain_recall
+P009-L01,pair_009,cabling,positive_deviation,categorical_reasoning,difficulty coverage: categorical_reasoning
+P010-L01,pair_010,ups,omission,omission_detection,difficulty coverage: omission_detection
+P011-L01,pair_011,switchgear,omission,omission_detection,difficulty coverage: omission_detection
+P012-L01,pair_012,ups,clean_negative,direct_value,clean negative — ups (should NOT be a deviation)
+P013-L01,pair_013,crac_crah,clean_negative,categorical_reasoning,difficulty coverage: categorical_reasoning
+P014-L01,pair_014,refrigerant,clean_negative,domain_recall,clean negative — refrigerant (should NOT be a deviation)
+P015-L01,pair_015,crac_crah,ambiguous_contested,categorical_reasoning,contested label — reviewer to resolve
+P016-L01,pair_016,ups,adversarial_instruction,adversarial_noise,difficulty coverage: adversarial_noise
+P017-L01,pair_017,transformer,positive_deviation,categorical_reasoning,difficulty coverage: categorical_reasoning
+P017-L02,pair_017,transformer,omission,omission_detection,difficulty coverage: omission_detection
+P017-L03,pair_017,transformer,clean_negative,categorical_reasoning,clean negative — transformer (should NOT be a deviation)
+P017-L04,pair_017,transformer,clean_negative,direct_value,difficulty coverage: direct_value
+P018-L01,pair_018,chiller,positive_deviation,direct_value,difficulty coverage: direct_value
+P018-L02,pair_018,chiller,positive_deviation,categorical_reasoning,difficulty coverage: categorical_reasoning
+P018-L03,pair_018,chiller,positive_deviation,domain_recall,audit-flagged — previously marked needs human judgment
+P018-L04,pair_018,chiller,omission,omission_detection,difficulty coverage: omission_detection
+P018-L05,pair_018,chiller,clean_negative,direct_value,clean negative — chiller (should NOT be a deviation)
+P019-L03,pair_019,pdu_rpp,positive_deviation,table_or_layout,difficulty coverage: table_or_layout
+P019-L04,pair_019,pdu_rpp,clean_negative,categorical_reasoning,clean negative — pdu_rpp (should NOT be a deviation)
+P020-L03,pair_020,bms,positive_deviation,table_or_layout,audit-flagged — previously marked needs human judgment
+P020-L04,pair_020,bms,clean_negative,direct_value,clean negative — bms (should NOT be a deviation)
+P021-L01,pair_021,fire_suppression,positive_deviation,domain_recall,audit-flagged — previously marked needs human judgment
+P022-L01,pair_022,ats_sts,positive_deviation,unit_conversion,unit-conversion case (representation-sensitive; only 2 in benchmark)
+P023-L02,pair_023,cooling_tower,positive_deviation,table_or_layout,difficulty coverage: table_or_layout
+P026-L01,pair_026,generator,adversarial_instruction,adversarial_noise,difficulty coverage: adversarial_noise
+P029-L01,pair_029,refrigerant,positive_deviation,domain_recall,audit-flagged — previously marked needs human judgment
+P036-L01,pair_036,metering_power_quality,positive_deviation,adversarial_noise,difficulty coverage: adversarial_noise
+P039-L01,pair_039,ups,ocr_extraction_case,scanned_or_image,difficulty coverage: scanned_or_image
+P040-L01,pair_040,pdu_rpp,ocr_extraction_case,scanned_or_image,difficulty coverage: scanned_or_image
+P041-L01,pair_041,switchgear,ocr_extraction_case,scanned_or_image,difficulty coverage: scanned_or_image
+P044-L01,pair_044,generator,positive_deviation,categorical_reasoning,primary-source-derived pair (check derivation vs public source)
+P044-L02,pair_044,generator,clean_negative,direct_value,primary-source-derived pair (check derivation vs public source)
+P045-L01,pair_045,refrigerant,positive_deviation,domain_recall,primary-source-derived pair (check derivation vs public source)
+P045-L02,pair_045,refrigerant,clean_negative,categorical_reasoning,primary-source-derived pair (check derivation vs public source)
+P051-L01,pair_051,crac_crah,ambiguous_contested,categorical_reasoning,contested label — reviewer to resolve
+P052-L01,pair_052,pdu_rpp,positive_deviation,derived_arithmetic,audit-flagged — previously marked needs human judgment

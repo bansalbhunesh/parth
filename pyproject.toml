@@ -15,6 +15,10 @@ dependencies = [
     "pytesseract>=0.3.10,<1.0",
     "Pillow>=10.0,<12.0",
     "httpx>=0.27,<1.0",
+    # Explicit security floor for the multipart upload parser (transitive via
+    # FastAPI). <0.0.31 has several parsing DoS CVEs (CVE-2026-40347/42561/
+    # 53538-53540); pin the patched floor since Phase 5 hardens the upload path.
+    "python-multipart>=0.0.31",
 ]
 
 [project.optional-dependencies]

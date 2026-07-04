@@ -77,4 +77,6 @@ detection is unaffected; but we don't claim pixel-perfect transcription.
 
 Tests: [`../tests/test_ocr.py`](../tests/test_ocr.py) — builds an image-only PDF
 in-memory, asserts OCR recovery (skipped where Tesseract is absent), and asserts
-graceful empty-string degradation when OCR is disabled or broken.
+graceful empty-string degradation when OCR is disabled or broken. Prove it in
+your environment with `make verify-ocr` (local) or `make verify-ocr-docker` (the
+shipping image). Deploy/verify steps: [`../docs/OCR_DEPLOYMENT_CHECKLIST.md`](../docs/OCR_DEPLOYMENT_CHECKLIST.md).

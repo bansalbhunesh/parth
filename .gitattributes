@@ -1,0 +1,2 @@
+# Shell scripts must keep LF endings so the shebang works on Linux / CI.
+scripts/verify_ocr_docker.sh text eol=lf

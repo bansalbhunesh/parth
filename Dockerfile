@@ -1,5 +1,13 @@
 FROM python:3.11-slim AS backend
 
+# tesseract-ocr powers the scanned/image-only PDF + image OCR fallback
+# (backend/agents/ocr_util.py). Without it the app still runs and degrades to an
+# honest "OCR unavailable" message; with it, scanned submittals are read via OCR.
+# Kept in sync with Dockerfile.backend so docker-compose has the same capability.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tesseract-ocr \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 COPY backend/requirements.txt backend/requirements.txt
 RUN pip install --no-cache-dir -r backend/requirements.txt

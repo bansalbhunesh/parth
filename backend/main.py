@@ -17,6 +17,7 @@ from backend.agents.rfi_copilot import ask, ask_fallback, ask_stream
 from backend.analyze import run_analysis, run_streaming_analysis
 from backend.orchestrator import run_pipeline
 from backend.paths import CORPUS, PROJECTS_DIR
+from backend.uploads import validate_upload
 
 # Dependency bundles for the expensive / abusable endpoints. Auth is a no-op
 # unless DEMO_AUTH_ENABLED + DEMO_AUTH_TOKEN are set; rate limiting is on by
@@ -213,6 +214,7 @@ def _extract_upload_doc(file: UploadFile) -> dict:
     name = file.filename or "upload"
     data = _read_capped(file, name)
     ctype = file.content_type or ""
+    validate_upload(name, ctype, data)  # MIME/ext/magic-byte allowlist
     doc = ocr_util.extract_document(data, name, ctype)
     if doc["text"].strip():
         return doc
@@ -308,6 +310,8 @@ def analyze_vision(
     img_name = submittal_image.filename or "submittal"
     spec_data = _read_capped(spec_file, spec_name)
     img_data = _read_capped(submittal_image, img_name)
+    validate_upload(spec_name, spec_file.content_type or "", spec_data)
+    validate_upload(img_name, submittal_image.content_type or "", img_data)
     spec_text = (extract_pdf_bytes(spec_data, spec_name)
                  if spec_name.lower().endswith(".pdf")
                  else spec_data.decode("utf-8", errors="replace"))
@@ -333,6 +337,10 @@ def analyze_upload_stream(
     sub_name = submittal_file.filename or "submittal"
     spec_data = _read_capped(spec_file, spec_name)
     sub_data = _read_capped(submittal_file, sub_name)
+    # Validate synchronously so a bad upload returns a clean 4xx before the SSE
+    # stream opens (never a partial event stream on a rejected file).
+    validate_upload(spec_name, spec_file.content_type or "", spec_data)
+    validate_upload(sub_name, submittal_file.content_type or "", sub_data)
 
     def generate():
         from backend.agents import ocr_util

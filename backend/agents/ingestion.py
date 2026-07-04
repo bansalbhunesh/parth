@@ -3,20 +3,20 @@ Ingestion Agent — document intake, parsing, and normalization.
 """
 
 import hashlib
-import io
 import logging
-import os
 import pathlib
 import re
 from typing import Optional
 
+from backend.agents import ocr_util
 from backend.paths import CORPUS
 
 log = logging.getLogger("pramaan.ingestion")
 
 # A PDF whose text layer yields fewer than this many characters is treated as
-# scanned / image-only and routed to the OCR fallback.
-_OCR_MIN_CHARS = 20
+# scanned / image-only and routed to the OCR fallback. Owned by ocr_util now;
+# re-exported here for back-compat with any caller referencing the old name.
+_OCR_MIN_CHARS = ocr_util._OCR_MIN_CHARS
 
 
 def _clean_text(text: str) -> str:
@@ -28,96 +28,21 @@ def _clean_text(text: str) -> str:
 
 def _pdf_text_layer(data: bytes, filename: str) -> str:
     """Pull the embedded text layer (pdfplumber, then PyMuPDF). Returns "" for
-    scanned/image-only PDFs, which carry no text layer."""
-    try:
-        import pdfplumber
-        text_pages = []
-        with pdfplumber.open(io.BytesIO(data)) as pdf:
-            for page in pdf.pages:
-                t = page.extract_text()
-                if t:
-                    text_pages.append(t)
-        if text_pages:
-            return "\n\n".join(text_pages)
-    except ImportError:
-        pass
-    except Exception as exc:
-        log.warning("pdfplumber failed for %s: %s, trying PyMuPDF", filename, exc)
-
-    try:
-        import fitz
-        with fitz.open(stream=data, filetype="pdf") as doc:
-            pages = [page.get_text() for page in doc]
-        return "\n\n".join(pages)
-    except ImportError:
-        log.warning("No PDF library available, cannot extract: %s", filename)
-        return ""
-    except Exception as exc:
-        log.warning("PyMuPDF text-layer extraction failed for %s: %s", filename, exc)
-        return ""
+    scanned/image-only PDFs, which carry no text layer. Thin wrapper over
+    ocr_util (kept for the existing import surface)."""
+    return ocr_util.extract_text_from_pdf(data, filename)
 
 
 def _ocr_pdf_bytes(data: bytes, filename: str) -> str:
-    """OCR fallback for scanned / image-only PDFs — the messy paper-scan-emailed
-    submittals EPCs actually deal with.
-
-    Best-effort by design: rasterizes each page with PyMuPDF (no Poppler needed)
-    and runs Tesseract via pytesseract. If the OCR toolchain is missing (no
-    pytesseract, no tesseract binary, no language data) it returns "" rather than
-    raising, so the caller can surface an honest message instead of a 500. This
-    keeps the "no silent zeros" promise: a scanned PDF either gets read, or the
-    user is told plainly why it could not be.
-
-    Disable with PRAMAAN_OCR=0. Point at a tesseract binary with TESSERACT_CMD
-    and at language data with TESSDATA_PREFIX. DPI via PRAMAAN_OCR_DPI (default 300).
-    """
-    if os.getenv("PRAMAAN_OCR", "1") == "0":
-        return ""
-    try:
-        import fitz
-        import pytesseract
-        from PIL import Image
-    except ImportError as exc:
-        log.warning("OCR unavailable (missing %s) for %s", getattr(exc, "name", exc), filename)
-        return ""
-
-    cmd = os.getenv("TESSERACT_CMD")
-    if cmd:
-        pytesseract.pytesseract.tesseract_cmd = cmd
-
-    try:
-        dpi = int(os.getenv("PRAMAAN_OCR_DPI", "300"))
-    except ValueError:
-        dpi = 300
-
-    try:
-        with fitz.open(stream=data, filetype="pdf") as doc:
-            pages = []
-            for page in doc:
-                pix = page.get_pixmap(dpi=dpi)
-                img = Image.open(io.BytesIO(pix.tobytes("png")))
-                pages.append(pytesseract.image_to_string(img))
-        text = "\n\n".join(pages)
-        if text.strip():
-            log.info("OCR recovered %d chars from scanned PDF %s", len(text), filename)
-        return text
-    except Exception as exc:
-        log.warning("OCR failed for %s: %s", filename, exc)
-        return ""
+    """OCR fallback for scanned / image-only PDFs. Thin wrapper over ocr_util
+    (kept for the existing import surface); see ocr_util.ocr_pdf_bytes."""
+    return ocr_util.ocr_pdf_bytes(data, filename)
 
 
 def extract_pdf_bytes(data: bytes, filename: str = "upload.pdf") -> str:
     """Extract text from PDF bytes. Tries the embedded text layer first; if that
     is empty or near-empty (a scanned/image-only PDF), falls back to OCR."""
-    text = _pdf_text_layer(data, filename)
-    if len(text.strip()) >= _OCR_MIN_CHARS:
-        return _clean_text(text)
-
-    # Text layer is empty or near-empty -> likely scanned. Try OCR.
-    ocr = _ocr_pdf_bytes(data, filename)
-    if len(ocr.strip()) > len(text.strip()):
-        return _clean_text(ocr)
-    return _clean_text(text)
+    return _clean_text(ocr_util.extract_text_with_fallback(data, filename))
 
 
 def _extract_pdf(path: pathlib.Path) -> str:

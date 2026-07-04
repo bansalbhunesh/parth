@@ -187,10 +187,17 @@ def _read_capped(file: UploadFile, name: str) -> bytes:
     return data
 
 
+# Raster-image extensions routed to Tesseract OCR (text-reconcile path). This is
+# SEPARATE from /analyze/vision, which reads an image with a vision LLM.
+_IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".tif", ".tiff", ".webp", ".bmp")
+
+
 def _extract_upload_text(file: UploadFile) -> str:
     name = file.filename or "upload"
     data = _read_capped(file, name)
-    if name.lower().endswith(".pdf") or file.content_type == "application/pdf":
+    lower = name.lower()
+    ctype = file.content_type or ""
+    if lower.endswith(".pdf") or ctype == "application/pdf":
         text = extract_pdf_bytes(data, name)
         if not text:
             raise HTTPException(
@@ -198,6 +205,18 @@ def _extract_upload_text(file: UploadFile) -> str:
                 f"Could not read '{name}'. It looks like a scanned / image-only PDF "
                 "and OCR is unavailable in this deployment. Upload a text-based PDF, "
                 "or paste the document text directly into Live Analysis.",
+            )
+        return text
+    if lower.endswith(_IMAGE_EXTS) or ctype.startswith("image/"):
+        from backend.agents import ocr_util
+        text = ocr_util.extract_text_from_image(data, ctype or "image/png")
+        if not text.strip():
+            raise HTTPException(
+                400,
+                f"Could not read text from image '{name}'. OCR is unavailable in this "
+                "deployment, or the image carries no legible text. Paste the document "
+                "text directly, or use Vision mode (/analyze/vision), which reads "
+                "values from the image with an LLM.",
             )
         return text
     return data.decode("utf-8", errors="replace")
@@ -355,6 +374,8 @@ def _llm_status() -> dict:
 @app.get("/health")
 def health():
     import os
+
+    from backend.agents import ocr_util
     llm = _llm_status()
     return {
         "ok": True,
@@ -365,6 +386,39 @@ def health():
         "commit": (os.getenv("RENDER_GIT_COMMIT") or os.getenv("GIT_COMMIT") or "dev")[:7],
         "llm": llm,
         "analysis_mode": "llm" if llm["ready"] else "rule-based-fallback",
+        # True only when the tesseract binary is present AND OCR is enabled — so a
+        # UI badge built on this can never imply OCR works where it does not.
+        # Cached probe (no subprocess per health check). See /ocr-check for detail.
+        "ocr_available": ocr_util.tesseract_available_cached() and ocr_util.ocr_enabled(),
+    }
+
+
+@app.get("/ocr-check")
+def ocr_check():
+    """Report whether scanned-PDF / image OCR will actually run in THIS
+    deployment. Unlike a doc claim, this is the ground truth: it live-probes the
+    tesseract binary. Returns only booleans / ints / a version string — never a
+    stack trace, path, or secret. A frontend OCR-status badge should read this."""
+    from backend.agents import ocr_util
+    installed = ocr_util.is_tesseract_available()
+    enabled = ocr_util.ocr_enabled()
+    ready = installed and enabled
+    if not enabled:
+        status = "disabled"        # turned off via PRAMAAN_OCR / PRAMAAN_OCR_ENABLED
+    elif not installed:
+        status = "tesseract_not_installed"
+    else:
+        status = "ready"
+    return {
+        "ocr_available": ready,
+        "ocr_enabled": enabled,
+        "tesseract_installed": installed,
+        "tesseract_version": ocr_util.get_tesseract_version(),
+        "image_ocr_supported": ready,
+        "pdf_ocr_supported": ready,
+        "max_pdf_pages": ocr_util.max_pdf_pages(),
+        "max_image_pixels": ocr_util.max_image_pixels(),
+        "status": status,
     }
 
 

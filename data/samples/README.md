@@ -26,11 +26,11 @@ Expected result: **2 deviations caught, 0 false positives.**
 ## How to demo it
 
 **In the dashboard (easiest):** open the **Live Analysis** section →
-click **"Load real document ★"** → **Analyze**. The LLM streams its reasoning
-and surfaces the 2 buried deviations. (The plain **"Load example"** button uses
-the structured corpus format — a regex can catch that; the real document needs
-reasoning. Showing both, in that order, is a strong narrative: *"a regex catches
-the clean example — but a real vendor datasheet? Only reasoning finds this."*)
+click **"Load deviation demo ★"** → **Analyze**. The LLM streams its reasoning
+and surfaces the buried deviations. (The plain **"Load example"** button uses
+the structured corpus format — a regex can catch that; a realistic prose submittal
+needs reasoning. Showing both, in that order, is a strong narrative: *"a regex catches
+the clean example — but a realistic vendor submittal? Only reasoning finds this."*)
 
 **Via the API:**
 ```bash
@@ -88,8 +88,11 @@ two markdown files) into Live Analysis → Analyze.
 
 ## Why this matters for judging
 
-- The corpus benchmark proves *breadth and reproducibility* (12 projects, F1=1.000).
+- The 12-project synthetic corpus proves *breadth and reproducibility* — it
+  recovers all seeded deviations by construction (a breadth check, not an accuracy
+  score). The accuracy signal is the frozen ps4_external_v1 benchmark (v1.2):
+  recall 0.862, precision 0.953, FAR 0.000.
 - **These samples prove it works on a document a vendor would actually send** —
   marketing language, a false "fully compliant" claim, a beginning-of-life vs
   end-of-life trap. That is the question every judge asks: *"does it work on
-  real data?"* — and you can answer it live.
+  realistic data?"* — and you can answer it live.

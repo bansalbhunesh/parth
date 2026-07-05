@@ -12,8 +12,8 @@ const STEPS_BEFORE = [
 
 const STEPS_AFTER = [
   { phase: "Document upload", duration: "3 minutes", pain: "Drag & drop specs, submittals, and standards" },
-  { phase: "AI extraction", duration: "< 1 minute", pain: "Ingestion + Extraction agents parse all documents simultaneously" },
-  { phase: "Cross-reference", duration: "< 1 minute", pain: "Reconciliation agent checks every requirement × every submittal × 7 standards" },
+  { phase: "AI extraction", duration: "< 1 minute", pain: "Deterministic ingest + extraction stages parse all documents simultaneously" },
+  { phase: "Cross-reference", duration: "< 1 minute", pain: "The LLM reasoning core checks every requirement × every submittal × 7 standards" },
   { phase: "Register + Cx prediction", duration: "Instant", pain: "Full register with severity, lead time, and predicted Cx test failure" },
   { phase: "Week 11 detection", duration: "Same day", pain: "Caught at upload — 149 weeks before commissioning would find them" },
 ];

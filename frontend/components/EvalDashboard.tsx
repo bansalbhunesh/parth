@@ -120,15 +120,19 @@ export default function EvalDashboard() {
           {live && <span className="eval-live-dot" />}
         </div>
         <div className="eval-desc">
-          Deterministic baseline proves plumbing; LLM agent recovers deviations from raw unstructured documents.
-          All metrics computed by <code>eval/run_eval.py</code> — reproducible, auditable, no cherry-picking.
+          This is the <strong>synthetic-corpus integrity check</strong>: the deterministic harness recovers
+          every seeded deviation <em>by construction</em>, which is why these numbers are 1.000 — a plumbing
+          check, not an accuracy claim. The measured accuracy signal is the frozen <code>ps4_external_v1</code>
+          benchmark (v1.2): <strong>recall 0.862 · precision 0.953 · F1 0.905 · FAR 0.000</strong> — see{" "}
+          <a href="/evidence" style={{ color: "var(--accent)" }}>/evidence</a>. All metrics computed by{" "}
+          <code>eval/run_eval.py</code> — reproducible, auditable, no cherry-picking.
           {live && <span style={{ color: "var(--ok)", marginLeft: 8, fontSize: 11 }}>LIVE from /metrics</span>}
         </div>
       </div>
 
       <div className="eval-grid">
         <div className="eval-section">
-          <div className="eval-section-title">Detection accuracy</div>
+          <div className="eval-section-title">Detection · synthetic corpus (by construction)</div>
           <AnimatedMetric value={m.detection.baseline_precision} label="Precision" color="var(--ok)" delay={0} />
           <AnimatedMetric value={m.detection.baseline_recall} label="Recall" color="var(--ok)" delay={150} />
           <AnimatedMetric value={m.detection.baseline_f1} label="F1 Score" color="var(--ok)" delay={300} />
@@ -146,7 +150,7 @@ export default function EvalDashboard() {
           <div className="eval-impact-row">
             <div className="eval-impact">
               <div className="eval-impact-val" style={{ color: "var(--lead)" }}>{m.commissioning.total_lead_time_weeks}w</div>
-              <div className="eval-impact-label">Total lead time saved</div>
+              <div className="eval-impact-label">Total lead-time window (scenario)</div>
             </div>
             <div className="eval-impact">
               <div className="eval-impact-val" style={{ color: "var(--lead)" }}>{m.commissioning.max_lead_time_weeks}w</div>
@@ -165,15 +169,15 @@ export default function EvalDashboard() {
       </div>
 
       <div className="eval-comparison">
-        <div className="eval-comparison-title">Baseline vs LLM agent</div>
+        <div className="eval-comparison-title">Synthetic corpus (by construction) vs reasoning-core target</div>
         <div className="eval-comparison-grid">
           <div className="eval-comp-header">Metric</div>
-          <div className="eval-comp-header">Baseline (deterministic)</div>
-          <div className="eval-comp-header">LLM Agent (Gemini)</div>
+          <div className="eval-comp-header">Synthetic corpus (deterministic)</div>
+          <div className="eval-comp-header">Reasoning core (acceptance target)</div>
 
           {[
             ["Precision", m.detection.baseline_precision.toFixed(3), "≥ 0.85"],
-            ["Recall", m.detection.baseline_recall.toFixed(3), "1.000"],
+            ["Recall", m.detection.baseline_recall.toFixed(3), "≥ 0.85"],
             ["F1", m.detection.baseline_f1.toFixed(3), "≥ 0.92"],
             ["Cx prediction", m.commissioning.cx_prediction_accuracy.toFixed(3), "≥ 0.85"],
             ["Citations", "N/A", "≥ 0.95"],
@@ -185,6 +189,12 @@ export default function EvalDashboard() {
               <div className="eval-comp-cell eval-comp-llm">{llm}</div>
             </div>
           ))}
+        </div>
+        <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 10 }}>
+          Left column: the synthetic corpus recovers all seeded deviations by construction (integrity check).
+          Right column: acceptance targets, not measured scores. The measured reasoning-core result is the frozen{" "}
+          <code>ps4_external_v1</code> benchmark (v1.2) — recall 0.862, precision 0.953, F1 0.905 — reported on{" "}
+          <a href="/evidence" style={{ color: "var(--accent)" }}>/evidence</a>.
         </div>
       </div>
     </div>

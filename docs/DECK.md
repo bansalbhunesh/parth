@@ -1,92 +1,78 @@
 # Pramaan — Pitch Deck Outline
 
-> 11 slides for a 3-minute pitch + appendix. Business-led; the live demo (Slide 5)
-> is the centre of gravity. Speaker notes map to [`PITCH.md`](../PITCH.md).
-> Keep ≤ 6 words per bullet on screen — you say the rest.
+> 12 slides. The rendered deck is [`../presentation.html`](../presentation.html)
+> (export with `python scripts/export_deck.py` → [`Pramaan_Deck.pdf`](Pramaan_Deck.pdf)).
+> Speaker notes map to [`../PITCH.md`](../PITCH.md). Keep ≤ 6 words per bullet on
+> screen — you say the rest. **Every metric on a slide carries an evidence label:**
+> benchmarked · live-model · deterministic baseline · team-authored · primary-source-derived · pending · scenario · limitation.
 
 ---
 
 ### Slide 1 — Title
-- **PRAMAAN** · EPC Deviation Intelligence for Data Centres
-- *"Did the vendor build what we specified?" — answered the day the document lands.*
-- Live: **parth-tan.vercel.app/judge** · ET AI Hackathon 2026
-- **Speaker note:** name + one-line value prop. Don't over-explain; move to stakes.
+- **PRAMAAN** · EPC Deviation Intelligence for Data-Centre Delivery
+- A **benchmarked prototype**: deterministic numbers reproduce offline; live-model results reported honestly.
+- Headline chips: recall **0.862** *(benchmarked v1.2)* · **53** pairs *(team-authored)* · **1** LLM reasoning core *(+ deterministic services)*.
+- **Speaker note:** name + one-line value prop, then move to stakes.
 
-### Slide 2 — The stakes (lead with money)
-- **$30B** into Indian data centres → **2 GW by 2026**
-- **9 in 10** large builds slip schedule (Oxford megaproject data)
-- One month of delay on a 50 MW build = **$10–40M**
-- **Visual:** rising capex curve; a red delay marker at commissioning.
-- **Speaker note:** make a business judge feel the money in 15 seconds. (Sources: `docs/BUSINESS.md`.)
+### Slide 2 — The problem
+- A late submittal deviation becomes a **commissioning + schedule failure**.
+- Caught at commissioning (Weeks 16–44, *scenario*) vs caught at submittal review (Week 11).
+- **Speaker note:** make a business judge feel the cost of finding it late.
 
-### Slide 3 — Why it's hard
-- Spec · Submittal · Standard = **3 documents, 3 parties**
-- Deviations hide in thousands of pages
-- Surface at **commissioning — too late**
-- **Visual:** three disconnected document icons; a deviation slipping through the gap.
+### Slide 3 — Why current review fails
+- Owner requirement · vendor submittal · commissioning/schedule = **3 documents, 3 parties**.
+- Deviations hide in the gaps until an integrated systems test fails.
 - **Speaker note:** the 7-min-vs-10-min battery example, said out loud.
 
 ### Slide 4 — The solution
-- Reads **all three documents** together
-- Flags the deviation **on upload day**
-- Predicts the **commissioning test it fails** + **weeks of lead time**
-- **Visual:** the 5-agent pipeline (use `docs/pipeline-diagram.svg`).
+- **Requirement → deviation → commissioning test → action window.**
+- Reconciles spec + submittal + standards; traces each deviation to the Cx test it fails and the lead time to fix it.
 - **Speaker note:** one sentence, then "let me show you live."
 
-### Slide 5 — LIVE DEMO (the star) ★
-- *Real Vertiv UPS + Cummins genset → 5 deviations*
-- **It did the math: 4,000 gal ÷ 103 GPH = 38.8 h vs 48 required**
-- EPA Tier 2 vs Tier 4 · battery 7 vs 10 min · efficiency 96 vs 95.9%
-- **Visual:** the live `/judge` stream (record it; do NOT use a static slide if you can demo live).
-- **Speaker note:** stop talking for 1 second after the 38.8h finding lands.
+### Slide 5 — Live product / Judge Mode ★
+- `/judge`: **Load deviation demo ★** (hidden 2N→N+1, 10→8 min) and **Load compliant demo ✓** (zero deviations — no false alarm).
+- Token-by-token reasoning; a truthful provenance chip on every result (live LLM · vision · rule floor · OCR).
+- **Speaker note:** demo live if you can; let the derived catch land in silence.
 
-### Slide 6 — It's cited, and it's honest
-- **15 team-authored pairs (values cited from public sources):** Vertiv · Cummins · STULZ · ABB · FM-200 · Carrier · EUROBAT · transformer · cabling · Tate ConCore · Schneider Canalis · ASHRAE setpoint
-- vs real standards: Uptime · NFPA · EPA · ASHRAE · IEC · TIA-942
-- **27 hard deviation claims — 4 deterministic-offline, 23 live-model; values cited, not seeded**
-- Knew R410A's GWP (2,088); *cleared* IP54 that exceeds spec
-- **Visual:** the PROVENANCE.md source table.
-- **Speaker note:** "every value is citable" — this is the anti-vaporware slide.
+### Slide 6 — Architecture truth
+- **One compliance reasoning graph + connected deterministic services + reliability layer.**
+- Exactly one node reasons with an LLM (`reconcile`); ingest/retrieve/critique deterministic; two bounded cycles. RFI copilot is a **service, not a graph node**.
+- **Visual:** [`pipeline-diagram.svg`](pipeline-diagram.svg) / the interactive diagram — they now tell the same story.
+- **Speaker note:** "not five LLM agents — one reasoning core, the rest deterministic and inspectable."
 
-### Slide 7 — How it works
-- **5 agents, LangGraph:** Ingest → Extract → Reconcile → Cx-Predict → RFI Copilot
-- Gemini reasoning · citation-faithfulness check · rule-table Cx mapping
-- **Visual:** the architecture one-pager diagram ([`ARCHITECTURE.md`](ARCHITECTURE.md)).
-- **Speaker note:** 15 seconds — depth on demand, not a lecture.
+### Slide 7 — Benchmark proof
+- **ps4_external_v1 (v1.2)** — 53 pairs · 129 frozen labels · 17 systems · 64 clean negatives · 3-pass (`gemini-3.1-flash-lite`).
+- **recall 0.862 · precision 0.953 · F1 0.905 · FAR 0.000 · p50 ~2.5 s** *(benchmarked)*; **rule baseline 0.111** *(deterministic)*; **587** tests.
+- **Speaker note:** the LLM core clears the deterministic floor on the same frozen labels — a benchmark result, not field validation.
 
-### Slide 8 — The moat
-- Submittal review exists (BuildSync, Spec-ID, InspectMind)
-- **No one predicts the commissioning failure + lead-time-to-failure**
-- + an **open, reproducible eval** — not a closed SaaS
-- **Visual:** the comparison table from `COMPETITIVE.md`.
-- **Speaker note:** honest positioning earns trust; name the competitors first.
+### Slide 8 — Trust & limitations
+- Stand behind: 0 false alerts on 64 clean negatives · citations · reproducible.
+- Do not claim: team-authored fixtures (10 primary-source-derived, 5 URLs; **stored PDFs pending**) · **reviewer-2 pending** · automated cross-check is **machine QA, not human** · not field/customer-validated.
+- **Speaker note:** the honesty beat — trust beats a perfect score.
 
-### Slide 9 — Business impact (the asymmetry)
-- One missed deviation: **$4–25M** delay → fix on submittal day = **one RFI** *(scenario figures)*
-- Analysis costs **~paise** → an illustrative **10–100× ROI** on a single prevented slip *(modeled, not customer-validated)*
-- Aims to move detection from commissioning to submittal-day review, full audit trail to the CxA *(manual-hours reduction not yet measured)*
-- **Visual:** the millions-vs-paise asymmetry; ROI calculator (scenario); before/after timeline.
-- **Speaker note:** the asymmetry *is* the business case → `docs/BUSINESS.md`.
-
-### Slide 10 — Engineered to degrade gracefully
-- **No silent zeros** — rule-based fallback when the AI is rate-limited
-- **Full CI green · deployed** (Vercel + Render)
-- Two-way scoring · true negatives · `/llm-check` live status
-- **Visual:** green CI badge + the resilience flow.
+### Slide 9 — Reliability (built for the bad day)
+- **Provider failover for availability** (→ deterministic floor), **not accuracy** — live at `/llm-check`.
+- No silent zeros; OCR ground truth at `/ocr-check`; demo hardening (auth/rate-limit/upload validation), *not production*.
 - **Speaker note:** "engineered for the bad day, not just the stage."
 
-### Slide 11 — Vision + ask
-- Every data-centre build, every submittal, day one
-- Scale: batch ingest · vector store · delta-only re-checks
-- *The most expensive question in construction → a 5-minute answer*
-- **Visual:** map of Indian data-centre hubs; the live URL.
-- **Speaker note:** close on the vision; thank the panel.
+### Slide 10 — Business impact
+- The value is **time, caught early** — lead-time weeks, not a fabricated ROI.
+- Any cost figure is an explicitly-labelled illustrative **scenario**; manual-hours reduction not yet measured.
+- **Speaker note:** the asymmetry is the business case; do not overclaim.
+
+### Slide 11 — Roadmap
+- Evidence depth (stored primary sources) · independent review (reviewer-2 adjudication) · production hardening (shared-store auth/rate-limit, pgvector, async).
+- **Speaker note:** ordered by what most increases trust first.
+
+### Slide 12 — Close
+- **Evidence before confidence.** Benchmark v1.2 headline; one reasoning graph + deterministic services + reliability layer; reviewer-2 pending, and we say so.
+- Links: `/judge` · `/evidence` · GitHub · live demo.
 
 ---
 
-## Appendix (for live Q&A, not the 3-min run)
-- **A1 — Metrics:** benchmark P/R/F1, lead-time saved, true-negative rate; the 3 real-pair results (5/5, 3/3, 3/3, all LLM-verified).
-- **A2 — Eval methodology:** structured baseline (integrity), text extraction (robustness), multi-project (breadth), real-LLM (capability); two-way scoring.
-- **A3 — Cost & scale:** ~paise/analysis on a flash model after 85% prompt-token cut; async + queue + pgvector at scale.
-- **A4 — Security/ops:** no secrets in repo, input validation, 15 MB upload cap, graceful degradation, deploy-commit visible at `/health`.
-- **A5 — The four hard questions:** see `PITCH.md` Q&A defence.
+## Appendix (live Q&A)
+- **A1 — Benchmark card:** `benchmarks/ps4_external_v1/reports/benchmark_card.json` + `/evidence`.
+- **A2 — Architecture:** `docs/ARCHITECTURE.md`, `docs/TECHNICAL_OVERVIEW.md` — verify against `backend/orchestrator.py`.
+- **A3 — Reviewer status:** `benchmarks/ps4_external_v1/labels/REVIEW_STATUS.md` (single-author frozen; reviewer-2 pending).
+- **A4 — Reliability/ops:** `/health`, `/llm-check`, `/ocr-check`; `docs/LLM_FAILOVER_RUNBOOK.md`, `docs/SECURITY_DEMO_RUNBOOK.md`.
+- **A5 — Claims governance:** `docs/CLAIMS_REGISTER.md` (allowed vs banned wording, with limitations).

@@ -146,6 +146,10 @@ the one deliberately contested ASHRAE case that keeps our self-score honest. The
 are run-specific observations, not a frozen benchmark score.
 
 Same day, the **full Meghdoot LLM eval was re-verified on a clean key**
-(`gemini-2.5-flash`, 10 paced calls, zero 429s): **P/R/F1 = 1.000 on both
-semantic and strict scoring, citation faithfulness 1.000** — the June result
-reproduces in July on the current model.
+(`gemini-2.5-flash`, 10 paced calls, zero 429s): it recovered **every label on
+both semantic and strict scoring with faithful citations** on that dated run — the
+June result reproduced in July on the current model. A clean sweep on 15
+team-authored pairs is exactly *why* we do not headline it: the number we actually
+report is the frozen ps4_external_v1 benchmark (v1.2) — **recall 0.862, precision
+0.953, FAR 0.000** — where the labels are held out and adversarial clean negatives
+are in the mix.

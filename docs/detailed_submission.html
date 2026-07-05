@@ -32,10 +32,12 @@
   .lab { font-size: 7.6pt; font-weight: 700; text-transform: uppercase; letter-spacing:.4px;
          padding: 0.5px 5px; border-radius: 8px; white-space: nowrap; }
   .lab.meas { background:#dff5e6; color:#12683a; }
+  .lab.bench{ background:#dff5e6; color:#12683a; }
   .lab.syn  { background:#e6e9fb; color:#33409a; }
   .lab.scen { background:#fdeecf; color:#8a5a00; }
   .lab.live { background:#e2f2fb; color:#0b5a86; }
   .lab.det  { background:#e9f7f4; color:#0b6a5a; }
+  .lab.pend { background:#fde2e2; color:#8a1f1f; }
   .legend { font-size: 8.6pt; color:#52616b; margin: 4pt 0 0; }
   .foot { margin-top: 12pt; font-size: 8.4pt; color: #6b7880; border-top: 1px solid #dbe6ec; padding-top: 5pt; }
   .pb { page-break-before: always; }
@@ -46,128 +48,131 @@
 
 <h1>Pramaan — EPC Deviation Intelligence</h1>
 <div class="sub">Spec-to-Site Deviation Sentinel + Commissioning Risk Twin &middot; ET AI Hackathon 2026 &middot; Problem Statement 4</div>
-<div class="sub">Repository: <code>github.com/bansalbhunesh/parth</code> &middot; Live: <code>parth-tan.vercel.app/judge</code> &middot; API: <code>parth-1-ma30.onrender.com/health</code></div>
+<div class="sub">Repository: <code>github.com/bansalbhunesh/parth</code> &middot; Judge Mode: <code>parth-tan.vercel.app/judge</code> &middot; Evidence: <code>parth-tan.vercel.app/evidence</code> &middot; API: <code>parth-1-ma30.onrender.com/health</code></div>
 <div class="sub">Phase-2 deadline (live Unstop record): <strong>2026-07-22, 23:59:21 IST</strong></div>
 
-<p class="lede"><strong class="k">The wedge:</strong> Pramaan converts a spec/submittal mismatch into a cited commissioning failure mode and the schedule window to act — <em>before</em> the failed test becomes a project delay. Not "RAG + agents + dashboard"; the trace from owner requirement &rarr; deviation &rarr; commissioning test &rarr; lead-time-to-failure, with evidence at each step.</p>
+<p class="lede"><strong class="k">The wedge:</strong> Pramaan converts a spec/submittal mismatch into a cited commissioning failure mode and the schedule window to act — <em>before</em> the failed test becomes a project delay. The trace is owner requirement &rarr; deviation &rarr; commissioning test &rarr; lead-time-to-failure, with evidence at each step. It is a <strong>benchmarked prototype</strong>, not a field-validated product, and this document labels every number accordingly.</p>
 
-<p class="legend"><strong>Evidence labels used throughout this document:</strong>
-<span class="lab meas">measured</span> observed in a run/test &nbsp;
-<span class="lab syn">synthetic</span> authored corpus, true by construction &nbsp;
+<p class="legend"><strong>Evidence labels used throughout:</strong>
+<span class="lab bench">benchmarked</span> from the frozen ps4_external_v1 (v1.2) run &nbsp;
 <span class="lab det">deterministic&nbsp;offline</span> reproducible with no API key &nbsp;
 <span class="lab live">live-model</span> varies run-to-run &nbsp;
-<span class="lab scen">scenario</span> modeled assumption, not validated.</p>
+<span class="lab syn">synthetic</span> authored corpus, true by construction &nbsp;
+<span class="lab scen">scenario</span> modeled assumption, not validated &nbsp;
+<span class="lab pend">pending</span> not yet done.</p>
 
-<h2>1. The problem</h2>
-<p>In a hyperscale data-centre EPC build, the <strong>design basis</strong>, <strong>vendor submittals</strong>, and <strong>governing standards</strong> live in different systems and are reviewed by different people. A vendor deviation missed at submittal review resurfaces months later at commissioning — as a failed acceptance test, rework, and schedule slip. Found on submittal day it is a one-line RFI; found at commissioning it is a schedule event.</p>
-<p class="sub">Market context <span class="lab scen">scenario</span>: India data-centre capex is large and growing (IBEF, secondary research: ~US$10B in 2025 toward ~US$22B by 2030; JLL primary release is more conservative — 791 MW added by 2026, US$5.7B investment). These frame the opportunity; they are not Pramaan-specific results.</p>
+<h2>1. Problem statement &amp; PS4 alignment</h2>
+<p>In a hyperscale data-centre EPC build, the <strong>design basis</strong>, <strong>vendor submittals</strong>, and <strong>governing standards</strong> live in different systems and are reviewed by different people. A vendor deviation missed at submittal review resurfaces months later at commissioning — as a failed acceptance test, rework, and schedule slip. Found on submittal day it is a one-line RFI; found at commissioning it is a schedule event. PS4 asks for AI that reconciles specifications against submittals and standards; Pramaan does that and adds the commissioning/schedule consequence and the window to act.</p>
+<p class="sub">Market context <span class="lab scen">scenario</span>: India data-centre capex is large and growing (secondary research). These frame the opportunity; they are not Pramaan-specific results.</p>
 
-<h2>2. What Pramaan does</h2>
+<h2>2. Product workflow</h2>
 <ul>
-  <li>Reconciles a design specification against a vendor submittal and the governing standards, and reports each genuine deviation with the standard it violates.</li>
-  <li>For each deviation, predicts the <strong>commissioning test</strong> that will fail and the <strong>lead-time-in-weeks</strong> to fix it if caught now — the commissioning-risk twin.</li>
-  <li>Renders an evidence chain (required value, submitted value, source citation, confidence) and exports an audit trail for the commissioning authority.</li>
-  <li>Degrades gracefully: when the LLM is unavailable, an independent rule-based detector still catches the headline numeric shortfalls — no silent zeros, and never the answer key (see §5).</li>
+  <li>Reconciles a design specification against a vendor submittal and the governing standards, and reports each genuine deviation with the standard it violates and a citation chain (required value, submitted value, source, confidence).</li>
+  <li>For each deviation, predicts the <strong>commissioning test</strong> that will fail and the <strong>lead-time-in-weeks</strong> to fix it if caught now — the commissioning-risk twin — and connects it to schedule and supply-chain services.</li>
+  <li><strong>Judge Mode (<code>/judge</code>)</strong> is the 60-second flow: <em>Load deviation demo ★</em> (a natural-prose pair with a hidden 2N→N+1 and 10→8 min non-compliance) and <em>Load compliant demo ✓</em> (a fully compliant submittal — the correct answer is zero deviations). Users can upload their own spec + submittal (PDF / image / text).</li>
+  <li>Every result shows a <strong>truthful provenance chip</strong> — live LLM, vision, deterministic rule floor, or OCR — and a zero-deviation result from the rule floor is labelled inconclusive, not a green pass.</li>
 </ul>
 
-<h2>3. Architecture (as actually executed)</h2>
-<p>Pramaan is <strong>one compliance/Cx reasoning graph plus three connected deterministic intelligence services</strong> — not five co-operating AI agents. The runtime compliance graph is:</p>
+<h2>3. Technical architecture (as actually executed)</h2>
+<p>Pramaan is <strong>one compliance reasoning graph, a set of connected deterministic intelligence services, and a reliability layer</strong> — <em>not</em> five co-operating LLM agents. Verify against <code>backend/orchestrator.py</code>. The runtime graph is:</p>
 <p><code>ingest &rarr; load_standards &rarr; validate &rarr; reconcile &rarr; retrieve &rarr; critique &rarr; cx_predict &rarr; format_output</code></p>
 <ul>
-  <li><code>validate</code> is a routing gate; <code>reconcile</code>/<code>retrieve</code>/<code>critique</code> form a bounded retrieval + reflexion loop; <code>cx_predict</code> maps each deviation to its commissioning test via a rule table (no per-deviation LLM call).</li>
-  <li>The standalone <strong>extraction</strong> module is <em>not</em> in the executed graph, and the <strong>RFI Copilot</strong> is a separate API workflow — stated plainly rather than diagrammed as active agents.</li>
-  <li>The three deterministic services — <strong>schedule risk</strong> (graph CPM + seeded beta-PERT Monte Carlo), <strong>supply chain</strong> (closed-form ETA/risk over static data), and the <strong>project/Cx graph</strong> — are separate endpoints, not agents in the compliance graph.</li>
+  <li><strong>Exactly one node reasons with an LLM</strong> — <code>reconcile</code> (extraction happens inside it; there is no separate extract node). <code>ingest</code>, <code>load_standards</code>, <code>validate</code>, <code>retrieve</code>, and <code>critique</code> are deterministic.</li>
+  <li>Two <strong>bounded cycles</strong>: a retrieval tool-call (<code>retrieve</code> fetches a cited standard missing from context and loops back) and a self-critique / reflexion loop (<code>critique</code> drops equality-false-positives and duplicates, loops back on a failed check). Both are bounded by env vars; a sequential runner drives the same nodes if LangGraph is absent.</li>
+  <li><code>cx_predict</code> maps each deviation to its commissioning test via a rule table then a standards graph; it calls an LLM only as a <strong>fallback</strong> for equipment classes in neither.</li>
+  <li><strong>Connected deterministic services</strong> (separate endpoints, not graph nodes): schedule risk (graph CPM + beta-PERT Monte Carlo), supply-chain risk (closed-form ETA/risk), and the project/Cx graph. The <strong>RFI Copilot is a service</strong> (BM25 retrieval + an LLM only to phrase a cited answer), <em>not</em> a graph node.</li>
 </ul>
 
-<h2>4. Deployment &amp; live behaviour</h2>
+<h2>4. Benchmark methodology &amp; results</h2>
+<p>The headline evaluation is the frozen, provenance-tracked <strong>ps4_external_v1 (v1.2)</strong> benchmark: <strong>53 spec–submittal pairs, 129 single-author-frozen labels, 17 datacenter system types, and 64 clean-negative (compliant) controls</strong>. The featured configuration is <code>gemini-3.1-flash-lite</code> over a 3-pass repeated run. Source: <code>benchmarks/ps4_external_v1/reports/benchmark_card.json</code> (regenerate with <code>python scripts/benchmark_report.py</code>).</p>
 <div class="grid">
-  <div class="fact"><b>Live demo <span class="lab meas">measured</span></b>Judge page + API return 200; a live Gemini text comparison and image (vision) analysis both returned valid findings during an external audit.</div>
-  <div class="fact"><b>Latency <span class="lab meas">measured</span></b>Model calls run ~13–33 s; the UI streams reasoning and caps the wait, degrading to the rule engine on timeout.</div>
-  <div class="fact"><b>OCR <span class="lab meas">measured</span></b>Reads scanned / image-only PDFs and uploaded images via Tesseract OCR (text-first, best-effort). <code>render.yaml</code> now builds from the <code>Dockerfile.backend</code> image (Tesseract installed, verified 5.5.0 in-image), so OCR runs on the hosted backend; <code>GET /ocr-check</code> reports live status. Any host without Tesseract returns a clear "OCR unavailable" message.</div>
+  <div class="fact"><b>Recall <span class="lab bench">benchmarked</span></b><strong>0.862</strong> mean semantic recall (range 0.841–0.873 across 3 passes).</div>
+  <div class="fact"><b>Precision <span class="lab bench">benchmarked</span></b><strong>0.953</strong> mean semantic precision.</div>
+  <div class="fact"><b>F1 <span class="lab bench">benchmarked</span></b><strong>0.905</strong> mean semantic F1.</div>
+  <div class="fact"><b>False-alert rate <span class="lab bench">benchmarked</span></b><strong>0.000</strong> on the 64 clean-negative controls.</div>
+  <div class="fact"><b>Latency <span class="lab bench">benchmarked</span></b><strong>~2.5 s</strong> p50 per pair (gateway/model dependent).</div>
+  <div class="fact"><b>Rule baseline <span class="lab det">deterministic&nbsp;offline</span></b><strong>0.111</strong> recall (7/63), 0 false positives — a deliberately low floor.</div>
 </div>
-
-<h2 class="pb">5. Scientific integrity of the analysis path</h2>
-<p>User-facing analysis <strong>never substitutes the answer key</strong>. When the LLM pipeline returns empty (throttled / no key), the corpus endpoints degrade to the independent rule detector over the same spec + submittal, labelled <code>analysis_mode:"rule"</code>, or report <code>analysis_mode:"unavailable"</code> — never the seeded ground-truth labels. The seeded fixture is reachable only via an explicit <code>?seeded_demo=true</code> opt-in, stamped <code>analysis_mode:"seeded_demo"</code> with a disclaimer. The copilot's offline fallback is labelled <code>mode:"offline-fallback"</code>. This is verified by automated tests that assert seeded identifiers never leak into the default path.</p>
-
-<h2>6. Evaluation methodology &amp; results</h2>
-<h3>6a. Synthetic portfolio — breadth check <span class="lab syn">synthetic</span></h3>
-<p>A 12-project, 11-country synthetic corpus with <strong>seeded</strong> deviations gives repeatable breadth coverage. Its P/R/F1 read <strong>1.000 by construction</strong> — it exercises the plumbing across formats and standards; it is <em>not</em> evidence of external accuracy, and we label it that way rather than headline it.</p>
-<h3>6b. Team-authored evaluation pairs — the credibility signal</h3>
-<p>Fifteen team-authored pairs whose values are <strong>cited from public product datasheets and standards</strong> (Vertiv, Cummins, STULZ, ABB, Tate ConCore, Schneider Canalis, Raritan, Xtralis VESDA, Distech, and others). They are realistic engineering documents, <em>not</em> downloaded immutable vendor files. Across them are <strong>27 hard deviation claims + 1 deliberately contested case</strong>.</p>
-<table>
-  <tr><th>Layer</th><th>What it proves</th><th>Result</th></tr>
-  <tr><td>Deterministic offline <span class="lab det">deterministic&nbsp;offline</span></td><td>Rule detector recovers headline numeric shortfalls with no API key; clears compliant/true-negative values</td><td>4 of the 27 hard claims + true-negatives; <strong>0 false positives</strong>, reproducible (<code>python eval/real_pairs_offline.py</code>)</td></tr>
-  <tr><td>Live-model <span class="lab live">live-model</span></td><td>Frontier model recovers the reasoning-dependent remainder (derived arithmetic, recalled GWPs, categorical/omission findings)</td><td>The other 23 hard claims require a live model; recall/precision <strong>vary run-to-run</strong> and are reported per dated run, not as a fixed score</td></tr>
-</table>
-<p><strong class="k">Honest scoring.</strong> The live scorer now performs <strong>one-to-one (bipartite) matching</strong> — each finding is credited to at most one ground-truth label and vice-versa, so a single broad finding cannot inflate recall, and unmatched findings are counted as false positives (never a negative "extra"). It reports <strong>two</strong> recall numbers: an <em>executed-only</em> recall and a <em>primary</em> recall that counts not-run (quota/outage) pairs as misses. One case (a 30&deg;C supply-air setpoint, within ASHRAE A1 allowable but above recommended) is deliberately contested and scored against us, so the honest precision sits near ~0.9, not a suspicious 1.000.</p>
-<p class="sub"><strong>Independence caveat.</strong> On one BMS pair, a live run surfaced two consequences we had not listed and we adopted them into ground truth; labels added after seeing the model's output are no longer independent of it, and we say so. A fully independent, frozen, primary-source benchmark with pre-registered labels is the next validation milestone.</p>
-
-<h3>6c. Example deviations (illustrative, from the team-authored pairs)</h3>
-<table>
-  <tr><th>Parameter</th><th>Required (standard)</th><th>Submitted (cited value)</th><th>Layer</th></tr>
-  <tr><td>UPS battery autonomy</td><td>&ge; 10 min (Uptime Tier IV)</td><td>7 min (Vertiv GXT5-1000)</td><td><span class="lab det">offline</span></td></tr>
-  <tr><td>UPS online efficiency</td><td>&ge; 96%</td><td>95.9% online (99% is ECO)</td><td><span class="lab det">offline</span></td></tr>
-  <tr><td>Generator on-site fuel</td><td>&ge; 48 h</td><td>38.8 h (derived: 4,000 gal &divide; 103 GPH)</td><td><span class="lab live">live-model</span></td></tr>
-  <tr><td>Generator emissions</td><td>EPA Tier 4</td><td>EPA Tier 2 (Cummins QSK60)</td><td><span class="lab live">live-model</span></td></tr>
-  <tr><td>Refrigerant GWP</td><td>&le; 750 (EU F-Gas)</td><td>R-410A GWP 2,088 (model-recalled)</td><td><span class="lab live">live-model</span></td></tr>
-  <tr><td>Raised-floor point load</td><td>&ge; 1,500 lbf</td><td>1,250 lbf (Tate ConCore 1250 ceiling)</td><td><span class="lab det">offline</span></td></tr>
-  <tr><td>Busway short-time withstand</td><td>&ge; 65 kA/1 s</td><td>50 kA/1 s (Schneider Canalis KTA10)</td><td><span class="lab det">offline</span></td></tr>
-  <tr><td>Supply-air setpoint (contested)</td><td>&le; 27 &deg;C recommended</td><td>30 &deg;C (within A1 allowable)</td><td><span class="lab scen">contested</span></td></tr>
-</table>
-<p class="sub">Compliant values (e.g. IP54 &ge; IP42, 415 V, 10 s NFPA start) are deliberately present and are <em>not</em> flagged &mdash; a precision / true-negative check.</p>
-
-<h3>6d. Reproduce it</h3>
+<p>The scorer performs <strong>one-to-one (bipartite) matching</strong> — each finding is credited to at most one label and vice-versa, so a broad finding cannot inflate recall, and unmatched findings count as false positives. Recall counts not-run (quota/outage) pairs as misses. The reasoning core clears the deterministic floor on the same frozen labels (0.862 vs 0.111).</p>
+<p><strong class="k">Provenance &amp; review status (the limitations that must travel with the numbers).</strong></p>
 <ul>
-  <li><code>python -m pytest tests -q</code> &mdash; 480+ tests, no API key <span class="lab meas">measured</span></li>
-  <li><code>python eval/real_pairs_offline.py</code> &mdash; deterministic offline recall + 0 false positives, exits 0 <span class="lab det">deterministic&nbsp;offline</span></li>
-  <li><code>make eval-real</code> &mdash; the live-model layer; prints executed-only <em>and</em> primary recall with per-pair TP/FP/FN <span class="lab live">live-model</span></li>
-  <li><code>python scripts/verify_live.py</code> &mdash; end-to-end checks against the deployment <span class="lab live">live-model</span></li>
+  <li>Fixtures are <strong>team-authored</strong>; <strong>10</strong> are derived from public primary sources (<strong>5</strong> with a verified public URL). <span class="lab pend">stored primary-source PDFs pending</span></li>
+  <li>Labels are <strong>single-author frozen</strong>. A second human reviewer (reviewer-2) has <strong>not</strong> run: <span class="lab pend">two-person adjudication pending</span>.</li>
+  <li>An automated consistency audit checks each label against its own documents (123/129 consistent, 6 flagged). This is <strong>machine QA, not a human reviewer</strong>, and does not substitute for the pending adjudication.</li>
+  <li>This is a <strong>benchmark result — not</strong> a real-world-accuracy, field-validation, or customer claim.</li>
 </ul>
+<p class="sub">A comparison model (<code>gemini-2.5-flash</code>) reached a higher peak recall (~0.95) but was slower and did not complete a clean 3-pass repeat; it is reported as an ablation, not the primary result. Full card and live status: <code>parth-tan.vercel.app/evidence</code>.</p>
 
-<h2>7. Business impact</h2>
-<p>The asymmetry is real: an undetected deviation can become a multi-week commissioning slip, while an analysis costs cents. But the <strong>pricing, ROI multiple, payback, and margin figures are modeled hypotheses <span class="lab scen">scenario</span></strong> — not validated by a paid pilot, LOI, or customer, and the ROI calculator is a sensitivity model, not realized savings. We have <strong>not yet</strong> run a timed manual-coordination study, so we make no measured hours-saved claim. The defensible business statement today: "The cost of late nonconformance can be high; Pramaan is designed to move detection to submittal review."</p>
-
-<h2>8. Engineering quality</h2>
+<h2 class="pb">5. OCR, failover &amp; reliability</h2>
 <div class="grid">
-  <div class="fact"><b>Tests <span class="lab meas">measured</span></b>480+ automated tests (481 locally); backend coverage ~81%. Full CI: Python tests + lint, frontend types/tests/build, Docker.</div>
-  <div class="fact"><b>Resilience <span class="lab det">deterministic&nbsp;offline</span></b>No API key, malformed PDFs, cold backend all return 200; <code>/llm-check</code> surfaces the true LLM status.</div>
-  <div class="fact"><b>Reproducibility <span class="lab det">deterministic&nbsp;offline</span></b>Deterministic evals and unit tests run offline; live-model results are labelled and vary run-to-run.</div>
+  <div class="fact"><b>Provider failover <span class="lab meas">measured</span></b>gemini → Qwen gateway → Groq → Claude → local Ollama → deterministic rule floor. Only configured providers are tried. <strong>Availability, not accuracy</strong> — every leg is scored the same. Live chain at <code>/llm-check</code> (<code>?deep=1</code> for a reconcile-sized probe).</div>
+  <div class="fact"><b>Deterministic floor <span class="lab det">deterministic&nbsp;offline</span></b>No silent zeros: if no provider answers, the rule engine returns headline deviations computed from the documents (low-recall by design, 0.111), never seeded labels. The UI labels a rule-floor 0-result as inconclusive.</div>
+  <div class="fact"><b>OCR <span class="lab meas">measured</span></b>Reads scanned / image-only PDFs and uploaded images via Tesseract (text-first, best-effort). <code>render.yaml</code> builds from <code>Dockerfile.backend</code> (Tesseract in-image); <code>GET /ocr-check</code> reports live status. Hosts without Tesseract return a clear "OCR unavailable" message.</div>
 </div>
-<p class="sub"><strong>Prototype, not a hardened production service.</strong> There is no authentication, rate limiting, tenant isolation, or upload/dependency hardening yet; synchronous LLM calls and single-instance free-tier hosting are not a production-load story. These are named limitations, not claims.</p>
+<p class="sub"><code>/health</code> exposes the running commit and analysis mode; every endpoint returns 200 without a key (bundled ground-truth data), so a cold or key-less backend never fakes a live result.</p>
 
-<h2>9. Security, standards &amp; IP posture</h2>
+<h2>6. Security &amp; public-demo hardening (implemented)</h2>
+<p>Phase-5 shipped <strong>demo-level</strong> hardening (verified by <code>tests/test_security*.py</code>, <code>test_upload_hardening.py</code>, <code>test_prompt_injection.py</code>, <code>test_no_secrets.py</code>):</p>
 <ul>
-  <li>No API keys are committed; credentials are external secrets. Path-traversal, malformed-input, output-escaping, and upload-size tests exist; error bodies never leak stack traces.</li>
-  <li>Third-party standards content is a team-authored paraphrase from public/secondary references — proprietary standard text is not redistributed; product/standard names are trademarks of their owners and Pramaan is not endorsed by them.</li>
-  <li>Known follow-ups (P1): auth + rate limits on public LLM endpoints, upload/dependency hardening, and a <code>THIRD_PARTY_NOTICES.md</code> with per-artifact source/version/hash.</li>
+  <li><strong>Optional token auth</strong> on analysis endpoints and <strong>per-IP rate limiting</strong> (single-instance, in-memory).</li>
+  <li><strong>Upload validation</strong> — MIME + extension + magic-byte allowlist; rejects archives/executables/disguised files, oversized uploads (15 MB cap), and decompression-bomb images.</li>
+  <li><strong>Prompt-injection-resistant</strong> prompts and <strong>no secret leakage</strong> in status endpoints (booleans/caps only; the token and client IP are never returned).</li>
+</ul>
+<p class="sub"><strong>Demo hardening, not production security.</strong> Rate limiting has no shared store, auth is an optional demo token (not access control / tenant isolation), and this is not a production-load story. These are named limitations, not claims. See <code>docs/SECURITY_DEMO_RUNBOOK.md</code>.</p>
+
+<h2>7. Standards, IP &amp; provenance limitations</h2>
+<ul>
+  <li>Third-party standards content is a team-authored paraphrase from public/secondary references — proprietary standard text is not redistributed; product and standard names are trademarks of their owners, and Pramaan is not endorsed by them.</li>
+  <li>Benchmark provenance is governed by <code>docs/CLAIMS_REGISTER.md</code> and <code>docs/SOURCE_PROVENANCE.md</code>: allowed vs banned wording, each quantitative claim paired with its limitation. "Derived from a public primary source" is not the same as a stored primary-source PDF, and we do not conflate them.</li>
+  <li>No API keys are committed; credentials are external secrets. <code>THIRD_PARTY_NOTICES.md</code> records third-party artifacts.</li>
 </ul>
 
-<h2>10. Honest limitations &amp; roadmap</h2>
+<h2>8. Deployment &amp; reproducibility</h2>
+<div class="grid">
+  <div class="fact"><b>Tests <span class="lab meas">measured</span></b><strong>587</strong> automated tests (API, agents, security, resilience, benchmark, failover). Full CI: Python tests + lint, frontend types/tests/build, Docker.</div>
+  <div class="fact"><b>Reproduce offline <span class="lab det">deterministic&nbsp;offline</span></b><code>python scripts/run_benchmark_suite.py --rule-only</code> (manifest + hash + rule baseline + report) — no API key, a judge's laptop is enough.</div>
+  <div class="fact"><b>Deploy <span class="lab meas">measured</span></b>Frontend on Vercel, API on Render (Docker backend). <code>/health</code> shows the running commit; <code>verify_live.py</code> checks the deployment end-to-end.</div>
+</div>
+<p class="sub">Reproduce the benchmark card: <code>python scripts/benchmark_manifest_check.py</code>, <code>benchmark_hash_sources.py</code>, <code>benchmark_report.py</code>. Deterministic evals and unit tests run offline; live-model results are labelled and vary run-to-run.</p>
+
+<h2>9. Known limitations &amp; roadmap</h2>
 <ul>
-  <li><strong>Schedule risk is simulation</strong>, not field-calibrated prediction; deviation probabilities and "actual delays" are seeded, not empirical.</li>
-  <li><strong>Supply-chain intelligence is illustrative</strong> — closed-form over static data, no live shipment/route feed yet.</li>
-  <li><strong>No measured coordination-hours study</strong> yet; the 45-day figure was a UI constant and is not presented as a result.</li>
-  <li><strong>Next milestones:</strong> a frozen independent benchmark (primary-source PDFs, hashes, pre-registered labels, clean negatives, one-to-one TP/FP/FN with variance); a timed human baseline; and auth + rate limiting. <em>(Done since: OCR now ships in the hosted image via the Render Docker build.)</em></li>
+  <li><strong>Benchmark:</strong> team-authored fixtures, single-author frozen labels; stored primary-source PDFs and two-person (reviewer-2) adjudication are <span class="lab pend">pending</span>. Not field- or customer-validated.</li>
+  <li><strong>Schedule risk is simulation</strong>, not field-calibrated prediction; deviation probabilities are seeded, not empirical. Supply-chain intelligence is closed-form over static data (no live feed).</li>
+  <li><strong>No measured coordination-hours study</strong> yet; any cost/ROI figure is an explicitly-labelled scenario, not realized savings.</li>
+  <li><strong>Prototype hardening:</strong> single-instance in-memory rate limiting, optional demo token; synchronous LLM calls; not a production-load service.</li>
+  <li><strong>Next milestones (trust-first):</strong> stored primary-source PDFs + expanded primary-source-derived pairs; reviewer-2 two-person adjudication and resolving the 6 audit-flagged labels; production hardening (shared-store auth/rate-limit, pgvector/Qdrant, async, delta re-checks).</li>
 </ul>
 
-<h2 class="pb">11. Rubric mapping (PS4 weights: 25 / 25 / 20 / 15 / 15)</h2>
+<h2>10. Links</h2>
+<ul>
+  <li><strong>GitHub:</strong> <code>github.com/bansalbhunesh/parth</code></li>
+  <li><strong>Live demo — Judge Mode:</strong> <code>parth-tan.vercel.app/judge</code></li>
+  <li><strong>Evidence dashboard:</strong> <code>parth-tan.vercel.app/evidence</code></li>
+  <li><strong>API health / OCR / LLM status:</strong> <code>/health</code> &middot; <code>/ocr-check</code> &middot; <code>/llm-check</code></li>
+  <li><strong>Benchmark report + card:</strong> <code>benchmarks/ps4_external_v1/reports/benchmark_report.md</code> &middot; <code>benchmark_card.json</code></li>
+  <li><strong>Deck (PDF):</strong> <code>docs/Pramaan_Deck.pdf</code> &middot; <strong>Claims register:</strong> <code>docs/CLAIMS_REGISTER.md</code></li>
+  <li><strong>Demo video:</strong> <span class="lab pend">link pending — see docs/VIDEO_RUNBOOK.md</span></li>
+</ul>
+
+<h2 class="pb">Rubric mapping (PS4 weights: 25 / 25 / 20 / 15 / 15)</h2>
 <table>
   <tr><th>Criterion</th><th>How Pramaan addresses it</th><th>Honest status</th></tr>
   <tr><td>Innovation (25%)</td><td>Spec &rarr; deviation &rarr; commissioning test &rarr; lead-time chain; a distinctive wedge beyond submittal review</td><td>Strong &mdash; the moat is the Cx-test / lead-time link, not module count</td></tr>
-  <tr><td>Business impact (25%)</td><td>Cost-of-late-nonconformance thesis; scenario ROI model</td><td><span class="lab scen">scenario</span> no measured hours-saved study yet</td></tr>
-  <tr><td>Technical excellence (20%)</td><td>Real LangGraph + LLM, schedule simulation, 480+ tests, CI, live LLM/vision</td><td><span class="lab meas">measured</span> answer-key fallback removed; scorer corrected</td></tr>
-  <tr><td>Scalability (15%)</td><td>Modular, containerized; deterministic services run at ~142 systems/s</td><td>Prototype: no auth / persistence / queue; throughput is rule execution, not LLM</td></tr>
-  <tr><td>User experience (15%)</td><td>Focused Judge Mode + streaming reasoning; polished desktop UI</td><td>Known mobile / a11y / latency follow-ups (P1)</td></tr>
+  <tr><td>Business impact (25%)</td><td>Cost-of-late-nonconformance thesis; lead-time weeks as the defensible unit</td><td><span class="lab scen">scenario</span> no measured hours-saved study yet; no ROI claim</td></tr>
+  <tr><td>Technical excellence (20%)</td><td>LangGraph reasoning graph + one LLM core, deterministic services, 587 tests, CI, frozen benchmark</td><td><span class="lab bench">benchmarked</span> 0.862/0.953/0.905; reviewer-2 pending</td></tr>
+  <tr><td>Scalability (15%)</td><td>Modular, containerized; deterministic services run at high throughput; async job flow + input-hash cache</td><td>Prototype: single-instance auth/rate-limit; LLM path is the scale constraint</td></tr>
+  <tr><td>User experience (15%)</td><td>Focused Judge Mode + streaming reasoning + evidence page; provenance chips</td><td>Desktop-first; mobile/a11y improved this phase</td></tr>
 </table>
 
-<h2>12. Anticipated judge questions (honest answers)</h2>
-<p><strong class="k">Is the data real?</strong> The 12-project portfolio is synthetic regression data. The evaluation pairs are team-authored with values cited from public product figures; 4 claims are checked deterministically offline, 23 require a live model. A fully independent, frozen benchmark is the next milestone.</p>
-<p><strong class="k">Is schedule risk predictive?</strong> Today it is a seeded CPM / Monte-Carlo scenario engine, not calibrated on field actuals. That calibration is the next validation step.</p>
-<p><strong class="k">Why "agents"?</strong> The LLM is used only for cross-document semantic reconciliation; validation, Cx mapping, schedule propagation, and guardrails are deterministic so outputs stay inspectable. It is one reasoning graph plus three deterministic services, not five agents.</p>
-<p><strong class="k">What did users save?</strong> We make no measured field-savings claim yet; a timed human baseline is planned.</p>
+<h2>Anticipated judge questions (honest answers)</h2>
+<p><strong class="k">Is the data real?</strong> The benchmark fixtures are team-authored — 10 derived from public primary sources, 5 with a verified URL — and stored primary-source PDFs are pending. We do not call them real datasheets. The benchmark measures a reliable first-pass workflow, not real-world accuracy.</p>
+<p><strong class="k">Is the benchmark independently reviewed?</strong> Not yet. Labels are single-author frozen; the automated consistency audit (123/129) is machine QA, not a second human reviewer. Two-person adjudication is the next validation milestone.</p>
+<p><strong class="k">Why not "five agents"?</strong> Exactly one node reasons with an LLM (<code>reconcile</code>); ingestion, retrieval, self-critique, and commissioning mapping are deterministic and inspectable, plus deterministic schedule/supply/graph services. One reasoning graph + deterministic services, not five agents.</p>
+<p><strong class="k">What if the LLM is down during judging?</strong> Every endpoint returns 200, the rule engine still finds headline deviations, and the UI labels that as the low-recall floor — not a clean bill of health. <code>/llm-check</code> reports the true status.</p>
 
 <div class="foot">
-  Evidence-safe proof points: "480+ automated tests pass; backend coverage ~81%." · "The public deployment performed a live Gemini text and vision analysis during an external audit." · "The schedule service runs seeded CPM/Monte-Carlo simulation; delay results are simulated, not field predictions." · "The 12-project portfolio is synthetic regression coverage." · Every metric above carries an evidence label. Results are observations at the audited commit, not evergreen badges.
+  Evidence-safe proof points: "On the frozen ps4_external_v1 (v1.2) benchmark — 53 team-authored pairs, 129 single-author-frozen labels, 17 systems, 64 clean negatives — the featured 3-pass run reports recall 0.862, precision 0.953, F1 0.905, and 0 false alerts on the clean negatives, vs a deterministic rule baseline of 0.111." · "587 automated tests; full CI." · "Reviewer-2 human adjudication is pending; the automated cross-check is machine QA." · Every metric carries an evidence label. Results are observations at the audited commit, not evergreen badges.
 </div>
 
 </body>

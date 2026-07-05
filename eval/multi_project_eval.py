@@ -228,7 +228,7 @@ def main():
     _cxa = agg['aggregate_cx_accuracy']
     _cxa_str = f"{_cxa:.3f}" if _cxa is not None else "n/a (detection-only mode)"
     print(f"  Cx prediction accuracy  : {_cxa_str}")
-    print(f"  Total lead time saved   : {agg['total_lead_time_weeks']} weeks")
+    print(f"  Total lead-time window  : {agg['total_lead_time_weeks']} weeks (scenario)")
     print(f"  Max lead time           : {agg['max_lead_time_weeks']} weeks")
     print(f"{'='*70}\n")
 

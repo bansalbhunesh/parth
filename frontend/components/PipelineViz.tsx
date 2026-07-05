@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 
 const STAGES = [
   { id: "ingest", label: "Document Ingestion", sub: "Specs · Submittals · Standards", icon: "📄", color: "#5b8cff" },
-  { id: "extract", label: "Extraction Agent", sub: "Raw → Structured Triples", icon: "⚡", color: "#ffb020" },
-  { id: "reconcile", label: "Reconciliation Agent", sub: "Cross-Document Reasoning", icon: "🧠", color: "#ff4d4d", hero: true },
+  { id: "extract", label: "Extraction", sub: "Raw → Structured Triples · deterministic", icon: "⚡", color: "#ffb020" },
+  { id: "reconcile", label: "Reconciliation Core", sub: "Cross-Document Reasoning · one LLM node", icon: "🧠", color: "#ff4d4d", hero: true },
   { id: "cx", label: "Cx Predictor", sub: "Deviation → Test + Lead Time", icon: "⏱", color: "#35c98b" },
   { id: "copilot", label: "RFI Copilot", sub: "RAG + Prior-RFI Matching", icon: "💬", color: "#36d6e7" },
 ];

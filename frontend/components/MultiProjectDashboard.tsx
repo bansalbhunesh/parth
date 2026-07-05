@@ -41,7 +41,7 @@ export default function MultiProjectDashboard() {
             { label: "Recall", value: agg.aggregate_recall.toFixed(3), color: "#22c55e" },
             { label: "F1 Score", value: agg.aggregate_f1.toFixed(3), color: "#22c55e" },
             { label: "Cx Accuracy", value: agg.aggregate_cx_accuracy.toFixed(3), color: "#3b82f6" },
-            { label: "Lead Saved", value: `${agg.total_lead_time_weeks}w`, color: "#f59e0b" },
+            { label: "Lead-time window", value: `${agg.total_lead_time_weeks}w`, color: "#f59e0b" },
           ].map((m) => (
             <div key={m.label} style={{
               background: "#111827",
@@ -56,6 +56,13 @@ export default function MultiProjectDashboard() {
           ))}
         </div>
       )}
+
+      <div style={{ fontSize: 11, color: "#9ca3af", lineHeight: 1.5 }}>
+        These 12 projects are a <strong>synthetic breadth check</strong>: the corpus recovers all seeded
+        deviations <em>by construction</em>, so precision/recall/F1 read 1.000 — a plumbing check, not an
+        accuracy claim. The measured accuracy signal is the frozen <code>ps4_external_v1</code> benchmark
+        (v1.2): recall 0.862, precision 0.953, F1 0.905. Lead-time weeks are an illustrative scenario.
+      </div>
 
       <div style={{
         display: "grid",

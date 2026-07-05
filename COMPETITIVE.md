@@ -12,11 +12,11 @@ across all tracks**. Scored on hard, checkable signals, the visible field has:
 | Signal | Visible field (~70 repos, all tracks) | Pramaan |
 |---|---|---|
 | CI pipeline | **0** | ✅ green (tests + 3 evals + tsc + build + Docker smoke + ruff) |
-| Test suite | **1** (minimal) | ✅ 480+ tests |
+| Test suite | **1** (minimal) | ✅ 587 tests |
 | Eval harness with ground truth | **0** | ✅ 4 paths + no-key real-pairs harness |
 | Quantified impact model | **0** | ✅ `docs/BUSINESS.md`, every figure cited |
 | Live deployment | 3 | ✅ 2 (Vercel + Render) |
-| Real third-party documents in the loop | ~2 | ✅ 15 sourced datasheet pairs |
+| Public-source-cited document pairs in the loop | ~2 | ✅ 15 team-authored pairs (values cited from public datasheets) + a frozen 53-pair benchmark |
 
 In our own track (PS4), the strongest visible rival is a FastAPI+Claude+ChromaDB
 platform with an NCR workflow — real code, but no tests, no eval, no CI, no
@@ -91,12 +91,15 @@ are. Judges reward that honesty.
 
 ## 4. Where a judge could still push — and our answer
 
-- *"F1 = 1.000 looks too clean."* It is — on **synthetic** seeded data. The
-  honest number is the real-document run and the real-LLM eval; the perfect
-  scores are the harness confirming it recovers what it seeded.
-- *"Is this just GPT-wrapping?"* No: 5-agent LangGraph pipeline, deterministic
-  rule-based fallback, an open eval harness, and a commissioning-impact model
-  that commercial tools don't expose.
+- *"A perfect score looks too clean."* On the **synthetic** seeded corpus it is —
+  those are integrity checks confirming the harness recovers what it seeded, not a
+  capability claim. The number we actually report is the frozen ps4_external_v1
+  benchmark (v1.2): **recall 0.862, precision 0.953, FAR 0.000** on held-out labels
+  with adversarial clean negatives — deliberately not 1.000.
+- *"Is this just GPT-wrapping?"* No: one compliance reasoning graph (a single LLM
+  reasoning core wrapped in deterministic ingest/retrieval/critique/Cx-mapping
+  services), a deterministic rule-based fallback, an open frozen eval harness, and
+  a commissioning-impact model that commercial tools don't expose.
 - *"Does it work without your API key / under load?"* Yes — `/llm-check` reports
   true status, and the rule-based fallback returns Cx-mapped deviations in <1s
   when the model is rate-limited (free-tier reality), instead of a silent zero.

@@ -1,135 +1,138 @@
-# Pramaan — 3-Minute Pitch Script
+# Pramaan — 3–4 Minute Pitch Script
 
-> The words you actually say, timed to ~3:00. Built for a *business* panel:
-> lead with the money, let one live real-document catch carry the wow, close on
-> impact. Rehearse the demo until it's muscle memory — everything flexes around it.
-> Recording the video? The shoot itself is run by [`docs/VIDEO_RUNBOOK.md`](docs/VIDEO_RUNBOOK.md).
+> The words you actually say, timed to ~3:30. Built for a panel that rewards
+> *trust*: lead with the stakes, let one live catch carry the wow, and close on
+> honest limitations. Rehearse the demo until it's muscle memory.
+> Recording the video? The shoot is run by [`docs/VIDEO_RUNBOOK.md`](docs/VIDEO_RUNBOOK.md).
 
 ---
 
 ## Pre-flight (5 minutes before you present)
 
-- Run **`make verify-live`** (or `python scripts/verify_live.py`) — the ONLY
-  green light that counts. It checks the deployed commit, the PS4 layers, and
-  runs the *real GXT5 pair* through `/analyze` + `/analyze/stream` end-to-end.
-  **Do not trust a bare `/llm-check`** — the tiny probe can pass while
-  demo-sized calls 429 (that exact false-green killed the live AI path once).
-  If anything is red: fresh `GEMINI_API_KEY` in Render → Manual Deploy →
-  re-run until `GREEN -- demo away.`
-- Open **`/judge`** (parth-tan.vercel.app/judge).
-- Have one **real pair** ready from `data/samples/real/` — the **Vertiv GXT5 +
-  Cummins QSK60** power pair is the richest (5 findings, incl. the arithmetic).
-- Do **one warm-up Analyze** in the UI so the path a judge sees is the path
-  you just verified — no cold-start mid-pitch.
+- Run **`make verify-live`** (or `python scripts/verify_live.py`) — the only green
+  light that counts. It checks the deployed commit and runs a real pair through
+  `/analyze` end-to-end. **Do not trust a bare `/llm-check`** — the tiny probe can
+  pass while demo-sized calls 429 (that false-green killed the live AI path once);
+  use `/llm-check?deep=1`.
+- Open **`/judge`** (parth-tan.vercel.app/judge) and **`/evidence`** in a second tab.
+- Do **one warm-up Analyze** so the path a judge sees is the path you just verified — no cold-start mid-pitch.
+- If the model is down, that's fine — the deterministic floor and the honest
+  provenance chip are part of the story. Do not fake a live result.
 - Speak **slower** than feels natural. Let the derived-number moment land in silence.
 
 ---
 
-## [0:00–0:20] — The stakes (make a business judge feel it)
+## [0:00–0:20] — Problem / stakes
 
-> "**Thirty billion dollars** is pouring into Indian data centres on the way to
-> **two gigawatts by 2026** — and **nine out of ten** large builds slip schedule.
-> The most expensive slips happen at **commissioning**: on a 50-megawatt build, a
-> single month of delay runs **ten to forty million dollars** in lost revenue,
-> financing, and penalties. One of the most common — and most avoidable — triggers
-> is a vendor submittal that quietly fails the spec. It's the most expensive
-> question in construction: *did the vendor actually deliver what we specified?*"
+> "Billions are pouring into data-centre construction, and most large builds slip
+> schedule. The most expensive slips happen at **commissioning** — when a vendor
+> submittal that quietly failed the spec finally gets caught, after the gear is
+> fabricated, shipped, and installed. It's the most expensive question in the
+> project: *did the vendor actually deliver what we specified?*"
 
-## [0:20–0:40] — Why it's hard
+## [0:20–0:50] — What Pramaan does
 
-> "Because the design spec, the vendor's submittal, and the governing standard live
-> in **three different documents**, written by three different parties, reviewed by
-> people who are human. A 7-minute battery where the spec needs 10 hides in
-> thousands of pages — until a commissioning test fails at Week 38."
+> "Pramaan answers that question **the day the submittal lands.** It reconciles the
+> owner's requirement, the vendor's submittal, and the governing standards, flags
+> every deviation, and — this is the part no one else does — tells you exactly
+> which **commissioning test** that deviation will fail and how many **weeks of lead
+> time** you have to fix it first. Let me show you, live."
 
-## [0:40–0:55] — What Pramaan is
+## [0:50–1:30] — Live demo flow
 
-> "Pramaan is a multi-agent AI system that reads all three documents and catches
-> that deviation **the day the submittal lands** — and tells you exactly which
-> commissioning test it will fail, and how many weeks early you caught it. Let me
-> show you, live, on **real manufacturer datasheets**."
+*(On `/judge` → Live Analysis. Hit **Load deviation demo ★**.)*
 
-## [0:55–1:50] — The live demo (the star)
+> "This is a realistic design basis against a vendor submittal, in natural prose —
+> nothing pre-seeded. Watch it reason from the raw documents."
 
-*(On `/judge` → Live Analysis. Load the Vertiv GXT5 + Cummins QSK60 pair.)*
+*(Click Analyze; let it stream. Point at the findings.)*
 
-> "This is a real **Vertiv UPS** and a real **Cummins generator**, against a
-> Tier IV design basis. Watch it reason from the raw documents."
+> "It surfaces the non-compliances a human skims past — a redundancy dropped from
+> 2N to N+1, battery autonomy quoted at end-of-life below spec — each cited to the
+> clause, mapped to the commissioning test it fails, with the lead time. And notice
+> the **provenance chip**: it tells you honestly whether this came from the live
+> model or the deterministic floor."
 
-*(Click Analyze. Let it stream token-by-token. Then point at the findings.)*
+*(Hit **Load compliant demo ✓**.)*
 
-> "Five deviations — and this is **reasoning, not keyword matching.** Look here:
-> the generator's day tank is 4,000 gallons, it burns 103 gallons an hour — Pramaan
-> **did the division itself: 38.8 hours of fuel, against the 48 required.** It
-> flagged the engine as **EPA Tier 2** where the site needs **Tier 4**. It caught
-> the battery at **7 minutes against 10** — and an efficiency miss of **96 versus
-> 95.9 percent**, a tenth of a percent a human skims straight past. Every finding
-> cites the standard, names the commissioning test, and the lead time."
+> "Now a fully compliant submittal. The correct answer is **zero deviations** — and
+> it doesn't cry wolf. That's the behaviour our 64 clean-negative controls measure."
 
-## [1:50–2:15] — It's real, and it's honest
+## [1:30–2:00] — Evidence chain
 
-> "And it's not our data. We built **fifteen** of these from actual published
-> spec sheets — **Vertiv, Cummins, STULZ, ABB, Raritan, Xtralis, Distech** —
-> against real standards: Uptime, NFPA, EPA, ASHRAE, IEC, BACnet/BTL. On the
-> cooling unit it even **knew R410A's global-warming
-> potential is 2,088** and flagged it against the limit — the datasheet never said
-> the number. And it doesn't cry wolf: on the switchgear it **cleared** an IP-54
-> rating that *exceeds* the requirement. Every value we used is citable. Nothing
-> seeded."
+> "So the chain is: **requirement → deviation → commissioning test → schedule
+> risk.** A 7-minute battery against a 10-minute spec isn't just a compliance flag —
+> Pramaan traces it to the integrated systems test it fails at Week 38, and the
+> milestone that slips. Caught at submittal review in Week 11, that's a 27-week
+> window to fix it — a one-line RFI instead of a seven-figure slip."
 
-## [2:15–2:35] — Built for the bad day (resilient)
+## [2:00–2:35] — Benchmark result
 
-> "This isn't a demo that works once. The eval scores two ways so we never inflate
-> a number; clean systems are seeded as true negatives to prove we don't over-flag;
-> full CI green (tests + lint + build). And when the AI model is rate-limited — which *will* happen —
-> a rule-based engine still catches the headline shortfalls. **No silent zeros.**
-> We engineered for the bad day, not just the stage."
+> "And this is measured, not asserted. On our frozen benchmark — **53
+> spec–submittal pairs, 129 labels, 17 systems, 64 clean negatives** — the featured
+> model over a 3-pass run reports **0.862 recall, 0.953 precision, 0.905 F1, and
+> zero false alerts** on the clean negatives, versus a deterministic rule baseline
+> of **0.111** on the same labels. The reasoning core clearly beats the floor — and
+> you can reproduce the deterministic parts on your own laptop, no key required."
 
-## [2:35–3:00] — Impact + close
+## [2:35–3:05] — Architecture and reliability
 
-> "What does that buy? Manual cross-checking takes an engineer significant time.
-> Pramaan aims to cut that to **minutes** (the hours saved are not yet measured in a study), with a full audit trail you can hand to the
-> commissioning authority. On an 800-crore project, catching these early avoids
-> **crores** of rework — and protects a schedule where every week of delay is real
-> revenue lost. Pramaan turns *'did they build what we specified?'* into a
-> five-minute, evidence-backed answer — on the day it still costs nothing to fix.
-> Thank you."
+> "Under the hood it's **one compliance reasoning graph, not five AI agents.**
+> Exactly one step reasons with an LLM; ingestion, retrieval, self-critique, and
+> commissioning mapping are deterministic and inspectable, plus deterministic
+> schedule and supply-chain services. And it's built for the bad day: when a
+> provider is rate-limited it **fails over for availability** — gemini, gateway,
+> Groq, Claude, local — and if none answer, a rule engine still returns the headline
+> deviations. Failover buys uptime, never accuracy. Every leg is scored the same."
+
+## [3:05–3:30] — Limitations, roadmap, close
+
+> "I'll be straight about what this is. **Pramaan is not claiming field-validated
+> ROI yet. It is a benchmarked prototype that proves a reliable first-pass deviation
+> detection workflow across EPC document pairs.** The fixtures are team-authored,
+> the labels are single-author frozen with a second human reviewer still pending,
+> and the automated cross-check is machine QA, not a human review — and the app says
+> so, everywhere. Next is stored primary sources, two-person adjudication, and
+> production hardening. Everything I just claimed is on the **/evidence** page with
+> its limitation. Evidence before confidence. Thank you."
 
 ---
 
 ## Q&A defence — the hard questions
 
-**"Is your data synthetic?"**
-> "Our 12-project *benchmark* is — deliberately, so we can measure breadth across
-> geographies. But you just watched it work on a **Vertiv/Cummins pair whose values
-> are cited from published datasheets**, and we ship fifteen such pairs, every value
-> traced. Benchmark for breadth; cited public values for reality."
+**"Is your data real?"**
+> "The benchmark fixtures are **team-authored** — 10 derived from public primary
+> sources, 5 with a verified URL — and stored primary-source PDFs are a pending
+> roadmap item. We deliberately don't call them real datasheets. The benchmark
+> measures a reliable first-pass workflow; it is not a real-world-accuracy claim."
 
 **"Isn't this just a Gemini wrapper?"**
-> "A wrapper doesn't divide 4,000 by 103 and reason about fuel autonomy, or recall
-> a refrigerant's GWP, or *not* flag a value that exceeds spec. The model is one
-> component — the system is the cross-document reconciliation, the commissioning
-> prediction, the citation check, and an open eval that proves it."
+> "One node reasons with an LLM; the system around it is the cross-document
+> reconciliation graph with retrieval and self-critique cycles, the deterministic
+> commissioning and schedule services, the citation check, and a frozen,
+> reproducible benchmark. A wrapper doesn't clear a 0.111 rule floor to 0.862 on
+> held-out frozen labels."
 
-**"Hasn't this been done — BuildSync, Spec-ID?"**
-> "Submittal review exists. What no one else does is **predict the commissioning
-> test each deviation will fail and the lead-time-to-failure** — turning 'this
-> deviates' into 'this fails IST-07 at Week 44, you have 27 weeks.' That, plus an
-> open reproducible eval, is the moat."
+**"Is your benchmark independently reviewed?"**
+> "Not yet — and we're explicit about it. Labels are single-author frozen. There's
+> an automated consistency audit (123 of 129 consistent, 6 flagged), but that is
+> machine QA, **not** a second human reviewer. Two-person adjudication is the next
+> validation milestone."
 
-**"What does it cost, and what if the LLM is down?"**
-> "A few paise per analysis on a flash model after an 85% prompt-token cut. If the
-> model's down, every endpoint still returns 200, the rule-based engine still
-> finds the headline deviations, and `/llm-check` reports the true status."
+**"What if the LLM is down during judging?"**
+> "Every endpoint still returns 200, the deterministic rule engine still finds the
+> headline deviations, and the UI labels that result as the low-recall floor — not a
+> clean bill of health. `/llm-check` reports the true provider status."
 
 ---
 
 ## The 10-second version (hallway / elevator)
 > "Pramaan reads the spec, the submittal, and the standard, and catches the vendor
-> deviation the day the document lands — not six months later in commissioning.
-> Cited public values, real reasoning, and it tells you which test it'll fail."
+> deviation the day the document lands — then names the commissioning test it'll
+> fail and how many weeks early you caught it. Benchmarked, honest about its limits,
+> and reproducible."
 
 ## Three things to never skip
-1. **Lead with the money** — Indian data-centre capex and the seven-figure slip.
-2. **The arithmetic moment** — "it divided 4,000 by 103 itself." That's the proof it reasons.
-3. **One honesty beat** — true negatives, or "no silent zeros when the AI is down." Trust beats a perfect score.
+1. **Lead with the stakes** — the seven-figure commissioning slip.
+2. **The live catch + provenance chip** — it reasons, and it tells you how it answered.
+3. **One honesty beat** — reviewer-2 pending, or "no silent zeros when the AI is down." Trust beats a perfect score.

@@ -27,7 +27,9 @@ DEMO_AUTH_ENABLED=false        # flip to true (+DEMO_AUTH_TOKEN) only if abused
 ```
 
 **LLM env:** `PRAMAAN_LLM=gemini`, `GEMINI_MODEL=gemini-2.5-flash`,
-`PRAMAAN_LLM_TIMEOUT=60`, `PRAMAAN_LLM_PROVIDER_ORDER=gemini,qwen,groq,claude`.
+`PRAMAAN_LLM_TIMEOUT=60`, `PRAMAAN_LLM_PROVIDER_ORDER=gemini,groq,qwen,claude`
+(Groq second while the Qwen/OpenRouter leg is unfunded and 402s — see
+`LLM_FAILOVER_RUNBOOK.md`).
 
 ## 2. Frontend (Vercel)
 

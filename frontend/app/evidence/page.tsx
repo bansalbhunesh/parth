@@ -214,7 +214,10 @@ export default async function EvidencePage() {
             Ablation (not the primary result): <code>{BENCH.ablation_model}</code>{" "}
             reached a higher peak recall (~{pct(BENCH.ablation_recall_peak)}) but was
             slower and did not complete a clean 3-pass repeat — reported as a model
-            comparison only.
+            comparison only. The <strong>hosted live demo pins this ablation model</strong>{" "}
+            (<code>{BENCH.ablation_model}</code>, native API); the featured 3-pass
+            numbers above belong to <code>{BENCH.featured_model}</code> and are never
+            re-attributed. <code>/llm-check</code> reports which model answered.
           </p>
         </div>
         <p className="ev-limitation">

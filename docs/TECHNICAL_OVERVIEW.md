@@ -56,8 +56,9 @@ computing from the deviation register. Narratives that an LLM writes carry a
 ## 3. Reliability: failover is availability, not accuracy
 
 `backend/llm.py` implements the provider chain. Order (only *configured* providers
-are attempted): `gemini → Qwen gateway → Groq → Claude → local Ollama →
-deterministic rule engine`.
+are attempted): `gemini → Groq → Qwen gateway → Claude → local Ollama →
+deterministic rule engine` (hosted-demo order; the Qwen gateway leg needs funded
+OpenRouter credits, so Groq sits second until then).
 
 - Every leg is scored the same in the benchmark — **failover never improves
   accuracy**, it only keeps the demo answering.

@@ -105,7 +105,7 @@
 
 <h2 class="pb">5. OCR, failover &amp; reliability</h2>
 <div class="grid">
-  <div class="fact"><b>Provider failover <span class="lab meas">measured</span></b>gemini → Qwen gateway → Groq → Claude → local Ollama → deterministic rule floor. Only configured providers are tried. <strong>Availability, not accuracy</strong> — every leg is scored the same. Live chain at <code>/llm-check</code> (<code>?deep=1</code> for a reconcile-sized probe).</div>
+  <div class="fact"><b>Provider failover <span class="lab meas">measured</span></b>gemini → Groq → Qwen gateway → Claude → local Ollama → deterministic rule floor. Only configured providers are tried. <strong>Availability, not accuracy</strong> — every leg is scored the same. Live chain at <code>/llm-check</code> (<code>?deep=1</code> for a reconcile-sized probe).</div>
   <div class="fact"><b>Deterministic floor <span class="lab det">deterministic&nbsp;offline</span></b>No silent zeros: if no provider answers, the rule engine returns headline deviations computed from the documents (low-recall by design, 0.111), never seeded labels. The UI labels a rule-floor 0-result as inconclusive.</div>
   <div class="fact"><b>OCR <span class="lab meas">measured</span></b>Reads scanned / image-only PDFs and uploaded images via Tesseract (text-first, best-effort). <code>render.yaml</code> builds from <code>Dockerfile.backend</code> (Tesseract in-image); <code>GET /ocr-check</code> reports live status. Hosts without Tesseract return a clear "OCR unavailable" message.</div>
 </div>

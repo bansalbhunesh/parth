@@ -397,7 +397,7 @@ cd frontend && npm install && npm run dev          # → localhost:3000
 curl http://localhost:8000/export/audit/html > evidence.html
 ```
 
-> **No API key?** The dashboard runs fully with ground-truth fallback data. All 29 API endpoints return 200. Both eval harnesses (structured + text-based), the corpus, and the frontend work offline. 587 tests pass without any external dependencies.
+> **No API key?** The dashboard runs fully with ground-truth fallback data. All 30+ API endpoints return 200. Both eval harnesses (structured + text-based), the corpus, and the frontend work offline. 587 tests pass without any external dependencies.
 >
 > **Or just open the live demo:** [parth-tan.vercel.app](https://parth-tan.vercel.app) (frontend) · [parth-1-ma30.onrender.com](https://parth-1-ma30.onrender.com/health) (API)
 
@@ -410,11 +410,13 @@ curl http://localhost:8000/export/audit/html > evidence.html
 | **Render** (backend) | `PRAMAAN_LLM_TIMEOUT` | optional | seconds the sync `/analyze` waits on the LLM before falling back (default `60`). |
 | **Render** (backend) | `PRAMAAN_SCHEDULE` / `PRAMAAN_SUPPLY` / `PRAMAAN_GRAPH` | optional | PS4 layers; default `1` (on). Set `0` to hide a section. |
 | **Vercel** (frontend) | `NEXT_PUBLIC_API` | **required** | set to the Render backend URL (e.g. `https://parth-1-ma30.onrender.com`). Inlined at build time. **Without it the frontend falls back to bundled data** (which mirrors live engine output, so the demo still renders correctly but is not live-served). |
-| **Render** (backend) | `OPENAI_API_KEY`/`OPENAI_BASE_URL`/`OPENAI_MODEL`, `GROQ_API_KEY` (+ optional `ANTHROPIC_API_KEY`) | resilience | **Automatic provider failover.** Configure more providers and the backend fails over on quota/429/timeout in order — **gemini → OpenAI-compatible gateway (Qwen) → Groq → claude → deterministic rule engine** — no redeploy, no code change. A single-key setup is unchanged. `/llm-check` shows the live chain, which provider last answered, and the last failover reason. **Failover is for reliability, not accuracy** — the rule engine remains the safe floor. Verified recall on the real pairs: Gemini 1.000 · Qwen3-235B 0.82 · Groq Llama-3.3-70B strong recall with a mild over-flag tendency (hence behind Qwen). |
+| **Render** (backend) | `OPENAI_API_KEY`/`OPENAI_BASE_URL`/`OPENAI_MODEL`, `GROQ_API_KEY` (+ optional `ANTHROPIC_API_KEY`) | resilience | **Automatic provider failover.** Configure more providers and the backend fails over on quota/429/timeout in order — **gemini → Groq → OpenAI-compatible gateway (Qwen) → claude → deterministic rule engine** — no redeploy, no code change. A single-key setup is unchanged. `/llm-check` shows the live chain, which provider last answered, and the last failover reason. **Failover is for reliability, not accuracy** — the rule engine remains the safe floor. Verified recall on the real pairs: Gemini 1.000 · Qwen3-235B 0.82 · Groq Llama-3.3-70B strong recall with a mild over-flag tendency. Groq sits second in the hosted demo because it is a funded, always-on free tier; the Qwen gateway leg needs paid OpenRouter credits (it returns 402 until funded — verified 2026-07-05). |
 
 > Render free-tier services **suspend after extended inactivity** and cold-start on the first hit (~30–50 s). If `/health` returns a "Service Suspended" page, resume/redeploy the service from the Render dashboard before the demo.
 >
 > **Pre-demo gate:** `make verify-live` (`scripts/verify_live.py`) verifies the *deployed* stack end-to-end — deployed commit vs `origin/main`, PS4 layers, a reconcile-sized `/llm-check?deep=1`, and the real Vertiv GXT5 pair through `/analyze` **and** `/analyze/stream` (must return `mode: llm`, not the fallback). Demo only on `GREEN -- demo away.`
+>
+> **Which model is which:** the frozen benchmark's *featured* configuration is `gemini-3.1-flash-lite` (via gateway) because it completed a clean, repeatable 3-pass run; the hosted demo pins **`gemini-2.5-flash`** (native API) — the same model the benchmark card reports as its ablation (higher peak recall, 0.9524, but no clean 3-pass). The live demo may answer from any configured provider in the failover chain, and `/llm-check` always reports exactly which model answered. Benchmark numbers are never re-attributed across models.
 
 ---
 
@@ -519,7 +521,7 @@ Pramaan cross-references against **7 governing standards** — all content is pa
 | `GET` | `/projects/{id}/remediation/{dev}` | **What-if remediation simulator** — schedule slip + cost vs the week a deviation is caught (deterministic; the lead-time metric made causal) |
 | `GET` | `/projects/eval/aggregate` | Multi-project eval — aggregate P/R/F1 across all projects |
 
-29 endpoints. All return 200 with graceful fallback to ground-truth data when no LLM key is configured. Streaming endpoints use Server-Sent Events (SSE) for real-time token delivery.
+30+ endpoints. All return 200 with graceful fallback to ground-truth data when no LLM key is configured. Streaming endpoints use Server-Sent Events (SSE) for real-time token delivery.
 
 > **Interactive API docs:** Launch the backend and visit [localhost:8000/docs](http://localhost:8000/docs) for live Swagger UI — try every endpoint in your browser.
 
@@ -530,7 +532,7 @@ Pramaan cross-references against **7 governing standards** — all content is pa
 ```
 pramaan/
 ├── backend/
-│   ├── main.py                    # FastAPI — 28+ endpoints, SSE streaming, graceful fallback
+│   ├── main.py                    # FastAPI — 30+ endpoints, SSE streaming, graceful fallback
 │   ├── analyze.py                 # Shared analysis logic (sync + streaming + rule fallback)
 │   ├── paths.py                   # Single source of truth for data paths
 │   ├── orchestrator.py            # LangGraph pipeline with conditional routing
@@ -575,7 +577,7 @@ pramaan/
 │   ├── baseline_reconciler.py     # Deterministic baseline (proves plumbing)
 │   ├── multi_project_eval.py      # Multi-project aggregate eval (12 projects)
 │   ├── text_eval.py               # Raw-markdown extraction eval (independent input path)
-│   ├── real_pairs_offline.py      # No-key harness over the 11 real datasheet pairs
+│   ├── real_pairs_offline.py      # No-key harness over the 15 team-authored datasheet pairs
 │   ├── schedule_calibration.py    # Monte-Carlo P80 self-coverage calibration
 │   └── scale_benchmark.py         # Throughput benchmark for the scale story
 ├── frontend/
@@ -628,7 +630,7 @@ pramaan/
     └── …                          # real-pairs, OCR, retrieval-loop, self-critique, hardening
 ```
 
-**60+ source files · 16,800+ lines of code · 587 tests · 12 projects · 28+ endpoints**
+**60+ source files · 16,800+ lines of code · 587 tests · 12 projects · 30+ endpoints**
 
 ---
 
@@ -780,5 +782,5 @@ python3 eval/run_eval.py --detector llm
 <p align="center">
   <strong>PRA<span style="color:#36d6e7">MAAN</span></strong><br>
   <em>EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4</em><br>
-  <sub>12 Projects &middot; 11 Countries &middot; 28 Endpoints &middot; 50 Synthetic Deviations &middot; 1,024 Lead-time-weeks (synthetic sum) &middot; Benchmark v1.2: 53 pairs / recall 0.862 / FAR 0.000 &middot; 587 tests &middot; CI green</sub>
+  <sub>12 Projects &middot; 11 Countries &middot; 30+ Endpoints &middot; 50 Synthetic Deviations &middot; 1,024 Lead-time-weeks (synthetic sum) &middot; Benchmark v1.2: 53 pairs / recall 0.862 / FAR 0.000 &middot; 587 tests &middot; CI green</sub>
 </p>

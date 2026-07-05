@@ -81,8 +81,8 @@
 > Exactly one step reasons with an LLM; ingestion, retrieval, self-critique, and
 > commissioning mapping are deterministic and inspectable, plus deterministic
 > schedule and supply-chain services. And it's built for the bad day: when a
-> provider is rate-limited it **fails over for availability** — gemini, gateway,
-> Groq, Claude, local — and if none answer, a rule engine still returns the headline
+> provider is rate-limited it **fails over for availability** — gemini, Groq,
+> gateway, Claude, local — and if none answer, a rule engine still returns the headline
 > deviations. Failover buys uptime, never accuracy. Every leg is scored the same."
 
 ## [3:05–3:30] — Limitations, roadmap, close
@@ -118,6 +118,15 @@
 > an automated consistency audit (123 of 129 consistent, 6 flagged), but that is
 > machine QA, **not** a second human reviewer. Two-person adjudication is the next
 > validation milestone."
+
+**"Your benchmark features `gemini-3.1-flash-lite` but the live demo runs `gemini-2.5-flash` — why?"**
+> "The featured benchmark configuration is the one that completed a clean,
+> repeatable 3-pass run — that's what we headline. The hosted demo pins
+> `gemini-2.5-flash`, which is on the same benchmark card as the ablation — it
+> peaked *higher* (0.9524 recall) but didn't complete a clean 3-pass, so we
+> don't headline it. The demo may answer from any configured provider in the
+> failover chain, and `/llm-check` reports exactly which model answered. We
+> never re-attribute one model's benchmark numbers to another."
 
 **"What if the LLM is down during judging?"**
 > "Every endpoint still returns 200, the deterministic rule engine still finds the

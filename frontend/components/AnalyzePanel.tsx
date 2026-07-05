@@ -63,6 +63,33 @@ Apex Critical Power confirms the ePX-1000 meets or exceeds all applicable
 performance requirements and is offered as fully compliant with the project
 specification.`;
 
+// Clean-negative demo: a submittal that MEETS or EXCEEDS every requirement in
+// REAL_SPEC (2N, 1000 kW, 10 min EoL autonomy, >=96% eff, THD <=3%, <=72 dB).
+// The correct answer is ZERO deviations — it demonstrates the low false-alert
+// behaviour the benchmark measures (0 false alerts on 64 clean-negative controls),
+// not just the ability to find faults.
+const CLEAN_SUBMITTAL = `TECHNICAL SUBMITTAL — TruePower DCX-1000 UPS
+Submitted by Meridian Power Systems · Submittal MPS-EL-0117 · For Approval
+
+1. System Overview
+Modular double-conversion UPS arranged in a full 2N configuration across two
+independent power paths. Any single module, static switch or path can be removed
+for maintenance without dropping the critical load.
+
+2. Guaranteed Technical Particulars
+  2.1 Topology ......................... Double conversion (VFI-SS-111)
+  2.2 Module rated active power ........ 1000 kW
+  2.3 System redundancy ................ 2N (two independent paths)
+  2.4 Battery autonomy at full load .... 11 minutes at END OF LIFE, minimum
+                                         design temperature, one string out
+  2.5 Online efficiency at 100% load ... 96.4%
+  2.6 Input current THD ................ 2.7%
+  2.7 Audible noise at 1 m ............. 70 dB(A)
+
+3. Compliance Statement
+Meridian confirms the DCX-1000 meets or exceeds every performance requirement in
+Section 26 33 53, including the 2N topology and end-of-life autonomy provisions.`;
+
 interface AnalyzeResult {
   system: string;
   deviations: Array<{
@@ -90,6 +117,54 @@ const API = process.env.NEXT_PUBLIC_API ?? "http://localhost:8000";
 function formatElapsed(ms: number | undefined | null): string {
   if (ms == null || Number.isNaN(ms)) return "—";
   return ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${Math.round(ms)} ms`;
+}
+
+// Where did this result actually come from? Report it honestly so a judge can
+// tell a live-model answer from the deterministic availability fallback — never
+// dress the rule floor up as "AI".
+function provenance(mode: string): { label: string; cls: string; title: string } {
+  switch (mode) {
+    case "llm":
+      return { label: "Live LLM reasoning", cls: "prov-llm",
+        title: "A configured LLM provider answered (Gemini → gateway → Groq → Claude → local, whichever was reachable). Availability failover, scored the same regardless of leg." };
+    case "vision":
+      return { label: "Vision (image) reasoning", cls: "prov-llm",
+        title: "Gemini vision read the values directly from the uploaded image." };
+    case "vision-unavailable":
+      return { label: "Vision unavailable", cls: "prov-rule",
+        title: "The vision model could not be reached for this image; no findings were fabricated." };
+    case "deterministic":
+    case "rule":
+      return { label: "Deterministic rule floor", cls: "prov-rule",
+        title: "No LLM provider was reachable (quota / timeout / no key), so the deterministic rule engine answered from your documents. Low-recall by design — an availability floor, never seeded data." };
+    default:
+      return { label: "Provenance unknown", cls: "prov-rule",
+        title: "This result did not report how it was produced; treat it cautiously." };
+  }
+}
+
+// A "0 deviations" result only means "compliant" when a real model did the
+// reasoning. From the deterministic rule floor (low recall by design) an empty
+// result is NOT a clean bill of health — say so instead of a false green.
+function llmBacked(mode: string): boolean {
+  return mode === "llm" || mode === "vision";
+}
+
+// Turn a raw fetch/stream error into guidance a judge can act on, without
+// implying success. Known demo failure modes get a specific hint.
+function friendlyError(raw: string): string {
+  const s = (raw || "").toLowerCase();
+  if (s.includes("429") || s.includes("rate limit"))
+    return "Rate limit reached — the public demo caps requests per IP. Wait a moment and try again.";
+  if (s.includes("401") || s.includes("403") || s.includes("auth"))
+    return "This demo build requires an access token for analysis. Paste text-mode still works, or set the demo token.";
+  if (s.includes("413") || s.includes("too large"))
+    return "That upload is over the 15 MB limit. Try a smaller PDF or paste the text instead.";
+  if (s.includes("415") || s.includes("unsupported") || s.includes("mime"))
+    return "That file type was rejected by the upload validator. Use a PDF, image, MD, or TXT — or paste the text.";
+  if (s.includes("not connected") || s.includes("failed to fetch") || s.includes("networkerror"))
+    return "Backend not reachable — a cold free-tier server can take ~30 s to wake. Retry, or paste text to run against the live engine.";
+  return raw;
 }
 
 type InputMode = "text" | "pdf";
@@ -314,6 +389,16 @@ export default function AnalyzePanel() {
     setStreamText("");
   };
 
+  // Clean-negative: same spec, a fully compliant submittal → expect 0 deviations.
+  const loadCleanSample = () => {
+    setMode("text");
+    setSpec(REAL_SPEC);
+    setSubmittal(CLEAN_SUBMITTAL);
+    setResult(null);
+    setError("");
+    setStreamText("");
+  };
+
   return (
     <div className="analyze-panel">
       <div className="analyze-header">
@@ -352,7 +437,10 @@ export default function AnalyzePanel() {
           Load example
         </button>
         <button className="analyze-example-btn" onClick={loadRealSample} disabled={loading} title="A realistic vendor datasheet vs design basis — natural prose, not the structured corpus. Catches a hidden 2N→N+1 and 10min→8min non-compliance.">
-          Load real document ★
+          Load deviation demo ★
+        </button>
+        <button className="analyze-example-btn" onClick={loadCleanSample} disabled={loading} title="Same design basis, a fully compliant submittal. The correct answer is zero deviations — it shows Pramaan does not false-alarm on a compliant document.">
+          Load compliant demo ✓
         </button>
       </div>
 
@@ -440,7 +528,7 @@ export default function AnalyzePanel() {
         {loading ? "Analyzing..." : mode === "pdf" ? "Upload & Analyze" : "Analyze for deviations"}
       </button>
 
-      {error && <div className="analyze-error">{error}</div>}
+      {error && <div className="analyze-error" role="alert">{friendlyError(error)}</div>}
 
       {ocrWarning && (
         <div
@@ -502,16 +590,34 @@ export default function AnalyzePanel() {
               {result.count} deviation{result.count !== 1 ? "s" : ""} found
             </span>
             <span className="analyze-results-meta">
-              {formatElapsed(result.elapsed_ms)}
-              {" · "}
-              {result.mode === "llm" ? "AI reasoning" : "rule-based engine"}
+              <span
+                className={`analyze-prov ${provenance(result.mode).cls}`}
+                title={provenance(result.mode).title}
+              >
+                {provenance(result.mode).label}
+              </span>
+              {(extraction?.spec.ocr_used || extraction?.submittal.ocr_used) && (
+                <span className="analyze-prov prov-ocr" title="At least one document was read via Tesseract OCR (best-effort, not lossless).">
+                  OCR text extraction
+                </span>
+              )}
+              <span className="analyze-results-time">{formatElapsed(result.elapsed_ms)}</span>
             </span>
           </div>
 
           {result.deviations.length === 0 ? (
-            <div className="analyze-no-devs">
-              No deviations detected — submittal meets all identified requirements.
-            </div>
+            llmBacked(result.mode) ? (
+              <div className="analyze-no-devs">
+                No deviations detected — submittal meets all identified requirements.
+              </div>
+            ) : (
+              <div className="analyze-no-devs inconclusive">
+                No deviations found by the <strong>deterministic rule floor</strong> —
+                the live model was unavailable, and this floor is low-recall by design,
+                so this is <strong>not</strong> a clean bill of health. Re-run when the
+                live model is reachable for a full check.
+              </div>
+            )
           ) : (
             <div className="analyze-devs">
               {result.deviations.map((d, i) => (

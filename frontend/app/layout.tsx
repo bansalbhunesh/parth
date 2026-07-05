@@ -1,10 +1,19 @@
 import "./globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 export const metadata: Metadata = {
   title: "Pramaan — EPC Deviation Intelligence",
   description:
     "Spec-to-Site Deviation Sentinel + Commissioning Risk Twin for hyperscale data-centre EPC delivery. Catches deviations 27 weeks before commissioning failure.",
+  icons: { icon: "/icon.svg" },
+};
+
+// Correct mobile scaling so the layout is honestly responsive down to ~360px
+// (no forced desktop width, no user-scaling lockout for accessibility).
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#0a0d11",
 };
 
 export default function RootLayout({

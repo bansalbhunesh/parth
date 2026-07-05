@@ -19,13 +19,16 @@ export default async function JudgePage() {
   const apiBase = process.env.NEXT_PUBLIC_API ?? "http://localhost:8000";
 
   return (
-    <div className="jm-wrap">
+    <main className="jm-wrap">
       <header className="jm-top">
         <div className="jm-brand">
           PRA<span>MAAN</span>
           <em>Judge Mode</em>
         </div>
-        <Link href="/" className="jm-link">Full dashboard →</Link>
+        <nav className="jm-topnav" aria-label="Judge navigation">
+          <Link href="/evidence" className="jm-link jm-link-alt">Evidence &amp; proof</Link>
+          <Link href="/" className="jm-link">Full dashboard →</Link>
+        </nav>
       </header>
 
       <section className="jm-hero">
@@ -55,40 +58,69 @@ export default async function JudgePage() {
         )}
       </section>
 
-      <section className="jm-metrics">
-        <div className="jm-metric">
-          <div className="jm-metric-val">50</div>
-          <div className="jm-metric-label">deviations caught</div>
+      <section className="jm-orient" aria-label="How to read Pramaan in 60 seconds">
+        <div className="jm-orient-step">
+          <span className="jm-orient-n">1</span>
+          <div><strong>What it does</strong><p>Reconciles an owner spec against a vendor submittal and the governing standards, and flags every deviation.</p></div>
         </div>
-        <div className="jm-metric">
-          <div className="jm-metric-val lead">1,024</div>
-          <div className="jm-metric-label">lead-time weeks (synthetic portfolio sum)</div>
+        <div className="jm-orient-step">
+          <span className="jm-orient-n">2</span>
+          <div><strong>What you give it</strong><p>A design basis + a vendor submittal — PDF, image, or pasted text. Try the buttons below.</p></div>
         </div>
-        <div className="jm-metric">
-          <div className="jm-metric-val ok">15</div>
-          <div className="jm-metric-label">team-authored eval pairs · 4 offline-checked · 23 live-model</div>
+        <div className="jm-orient-step">
+          <span className="jm-orient-n">3</span>
+          <div><strong>What it returns</strong><p>Each non-compliance with its standard, the commissioning test it fails, and the lead-time to fix it.</p></div>
         </div>
-        <div className="jm-metric">
-          <div className="jm-metric-val accent">12 · 11</div>
-          <div className="jm-metric-label">projects · countries</div>
+        <div className="jm-orient-step">
+          <span className="jm-orient-n">4</span>
+          <div><strong>How it&apos;s proven</strong><p>A frozen, provenance-tracked benchmark + full limitations — <Link href="/evidence">open the evidence page →</Link></p></div>
         </div>
       </section>
+
+      <section className="jm-metrics">
+        <div className="jm-metric">
+          <div className="jm-metric-val lead">0.862</div>
+          <div className="jm-metric-label">mean recall · benchmark v1.2 (3-pass)</div>
+        </div>
+        <div className="jm-metric">
+          <div className="jm-metric-val ok">0</div>
+          <div className="jm-metric-label">false alerts on 64 clean-negative controls</div>
+        </div>
+        <div className="jm-metric">
+          <div className="jm-metric-val">53</div>
+          <div className="jm-metric-label">spec–submittal pairs · 129 frozen labels · 17 systems</div>
+        </div>
+        <div className="jm-metric">
+          <div className="jm-metric-val accent">27 wk</div>
+          <div className="jm-metric-label">lead time on the hero UPS deviation (Cx week 38 − week 11)</div>
+        </div>
+      </section>
+      <p className="jm-metrics-note">
+        Numbers are from the frozen <strong>ps4_external_v1 (v1.2)</strong> benchmark:
+        team-authored fixtures, single-author frozen labels, two-person reviewer
+        adjudication still pending — a benchmark result, not a field-validation
+        claim. <Link href="/evidence">See every number and its limitation →</Link>
+      </p>
 
       <section className="jm-section">
         <div className="jm-section-head">
           <h2>Try it live — reasoning over a document, not keywords</h2>
           <p>
-            Hit <strong>“Load real document ★”</strong> (a Vertiv-datasheet-derived
-            submittal vs a design basis), or upload your own spec + submittal. Pramaan reasons
-            out the non-compliances from scratch and cites the standard, the
-            commissioning test, and the lead time for each. Every value in our
-            evaluation pairs is cited to a public source —{" "}
+            Hit <strong>“Load deviation demo ★”</strong> (a realistic design basis
+            vs a vendor submittal, in natural prose — with a hidden 2N→N+1 and a
+            10-min→8-min non-compliance), then <strong>“Load compliant demo ✓”</strong>
+            {" "}(a fully compliant submittal — the correct answer is zero deviations,
+            so you can see it does not false-alarm). Or upload your own spec + submittal.
+            Pramaan reasons out the non-compliances from scratch and cites the standard,
+            the commissioning test, and the lead time for each. Our fixtures are
+            team-authored; where they derive from public primary sources the values are
+            cited (10 documents, 5 with a verified public URL) —{" "}
             <a
               href="https://github.com/bansalbhunesh/parth/blob/main/data/samples/real/PROVENANCE.md"
               target="_blank"
               rel="noreferrer"
             >
-              verify each one yourself
+              see the provenance yourself
             </a>.
           </p>
         </div>
@@ -102,9 +134,10 @@ export default async function JudgePage() {
             A deviation isn&apos;t just a compliance flag. Pramaan traces it to the
             commissioning test it fails, the schedule milestone it slips, and the
             long-lead supplier whose re-procurement is the real cost — one connected
-            graph, every edge standards-cited, no number invented. Caught at submittal
-            review, here&apos;s what these {schedule.n_risks} deviations are worth to the
-            ready-for-service date:
+            graph where each deviation→standard→Cx-test edge carries the basis it
+            rests on (schedule and cost edges are computed by the deterministic
+            services, not the LLM). Caught at submittal review, here&apos;s what these{" "}
+            {schedule.n_risks} deviations are worth to the ready-for-service date:
           </p>
         </div>
         <div className="jm-metrics">
@@ -157,14 +190,27 @@ export default async function JudgePage() {
         <MultiProjectDashboard />
       </section>
 
+      <p className="jm-limits">
+        <strong>What this prototype does not claim:</strong> not field- or
+        customer-validated; benchmark fixtures are team-authored (10 derived from
+        public primary sources); labels are single-author frozen with two-person
+        human adjudication pending; OCR and the live LLM run only where the
+        deployment provides them (status is shown truthfully above and at{" "}
+        <a href={`${apiBase}/ocr-check`} target="_blank" rel="noreferrer">/ocr-check</a>).
+      </p>
+
       <footer className="jm-foot">
         <Link href="/" className="jm-foot-cta">Open the full 22-section dashboard →</Link>
         <div className="jm-foot-links">
+          <Link href="/evidence">Evidence &amp; proof</Link>
+          <span>·</span>
           <a href={`${apiBase}/health`} target="_blank" rel="noreferrer">API health</a>
+          <span>·</span>
+          <a href={`${apiBase}/ocr-check`} target="_blank" rel="noreferrer">OCR status</a>
           <span>·</span>
           <a href="https://github.com/bansalbhunesh/parth" target="_blank" rel="noreferrer">Source</a>
         </div>
       </footer>
-    </div>
+    </main>
   );
 }

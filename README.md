@@ -19,8 +19,8 @@
   <img src="https://img.shields.io/badge/evaluation_pairs-15-35c98b?style=flat-square&labelColor=0d1a14" alt="15 team-authored evaluation pairs">
   <img src="https://img.shields.io/badge/offline_false_positives-0-35c98b?style=flat-square&labelColor=0d1a14" alt="0 false positives on the deterministic offline checks">
   <img src="https://img.shields.io/badge/honest_precision-0.9-ffb020?style=flat-square&labelColor=1a1508" alt="Honest precision 0.9">
-  <img src="https://img.shields.io/badge/tests-480%2B-5b8cff?style=flat-square&labelColor=111820" alt="480+ tests">
-  <img src="https://img.shields.io/badge/agents-5-5b8cff?style=flat-square&labelColor=111820" alt="5 agents">
+  <img src="https://img.shields.io/badge/tests-587-5b8cff?style=flat-square&labelColor=111820" alt="587 tests">
+  <img src="https://img.shields.io/badge/architecture-reasoning_graph-5b8cff?style=flat-square&labelColor=111820" alt="compliance reasoning graph — 1 LLM core + deterministic services">
   <img src="https://img.shields.io/badge/countries-11-ffb020?style=flat-square&labelColor=1a1508" alt="11 countries">
   <img src="https://img.shields.io/github/actions/workflow/status/bansalbhunesh/parth/ci.yml?style=flat-square&labelColor=111820&label=CI" alt="CI">
   <img src="https://img.shields.io/badge/license-MIT-5b8cff?style=flat-square&labelColor=111820" alt="MIT License">
@@ -165,23 +165,24 @@ In a **40 MW Tier IV data centre** build (Project Meghdoot, Navi Mumbai), the de
 
 ## The Solution
 
-Pramaan is a **multi-agent AI system** that cross-references every requirement against every submittal against every governing standard — and catches deviations the day the document is uploaded.
+Pramaan is **one compliance reasoning graph, a set of connected deterministic intelligence services, and a reliability layer** — it cross-references every requirement against every submittal against every governing standard and catches deviations the day the document is uploaded. (One step reasons with an LLM; the rest are deterministic — see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) and [`docs/TECHNICAL_OVERVIEW.md`](docs/TECHNICAL_OVERVIEW.md).)
 
 <p align="center">
-  <img src="docs/pipeline-diagram.svg" alt="Pramaan Pipeline — 5 AI Agents" width="100%">
+  <img src="docs/pipeline-diagram.svg" alt="Pramaan compliance reasoning graph" width="100%">
 </p>
 
-**LangGraph features used:** `StateGraph`, `add_conditional_edges` (validation gate skips reconciliation for missing documents), `TypedDict` state schema, compiled graph with `END` sentinel.
+**LangGraph features used:** `StateGraph`, `add_conditional_edges` (validation gate skips reasoning for missing documents), two **bounded cycles** (retrieval tool-call + self-critique/reflexion), `TypedDict` state schema, compiled graph with `END` sentinel; a sequential runner drives the same nodes if LangGraph is absent.
 
-**5 agents, narratable in 60 seconds:**
+**The graph, node by node — only `reconcile` runs an LLM:**
 
-| # | Agent | What it does | Tech |
+| # | Node | What it does | Runs on |
 |---|-------|-------------|------|
-| 1 | **Ingestion** | PDF/DOCX → normalized markdown per system | pdfplumber + PyMuPDF + Gemini multimodal |
-| 2 | **Extraction** | Raw documents → structured triples (parameter, value, unit, clause) | Gemini + accuracy scoring |
-| 3 | **Reconciliation** | Cross-document deviation detection — the brain | Gemini + confidence scoring |
-| 4 | **Cx Predictor** | Deviation → commissioning test (L1–L5) + week + lead time | Rule table + LLM fallback |
-| 5 | **RFI Copilot** | RAG over project corpus with citation + prior-RFI matching | TF-IDF retrieval + streaming |
+| 1 | **Ingest** | PDF/image → normalized text per system | Deterministic — pdfplumber + PyMuPDF + Tesseract OCR fallback |
+| 2 | **Extract → Reconcile** | Structured triples + cross-document deviation reasoning — the core | **LLM** (failover chain) + confidence + citation check |
+| 3 | **Retrieve** *(cycle 1)* | Fetch a cited standard missing from context, loop back to re-reason | Deterministic local KB lookup |
+| 4 | **Critique** *(cycle 2)* | Verify own findings; drop equality-FP/duplicates; loop back on a failed self-check | Deterministic verifier (opt-in LLM critic) |
+| 5 | **Cx Predictor** | Deviation → commissioning test (L1–L5) + week + lead time | Rule table → standards graph; LLM fallback only for unmapped classes |
+| 6 | **RFI Copilot** *(service, not a graph node)* | Retrieval over project corpus + prior-RFI matching | BM25 (TF-IDF-family) retrieval; LLM only phrases the answer + streaming |
 
 ---
 
@@ -753,8 +754,8 @@ python3 eval/run_eval.py --detector llm
 
 | Layer | Technology |
 |-------|----------|
-| LLM | Gemini 2.5 Flash (multimodal) — swappable to Claude |
-| Orchestration | LangGraph (agent state graph) |
+| LLM | Failover chain — featured `gemini-3.1-flash-lite` (gateway); native Gemini / Claude / Qwen-gateway / Groq / local Ollama swappable |
+| Orchestration | LangGraph (reasoning graph — conditional routing + 2 bounded cycles) |
 | Backend | FastAPI (Python 3.11+), SSE streaming |
 | Frontend | Next.js 15, React 19, TypeScript |
 | PDF Extraction | pdfplumber (primary) + PyMuPDF (fallback) |

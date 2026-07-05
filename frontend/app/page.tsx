@@ -268,14 +268,14 @@ export default async function Page() {
       </ScrollReveal>
 
       <h2 className="section" id="pipeline">
-        AI agent pipeline &middot; 5 agents &middot; narratable in 60 seconds
+        Reasoning pipeline &middot; one LLM core + deterministic services &middot; narratable in 60 seconds
       </h2>
       <ScrollReveal>
         <PipelineViz />
       </ScrollReveal>
 
       <h2 className="section" id="architecture">
-        System architecture &middot; LangGraph multi-agent orchestration
+        System architecture &middot; LangGraph compliance reasoning graph
       </h2>
       <ScrollReveal>
         <ArchitectureDiagram />

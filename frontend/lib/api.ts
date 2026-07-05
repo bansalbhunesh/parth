@@ -484,6 +484,46 @@ export async function getOcrCheck(): Promise<OcrStatus | null> {
   }
 }
 
+export interface HealthStatus {
+  ok: boolean;
+  project: string;
+  version: string;
+  commit: string;
+  llm: {
+    provider: string;
+    key_set: boolean;
+    model?: string;
+    chain: string[];
+    ready: boolean;
+  };
+  analysis_mode: string;
+  ocr_available: boolean;
+  security: {
+    auth_required: boolean;
+    rate_limit_enabled: boolean;
+    rate_limits_per_hour: Record<string, number> | null;
+    max_upload_mb: number;
+    max_pdf_pages: number;
+    max_image_pixels: number;
+    cors_locked: boolean;
+    ocr_available: boolean;
+  };
+  scalability?: Record<string, unknown>;
+}
+
+// Live deployment status for the evidence page. Returns null if the backend is
+// unreachable — the caller must then say "live status unavailable" rather than
+// imply anything is green. Never contains a secret (backend returns booleans/caps).
+export async function getHealth(): Promise<HealthStatus | null> {
+  try {
+    const r = await fetch(`${API}/health`, fetchOpts({ cache: "no-store" }));
+    if (!r.ok) throw new Error(String(r.status));
+    return (await r.json()) as HealthStatus;
+  } catch {
+    return null;
+  }
+}
+
 export async function getProjects(): Promise<ProjectSummary[]> {
   try {
     const r = await fetch(`${API}/projects`, fetchOpts({ cache: "no-store" }));

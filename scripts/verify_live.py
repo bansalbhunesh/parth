@@ -92,7 +92,7 @@ def expected_commit() -> str | None:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--api", default="https://parth-3puc.onrender.com")
+    ap.add_argument("--api", default="https://parth-1-ma30.onrender.com")
     ap.add_argument("--app", default="https://parth-tan.vercel.app")
     ap.add_argument("--min-findings", type=int, default=3,
                     help="min LLM findings on the GXT5 pair to count the demo "

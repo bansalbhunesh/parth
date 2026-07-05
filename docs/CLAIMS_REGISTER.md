@@ -41,8 +41,24 @@ scenario / pending / do-not-use.
 | 19 | Customer ROI | **none** | — | pending | (say nothing) | "customer ROI", "saves customers $X", "N% cost reduction" | none | — | do-not-use |
 | 20 | OCR (scanned PDF + image) | **text-first + Tesseract fallback** | `eval/OCR_SCANNED_PDF.md`, `tests/test_ocr.py`, `backend/agents/ocr_util.py` | measured | "reads scanned / image-only PDFs and uploaded images via Tesseract OCR where the tesseract binary is installed; text-first with an OCR fallback, best-effort" | "OCR works everywhere", "reads any scanned PDF", "pixel-perfect OCR", "lossless OCR", "100% OCR accuracy" | README, report, demo, docs | needs the tesseract system binary (shipped in the `Dockerfile.backend` image / Render Docker build); English-only, best-effort (not lossless — e.g. GXT5→GXTS); `GET /ocr-check` reports whether OCR is live in a given deployment | verified |
 | 21 | Vision (image via LLM) | **Gemini reads values from the picture** | `data/samples/real/VISION_RESULT.md`, `backend/analyze.py` | measured | "given a datasheet image, Gemini vision reads the values from the picture (a separate path from Tesseract OCR)" | "vision works on any image", "always reads images", "vision-grade accuracy" | README, docs, demo | Gemini-only (no text-model failover); degrades to `mode=vision-unavailable` on any error; demonstrated on one sample, not headlined as a benchmark number | scenario |
-| 22 | LLM provider failover | **self-healing chain → deterministic floor** | `backend/llm.py`, `tests/test_failover.py`, `tests/test_failover_phase4.py`, `docs/LLM_FAILOVER_RUNBOOK.md` | measured | "on quota/429/rate-limit/timeout the demo fails over gemini → Qwen gateway → Groq → Claude → local Ollama → deterministic rule engine; only configured providers are tried; `/llm-check` shows the live chain and last failover" | "failover improves accuracy", "more accurate with failover", "never goes down", "100% uptime", "self-healing accuracy" | README, docs, demo, video | **reliability/availability only, NOT accuracy** — every leg is scored the same; the rule floor is deliberately low-recall (see #11) and computes from the real documents, never seeded labels; the Qwen gateway must be a genuinely separate quota (not Google's endpoint) | verified |
+| 22 | LLM provider failover | **self-healing chain → deterministic floor** | `backend/llm.py`, `tests/test_failover.py`, `tests/test_failover_phase4.py`, `docs/LLM_FAILOVER_RUNBOOK.md` | measured | "on quota/429/rate-limit/timeout the demo fails over gemini → Groq → Qwen gateway → Claude → local Ollama → deterministic rule engine; only configured providers are tried; `/llm-check` shows the live chain and last failover" | "failover improves accuracy", "more accurate with failover", "never goes down", "100% uptime", "self-healing accuracy" | README, docs, demo, video | **reliability/availability only, NOT accuracy** — every leg is scored the same; the rule floor is deliberately low-recall (see #11) and computes from the real documents, never seeded labels; the Qwen gateway must be a genuinely separate quota (not Google's endpoint) | verified |
 | 23 | Public-demo security hardening | **auth (opt-in) + rate limits + upload validation** | `backend/security.py`, `backend/uploads.py`, `tests/test_security*.py`, `tests/test_upload_hardening.py`, `tests/test_prompt_injection.py`, `tests/test_no_secrets.py`, `docs/SECURITY_DEMO_RUNBOOK.md` | measured | "demo-hardened: optional token auth, per-IP rate limiting, MIME/magic-byte upload validation (rejects archives/executables/disguised/oversized/bomb images), prompt-injection-resistant prompts, and no secret leakage in status endpoints" | "production-grade", "enterprise-ready", "secure by default", "penetration-tested", "zero vulnerabilities", "DDoS protection", "hardened against all attacks" | README, docs, demo, video | **demo hardening, not production security** — rate limiting is single-instance/in-memory (no shared store), auth is an optional demo token (not access control), and the dependency audit fixed the in-scope upload-parser CVE while documenting dev-only/unshipped advisories | verified |
+
+## Architecture claims
+
+Governs how the runtime may be described (README, deck, docs, diagrams, video).
+Verify against `backend/orchestrator.py` + `backend/main.py`.
+
+| # | Claim | Allowed wording | Banned wording | Runtime truth |
+|---|---|---|---|---|
+| A1 | Overall shape | "one compliance reasoning graph + connected deterministic intelligence services + reliability layer" | "five AI agents", "5 autonomous agents", "multi-agent AI system" (as the headline), "fully autonomous" | LangGraph graph with conditional routing + 2 bounded cycles; one LLM node |
+| A2 | LLM footprint | "a single LLM reasoning core (`reconcile`); other nodes are deterministic-first" | "every step is AI", "agentic at every stage" | `node_reconcile` is the only node that reasons with an LLM; ingest/load_standards/validate/retrieve/critique are deterministic; `cx_predict` is rule/graph-first with an LLM **fallback** only for unmapped classes; the copilot uses an LLM only to phrase a retrieved answer |
+| A3 | The two cycles | "two bounded cycles — a retrieval tool-call and a self-critique/reflexion loop" | "unbounded agent loop", "recursive self-improvement" | `PRAMAAN_MAX_RETRIEVALS` / `PRAMAAN_MAX_REVISIONS` bound both; graph always terminates |
+| A4 | Deterministic services | "deterministic commissioning/schedule/supply-chain/graph services" | "AI-computed schedule", "the AI predicts the slip" | CPM + Monte Carlo + rule tables; commissioning mapping falls back to an LLM only for unmapped classes; LLM otherwise only narrates, with a labelled `mode` |
+| A5 | Graph edges | "each deviation→standard→Cx-test edge carries the basis it rests on" | "all graph edges standards-cited", "every edge is standards-cited" | Some edges (e.g. `supplied-by`) are structural and carry no `basis` |
+| A6 | Provider failover | "provider failover for availability; `/llm-check` shows the live chain" | "failover improves accuracy", "self-healing accuracy", "never goes down" | Reliability only; every leg scored the same (see #22) |
+| A7 | OCR availability | "OCR runtime availability exposed through `/ocr-check`" | "OCR always available", "reads any scanned PDF" | Needs the tesseract binary; `/ocr-check` is authoritative (see #20) |
+| A8 | Maturity | "benchmark-backed prototype / hackathon build" | "production-grade", "enterprise-ready" (see #17) | Prototype; demo hardening, not production security |
 
 ## Do NOT say (banned phrases — grep-enforced)
 
@@ -67,6 +83,8 @@ source, or video script:
 - "never goes down" / "100% uptime"
 - "secure by default" / "penetration-tested" / "zero vulnerabilities"
 - "DDoS protection" / "hardened against all attacks"
+- "five AI agents" / "5 autonomous agents" / "fully autonomous"
+- "all graph edges standards-cited" / "every edge is standards-cited"
 
 ## Safe framing (paste-ready)
 

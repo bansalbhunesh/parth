@@ -16,11 +16,11 @@
   <img src="https://img.shields.io/badge/projects-12-a855f7?style=flat-square&labelColor=1a1020" alt="12 projects">
   <img src="https://img.shields.io/badge/deviations_caught-50-ff4d4d?style=flat-square&labelColor=1a0f12" alt="50 deviations">
   <img src="https://img.shields.io/badge/lead--time_weeks-1024-36d6e7?style=flat-square&labelColor=0d1a1e" alt="1024 lead-time weeks (synthetic portfolio sum)">
-  <img src="https://img.shields.io/badge/evaluation_pairs-15-35c98b?style=flat-square&labelColor=0d1a14" alt="15 team-authored evaluation pairs">
-  <img src="https://img.shields.io/badge/offline_false_positives-0-35c98b?style=flat-square&labelColor=0d1a14" alt="0 false positives on the deterministic offline checks">
-  <img src="https://img.shields.io/badge/honest_precision-0.9-ffb020?style=flat-square&labelColor=1a1508" alt="Honest precision 0.9">
-  <img src="https://img.shields.io/badge/tests-480%2B-5b8cff?style=flat-square&labelColor=111820" alt="480+ tests">
-  <img src="https://img.shields.io/badge/agents-5-5b8cff?style=flat-square&labelColor=111820" alt="5 agents">
+  <img src="https://img.shields.io/badge/benchmark_v1.2_pairs-53-35c98b?style=flat-square&labelColor=0d1a14" alt="53 spec-submittal pairs on the ps4_external_v1 v1.2 benchmark">
+  <img src="https://img.shields.io/badge/clean--negative_false_alerts-0-35c98b?style=flat-square&labelColor=0d1a14" alt="0 false alerts on 64 clean-negative controls">
+  <img src="https://img.shields.io/badge/benchmark_recall-0.862-ffb020?style=flat-square&labelColor=1a1508" alt="Benchmark v1.2 mean recall 0.862">
+  <img src="https://img.shields.io/badge/tests-587-5b8cff?style=flat-square&labelColor=111820" alt="587 tests">
+  <img src="https://img.shields.io/badge/architecture-reasoning_graph-5b8cff?style=flat-square&labelColor=111820" alt="compliance reasoning graph — 1 LLM core + deterministic services">
   <img src="https://img.shields.io/badge/countries-11-ffb020?style=flat-square&labelColor=1a1508" alt="11 countries">
   <img src="https://img.shields.io/github/actions/workflow/status/bansalbhunesh/parth/ci.yml?style=flat-square&labelColor=111820&label=CI" alt="CI">
   <img src="https://img.shields.io/badge/license-MIT-5b8cff?style=flat-square&labelColor=111820" alt="MIT License">
@@ -31,7 +31,7 @@
   <a href="https://parth-tan.vercel.app/judge"><img src="https://img.shields.io/badge/★_JUDGE_MODE-90--second_proof-ffb020?style=for-the-badge&labelColor=1a1508" alt="Judge Mode"></a>
   <a href="https://parth-tan.vercel.app"><img src="https://img.shields.io/badge/▶_LIVE_DEMO-parth--tan.vercel.app-00d4ff?style=for-the-badge&labelColor=0a0d11" alt="Live Demo"></a>
   <a href="https://parth-1-ma30.onrender.com/health"><img src="https://img.shields.io/badge/API-parth--1--ma30.onrender.com-35c98b?style=for-the-badge&labelColor=0d1a14" alt="API"></a>
-  <a href="presentation.html"><img src="https://img.shields.io/badge/📊_PRESENTATION-15_slides-a855f7?style=for-the-badge&labelColor=1a1020" alt="Presentation"></a>
+  <a href="presentation.html"><img src="https://img.shields.io/badge/📊_PRESENTATION-12_slides-a855f7?style=for-the-badge&labelColor=1a1020" alt="Presentation"></a>
 </p>
 
 <p align="center">
@@ -50,21 +50,24 @@
 ---
 
 <p align="center">
-  <img src="docs/demo.gif" alt="Pramaan judge mode: load a real vendor document, hit Analyze, watch the AI stream its reasoning and return cited deviations — 2N vs N+1 redundancy and a battery-autonomy shortfall, each with the standard and commissioning test" width="900">
+  <img src="docs/demo.gif" alt="Pramaan judge mode: load a realistic vendor document, hit Analyze, watch the AI stream its reasoning and return cited deviations — 2N vs N+1 redundancy and a battery-autonomy shortfall, each with the standard and commissioning test" width="900">
   <br>
-  <sub>The real flow, uncut: <strong>Load real document ★ → Analyze → cited findings in ~19 s</strong> — try it yourself in <a href="https://parth-tan.vercel.app/judge">Judge Mode</a>.</sub>
+  <sub>The real flow, uncut: <strong>Load deviation demo ★ → Analyze → cited findings</strong> — try it yourself in <a href="https://parth-tan.vercel.app/judge">Judge Mode</a>.</sub>
 </p>
 
 ---
 
 ## ⚡ Judges: start here (2 minutes)
 
-1. **See it catch a real deviation** → [Judge Mode](https://parth-tan.vercel.app/judge): click **Load real document ★**, hit **Analyze**, watch it derive 38.8 h of fuel autonomy from a real Cummins datasheet and name the commissioning test that fails.
-2. **Don't take our word for any number** → `git clone … && make verify` — the unit-test suite, the deterministic eval harnesses, and the frontend type-check reproduce offline with no API key. The **live-model** real-datasheet findings (23 of the 27 hard claims) vary run-to-run and are reported as such, not as a fixed score. No-key deterministic harness: `python eval/real_pairs_offline.py`.
-3. **The 3-minute pitch video** → *(link lands here on submission)* · script: [`PITCH.md`](PITCH.md)
-4. **Business case in one page** → [`docs/BUSINESS.md`](docs/BUSINESS.md) — what one caught deviation is worth ($10–40M/month of commissioning slip).
-5. **Every value in the real pairs is citable** → [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md).
-6. **It reads the drawing, not just text** → [`data/samples/real/VISION_RESULT.md`](data/samples/real/VISION_RESULT.md): given a datasheet **image**, Gemini vision read the values from the picture and caught all 3 deviations (incl. a missing-capability omission), clearing the compliant IP rating.
+1. **See it catch a real deviation** → [Judge Mode](https://parth-tan.vercel.app/judge): click **Load deviation demo ★**, hit **Analyze**, watch it catch a hidden 2N→N+1 redundancy drop and a battery-autonomy shortfall (10→8 min) in a realistic vendor submittal — each cited to the standard and mapped to the commissioning test it fails.
+2. **Don't take our word for any number** → `git clone … && make verify` — the unit-test suite, the deterministic eval harnesses, and the frontend type-check reproduce offline with no API key. The **live-model** team-authored cited-value findings (23 of the 27 hard claims) vary run-to-run and are reported as such, not as a fixed score. No-key deterministic harness: `python eval/real_pairs_offline.py`.
+3. **See the evidence, labelled** → [Evidence dashboard](https://parth-tan.vercel.app/evidence): the frozen v1.2 benchmark (recall 0.862 · precision 0.953 · F1 0.905 · FAR 0.000), with reviewer-2 shown as **pending** and the automated cross-check labelled **machine QA, not human**.
+4. **The 3-minute pitch video** → *(link lands here on submission)* · script: [`PITCH.md`](PITCH.md)
+5. **Business case in one page** → [`docs/BUSINESS.md`](docs/BUSINESS.md) — what one caught deviation is worth ($10–40M/month of commissioning slip).
+6. **Every value in the real pairs is citable** → [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md).
+7. **It reads the drawing, not just text** → [`data/samples/real/VISION_RESULT.md`](data/samples/real/VISION_RESULT.md): given a datasheet **image**, Gemini vision read the values from the picture and caught all 3 deviations (incl. a missing-capability omission), clearing the compliant IP rating.
+
+> **Submitting?** The one-page pre-flight is [`docs/FINAL_SUBMISSION_CHECKLIST.md`](docs/FINAL_SUBMISSION_CHECKLIST.md) — every URL, artifact, and truth-gate in one place.
 
 ---
 
@@ -102,7 +105,7 @@
 >
 > **It reasons over documents — not keywords.** Across **15 team-authored evaluation pairs** whose values are cited from public product datasheets and standards — Vertiv, Cummins, STULZ, ABB, Tate ConCore, Schneider Canalis, **Raritan, Xtralis VESDA, Distech** (Uptime, NFPA, EPA, ASHRAE, IEC, CISCA) — it targets **27 hard deviation claims: 4 are checked deterministically offline (no key); the remaining 23 require live-model evaluation** and vary by model and day. Live runs have recovered arithmetic it did itself (4,000 gal ÷ 103 GPH = **38.8 h** vs 48 required) and refrigerant/agent GWPs it **recalled from domain knowledge** (R-410A 2,088, R-134a 1,430, FM-200 3,220) the datasheets never stated. Two claims are **hard product-ceiling shortfalls** (ConCore 1250 = 1,250 lbf vs 1,500 required; Canalis KTA10 = 50 kA vs 65). We deliberately keep **one contested case and score it against ourselves — not a suspicious 1.000.** Live results are reported with not-run pairs counted; every value is traced in → [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md)
 >
-> **And it's engineered to degrade gracefully.** Each finding cites the standard, predicts the commissioning test it will fail, and the weeks of lead time. When the AI is rate-limited, a rule-based engine still catches the headline shortfalls — **no silent zeros.** Benchmarked across 12 projects / 11 countries for breadth · full CI (tests + lint + build) green. *(This is a prototype, not a hardened production service — no auth, rate-limiting, or tenant isolation yet.)*
+> **And it's engineered to degrade gracefully.** Each finding cites the standard, predicts the commissioning test it will fail, and the weeks of lead time. When the AI is rate-limited, a rule-based engine still catches the headline shortfalls — **no silent zeros.** The headline accuracy signal is the frozen **ps4_external_v1 benchmark (v1.2): recall 0.862 · precision 0.953 · F1 0.905 · FAR 0.000** on 53 pairs / 129 labels; the 12-project portfolio is a synthetic breadth check. Full CI (tests + lint + build) green. *(This is a prototype, not a hardened production service — demo hardening is in place (auth, rate-limiting, upload validation); shared-store multi-tenant isolation is not.)*
 >
 > **The one-line moat:** other tools stop at the spec-vs-submittal mismatch — Pramaan names the exact *commissioning test* that deviation will fail and the *weeks of lead time* to fix it first, a domain-informed rule + LLM hybrid that turns a design-review miss into a scheduled, preventable commissioning failure. **And it generalises:** any *specification → vendor submittal → acceptance-test* domain — pharma GMP qualification, aerospace AS9100, medical-device V&V, switchgear type-testing — is the same problem. Data-centre EPC is simply the highest-stakes instance we proved it on.
 
@@ -113,7 +116,7 @@
 **No setup — use the deployed app:**
 
 1. Open **[Judge Mode →](https://parth-tan.vercel.app/judge)** (the focused, 90-second view).
-2. In **Live Analysis**, click **“Load real document ★”** — or upload your own spec + submittal PDFs.
+2. In **Live Analysis**, click **“Load deviation demo ★”** — or upload your own spec + submittal PDFs.
 3. Hit **Analyze**. Watch it stream the reasoning, then list each deviation with its severity, the standard it cites, the commissioning test it predicts will fail, and the lead time.
 
 Ready-made demo pairs ship in [`data/samples/`](data/samples/): a UPS edge pair, a Vertiv-datasheet-derived pair, a standby-generator pair, and **fifteen team-authored evaluation pairs** whose values are cited from public sources (Vertiv, Cummins, STULZ, ABB, FM-200/Novec, Carrier-class, EUROBAT, IEC 60076-11 transformer, NFPA 75 cabling, Tate ConCore raised-floor, Schneider Canalis busway, ASHRAE supply-air setpoint — every value traced in [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md)). Drop any pair into the analyzer.
@@ -165,23 +168,24 @@ In a **40 MW Tier IV data centre** build (Project Meghdoot, Navi Mumbai), the de
 
 ## The Solution
 
-Pramaan is a **multi-agent AI system** that cross-references every requirement against every submittal against every governing standard — and catches deviations the day the document is uploaded.
+Pramaan is **one compliance reasoning graph, a set of connected deterministic intelligence services, and a reliability layer** — it cross-references every requirement against every submittal against every governing standard and catches deviations the day the document is uploaded. (One step reasons with an LLM; the rest are deterministic — see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) and [`docs/TECHNICAL_OVERVIEW.md`](docs/TECHNICAL_OVERVIEW.md).)
 
 <p align="center">
-  <img src="docs/pipeline-diagram.svg" alt="Pramaan Pipeline — 5 AI Agents" width="100%">
+  <img src="docs/pipeline-diagram.svg" alt="Pramaan compliance reasoning graph" width="100%">
 </p>
 
-**LangGraph features used:** `StateGraph`, `add_conditional_edges` (validation gate skips reconciliation for missing documents), `TypedDict` state schema, compiled graph with `END` sentinel.
+**LangGraph features used:** `StateGraph`, `add_conditional_edges` (validation gate skips reasoning for missing documents), two **bounded cycles** (retrieval tool-call + self-critique/reflexion), `TypedDict` state schema, compiled graph with `END` sentinel; a sequential runner drives the same nodes if LangGraph is absent.
 
-**5 agents, narratable in 60 seconds:**
+**The graph, node by node — only `reconcile` runs an LLM:**
 
-| # | Agent | What it does | Tech |
+| # | Node | What it does | Runs on |
 |---|-------|-------------|------|
-| 1 | **Ingestion** | PDF/DOCX → normalized markdown per system | pdfplumber + PyMuPDF + Gemini multimodal |
-| 2 | **Extraction** | Raw documents → structured triples (parameter, value, unit, clause) | Gemini + accuracy scoring |
-| 3 | **Reconciliation** | Cross-document deviation detection — the brain | Gemini + confidence scoring |
-| 4 | **Cx Predictor** | Deviation → commissioning test (L1–L5) + week + lead time | Rule table + LLM fallback |
-| 5 | **RFI Copilot** | RAG over project corpus with citation + prior-RFI matching | TF-IDF retrieval + streaming |
+| 1 | **Ingest** | PDF/image → normalized text per system | Deterministic — pdfplumber + PyMuPDF + Tesseract OCR fallback |
+| 2 | **Extract → Reconcile** | Structured triples + cross-document deviation reasoning — the core | **LLM** (failover chain) + confidence + citation check |
+| 3 | **Retrieve** *(cycle 1)* | Fetch a cited standard missing from context, loop back to re-reason | Deterministic local KB lookup |
+| 4 | **Critique** *(cycle 2)* | Verify own findings; drop equality-FP/duplicates; loop back on a failed self-check | Deterministic verifier (opt-in LLM critic) |
+| 5 | **Cx Predictor** | Deviation → commissioning test (L1–L5) + week + lead time | Rule table → standards graph; LLM fallback only for unmapped classes |
+| 6 | **RFI Copilot** *(service, not a graph node)* | Retrieval over project corpus + prior-RFI matching | BM25 (TF-IDF-family) retrieval; LLM only phrases the answer + streaming |
 
 ---
 
@@ -196,9 +200,9 @@ Pramaan is a **multi-agent AI system** that cross-references every requirement a
 
 | Section | Screenshot |
 |---------|-----------|
-| Sentinel Alert + 267-Week Savings | <img src="docs/screenshots/02-sentinel.png" width="600"> |
+| Sentinel Alert + Lead-Time Window *(scenario)* | <img src="docs/screenshots/02-sentinel.png" width="600"> |
 | Before / After Comparison | <img src="docs/screenshots/04-before-after.png" width="600"> |
-| 5-Agent Pipeline | <img src="docs/screenshots/05-pipeline.png" width="600"> |
+| Reasoning Pipeline | <img src="docs/screenshots/05-pipeline.png" width="600"> |
 | Architecture Diagram | <img src="docs/screenshots/06-architecture.png" width="600"> |
 | System Health Grid | <img src="docs/screenshots/07-systems.png" width="600"> |
 | Compliance Score | <img src="docs/screenshots/08-compliance.png" width="600"> |
@@ -249,7 +253,7 @@ real-document run is captured in
 |--------|-------|
 | Deviations caught | **14** (7 Critical, 6 Major, 1 Minor) |
 | False positives | **0** |
-| Total lead time saved | **267 weeks** (5+ years) |
+| Total lead-time window *(illustrative scenario)* | **267 weeks** across 14 findings |
 | Max single finding | **33 weeks** (BMS monitoring) |
 | Mean lead time | **19.1 weeks** |
 | Systems scanned | **10** (3 true negatives) |
@@ -259,7 +263,7 @@ real-document run is captured in
 </tr>
 </table>
 
-> **The metric that wins: Lead Time.** Every deviation carries `lead_time_weeks`. The BMS monitoring finding is **33 weeks** — caught Week 11, would have failed IST-15 at Week 44. Total across all 14: **267 weeks** of avoided commissioning rework.
+> **The metric that wins: Lead Time.** Every deviation carries `lead_time_weeks`. The BMS monitoring finding is **33 weeks** — caught Week 11, would have failed IST-15 at Week 44. Summed across all 14 findings that's a **267-week** combined lead-time window — an illustrative scenario on the demo portfolio, not a measured saving.
 
 ---
 
@@ -267,7 +271,7 @@ real-document run is captured in
 
 Pramaan is evaluated across **12 project datasets** spanning different tiers, geographies, climates, and governing standards — proving the pipeline generalises beyond a single dataset:
 
-| Project | Tier | Location | MW | Standards | Deviations | Lead Saved | F1 |
+| Project | Tier | Location | MW | Standards | Deviations | Lead Saved | F1 (synthetic†) |
 |---------|------|----------|----|-----------|------------|------------|-----|
 | **Meghdoot** | Uptime Tier IV | Navi Mumbai, India | 40 | Uptime, NFPA, ASHRAE, TIA, BICSI, IS 1893 | 14 | 267w | 1.000 |
 | **Vajra** | Uptime Tier III | Pune, India | 20 | Uptime, ASHRAE, NFPA, TIA | 4 | 95w | 1.000 |
@@ -283,18 +287,26 @@ Pramaan is evaluated across **12 project datasets** spanning different tiers, ge
 | **Thames** | Uptime Tier IV | London, UK | 35 | MCPD 2018, BREEAM | 2 | 50w | 1.000 |
 | **TOTAL** | **6 tiers** | **11 countries** | **256** | **25+ standards** | **50** | **1,024w** | **1.000** |
 
+> **†** Deviations in this portfolio are **seeded**, so the F1 is **1.000 by
+> construction** — a synthetic breadth/plumbing check, **not** detection skill and
+> not a real-world-accuracy claim. The headline capability number is the frozen
+> **ps4_external_v1 (v1.2)** benchmark: recall **0.862**, precision **0.953**, F1
+> **0.905**, 0 false alerts on 64 clean negatives (see `/evidence`).
+
 ```bash
 python3 eval/multi_project_eval.py
-# → 12 projects, 50 deviations, P=1.000 R=1.000 F1=1.000, 1024 lead-time-weeks summed (synthetic)
+# → 12 projects, recovers all 50 seeded deviations by construction (synthetic breadth check); 1024 lead-time-weeks summed (synthetic)
 
 python3 eval/multi_project_eval.py --json
 ```
 
 > **Real-LLM verified, not just structural.** The table above is the offline
 > baseline. With a real frontier model (`gemini-2.5-pro`) reasoning over the
-> **raw documents** from scratch, a live run recovered **50/50 deviations across all
-> 12 projects — Recall/Precision/F1 = 1.000 on this synthetic portfolio** (a breadth
-> check, *not* external accuracy; live results vary run-to-run). Full provenance,
+> **raw documents** from scratch, a live run recovered **all 50 seeded deviations
+> across the 12-project synthetic portfolio** (a breadth check, true *by
+> construction* — *not* external accuracy; live results vary run-to-run). The
+> headline capability number is the frozen **ps4_external_v1 (v1.2)** benchmark
+> (recall 0.862), not this synthetic grid. Full provenance,
 > per-model breakdown, and the two issues real runs surfaced (and how we fixed
 > them) are documented in [`eval/REAL_WORLD_RESULTS.md`](eval/REAL_WORLD_RESULTS.md).
 > Reproduce: `python3 eval/multi_project_eval.py --detector llm` (needs an API key).
@@ -360,13 +372,13 @@ python3 eval/multi_project_eval.py --json
 python3 data/generate_corpus.py                    # Project Meghdoot (primary)
 python3 data/generate_projects.py                  # 11 additional projects
 
-# 2. Run the test suite (480+ tests, no API key needed)
-python3 -m pytest tests/ -q                       # → 481 passed (local; count varies slightly by Python version)
+# 2. Run the test suite (587 tests, no API key needed)
+python3 -m pytest tests/ -q                       # → 587 passed (local; count varies slightly by Python version)
 
-# 3. Prove the pipeline + eval harness (3 independent paths)
-python3 eval/run_eval.py --detector baseline      # → P/R/F1 = 1.000, 267 weeks saved
-python3 eval/text_eval.py                         # → Raw-markdown input path: regex extraction → F1=1.000
-python3 eval/multi_project_eval.py                # → 12 projects, F1=1.000, 1024 lead-time-weeks summed (synthetic)
+# 3. Prove the pipeline + eval harness (3 independent paths — all synthetic, by construction)
+python3 eval/run_eval.py --detector baseline      # → recovers all seeded deviations (synthetic integrity check)
+python3 eval/text_eval.py                         # → raw-markdown input path recovers seeded deviations (synthetic, by construction)
+python3 eval/multi_project_eval.py                # → 12 projects, all seeded deviations recovered by construction, 1024 lead-time-weeks summed (synthetic)
 
 # 4. The real run — LLM recovers deviations from RAW unstructured documents
 export GEMINI_API_KEY=your_key_here
@@ -385,7 +397,7 @@ cd frontend && npm install && npm run dev          # → localhost:3000
 curl http://localhost:8000/export/audit/html > evidence.html
 ```
 
-> **No API key?** The dashboard runs fully with ground-truth fallback data. All 29 API endpoints return 200. Both eval harnesses (structured + text-based), the corpus, and the frontend work offline. 480+ tests pass without any external dependencies.
+> **No API key?** The dashboard runs fully with ground-truth fallback data. All 30+ API endpoints return 200. Both eval harnesses (structured + text-based), the corpus, and the frontend work offline. 587 tests pass without any external dependencies.
 >
 > **Or just open the live demo:** [parth-tan.vercel.app](https://parth-tan.vercel.app) (frontend) · [parth-1-ma30.onrender.com](https://parth-1-ma30.onrender.com/health) (API)
 
@@ -398,11 +410,13 @@ curl http://localhost:8000/export/audit/html > evidence.html
 | **Render** (backend) | `PRAMAAN_LLM_TIMEOUT` | optional | seconds the sync `/analyze` waits on the LLM before falling back (default `60`). |
 | **Render** (backend) | `PRAMAAN_SCHEDULE` / `PRAMAAN_SUPPLY` / `PRAMAAN_GRAPH` | optional | PS4 layers; default `1` (on). Set `0` to hide a section. |
 | **Vercel** (frontend) | `NEXT_PUBLIC_API` | **required** | set to the Render backend URL (e.g. `https://parth-1-ma30.onrender.com`). Inlined at build time. **Without it the frontend falls back to bundled data** (which mirrors live engine output, so the demo still renders correctly but is not live-served). |
-| **Render** (backend) | `OPENAI_API_KEY`/`OPENAI_BASE_URL`/`OPENAI_MODEL`, `GROQ_API_KEY` (+ optional `ANTHROPIC_API_KEY`) | resilience | **Automatic provider failover.** Configure more providers and the backend fails over on quota/429/timeout in order — **gemini → OpenAI-compatible gateway (Qwen) → Groq → claude → deterministic rule engine** — no redeploy, no code change. A single-key setup is unchanged. `/llm-check` shows the live chain, which provider last answered, and the last failover reason. **Failover is for reliability, not accuracy** — the rule engine remains the safe floor. Verified recall on the real pairs: Gemini 1.000 · Qwen3-235B 0.82 · Groq Llama-3.3-70B strong recall with a mild over-flag tendency (hence behind Qwen). |
+| **Render** (backend) | `OPENAI_API_KEY`/`OPENAI_BASE_URL`/`OPENAI_MODEL`, `GROQ_API_KEY` (+ optional `ANTHROPIC_API_KEY`) | resilience | **Automatic provider failover.** Configure more providers and the backend fails over on quota/429/timeout in order — **gemini → Groq → OpenAI-compatible gateway (Qwen) → claude → deterministic rule engine** — no redeploy, no code change. A single-key setup is unchanged. `/llm-check` shows the live chain, which provider last answered, and the last failover reason. **Failover is for reliability, not accuracy** — the rule engine remains the safe floor. Verified recall on the real pairs: Gemini 1.000 · Qwen3-235B 0.82 · Groq Llama-3.3-70B strong recall with a mild over-flag tendency. Groq sits second in the hosted demo because it is a funded, always-on free tier; the Qwen gateway leg needs paid OpenRouter credits (it returns 402 until funded — verified 2026-07-05). |
 
 > Render free-tier services **suspend after extended inactivity** and cold-start on the first hit (~30–50 s). If `/health` returns a "Service Suspended" page, resume/redeploy the service from the Render dashboard before the demo.
 >
 > **Pre-demo gate:** `make verify-live` (`scripts/verify_live.py`) verifies the *deployed* stack end-to-end — deployed commit vs `origin/main`, PS4 layers, a reconcile-sized `/llm-check?deep=1`, and the real Vertiv GXT5 pair through `/analyze` **and** `/analyze/stream` (must return `mode: llm`, not the fallback). Demo only on `GREEN -- demo away.`
+>
+> **Which model is which:** the frozen benchmark's *featured* configuration is `gemini-3.1-flash-lite` (via gateway) because it completed a clean, repeatable 3-pass run; the hosted demo pins **`gemini-2.5-flash`** (native API) — the same model the benchmark card reports as its ablation (higher peak recall, 0.9524, but no clean 3-pass). The live demo may answer from any configured provider in the failover chain, and `/llm-check` always reports exactly which model answered. Benchmark numbers are never re-attributed across models.
 
 ---
 
@@ -416,7 +430,7 @@ docker compose up --build
 # Option 2: Makefile
 make setup          # Install all dependencies
 make corpus         # Generate 12 project datasets
-make test           # Run 480+ tests
+make test           # Run 587 tests
 make eval-all       # Run all 3 eval paths
 make verify         # One-command: tests + all evals + type check
 make run            # Start backend API
@@ -434,10 +448,10 @@ The dashboard is a single-page application designed for a **60-second demo narra
 |---|---------|----------------|
 | 1 | **Hero Intro** | Problem statement + project context (40 MW, 7 standards, 87 submittals) |
 | 2 | **Sentinel** | Critical deviation fires: UPS-02 battery 7 min vs 10 min required |
-| 3 | **267-Week Savings** | Giant animated counter — the headline number |
+| 3 | **Lead-Time Window** *(scenario)* | Giant animated counter — summed lead-time window across the synthetic demo portfolio (illustrative, not a measured saving) |
 | 4 | **Before / After** | Manual review (10–15 weeks) vs Pramaan (< 5 minutes) toggle |
-| 5 | **Pipeline** | 5-agent pipeline with animated stage-by-stage reveal |
-| 6 | **Architecture** | 4-layer system diagram: Documents → Agents → Infrastructure → Outputs |
+| 5 | **Pipeline** | Reasoning pipeline — one LLM core + deterministic stages, animated reveal |
+| 6 | **Architecture** | 4-layer system diagram: Documents → Reasoning graph → Infrastructure → Outputs |
 | 7 | **Screenshots** | Interactive gallery of live dashboard screenshots |
 | 8 | **System Health** | 10 systems grid — critical/major/compliant status at a glance |
 | 9 | **Compliance Score** | Animated SVG ring gauge + per-system conformance cards |
@@ -507,7 +521,7 @@ Pramaan cross-references against **7 governing standards** — all content is pa
 | `GET` | `/projects/{id}/remediation/{dev}` | **What-if remediation simulator** — schedule slip + cost vs the week a deviation is caught (deterministic; the lead-time metric made causal) |
 | `GET` | `/projects/eval/aggregate` | Multi-project eval — aggregate P/R/F1 across all projects |
 
-29 endpoints. All return 200 with graceful fallback to ground-truth data when no LLM key is configured. Streaming endpoints use Server-Sent Events (SSE) for real-time token delivery.
+30+ endpoints. All return 200 with graceful fallback to ground-truth data when no LLM key is configured. Streaming endpoints use Server-Sent Events (SSE) for real-time token delivery.
 
 > **Interactive API docs:** Launch the backend and visit [localhost:8000/docs](http://localhost:8000/docs) for live Swagger UI — try every endpoint in your browser.
 
@@ -518,7 +532,7 @@ Pramaan cross-references against **7 governing standards** — all content is pa
 ```
 pramaan/
 ├── backend/
-│   ├── main.py                    # FastAPI — 28+ endpoints, SSE streaming, graceful fallback
+│   ├── main.py                    # FastAPI — 30+ endpoints, SSE streaming, graceful fallback
 │   ├── analyze.py                 # Shared analysis logic (sync + streaming + rule fallback)
 │   ├── paths.py                   # Single source of truth for data paths
 │   ├── orchestrator.py            # LangGraph pipeline with conditional routing
@@ -563,7 +577,7 @@ pramaan/
 │   ├── baseline_reconciler.py     # Deterministic baseline (proves plumbing)
 │   ├── multi_project_eval.py      # Multi-project aggregate eval (12 projects)
 │   ├── text_eval.py               # Raw-markdown extraction eval (independent input path)
-│   ├── real_pairs_offline.py      # No-key harness over the 11 real datasheet pairs
+│   ├── real_pairs_offline.py      # No-key harness over the 15 team-authored datasheet pairs
 │   ├── schedule_calibration.py    # Monte-Carlo P80 self-coverage calibration
 │   └── scale_benchmark.py         # Throughput benchmark for the scale story
 ├── frontend/
@@ -577,7 +591,7 @@ pramaan/
 │   │   ├── SectionIndex.tsx       # Interactive section directory
 │   │   ├── MultiProjectDashboard.tsx # 12-project eval grid with per-project metrics
 │   │   ├── StatsBar.tsx           # Summary stats strip
-│   │   ├── PipelineViz.tsx        # Animated 5-agent pipeline
+│   │   ├── PipelineViz.tsx        # Animated reasoning pipeline (one LLM core + deterministic stages)
 │   │   ├── ArchitectureDiagram.tsx # 4-layer architecture diagram
 │   │   ├── ScreenshotShowcase.tsx # Interactive screenshot gallery
 │   │   ├── ComplianceScore.tsx    # Animated SVG ring gauge + system cards
@@ -603,7 +617,7 @@ pramaan/
 │       └── api.ts                 # API client + SSE parser + bundled fallback data
 ├── scripts/
 │   └── verify_live.py             # Pre-demo gate: is the DEPLOYED stack demo-ready?
-└── tests/                         # 21 test files, 480+ tests
+└── tests/                         # 21 test files, 587 tests
     ├── test_api.py                # API tests (sync + streaming + upload + llm-check)
     ├── test_agents.py             # Agent unit tests (ingestion, extraction, cx, reconciliation)
     ├── test_corpus.py             # Corpus integrity tests (JSON/Markdown validation)
@@ -616,7 +630,7 @@ pramaan/
     └── …                          # real-pairs, OCR, retrieval-loop, self-critique, hardening
 ```
 
-**60+ source files · 16,800+ lines of code · 480+ tests · 12 projects · 28+ endpoints**
+**60+ source files · 16,800+ lines of code · 587 tests · 12 projects · 30+ endpoints**
 
 ---
 
@@ -656,15 +670,15 @@ The eval harness runs **four paths**. Paths 1–3 are reproducibility / integrit
 ```bash
 # Path 1: Structured baseline — compares pre-extracted triples (data integrity check)
 python3 eval/run_eval.py --detector baseline
-# → Precision: 1.000  Recall: 1.000  F1: 1.000
+# → recovers all seeded deviations, 0 false positives (synthetic integrity check, by construction)
 
 # Path 2: Text-based eval — runs regex extraction on RAW MARKDOWN (independent input path)
 python3 eval/text_eval.py
-# → 12 projects, 50 deviations discovered from raw text, F1=1.000
+# → 12 projects, 50 deviations discovered from raw text (synthetic, by construction)
 
 # Path 3: Multi-project aggregate — proves generalization across 11 countries
 python3 eval/multi_project_eval.py
-# → 12 projects, 50 deviations, P=1.000, R=1.000, F1=1.000, 1024 lead-time-weeks summed (synthetic)
+# → 12 projects, all 50 seeded deviations recovered by construction, 1024 lead-time-weeks summed (synthetic)
 
 # Path 4: LLM agent — recovers deviations from raw unstructured documents
 python3 eval/run_eval.py --detector llm
@@ -700,7 +714,7 @@ python3 eval/run_eval.py --detector llm
 |------------------|-----------------|----------|
 | **Innovation** | Goes past AI submittal review (the commercial state of the art — BuildSync, Spec-ID, InspectMind) by predicting **which commissioning test each deviation will fail, and how many weeks early** — cross-referencing spec + submittal + governing standard with a full citation chain. Demonstrated beyond the synthetic corpus (values cited from public datasheets) | LangGraph orchestration, deterministic domain services, citation chain, commissioning-risk twin, [`REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md) |
 | **Business Impact** | 1,024 lead-time-weeks summed across 50 synthetic findings (a portfolio sum of lookup-table lead times, *not* calendar delay avoided) illustrates the cost-of-late-detection thesis | Interactive ROI calculator (scenario model), cost-of-delay timeline, before/after comparison |
-| **Technical Excellence** | Dual eval harness (structured + text-based). The synthetic portfolio scores 1.000 **by construction** (we label it a plumbing/breadth check, not a flex); the honest signal is **15 team-authored evaluation pairs — 27 hard deviation claims (4 deterministic-offline, 23 live-model), one contested ASHRAE case scored against us**; live results reported with not-run pairs counted, not as a fixed 1.000. Full test + lint + build CI | Independent text-extraction + live-LLM eval, semantic + strict scoring, no-key offline harness (`eval/real_pairs_offline.py`), 25+ standards |
+| **Technical Excellence** | Dual eval harness (structured + text-based). The synthetic portfolio scores 1.000 **by construction** (we label it a plumbing/breadth check, not a flex); the honest signal is the frozen **ps4_external_v1 benchmark (v1.2) — 53 pairs, 129 labels, recall 0.862 · precision 0.953 · F1 0.905 · FAR 0.000 vs a 0.111 rule baseline** (reviewer-2 pending), complemented by 15 team-authored real-datasheet pairs; results reported with not-run pairs counted, never as a fixed 1.000. Full test + lint + build CI (587 tests) | Independent text-extraction + live-LLM eval, semantic + strict scoring, no-key offline harness (`eval/real_pairs_offline.py`), 25+ standards |
 | **Robustness** | Graceful degradation everywhere — no API key, malformed PDFs, cold backend all return 200; `/llm-check` surfaces the true LLM status | 50-test resilience suite, ISR-cached frontend, deterministic fallback |
 | **Scalability** | 12 projects → enterprise portfolio via multi-project eval + batch ingest + vector store | Multi-project dashboard, architecture diagram, scale story |
 | **UX** | Two surfaces: a focused **Judge Mode** (90-second proof) and a 22-section deep-dive dashboard, both ISR-cached for instant loads, streaming AI | `/judge` + full dashboard, live PDF upload, dark theme, responsive |
@@ -725,17 +739,17 @@ python3 eval/run_eval.py --detector llm
 | Time | Action | What to say |
 |------|--------|-------------|
 | 0:00 | Open `/judge` | "Pramaan reads vendor submittals against the design basis and catches deviations the day the document lands — not in commissioning, six months too late." |
-| 0:12 | Point to the 4 metric cards | "50 synthetic deviations across 12 projects for breadth, and 1,024 lead-time-weeks summed. But here's the honest signal: **27 hard deviation claims across 15 team-authored pairs — 4 checked deterministically offline, 23 by the live model — with values cited from public Vertiv, Cummins, ABB and Tate figures** — plus one contested case we score against ourselves, because honest experts disagree." |
-| 0:25 | Click **Load real document ★** | "This isn't our test data. This is a real Vertiv UPS datasheet, downloaded from their website — paired with a design basis." |
-| 0:35 | Hit **Analyze** | "Watch it reason over the raw PDFs and find the non-compliances from scratch." |
-| 0:50 | Point at the results | "Eight deviations. It derived 2.4 kW from 3 kVA × 0.8 PF. It flagged 88% online efficiency — not the ECO-mode headline. It caught a *missing* THD value. And the vendor stamped this 'fully compliant.'" |
-| 1:05 | The kill shot | "Same two PDFs, no LLM key — the regex fallback finds **zero**. Pattern-matching can't do this. Reasoning can. That gap is the product." |
-| 1:20 | Scroll to portfolio | "And it's not one lucky datasheet — 15 team-authored pairs (values cited from public sources) across UPS, generator, cooling, switchgear, raised floor and busway. The 12-project synthetic portfolio is the breadth test — clean by construction, and we label it that way." |
-| 1:30 | Close | "One click to the full dashboard if you want the eval harness, the commissioning twin, the audit export." |
+| 0:12 | Point to the metric cards | "Breadth first: 50 seeded deviations across a 12-project synthetic portfolio (clean by construction, labelled that way). The honest signal is the frozen benchmark — **53 spec–submittal pairs, 129 labels, 17 systems, 64 clean negatives** — team-authored, values traced to public sources." |
+| 0:25 | Click **Load deviation demo ★** | "A realistic vendor submittal against a design basis, in natural prose — nothing pre-seeded." |
+| 0:35 | Hit **Analyze** | "Watch it reason over the raw documents and find the non-compliances from scratch." |
+| 0:50 | Point at the results | "It surfaces the non-compliances a human skims past — redundancy quietly dropped from 2N to N+1, battery autonomy quoted below spec (10→8 min) — each cited to the clause and mapped to the commissioning test it fails. Note the **provenance chip**: it says honestly whether this came from the live model or the deterministic floor." |
+| 1:05 | The kill shot | "On the frozen benchmark the reasoning core reports 0.862 recall vs a deterministic rule baseline of 0.111 on the same labels. Pattern-matching can't do this. Reasoning can. That gap is the product." |
+| 1:20 | Click **Load compliant demo ✓** | "Now a fully compliant submittal. The correct answer is zero deviations — it doesn't cry wolf. That's what the 64 clean-negative controls measure: FAR 0.000." |
+| 1:30 | Close | "One click to the full dashboard if you want the eval harness, the commissioning twin, the audit export. The canonical timed script is [`PITCH.md`](PITCH.md)." |
 
 ### The deep-dive (full dashboard, when judges want rigour)
 
-`/` → Sentinel (27 weeks early) → Before/After (10 weeks vs 5 min) → Cx Twin (IST-07/09/11 at risk) → ROI (₹1,788 lakhs avoided) → Copilot (RFI-014 cited) → Eval (P/R/F1 = 1.000, reproducible) → Export (evidence pack with citation chain).
+`/` → Sentinel (27 weeks early) → Before/After (10 weeks vs 5 min) → Cx Twin (IST-07/09/11 at risk) → ROI (illustrative scenario) → Copilot (RFI-014 cited) → Eval (benchmark v1.2 — recall 0.862, reproducible) → Export (evidence pack with citation chain).
 
 ---
 
@@ -743,7 +757,7 @@ python3 eval/run_eval.py --detector llm
 
 - **Never hardcode deviation answers.** The reasoning must be real; the eval proves it.
 - **Never reproduce copyrighted standard text** — paraphrased summaries only.
-- **Keep agents at 5 and narratable.** Legible beats clever.
+- **One reasoning graph, narratable.** Exactly one LLM reasoning core; the rest are deterministic, inspectable services. Legible beats clever.
 - **The lead-time number is the story.** If a change buries it, revert.
 - **No secrets in the repo.** `.env`, API keys, and credentials are in `.gitignore`.
 
@@ -753,8 +767,8 @@ python3 eval/run_eval.py --detector llm
 
 | Layer | Technology |
 |-------|----------|
-| LLM | Gemini 2.5 Flash (multimodal) — swappable to Claude |
-| Orchestration | LangGraph (agent state graph) |
+| LLM | Failover chain — featured `gemini-3.1-flash-lite` (gateway); native Gemini / Claude / Qwen-gateway / Groq / local Ollama swappable |
+| Orchestration | LangGraph (reasoning graph — conditional routing + 2 bounded cycles) |
 | Backend | FastAPI (Python 3.11+), SSE streaming |
 | Frontend | Next.js 15, React 19, TypeScript |
 | PDF Extraction | pdfplumber (primary) + PyMuPDF (fallback) |
@@ -768,5 +782,5 @@ python3 eval/run_eval.py --detector llm
 <p align="center">
   <strong>PRA<span style="color:#36d6e7">MAAN</span></strong><br>
   <em>EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4</em><br>
-  <sub>12 Projects &middot; 11 Countries &middot; 28 Endpoints &middot; 50 Synthetic Deviations &middot; 1,024 Lead-time-weeks (synthetic sum) &middot; 15 Team-authored Pairs &middot; Offline 0 FP &middot; Honest ~0.9 &middot; CI green</sub>
+  <sub>12 Projects &middot; 11 Countries &middot; 30+ Endpoints &middot; 50 Synthetic Deviations &middot; 1,024 Lead-time-weeks (synthetic sum) &middot; Benchmark v1.2: 53 pairs / recall 0.862 / FAR 0.000 &middot; 587 tests &middot; CI green</sub>
 </p>

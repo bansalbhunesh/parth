@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Pramaan">
+  <rect width="64" height="64" rx="14" fill="#0a0d11"/>
+  <rect x="1.5" y="1.5" width="61" height="61" rx="12.5" fill="none" stroke="#36d6e7" stroke-opacity="0.35" stroke-width="1.5"/>
+  <path d="M20 46V18h13a9 9 0 0 1 0 18h-6" fill="none" stroke="#36d6e7" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M40 40l5 5 9-11" fill="none" stroke="#35c98b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

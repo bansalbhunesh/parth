@@ -187,11 +187,11 @@ function TotalSavingsHero() {
     <div className="savings-hero">
       <div className="savings-glow" />
       <div className="savings-number">267</div>
-      <div className="savings-unit">total weeks of lead time saved</div>
+      <div className="savings-unit">weeks of lead-time window · synthetic demo portfolio</div>
       <div className="savings-sub">
-        14 deviations caught at Week 11 — before a single bolt turns on site.
-        That&apos;s 267 weeks (5+ years) of avoided commissioning rework, schedule delays,
-        and cost overruns across all findings.
+        Summed lead time across 14 findings in the synthetic demo portfolio — the window
+        between catching each deviation at submittal review (Week 11) and the commissioning
+        test it would otherwise fail. An illustrative scenario, not a measured saving.
       </div>
     </div>
   );
@@ -268,14 +268,14 @@ export default async function Page() {
       </ScrollReveal>
 
       <h2 className="section" id="pipeline">
-        AI agent pipeline &middot; 5 agents &middot; narratable in 60 seconds
+        Reasoning pipeline &middot; one LLM core + deterministic services &middot; narratable in 60 seconds
       </h2>
       <ScrollReveal>
         <PipelineViz />
       </ScrollReveal>
 
       <h2 className="section" id="architecture">
-        System architecture &middot; LangGraph multi-agent orchestration
+        System architecture &middot; LangGraph compliance reasoning graph
       </h2>
       <ScrollReveal>
         <ArchitectureDiagram />
@@ -361,7 +361,7 @@ export default async function Page() {
       </ScrollReveal>
 
       <h2 className="section" id="multiproject">
-        Multi-project eval &middot; 12 projects &middot; 11 countries &middot; 6 standards
+        Multi-project eval &middot; 12 projects &middot; 11 countries &middot; synthetic breadth (by construction)
       </h2>
       <ScrollReveal>
         <MultiProjectDashboard />

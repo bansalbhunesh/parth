@@ -8,12 +8,18 @@ const NODES = {
     { id: "sub", label: "Vendor Submittals", sub: "87 documents", detail: "Rev A–C · PDF/DOCX/tables", color: "#5b8cff" },
     { id: "std", label: "Standards Corpus", sub: "7 governing standards", detail: "1,580 lines · 317+ clauses", color: "#5b8cff" },
   ],
+  // The real LangGraph nodes (backend/orchestrator.py), tagged with what each
+  // runs on. Reconcile is the LLM reasoning core on the main path (extraction
+  // happens inside it); the rest are deterministic (cx-predict calls an LLM only
+  // as a fallback for unmapped classes). Retrieve + Critique are the two bounded
+  // cycles that loop back to reconcile. The RFI copilot is a separate service, not
+  // a graph node, so it is shown in the services band below — not here.
   agents: [
-    { id: "ingest", label: "Ingestion", sub: "PDF/DOCX parsing", icon: "01", color: "#ffb020" },
-    { id: "extract", label: "Extraction", sub: "Structured triples", icon: "02", color: "#ffb020" },
-    { id: "reconcile", label: "Reconciliation", sub: "Cross-doc reasoning", icon: "03", color: "#ff4d4d", hero: true },
-    { id: "cx", label: "Cx Predictor", sub: "Test + lead time", icon: "04", color: "#35c98b" },
-    { id: "copilot", label: "RFI Copilot", sub: "RAG + prior RFIs", icon: "05", color: "#36d6e7" },
+    { id: "ingest", label: "Ingest", sub: "PDF/image → text", icon: "01", color: "#ffb020", kind: "DET" },
+    { id: "reconcile", label: "Reconcile", sub: "Extract + cross-doc reasoning", icon: "02", color: "#ff4d4d", hero: true, kind: "LLM" },
+    { id: "retrieve", label: "Retrieve", sub: "Cycle 1 · fetch cited standard", icon: "03", color: "#5b8cff", kind: "DET" },
+    { id: "critique", label: "Critique", sub: "Cycle 2 · self-check / reflexion", icon: "04", color: "#5b8cff", kind: "DET" },
+    { id: "cx", label: "Cx Predictor", sub: "Test + lead time (rule/graph)", icon: "05", color: "#35c98b", kind: "RULE" },
   ],
   outputs: [
     { id: "register", label: "Deviation Register", sub: "7 findings · 4 critical", color: "#36d6e7" },
@@ -24,16 +30,16 @@ const NODES = {
 
 const DATAFLOWS = [
   { label: "Raw documents", from: "inputs", to: "ingest" },
-  { label: "Structured triples", from: "extract", to: "reconcile" },
-  { label: "Deviations + rationale", from: "reconcile", to: "cx" },
-  { label: "Cx predictions", from: "cx", to: "outputs" },
+  { label: "Deviations + rationale", from: "reconcile", to: "critique" },
+  { label: "Verified findings", from: "critique", to: "cx" },
+  { label: "Cx predictions + lead time", from: "cx", to: "outputs" },
 ];
 
 const TECH = [
-  { label: "Gemini 2.5 Flash", detail: "Multimodal LLM", color: "#ff4d4d" },
-  { label: "LangGraph", detail: "State machine orchestrator", color: "#ffb020" },
-  { label: "FastAPI", detail: "11 async endpoints", color: "#35c98b" },
-  { label: "TF-IDF / pgvector", detail: "Retrieval layer", color: "#5b8cff" },
+  { label: "LLM failover chain", detail: "featured gemini-3.1-flash-lite", color: "#ff4d4d" },
+  { label: "LangGraph", detail: "reasoning graph · 2 cycles", color: "#ffb020" },
+  { label: "FastAPI", detail: "SSE + async jobs", color: "#35c98b" },
+  { label: "TF-IDF / pgvector", detail: "retrieval layer", color: "#5b8cff" },
 ];
 
 export default function ArchitectureDiagram() {
@@ -110,8 +116,8 @@ export default function ArchitectureDiagram() {
       <div className={`arch2-section arch2-agents ${visible ? "arch2-visible" : ""}`} style={{ transitionDelay: "300ms" }}>
         <div className="arch2-section-label">
           <span className="arch2-section-dot" style={{ background: "#ff4d4d" }} />
-          LANGGRAPH AGENT ORCHESTRATOR
-          <span className="arch2-orchestrator-badge">STATE MACHINE</span>
+          LANGGRAPH COMPLIANCE REASONING GRAPH
+          <span className="arch2-orchestrator-badge">1 LLM CORE · 2 CYCLES</span>
         </div>
         <div className="arch2-agent-track">
           {NODES.agents.map((a, i) => (
@@ -123,7 +129,16 @@ export default function ArchitectureDiagram() {
                 <div className="arch2-agent-num" style={{ color: a.color }}>{a.icon}</div>
                 <div className="arch2-agent-label">{a.label}</div>
                 <div className="arch2-agent-sub">{a.sub}</div>
-                {a.hero && <div className="arch2-agent-brain-tag">BRAIN</div>}
+                <span
+                  className="arch2-agent-kind"
+                  style={{
+                    color: a.kind === "LLM" ? "#ff8a8a" : a.kind === "RULE" ? "#7fe3b8" : "#9fb2cc",
+                    borderColor: a.kind === "LLM" ? "rgba(255,77,77,0.4)" : a.kind === "RULE" ? "rgba(53,201,139,0.4)" : "rgba(122,136,153,0.4)",
+                  }}
+                >
+                  {a.kind === "LLM" ? "LLM" : a.kind === "RULE" ? "RULE" : "DET"}
+                </span>
+                {a.hero && <div className="arch2-agent-brain-tag">CORE</div>}
               </div>
               {i < NODES.agents.length - 1 && (
                 <div className={`arch2-agent-arrow ${i < activeAgent ? "arch2-arrow-active" : ""}`}>
@@ -144,6 +159,20 @@ export default function ArchitectureDiagram() {
               <span>{f.label}</span>
             </div>
           ))}
+        </div>
+        <div
+          className={visible ? "arch2-annotation-visible" : ""}
+          style={{
+            marginTop: 14, textAlign: "center", fontFamily: "var(--mono)",
+            fontSize: 10.5, lineHeight: 1.6, color: "var(--muted)",
+            opacity: visible ? 1 : 0, transition: "opacity 0.6s 1s",
+          }}
+        >
+          ↺ <strong style={{ color: "#ff8a8a" }}>Retrieve</strong> and{" "}
+          <strong style={{ color: "#ff8a8a" }}>Critique</strong> each loop back to
+          Reconcile — the two bounded cycles (retrieval tool-call · self-critique
+          reflexion). Reconcile is the LLM core; Cx-predict falls back to an LLM
+          only for unmapped classes.
         </div>
       </div>
 
@@ -200,10 +229,10 @@ export default function ArchitectureDiagram() {
       {/* Key properties */}
       <div className={`arch2-props ${visible ? "arch2-visible" : ""}`} style={{ transitionDelay: "1100ms" }}>
         {[
-          { icon: "01", title: "Deterministic eval", desc: "P/R/F1 = 1.000 against labelled ground truth", color: "#35c98b" },
-          { icon: "02", title: "Citation chain", desc: "Every finding traces to spec clause + standard + submittal", color: "#5b8cff" },
-          { icon: "03", title: "Zero false positives (offline)", desc: "3 true-negative systems (FIRE, BUSWAY, PDU) verified clean by the no-key rule engine", color: "#36d6e7" },
-          { icon: "04", title: "149 lead-time weeks", desc: "Total lead time across all 7 deviations caught at Week 11 (not calendar delay avoided)", color: "#ffb020" },
+          { icon: "01", title: "Benchmarked", desc: "recall 0.862 · precision 0.953 · F1 0.905 on ps4_external_v1 v1.2 (team-authored, reviewer-2 pending)", color: "#35c98b" },
+          { icon: "02", title: "Citation chain", desc: "every finding traces to spec clause + standard + submittal", color: "#5b8cff" },
+          { icon: "03", title: "0 false alerts", desc: "on 64 clean-negative controls in the benchmark (not a zero-false-positive claim overall)", color: "#36d6e7" },
+          { icon: "04", title: "27-week lead", desc: "on the hero UPS deviation — caught week 11 vs the week-38 commissioning test", color: "#ffb020" },
         ].map((p, i) => (
           <div key={i} className={`arch2-prop ${visible ? "arch2-card-visible" : ""}`} style={{ transitionDelay: `${1200 + i * 100}ms` }}>
             <div className="arch2-prop-num" style={{ color: p.color }}>{p.icon}</div>

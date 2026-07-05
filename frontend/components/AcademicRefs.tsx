@@ -21,7 +21,7 @@ const REFS = [
     title: "Identification and Categorization of Defects in Construction Specifications Utilizing NLP",
     venue: "ASCE JCEM Vol 152 No 5",
     year: 2026,
-    relevance: "NLP defect detection in construction specs — directly comparable to Pramaan's extraction agent",
+    relevance: "NLP defect detection in construction specs — directly comparable to Pramaan's extraction stage",
   },
 ];
 

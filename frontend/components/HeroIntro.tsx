@@ -14,8 +14,9 @@ export default function HeroIntro() {
         <strong> 33 weeks too late</strong>, causing seven-figure rework.
       </p>
       <p className="hero-intro-body">
-        <strong>Pramaan</strong> deploys 5 AI agents to cross-reference every requirement against every submittal
-        against every standard — and catches deviations the day the document is uploaded.
+        <strong>Pramaan</strong> runs one compliance reasoning graph — a single LLM reasoning core wrapped in
+        deterministic, inspectable services — to cross-reference every requirement against every submittal
+        against every standard, and catches deviations the day the document is uploaded.
       </p>
       <div className="hero-intro-stats">
         <div className="hero-intro-stat">

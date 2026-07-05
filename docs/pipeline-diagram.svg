@@ -39,7 +39,7 @@
   <rect width="1000" height="380" rx="16" stroke="#1a2030" stroke-width="1" fill="none"/>
 
   <!-- Title -->
-  <text x="500" y="32" text-anchor="middle" font-family="Inter, Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#00d4ff" letter-spacing="2">LANGGRAPH AGENT ORCHESTRATOR</text>
+  <text x="500" y="32" text-anchor="middle" font-family="Inter, Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#00d4ff" letter-spacing="2">LANGGRAPH REASONING GRAPH</text>
 
   <!-- Input labels (left side) -->
   <rect x="16" y="80" width="120" height="36" rx="8" fill="#111820" stroke="#1a2030" stroke-width="1"/>
@@ -56,10 +56,10 @@
   <line x1="136" y1="158" x2="170" y2="158" stroke="#00d4ff" stroke-width="1.5" opacity="0.4"/>
   <line x1="136" y1="218" x2="170" y2="158" stroke="#00d4ff" stroke-width="1.5" opacity="0.4"/>
 
-  <!-- Agent 1: Ingestion -->
+  <!-- Node 1: Ingestion -->
   <rect x="170" y="70" width="140" height="80" rx="12" fill="#111820" stroke="#00d4ff" stroke-width="1.5" opacity="0.9"/>
   <rect x="185" y="82" width="48" height="18" rx="9" fill="rgba(0,212,255,0.15)"/>
-  <text x="209" y="95" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#00d4ff">AGENT 1</text>
+  <text x="209" y="95" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#00d4ff">NODE 1</text>
   <text x="240" y="117" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#e8ecf0">Ingestion</text>
   <text x="240" y="137" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#8892a0">PDF → Markdown</text>
 
@@ -67,16 +67,16 @@
   <line x1="310" y1="110" x2="350" y2="110" stroke="#00d4ff" stroke-width="1.5" opacity="0.5"/>
   <polygon points="348,105 358,110 348,115" fill="#00d4ff" opacity="0.5"/>
 
-  <!-- Agent 2: Extraction -->
-  <rect x="358" y="70" width="140" height="80" rx="12" fill="#111820" stroke="#a855f7" stroke-width="1.5" opacity="0.9"/>
-  <rect x="373" y="82" width="48" height="18" rx="9" fill="rgba(168,85,247,0.15)"/>
-  <text x="397" y="95" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#a855f7">AGENT 2</text>
-  <text x="428" y="117" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#e8ecf0">Extraction</text>
-  <text x="428" y="137" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#8892a0">Structured Triples</text>
+  <!-- Node 2: Load standards (deterministic KB read) -->
+  <rect x="358" y="70" width="140" height="80" rx="12" fill="#111820" stroke="#00d4ff" stroke-width="1.5" opacity="0.9"/>
+  <rect x="373" y="82" width="48" height="18" rx="9" fill="rgba(0,212,255,0.15)"/>
+  <text x="397" y="95" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#00d4ff">NODE 2</text>
+  <text x="428" y="117" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#e8ecf0">Load Standards</text>
+  <text x="428" y="137" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#8892a0">Governing corpus</text>
 
   <!-- Arrow 2→Validate -->
-  <line x1="498" y1="110" x2="530" y2="110" stroke="#a855f7" stroke-width="1.5" opacity="0.5"/>
-  <polygon points="528,105 538,110 528,115" fill="#a855f7" opacity="0.5"/>
+  <line x1="498" y1="110" x2="530" y2="110" stroke="#00d4ff" stroke-width="1.5" opacity="0.5"/>
+  <polygon points="528,105 538,110 528,115" fill="#00d4ff" opacity="0.5"/>
 
   <!-- Validate Gate (diamond) -->
   <polygon points="568,80 608,110 568,140 528,110" fill="#111820" stroke="#ffb020" stroke-width="2"/>
@@ -86,14 +86,14 @@
   <!-- Conditional label -->
   <text x="568" y="155" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#8892a0" font-style="italic">conditional routing</text>
 
-  <!-- Arrow Validate→Agent 3 -->
+  <!-- Arrow Validate->Node 3 -->
   <line x1="608" y1="110" x2="640" y2="110" stroke="#ffb020" stroke-width="1.5" opacity="0.5"/>
   <polygon points="638,105 648,110 638,115" fill="#ffb020" opacity="0.5"/>
 
-  <!-- Agent 3: Reconciliation (THE BRAIN - highlighted) -->
+  <!-- Node 3: Reconciliation (THE LLM CORE - highlighted) -->
   <rect x="648" y="62" width="150" height="96" rx="14" fill="#111820" stroke="#ff4d4d" stroke-width="2.5" filter="url(#glow-sm)"/>
   <rect x="663" y="74" width="90" height="18" rx="9" fill="rgba(255,77,77,0.15)"/>
-  <text x="708" y="87" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#ff4d4d">AGENT 3 — BRAIN</text>
+  <text x="708" y="87" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#ff4d4d">NODE 3 — LLM CORE</text>
   <text x="723" y="113" text-anchor="middle" font-family="Inter, sans-serif" font-size="15" font-weight="800" fill="#e8ecf0">Reconciliation</text>
   <text x="723" y="133" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#ff4d4d">Cross-doc reasoning</text>
   <text x="723" y="148" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#8892a0">+ citation chain</text>
@@ -102,10 +102,10 @@
   <line x1="723" y1="158" x2="723" y2="190" stroke="#ff4d4d" stroke-width="1.5" opacity="0.5"/>
   <polygon points="718,188 723,198 728,188" fill="#ff4d4d" opacity="0.5"/>
 
-  <!-- Agent 4: Cx Predictor -->
+  <!-- Node 4: Cx Predictor -->
   <rect x="648" y="200" width="150" height="80" rx="12" fill="#111820" stroke="#35c98b" stroke-width="1.5" opacity="0.9"/>
   <rect x="663" y="212" width="48" height="18" rx="9" fill="rgba(53,201,139,0.15)"/>
-  <text x="687" y="225" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#35c98b">AGENT 4</text>
+  <text x="687" y="225" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#35c98b">NODE 4</text>
   <text x="723" y="249" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#e8ecf0">Cx Predictor</text>
   <text x="723" y="269" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#8892a0">Test + Lead Time</text>
 
@@ -121,15 +121,15 @@
   <text x="918" y="152" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#8892a0">+ Lead Time</text>
   <text x="918" y="167" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#8892a0">+ Cx Test Mapping</text>
 
-  <!-- Arrow from Agent 3/4 area to output -->
+  <!-- Arrow from Node 3/4 area to output -->
   <line x1="798" y1="110" x2="848" y2="110" stroke="#00d4ff" stroke-width="1.5" opacity="0.4"/>
 
-  <!-- Agent 5: RFI Copilot (below) -->
-  <rect x="848" y="210" width="140" height="80" rx="12" fill="#111820" stroke="#a855f7" stroke-width="1.5" opacity="0.9"/>
-  <rect x="863" y="222" width="48" height="18" rx="9" fill="rgba(168,85,247,0.15)"/>
-  <text x="887" y="235" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#a855f7">AGENT 5</text>
+  <!-- RFI Copilot: a separate service, NOT a graph node -->
+  <rect x="848" y="210" width="140" height="80" rx="12" fill="#111820" stroke="#a855f7" stroke-width="1.5" opacity="0.9" stroke-dasharray="4 3"/>
+  <rect x="863" y="222" width="56" height="18" rx="9" fill="rgba(168,85,247,0.15)"/>
+  <text x="891" y="235" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#a855f7">SERVICE</text>
   <text x="918" y="259" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#e8ecf0">RFI Copilot</text>
-  <text x="918" y="279" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#8892a0">RAG Q&A + Citations</text>
+  <text x="918" y="279" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#8892a0">BM25 retrieval + cited answer</text>
 
   <!-- Bottom stats bar -->
   <rect x="16" y="320" width="968" height="46" rx="10" fill="#111820" stroke="#1a2030" stroke-width="1"/>
@@ -144,14 +144,14 @@
   <text x="356" y="347" font-family="Inter, sans-serif" font-size="11" fill="#8892a0">TypedDict State</text>
 
   <circle cx="500" cy="343" r="6" fill="#35c98b" opacity="0.3"/><circle cx="500" cy="343" r="3" fill="#35c98b"/>
-  <text x="516" y="347" font-family="Inter, sans-serif" font-size="11" fill="#8892a0">5 Agents</text>
+  <text x="516" y="347" font-family="Inter, sans-serif" font-size="11" fill="#8892a0">1 LLM core + services</text>
 
   <circle cx="610" cy="343" r="6" fill="#ff4d4d" opacity="0.3"/><circle cx="610" cy="343" r="3" fill="#ff4d4d"/>
   <text x="626" y="347" font-family="Inter, sans-serif" font-size="11" fill="#8892a0">14 Deviations</text>
 
   <circle cx="740" cy="343" r="6" fill="#00d4ff" opacity="0.3"/><circle cx="740" cy="343" r="3" fill="#00d4ff"/>
-  <text x="756" y="347" font-family="Inter, sans-serif" font-size="11" fill="#8892a0">267 Weeks Saved</text>
+  <text x="756" y="347" font-family="Inter, sans-serif" font-size="11" fill="#8892a0">267 lead-time wks (synth)</text>
 
   <circle cx="890" cy="343" r="6" fill="#35c98b" opacity="0.3"/><circle cx="890" cy="343" r="3" fill="#35c98b"/>
-  <text x="906" y="347" font-family="Inter, sans-serif" font-size="11" fill="#8892a0">F1 = 1.000</text>
+  <text x="906" y="347" font-family="Inter, sans-serif" font-size="11" fill="#8892a0">2 bounded cycles</text>
 </svg>

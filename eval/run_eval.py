@@ -238,7 +238,7 @@ def main():
     print(f"{'~'*55}")
     print(f"  Mean lead time          : {r['mean_lead_time_weeks']:.1f} weeks")
     print(f"  Max lead time           : {r['max_lead_time_weeks']} weeks")
-    print(f"  Total lead time saved   : {r['total_lead_time_weeks']} weeks")
+    print(f"  Total lead-time window  : {r['total_lead_time_weeks']} weeks (scenario)")
     print(f"{'~'*55}")
     print(f"  True-negative systems   : {r['true_negative_systems']}  (FIRE, BUSWAY, PDU)")
     print(f"  FP in clean systems     : {r['false_positives_in_clean_systems']}")

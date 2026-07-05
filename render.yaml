@@ -29,8 +29,12 @@ services:
       # — hosted Render has no Ollama, and it stays filtered out regardless.
       # The env keys below use the older OPENAI_*/GROQ_* names; the code also
       # accepts the canonical QWEN_GATEWAY_*/CLAUDE_* names (see .env.example).
+      # Groq sits SECOND: the Qwen/OpenRouter gateway leg returns 402 until the
+      # OpenRouter account is funded (verified 2026-07-05 via /llm-check?probe_all=1),
+      # so a mid-demo Gemini 429 should fail over to a leg that actually answers
+      # before trying the gateway. Restore gemini,qwen,groq,claude once funded.
       - key: PRAMAAN_LLM_PROVIDER_ORDER
-        value: gemini,qwen,groq,claude
+        value: gemini,groq,qwen,claude
       - key: GEMINI_API_KEY
         sync: false   # set this secret in the Render dashboard
       # --- Automatic failover leg: OpenAI-compatible Qwen gateway (OpenRouter) ---

@@ -1,5 +1,9 @@
 # Pramaan — Submission Checklist (ET AI Hackathon 2.0, Phase 2)
 
+> **Pre-flight the day you submit?** Use [`FINAL_SUBMISSION_CHECKLIST.md`](FINAL_SUBMISSION_CHECKLIST.md)
+> — every judge-facing URL, artifact path, and truth-gate in one place. This file
+> tracks the deliverables; that file verifies them.
+>
 > One row per deliverable: what the form wants → the exact artifact → status.
 > Fill the **Unstop form field names + the deadline** from the dashboard (they
 > are not public); everything else is ready or has a named owner.
@@ -18,8 +22,8 @@
 | 2 | **Pitch video** (3 min) | YouTube unlisted link → also placed in README "Judges: start here" §3 | ⬜ record per `docs/VIDEO_RUNBOOK.md` (script: `PITCH.md`) |
 | 3 | **Architecture document** | [`docs/ARCHITECTURE.md`](ARCHITECTURE.md) (+ `docs/pipeline-diagram.svg`) | ✅ |
 | 4 | **Impact model** (quantified business benefit) | [`docs/BUSINESS.md`](BUSINESS.md) — every figure cited | ✅ |
-| 5 | Pitch deck (if the form takes a file) | [`docs/Pramaan_Deck.pdf`](Pramaan_Deck.pdf) — 15 pages, regenerate with `python scripts/export_deck.py` after any deck edit | ✅ |
-| 6 | Live demo URL | `https://parth-tan.vercel.app/judge` (front) · `https://parth-1-ma30.onrender.com/health` (API) | ⬜ blocked on Render: paste the fresh `GEMINI_API_KEY` + Manual Deploy latest `main`. Key verified locally 2026-07-03: deep probe 5 findings/23s · GXT5 pair 5 findings/16s (llm). **OCR note (P1 resolved):** `render.yaml` now builds from `Dockerfile.backend` (Docker runtime), which installs Tesseract, so scanned-PDF + image OCR runs on the hosted backend. After Manual Deploy, confirm `GET /ocr-check` returns `"status":"ready"` (locally verified in-image: tesseract 5.5.0, `/ocr-check` ready). Previously P1 (ship the Tesseract image or drop OCR claims) — resolved by shipping the image |
+| 5 | Pitch deck (if the form takes a file) | [`docs/Pramaan_Deck.pdf`](Pramaan_Deck.pdf) — 12 pages, regenerate with `python scripts/export_deck.py` after any deck edit | ✅ |
+| 6 | Live demo URL | `https://parth-tan.vercel.app/judge` (front) · `https://parth-1-ma30.onrender.com/health` (API) | ✅ live & verified 2026-07-05 against the deployed stack: `/health` → `"ready": true` (key set, commit matched `main`) · `/llm-check?deep=1` → gemini, 5 findings/12.7 s · `/analyze` demo pair → `mode: llm`, 5 findings/15 s · scanned-PDF upload → OCR (`ocr_used: true`) + 3 findings · `/ocr-check` → `"status":"ready"` (tesseract 5.5.0 in the `Dockerfile.backend` Render image). Re-verify on submission day with `make verify-live` |
 | 7 | Team details | 1–4 members, one team per person — from the Unstop registration | ⬜ confirm roster matches registration |
 
 ## Pre-submission gates (run in this order, same day)

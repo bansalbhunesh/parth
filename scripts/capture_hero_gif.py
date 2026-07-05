@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """capture_hero_gif.py — record the judge-mode star scene as a clean GIF.
 
-Drives the real UI (Load real document ★ → Analyze → streamed findings)
+Drives the real UI (Load deviation demo ★ → Analyze → streamed findings)
 against a running local stack and assembles the frames into docs/demo.gif
 for the README hero. No overlays, no watermark — just the product.
 
@@ -53,7 +53,7 @@ def main() -> int:
         page.wait_for_timeout(800)
         snap(page, 900)
 
-        page.get_by_role("button", name="Load real document").click()
+        page.get_by_role("button", name="Load deviation demo").click()
         page.wait_for_timeout(900)
         snap(page, 1100)  # documents loaded
 

@@ -6,7 +6,7 @@ previously returned zero.
 
 ## Before (deterministic-only, pre-resilience)
 
-Judge Mode → Load real document → `design_basis_edge.pdf` + Vertiv UPS datasheet:
+Judge Mode → Upload PDFs → `design_basis_edge.pdf` + Vertiv UPS datasheet:
 
 > **0 deviations found — submittal meets all identified requirements.** (`ms · deterministic mode`)
 

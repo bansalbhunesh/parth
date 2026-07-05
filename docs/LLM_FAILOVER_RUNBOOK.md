@@ -16,9 +16,16 @@ order override, separate-quota guard, no-secret-leak).
 ## The chain
 
 ```
-gemini  →  Qwen / OpenAI-compatible gateway  →  Groq  →  Claude  →  local Ollama  →  deterministic rule engine
-(primary)        (separate quota)             (insurance)  (failover)   (offline)        (always-present floor)
+gemini  →  Groq  →  Qwen / OpenAI-compatible gateway  →  Claude  →  local Ollama  →  deterministic rule engine
+(primary) (insurance)        (separate quota)           (failover)   (offline)        (always-present floor)
 ```
+
+> **Hosted-demo order note (2026-07-05):** Groq is deliberately *second* on the
+> hosted demo (`PRAMAAN_LLM_PROVIDER_ORDER=gemini,groq,qwen,claude` in
+> `render.yaml`) because the Qwen/OpenRouter gateway leg returns **402** until
+> the OpenRouter account is funded (verified via `/llm-check?probe_all=1`).
+> A mid-demo Gemini 429 should land on a leg that actually answers first.
+> Restore `gemini,qwen,groq,claude` once the gateway is funded.
 
 - **Only configured providers are attempted.** A leg with no key (or, for
   Ollama, `LOCAL_LLM_ENABLED` unset) is filtered out. So a **Gemini-only**

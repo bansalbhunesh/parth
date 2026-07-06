@@ -48,6 +48,12 @@ def _float_env(name: str, default: float) -> float:
 
 
 _CACHE_TTL_S = _float_env("PRAMAAN_CACHE_TTL_S", 3600)
+# Degraded (non-LLM) results get a much shorter TTL. The demo pair is a FIXED
+# input, so caching a rule-floor fallback under the full TTL would pin every
+# subsequent identical request to the degraded answer for up to an hour after
+# one transient 429 — long after the LLM recovered. Recomputing a rule-floor
+# result is instant and quota-free, so a short TTL costs nothing.
+_DEGRADED_TTL_S = _float_env("PRAMAAN_DEGRADED_CACHE_TTL_S", 120)
 _CACHE_MAX = _int_env("PRAMAAN_CACHE_MAX", 256)
 _JOB_MAX = _int_env("PRAMAAN_JOB_MAX", 256)
 _MAX_WORKERS = _int_env("PRAMAAN_JOB_WORKERS", 2)
@@ -96,7 +102,7 @@ def _cache_get(h: str):
         entry = _cache.get(h)
         if entry is None:
             return None
-        if now - entry["computed_at"] > _CACHE_TTL_S:
+        if now - entry["computed_at"] > entry.get("ttl_s", _CACHE_TTL_S):
             _cache.pop(h, None)
             return None
         _cache.move_to_end(h)
@@ -152,6 +158,11 @@ def analyze_cached(spec: str, submittal: str, system_id: str = "CUSTOM") -> dict
             "mode": res.mode,
             "elapsed_ms": res.elapsed_ms,
             "computed_at": time.time(),
+            # LLM-backed results keep the full TTL; a degraded (rule-floor /
+            # vision-unavailable) result expires fast so it can never pin an
+            # identical input to the fallback after the provider recovers.
+            "ttl_s": (_CACHE_TTL_S if res.mode in ("llm", "vision")
+                      else min(_CACHE_TTL_S, _DEGRADED_TTL_S)),
         }
         _cache_put(h, entry)
         return _view(h, entry, cached=False)

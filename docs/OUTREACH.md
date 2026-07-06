@@ -105,6 +105,60 @@ customer-validation score more than any further code.
 > Even a one-word "yes, accurate" on either is hugely helpful. Anonymised
 > ("a commissioning lead at a top-5 India colo") is completely fine if you prefer.
 
+## C2. Discipline-tailored draft quotes (send with C — for a REAL person to approve/edit)
+
+> ⚠️ **Publication rule (non-negotiable):** these are **drafts, not quotes**.
+> Nothing below may appear in VALIDATION.md, the README, the deck, the video, or
+> any public surface until a **real, identifiable practitioner has approved the
+> exact words in writing** (LinkedIn message or email retained off-repo). On
+> approval, attribute with *their* real name/title/company (or their chosen
+> anonymised form). Publishing an unapproved draft as a quote — or attaching an
+> invented name to one — would destroy exactly the evidence-first credibility
+> this project runs on, and is plausible disqualification territory.
+
+Tailor the ask: send the draft matching the person's discipline. Each maps to a
+capability Pramaan actually demonstrates, so an approver is confirming a pain
+they genuinely live.
+
+**For a CxA (controls-integration angle · maps to the BMS/Distech pair + Cx twin):**
+> *"In data center EPC projects, L1 submittal reviews are a notorious bottleneck.
+> If a vendor changes a sensor location or a BACnet register mapping in a CRAH
+> submittal and it gets approved without double-checking the controls integration,
+> we don't catch it until L4 functional testing — and it can delay Integrated
+> Systems Testing by weeks. Automating the comparison of submittals against the
+> Basis of Design to flag these integration and testing risks early is a massive
+> win for project schedules."* — [Name], [Title], [Company]
+
+**For a mission-critical MEP PM (power angle · maps to the ATS/switchgear pairs):**
+> *"Deviations in vendor submittals for mission-critical power systems — like
+> different response times on an automatic transfer switch or breaker rating
+> changes — frequently slip through standard document reviews. When these are
+> caught late during L5 Integrated Systems Testing, it creates severe
+> commissioning and schedule risk. Mapping submittal gaps directly to downstream
+> testing impacts is exactly the risk-traceability we need."* — [Name], [Title], [Company]
+
+**For a mechanical/HVAC PE (cooling angle · maps to the STULZ/chiller pairs):**
+> *"Vendor submittals for large chillers or CRAH units often carry minor
+> discrepancies in fan power, water flow rates, or sound levels against the
+> design specification. Reviewing these manually page-by-page is extremely
+> time-consuming. Catching a flow-rate deviation at the submittal stage is an
+> easy fix; catching it during Level 4 water-loop balancing can delay the entire
+> mechanical commissioning schedule."* — [Name], [Title], [Company]
+
+**For a controls/BMS commissioning consultant (integration angle · maps to the ECB-600 pair):**
+> *"BMS controls submittals are where data center projects usually get stuck. If
+> a chiller vendor submits a controller package with a different register map or
+> firmware version than the approved interface spec, it creates immediate
+> integration issues. An automated scan of controls submittals that alerts us to
+> interface mismatches prevents massive commissioning headaches."* — [Name], [Title], [Company]
+
+**For an EPC project director (schedule/LD angle · maps to the schedule-risk layer):**
+> *"In data center EPC projects, schedule is everything. Delayed or incorrect
+> submittal reviews lead to late equipment delivery, which directly impacts the
+> commissioning timeline and risks liquidated damages. Tracing vendor submittal
+> errors directly to downstream testing delays helps project managers prioritise
+> which submittals need critical escalation before they hit the field."* — [Name], [Title], [Company]
+
 ## D. Email to a warm intro / former colleague
 
 > Subject: 60-sec favour — does this match what you see in commissioning?

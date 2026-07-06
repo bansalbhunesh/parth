@@ -9,6 +9,16 @@ export const revalidate = 600;
 export const metadata = {
   title: "Pramaan — Judge Mode",
   description: "EPC Deviation Intelligence — the 90-second proof.",
+  openGraph: {
+    title: "Pramaan — Judge Mode: the 90-second proof",
+    description:
+      "Load the deviation demo, hit Analyze, watch it reason over the raw documents live — each finding cited to the standard and the commissioning test it fails.",
+    url: "/judge",
+    siteName: "Pramaan",
+    type: "website",
+    images: [{ url: "/og.png", width: 1200, height: 630 }],
+  },
+  twitter: { card: "summary_large_image", images: ["/og.png"] },
 };
 
 export default async function JudgePage() {

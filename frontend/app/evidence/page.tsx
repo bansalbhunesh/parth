@@ -12,6 +12,16 @@ export const metadata = {
   title: "Pramaan — Evidence & Proof",
   description:
     "Every headline number, its limitation, and the live deployment status — in one page.",
+  openGraph: {
+    title: "Pramaan — Evidence & Proof",
+    description:
+      "Every headline number, its limitation, and the live deployment status — benchmark card, reviewer status, and the limitations we do not hide.",
+    url: "/evidence",
+    siteName: "Pramaan",
+    type: "website",
+    images: [{ url: "/og.png", width: 1200, height: 630 }],
+  },
+  twitter: { card: "summary_large_image", images: ["/og.png"] },
 };
 
 // A cold Render free-tier backend can take 30s+ to wake; don't block the page on it.

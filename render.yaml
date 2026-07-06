@@ -29,34 +29,41 @@ services:
       # — hosted Render has no Ollama, and it stays filtered out regardless.
       # The env keys below use the older OPENAI_*/GROQ_* names; the code also
       # accepts the canonical QWEN_GATEWAY_*/CLAUDE_* names (see .env.example).
-      # Groq sits SECOND: the Qwen/OpenRouter gateway leg returns 402 until the
-      # OpenRouter account is funded (re-verified 2026-07-06 via /llm-check?probe_all=1)
-      # and the Claude leg is inert until CLAUDE_API_KEY/ANTHROPIC_API_KEY is set,
-      # so a mid-demo Gemini 429 should fail over to a leg that actually answers
-      # before trying the gateway. Working chain today: gemini -> groq -> rule floor.
-      # Restore gemini,qwen,groq,claude once funded. NOTE: the live service's env
-      # is dashboard-managed - edits here do NOT auto-apply; change it in the
-      # Render dashboard as well.
+      # Gateway leg FUNDED via aicredits.in (2026-07-06, key verified live) and
+      # pinned to google/gemini-3.1-flash-lite — the exact benchmark-featured
+      # model — so the canonical order gemini,qwen,groq,claude is restored (the
+      # first failover lands on the featured configuration). The Claude leg
+      # stays inert until CLAUDE_API_KEY/ANTHROPIC_API_KEY is set. The paid leg
+      # is spend-guarded by OPENAI_BUDGET_PER_HOUR below. NOTE: the live
+      # service's env is dashboard-managed - edits here do NOT auto-apply;
+      # change values in the Render dashboard as well, then Manual Deploy and
+      # confirm with /llm-check?probe_all=1.
       - key: PRAMAAN_LLM_PROVIDER_ORDER
-        value: gemini,groq,qwen,claude
+        value: gemini,qwen,groq,claude
       - key: GEMINI_API_KEY
         sync: false   # set this secret in the Render dashboard
-      # --- Automatic failover leg: OpenAI-compatible Qwen gateway (OpenRouter) ---
-      # Gemini stays PRIMARY (PRAMAAN_LLM=gemini above). If Gemini quota/429s
-      # or times out, complete() fails over to this gateway automatically, then
-      # to the rule-engine floor. Only active once OPENAI_API_KEY is set below —
-      # until then the chain is [gemini] and behaviour is unchanged.
-      # Verified 2026-07-03: qwen3-235b scored 9/11 (0.82) on the real pairs.
+      # --- Automatic failover leg: OpenAI-compatible gateway (aicredits.in) ---
+      # Gemini stays PRIMARY (PRAMAAN_LLM=gemini above). If Gemini quota/429s,
+      # times out, or returns unparseable JSON, the chain fails over here, then
+      # to Groq, then the rule-engine floor. Only active once OPENAI_API_KEY is
+      # set — until then the leg is filtered out and behaviour is unchanged.
       - key: OPENAI_BASE_URL
-        value: https://openrouter.ai/api/v1
+        value: https://aicredits.in/v1
       - key: OPENAI_MODEL
-        value: qwen/qwen3-235b-a22b-2507
+        value: google/gemini-3.1-flash-lite   # the benchmark-featured model
       - key: OPENAI_JSON_MODE
         value: "1"
       - key: OPENAI_MAX_TOKENS
         value: "4000"   # gateways default low and truncate multi-finding JSON
+      # Spend guard for the PAID leg: at most this many gateway calls per hour
+      # (process-local sliding window). Exhausted budget == leg failure -> the
+      # chain walks on to Groq / the free rule floor; the demo never breaks,
+      # the bill stays capped (~Rs 0.3 per reconcile-sized call at current
+      # aicredits pricing => worst case a few rupees/hour).
+      - key: OPENAI_BUDGET_PER_HOUR
+        value: "30"
       - key: OPENAI_API_KEY
-        sync: false   # set the OpenRouter key (sk-or-...) in the Render dashboard
+        sync: false   # set the aicredits key (sk-live-...) in the Render dashboard
       # --- Second failover leg: Groq (free tier, its own quota) for full
       # insurance. Chain: gemini -> qwen gateway -> groq -> rule floor. Groq
       # has good recall but a mild over-flag tendency, so it sits behind the

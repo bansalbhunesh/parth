@@ -20,16 +20,19 @@ gemini  →  Groq  →  Qwen / OpenAI-compatible gateway  →  Claude  →  loca
 (primary) (insurance)        (separate quota)           (failover)   (offline)        (always-present floor)
 ```
 
-> **Hosted-demo order note (re-verified 2026-07-06):** Groq is deliberately
-> *second* on the hosted demo (`PRAMAAN_LLM_PROVIDER_ORDER=gemini,groq,qwen,claude`
-> in `render.yaml`; the live service's env is **dashboard-managed**, so change it
-> there) because the Qwen/OpenRouter gateway leg returns **402** until the
-> OpenRouter account is funded, and the Claude leg is **unconfigured** (no key
-> set) — the hosted demo's *working* chain today is `gemini → Groq → rule
-> engine`. A mid-demo Gemini 429 should land on a leg that actually answers
-> first. Do not describe Qwen or Claude as live legs unless
-> `/llm-check?probe_all=1` shows them `ok:true` that day. Restore
-> `gemini,qwen,groq,claude` once the gateway is funded.
+> **Hosted-demo note (updated 2026-07-06):** the gateway leg is **funded via
+> aicredits.in** and pinned to `google/gemini-3.1-flash-lite` — the exact
+> benchmark-featured model — so the canonical order
+> `PRAMAAN_LLM_PROVIDER_ORDER=gemini,qwen,groq,claude` is restored: the first
+> failover lands on the featured configuration. The paid leg carries a **spend
+> guard** (`OPENAI_BUDGET_PER_HOUR`, default 30 on the hosted demo): an
+> exhausted hourly budget counts as a leg failure and the chain walks on to
+> Groq / the free rule floor, so abuse or a failover storm can never run up the
+> bill. The Claude leg stays **unconfigured** (no key set). The live service's
+> env is **dashboard-managed** — set values in the Render dashboard (render.yaml
+> is documentation for fresh deploys), then Manual Deploy. Do not describe any
+> leg as live unless `/llm-check?probe_all=1` shows it `ok:true` that day
+> (budget state appears there too: `budget_per_hour` / `budget_used_last_hour`).
 
 - **Only configured providers are attempted.** A leg with no key (or, for
   Ollama, `LOCAL_LLM_ENABLED` unset) is filtered out. So a **Gemini-only**

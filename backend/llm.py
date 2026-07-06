@@ -34,6 +34,7 @@ import json
 import logging
 import os
 import re
+import threading
 import time
 
 log = logging.getLogger("pramaan.llm")
@@ -83,6 +84,68 @@ FAILOVER_STATUS = {
 
 class LLMError(Exception):
     pass
+
+
+# ── Per-provider hourly call budget (spend guard for paid legs) ──────────────
+# A paid gateway leg (e.g. aicredits/OpenRouter) must not be drainable by demo
+# abuse or a failover storm. Each provider can carry an hourly ATTEMPT budget:
+# once exhausted, that leg raises LLMError and the chain walks on (next leg or
+# the free rule floor) — availability degrades gracefully, spend is capped.
+# Process-local sliding window (single-instance demo, same trade-off as the
+# per-IP rate limiter in backend/security.py). 0 / unset = unlimited, so free
+# legs and existing deployments behave exactly as before. Attempts (not just
+# successes) are counted, conservatively.
+_BUDGET_ENVS = {
+    "gemini": ["GEMINI_BUDGET_PER_HOUR"],
+    "openai": ["QWEN_GATEWAY_BUDGET_PER_HOUR", "OPENAI_BUDGET_PER_HOUR"],
+    "groq": ["GROQ_BUDGET_PER_HOUR"],
+    "claude": ["CLAUDE_BUDGET_PER_HOUR"],
+    "ollama": ["OLLAMA_BUDGET_PER_HOUR"],
+}
+_BUDGET_WINDOW_S = 3600
+_budget_calls: dict = {}   # provider -> [timestamps]
+_budget_lock = threading.Lock()
+
+
+def provider_budget(provider: str) -> int:
+    """The configured hourly call budget for a provider (0 = unlimited)."""
+    for name in _BUDGET_ENVS.get(provider, []):
+        v = os.getenv(name, "").strip()
+        if v.isdigit():
+            return int(v)
+    return 0
+
+
+def _budget_spent(provider: str) -> int:
+    now = time.time()
+    with _budget_lock:
+        hits = _budget_calls.setdefault(provider, [])
+        hits[:] = [t for t in hits if t > now - _BUDGET_WINDOW_S]
+        return len(hits)
+
+
+def _budget_charge(provider: str) -> None:
+    """Enforce + record one attempt against the provider's hourly budget.
+    Raises LLMError (treated as a provider failure → failover) when the budget
+    is exhausted. No-op for unlimited (0) budgets."""
+    cap = provider_budget(provider)
+    if cap <= 0:
+        return
+    now = time.time()
+    with _budget_lock:
+        hits = _budget_calls.setdefault(provider, [])
+        hits[:] = [t for t in hits if t > now - _BUDGET_WINDOW_S]
+        if len(hits) >= cap:
+            raise LLMError(
+                f"{provider} hourly call budget reached ({cap}/h) — spend guard; "
+                "failing over")
+        hits.append(now)
+
+
+def reset_budgets() -> None:
+    """Clear budget counters — used by the test suite between cases."""
+    with _budget_lock:
+        _budget_calls.clear()
 
 
 def _env_first(*names: str, default=None):
@@ -317,6 +380,7 @@ def complete(prompt: str, system: str = "", json_mode: bool = True) -> str:
     last_exc = None
     for i, provider in enumerate(chain):
         try:
+            _budget_charge(provider)  # spend guard: exhausted budget == leg failure
             result = _DISPATCH[provider](prompt, system, json_mode)
             if i > 0:
                 _record_failover(chain[i - 1], provider,
@@ -354,6 +418,7 @@ def complete_json(prompt: str, system: str = ""):
     last_exc = None
     for i, provider in enumerate(chain):
         try:
+            _budget_charge(provider)  # spend guard: exhausted budget == leg failure
             raw = _DISPATCH[provider](prompt, system, True)
             if raw is None or not str(raw).strip():
                 raise LLMError("provider returned an empty response")
@@ -413,6 +478,7 @@ def complete_vision(prompt: str, image_bytes: bytes, mime_type: str,
     deterministic engine (which reads the text layer / OCR). Vision is a
     capability we prove on real documents, not a live demo crutch."""
     if os.getenv("PRAMAAN_LLM", "gemini") == "openai" and os.environ.get("OPENAI_API_KEY"):
+        _budget_charge("openai")  # spend guard applies to vision calls too
         return _openai_compatible_vision(
             prompt, image_bytes, mime_type, system, label="OpenAI-compat",
             api_key=os.environ.get("OPENAI_API_KEY"),
@@ -422,6 +488,7 @@ def complete_vision(prompt: str, image_bytes: bytes, mime_type: str,
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise LLMError("Vision requires GEMINI_API_KEY (the only multimodal provider)")
+    _budget_charge("gemini")  # spend guard applies to vision calls too
     model_name = os.getenv("GEMINI_VISION_MODEL", os.getenv("GEMINI_MODEL", "gemini-2.5-flash"))
     log.info("Gemini vision call: model=%s, image_bytes=%d, prompt_len=%d",
              model_name, len(image_bytes), len(prompt))
@@ -630,6 +697,7 @@ def complete_stream(prompt: str, system: str = ""):
     for i, provider in enumerate(chain):
         emitted = False
         try:
+            _budget_charge(provider)  # spend guard: exhausted budget == leg failure
             for chunk in _STREAM_DISPATCH[provider](prompt, system):
                 emitted = True
                 yield chunk
@@ -770,21 +838,28 @@ def _provider_public_meta(provider: str) -> dict:
     """Non-secret descriptor of a provider's configuration for /llm-check.
     Reports which model/base is configured — never the key value."""
     if provider == "gemini":
-        return {"model": os.getenv("GEMINI_MODEL", "gemini-2.5-flash")}
-    if provider == "openai":
+        meta = {"model": os.getenv("GEMINI_MODEL", "gemini-2.5-flash")}
+    elif provider == "openai":
         base = _gateway_base_url()
-        # separate_quota is the honest check that the "Qwen backup" is a real,
+        # separate_quota is the honest check that the gateway backup is a real,
         # independent provider — false if it points at Google's own endpoint
         # (which would just re-spend Gemini's quota) or has no base URL set.
-        return {"model": _gateway_model(),
+        meta = {"model": _gateway_model(),
                 "base_url_set": bool(base),
                 "separate_quota": bool(base) and not _is_google_gateway(base)}
-    if provider == "groq":
-        return {"model": os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")}
-    if provider == "ollama":
-        return {"model": os.getenv("OLLAMA_MODEL", "llama3.1"),
+    elif provider == "groq":
+        meta = {"model": os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")}
+    elif provider == "ollama":
+        meta = {"model": os.getenv("OLLAMA_MODEL", "llama3.1"),
                 "base_url": _ollama_base(), "local": True}
-    return {"model": os.getenv("CLAUDE_MODEL", "claude-opus-4-8")}
+    else:
+        meta = {"model": os.getenv("CLAUDE_MODEL", "claude-opus-4-8")}
+    # Spend-guard visibility (counts only — never a key or a cost figure).
+    cap = provider_budget(provider)
+    if cap > 0:
+        meta["budget_per_hour"] = cap
+        meta["budget_used_last_hour"] = _budget_spent(provider)
+    return meta
 
 
 def failover_report() -> dict:
@@ -818,6 +893,7 @@ def probe_provider(provider: str) -> dict:
     if not _configured(provider):
         return {"provider": provider, "configured": False, "ok": False}
     try:
+        _budget_charge(provider)  # probes are real spend — they count too
         out = _DISPATCH[provider]("Reply with the single word: ok", "", False)
         return {"provider": provider, "configured": True, "ok": True,
                 "sample": _redact((out or "").strip())[:40]}

@@ -12,7 +12,7 @@ across all tracks**. Scored on hard, checkable signals, the visible field has:
 | Signal | Visible field (~70 repos, all tracks) | Pramaan |
 |---|---|---|
 | CI pipeline | **0** | ✅ green (tests + 3 evals + tsc + build + Docker smoke + ruff) |
-| Test suite | **1** (minimal) | ✅ 598 tests |
+| Test suite | **1** (minimal) | ✅ 605 tests |
 | Eval harness with ground truth | **0** | ✅ 4 paths + no-key real-pairs harness |
 | Quantified impact model | **0** | ✅ `docs/BUSINESS.md`, every figure cited |
 | Live deployment | 3 | ✅ 2 (Vercel + Render) |

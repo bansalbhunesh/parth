@@ -50,7 +50,7 @@
 
 Run from repo root.
 
-- [ ] **Tests** — `python -m pytest tests/ -q` → 598 passed (count varies slightly by Python version).
+- [ ] **Tests** — `python -m pytest tests/ -q` → 605 passed (count varies slightly by Python version).
 - [ ] **Lint** — `ruff check .` → clean.
 - [ ] **Benchmark integrity untouched** — `git status --porcelain benchmarks/` → empty (labels/scores/reviewer files pristine).
 - [ ] **Frontend** — `cd frontend && npx tsc --noEmit && npm run build` → clean.

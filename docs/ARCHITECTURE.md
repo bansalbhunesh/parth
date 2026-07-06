@@ -125,7 +125,7 @@ numbers, limitations and links: [`/evidence`](../frontend/app/evidence/page.tsx)
 · [`CLAIMS_REGISTER.md`](CLAIMS_REGISTER.md) ·
 [`benchmark_card.json`](../benchmarks/ps4_external_v1/reports/benchmark_card.json).
 
-**598 tests · GitHub Actions CI.** Deeper runtime detail:
+**605 tests · GitHub Actions CI.** Deeper runtime detail:
 [`TECHNICAL_OVERVIEW.md`](TECHNICAL_OVERVIEW.md).
 
 ## Tech stack

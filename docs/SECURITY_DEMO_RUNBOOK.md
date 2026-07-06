@@ -63,6 +63,17 @@ is **inert** (fail-open) so a misconfig can't brick the demo.
 
 ---
 
+## 2b. LLM spend guard (per-provider hourly call budgets)
+
+Paid failover legs (e.g. the aicredits gateway) carry an hourly ATTEMPT budget
+(`OPENAI_BUDGET_PER_HOUR` / `QWEN_GATEWAY_BUDGET_PER_HOUR`, etc.; 0/unset =
+unlimited). An exhausted budget makes that leg fail over exactly like a
+quota/429 — the next leg or the free deterministic floor answers, so demo abuse
+or a failover storm can degrade availability of a paid model but can never run
+up the bill. Process-local sliding window (single instance, same trade-off as
+the per-IP limiter below). `/llm-check` reports `budget_per_hour` and
+`budget_used_last_hour` per provider — counts only, never a key or cost figure.
+
 ## 3. Rate limiting
 
 Process-local sliding window, 1 hour, keyed by client IP (first hop of

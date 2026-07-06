@@ -59,9 +59,10 @@ Equipment→Supplier). `blast_radius(deviation)` walks it deterministically: a U
 deviation → fails IST-07 → bounded by the Vertiv UPS lead time (40-wk) → **up to a 13-week
 slip** to ready-for-service. The slip is a *worst-case remediation bound* — it assumes the
 fix requires re-procuring the long-lead item rather than a faster battery-only swap, so it
-is an upper bound on schedule exposure, not a point forecast. Every edge is standards-cited
-and every number comes from data — the LLM never draws an edge and never moves a date; it
-only narrates the blast radius.
+is an upper bound on schedule exposure, not a point forecast. Each
+deviation→standard→Cx-test edge carries the basis it rests on (structural edges such as
+`supplied-by` carry none — see `docs/ARCHITECTURE.md`), and every number comes from data —
+the LLM never draws an edge and never moves a date; it only narrates the blast radius.
 
 ## Honest summary
 

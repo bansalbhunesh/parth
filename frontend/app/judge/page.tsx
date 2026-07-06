@@ -176,7 +176,7 @@ export default async function JudgePage() {
             synthetic breadth corpus where the deviations are <strong>seeded</strong>,
             so the model recovers 50/50 <em>by construction</em> — it proves the
             pipeline scales and reproduces, not detection skill. The real proof is
-            the unseen-document panel above.
+            the live-analysis panel above (documents outside the seeded corpus).
           </p>
           <p className="jm-generalize">
             <strong>Not just data centres.</strong> The engine is domain-agnostic:

@@ -52,7 +52,7 @@ const BENCH = {
   review_status: "single-author frozen · two-person adjudication pending",
 };
 
-const TEST_COUNT = 587; // `python -m pytest tests --collect-only` (measured, not estimated)
+const TEST_COUNT = 594; // `python -m pytest tests --collect-only` (measured, not estimated)
 
 // Verbatim limitation line required next to the benchmark card.
 const LIMITATION =
@@ -127,8 +127,7 @@ export default async function EvidencePage() {
           {pct(BENCH.precision_mean)}, F1 {pct(BENCH.f1_mean)}, and{" "}
           <strong>0 false alerts</strong> on the {BENCH.clean_negatives} clean
           negatives, vs a deterministic rule baseline of {pct(BENCH.rule_recall)}.
-          This is a benchmark result — <strong>not</strong> a real-world-accuracy
-          or field-validation claim.
+          This is a benchmark result — <strong>not</strong> a real-world-accuracy or field-validation claim.
         </p>
       </section>
 

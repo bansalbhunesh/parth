@@ -8,6 +8,45 @@ traceable to a cited public source below. Some pairs mix a hard published ceilin
 with a realistic proposal choice; those are flagged inline as "scenario" in the
 honesty notes rather than presented as fixed datasheet maxima.
 
+## Source links (checked 2026-07-06)
+
+Every attribution below is backed by a resolvable public link where one exists.
+Each URL was fetched on **2026-07-06**; two vendor sites (vertiv.com, se.com)
+return 403 to automated fetchers — those pages are search-indexed and open in a
+normal browser, and are marked as such. **Honesty note: linked-and-attributed is
+not the same as externally validated** — these links let a reviewer check every
+derivation; they do not make team-authored fixtures real vendor submittals. No
+proprietary standard text is reproduced anywhere in this repo; paywalled
+standards are cited by designation only.
+
+| Source | Supports | Link | Fetch check |
+|---|---|---|---|
+| Vertiv Liebert GXT5 product family page | GXT5 online efficiency, runtime table, PF (Pair 1) | <https://www.vertiv.com/en-us/products-catalog/critical-power/uninterruptible-power-supplies-ups/liebert-gxt5-/> | page indexed; vertiv.com 403s bots — open in a browser |
+| Cummins QSK60 generator page | QSK60 ratings, NFPA 110 material (Pair 1) | <https://www.cummins.com/generators/qsk60> | 200 ✓ |
+| STULZ CyberAir CW & DX (STULZ USA) | EC-fan CRAC/CRAH family, DX/R410A (Pair 2) | <https://www.stulz.com/en-us/products/detail/cyberaircwanddx/> | 200 ✓ |
+| ABB MNS product page | MNS LV switchgear family (Pair 3) | <https://new.abb.com/low-voltage/products/switchgear/mcc-and-iec-low-voltage-switchgear/mns> | 200 ✓ |
+| ABB MNS System Guide (1TGC902030B0204) | Icw up to 100 kA, Form up to 4, IEC 61439-1/-2, IEC 61641 variant (Pair 3) | <https://library.e.abb.com/public/e1866cb0247ba992c1257ab400104b58/MNS_System_Guide_1TGC902030B0204_Rev04.pdf> | 200 ✓ |
+| EPA GWP reference page | R-410A 2,088 · R-134a 1,430 · HFC-227ea/FM-200 3,220 (AR4 values; Pairs 2/4/5) | <https://www.epa.gov/ghgemissions/understanding-global-warming-potentials> | 200 ✓ |
+| eCFR 40 CFR 60 Subpart IIII | Stationary CI engine emission tiers (Pair 1) | <https://www.ecfr.gov/current/title-40/chapter-I/subchapter-C/part-60/subpart-IIII> | 200 ✓ |
+| EUROBAT VRLA guide (2022, official PDF) | 3–5 yr "Standard Commercial" design-life class (Pair 6) | <https://www.eurobat.org/wp-content/uploads/2022/06/Eurobat-guide-on-VRLA-2022_exe.pdf> | 200 ✓ |
+| Tate ConCore 1250 product page | 1,250 lbf concentrated-load class (Pair 9) | <https://www.tateglobal.com/amer/products/raised-access-floors/concore-1250/> | 200 ✓ |
+| Tate ConCore 1250 spec sheet (R07/15 mirror) | CISCA concentrated/ultimate load figures (Pair 9) | <https://www.accessfloorsystems.com/media/productfileupload/tate-cc1250-specifications.pdf> | 200 ✓ |
+| Schneider Canalis KTA 800–5000 A catalogue (DEBU021EN) | KTA10 Icw 50 kA/1 s (Pair 10) | <https://www.se.com/uk/en/download/document/DEBU021EN/> | document reference; se.com 403s bots — open in a browser |
+| LBL / ASHRAE thermal guidelines PDF | Class A1 recommended vs allowable envelopes (Pair 11) | <https://datacenters.lbl.gov/sites/default/files/FINAL%20Thermal%20Guidelines%20and%20Temp%20Measurements%209-15-2020.pdf> | 200 ✓ |
+| Raritan PX3 page | PX3-1000 inlet metering; outlet metering/switching are 5000-series (Pair 12) | <https://www.raritan.com/products/power/power-distribution/px3> | 200 ✓ |
+| Xtralis VESDA VLC page | VLC 800 m² published coverage ceiling (Pair 13) | <https://xtralis.com/product/vesda-vlc/> | 200 ✓ |
+| Distech ECB-600 product page | ECB-600 series controller (Pair 14) | <https://www.distech-controls.com/products/detail/947845/distech-controls/ecb-600-and-ecx-400-series> | 200 ✓ |
+| Distech ECB B-AAC PICS (official PDF) | BTL B-AAC profile on BACnet MS/TP (Pair 14) | <https://docs-be.distech-controls.com/bundle/ECB-BACnet-Series-B-AAC_PICS_15/raw/resource/enus/ECB%20BACnet%20Series%20B-AAC_PICS_15.pdf> | 200 ✓ |
+| energy-storage.news: Samsung SDI first to pass UL 9540A | 128S/136S rack-level UL 9540A first (Pair 15) | <https://energy-storage.news/news/samsung-sdi-first-to-meet-stringent-new-ul-installation-standards> | 200 ✓ |
+| cleanpower.org NFPA 855 safety summary (PDF) | NFPA 855 ESS limits context (Pair 15) | <https://cleanpower.org/wp-content/uploads/gateway/2024/01/NFPA855_Safety_240111.pdf> | 200 ✓ |
+| Mayfield Renewables: NFPA 855 fire codes article | NFPA 855 spacing/limits context (Pair 15) | <https://www.mayfield.energy/technical-articles/fire-codes-and-nfpa-855-for-energy-storage-systems/> | 200 ✓ |
+
+**Cited by designation only (paywalled/licensed — no free official text, none
+reproduced here):** Uptime Tier standards; NFPA 75 / 110 / 262 / 2001 / 855
+(text); IEC 61439-2 / 61439-6 / 61641 / 60076-11; IEEE 519 / 1188; ISO/IEC
+62053-21; ASHRAE 90.1; UL 910 / 2200 / 9540A; CISCA test methods; IPCC AR4
+GWP tables (values mirrored on the EPA page above).
+
 ## Vendor products (submittal side)
 
 **Vertiv Liebert GXT5** (online double-conversion UPS)

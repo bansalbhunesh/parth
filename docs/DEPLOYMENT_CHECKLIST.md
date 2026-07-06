@@ -4,8 +4,8 @@ One-page pre-flight for deploying the Pramaan demo (backend on Render/Docker,
 frontend on Vercel). Companion docs: `docs/SECURITY_DEMO_RUNBOOK.md`,
 `docs/LLM_FAILOVER_RUNBOOK.md`, `docs/OCR_DEPLOYMENT_CHECKLIST.md`.
 
-> Pramaan is a prototype / hackathon build, **demo-hardened** — not
-> production-grade. Keep claims accordingly (`docs/CLAIMS_REGISTER.md`).
+> Pramaan is a prototype / hackathon build, **demo-hardened** — not production-grade.
+> Keep claims accordingly (`docs/CLAIMS_REGISTER.md`).
 
 ## 1. Backend (Render — Docker runtime)
 

@@ -12,7 +12,7 @@ across all tracks**. Scored on hard, checkable signals, the visible field has:
 | Signal | Visible field (~70 repos, all tracks) | Pramaan |
 |---|---|---|
 | CI pipeline | **0** | ✅ green (tests + 3 evals + tsc + build + Docker smoke + ruff) |
-| Test suite | **1** (minimal) | ✅ 587 tests |
+| Test suite | **1** (minimal) | ✅ 594 tests |
 | Eval harness with ground truth | **0** | ✅ 4 paths + no-key real-pairs harness |
 | Quantified impact model | **0** | ✅ `docs/BUSINESS.md`, every figure cited |
 | Live deployment | 3 | ✅ 2 (Vercel + Render) |
@@ -94,7 +94,7 @@ are. Judges reward that honesty.
 - *"A perfect score looks too clean."* On the **synthetic** seeded corpus it is —
   those are integrity checks confirming the harness recovers what it seeded, not a
   capability claim. The number we actually report is the frozen ps4_external_v1
-  benchmark (v1.2): **recall 0.862, precision 0.953, FAR 0.000** on held-out labels
+  benchmark (v1.2): **recall 0.862, precision 0.953, FAR 0.000** on frozen labels
   with adversarial clean negatives — deliberately not 1.000.
 - *"Is this just GPT-wrapping?"* No: one compliance reasoning graph (a single LLM
   reasoning core wrapped in deterministic ingest/retrieval/critique/Cx-mapping

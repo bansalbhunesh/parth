@@ -77,7 +77,7 @@ so the graph always terminates. If LangGraph isn't installed, an equivalent
 sequential runner drives the same nodes and cycles.
 
 > **Why not "five agents"?** An earlier framing called ingest / extract /
-> reconcile / cx-predict / copilot "five agents". In the real runtime the
+> reconcile / cx-predict / copilot "five agents" — wording we retired. In the real runtime the
 > reconcile step is the **single LLM reasoning core** (extraction happens inside
 > it — there is no separate extract node); ingestion, retrieval and self-critique
 > are deterministic. Two nodes touch an LLM only at the edges: `cx_predict` is
@@ -125,7 +125,7 @@ numbers, limitations and links: [`/evidence`](../frontend/app/evidence/page.tsx)
 · [`CLAIMS_REGISTER.md`](CLAIMS_REGISTER.md) ·
 [`benchmark_card.json`](../benchmarks/ps4_external_v1/reports/benchmark_card.json).
 
-**587 tests · GitHub Actions CI.** Deeper runtime detail:
+**594 tests · GitHub Actions CI.** Deeper runtime detail:
 [`TECHNICAL_OVERVIEW.md`](TECHNICAL_OVERVIEW.md).
 
 ## Tech stack

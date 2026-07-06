@@ -60,10 +60,15 @@ Verify against `backend/orchestrator.py` + `backend/main.py`.
 | A7 | OCR availability | "OCR runtime availability exposed through `/ocr-check`" | "OCR always available", "reads any scanned PDF" | Needs the tesseract binary; `/ocr-check` is authoritative (see #20) |
 | A8 | Maturity | "benchmark-backed prototype / hackathon build" | "production-grade", "enterprise-ready" (see #17) | Prototype; demo hardening, not production security |
 
-## Do NOT say (banned phrases — grep-enforced)
+## Do NOT say (banned phrases — enforced by `tests/test_claims_register.py`)
 
-These must never appear in README, benchmark report, deck source, detailed PDF
-source, or video script:
+Enforcement is automated: `tests/test_claims_register.py` scans README, PITCH,
+COMPETITIVE, deck + detailed sources, all docs, frontend text, and benchmark /
+sample docs on every test run and in CI. Affirmative use of a phrase below
+fails the suite; a genuine disclaimer (negation in the same sentence) passes.
+
+These must never appear affirmatively in README, benchmark report, deck source,
+detailed PDF source, or video script:
 
 - "real-world accuracy"
 - "real unseen datasheets"

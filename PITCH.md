@@ -111,13 +111,26 @@
 > reconciliation graph with retrieval and self-critique cycles, the deterministic
 > commissioning and schedule services, the citation check, and a frozen,
 > reproducible benchmark. A wrapper doesn't clear a 0.111 rule floor to 0.862 on
-> held-out frozen labels."
+> frozen labels."
 
-**"Is your benchmark independently reviewed?"**
+**"Is your benchmark independently reviewed?" — Not yet.**
 > "Not yet — and we're explicit about it. Labels are single-author frozen. There's
 > an automated consistency audit (123 of 129 consistent, 6 flagged), but that is
 > machine QA, **not** a second human reviewer. Two-person adjudication is the next
 > validation milestone."
+
+**"What does it miss?" — know the two weak classes cold.**
+> "Two classes, and they're published in the error analysis. **Omission
+> detection: 3 of 8** (recall 0.375) — deviations where the submittal silently
+> *leaves out* something the spec requires; noticing absence is harder than
+> comparing two stated values, and it's the top item on the improvement
+> roadmap. **Unit conversion: 0 of 2** — the two labels that require a
+> multi-step unit conversion before comparing. Every other class — direct
+> values, categorical reasoning, derived arithmetic, domain recall,
+> adversarial noise, scanned/image — runs at or near 1.0 on the featured
+> passes. We haven't retuned the engine against the frozen set to fix these —
+> that would turn the FAR 0.000 story into overfitting; they're future work on
+> a new benchmark version."
 
 **"Your benchmark features `gemini-3.1-flash-lite` but the live demo runs `gemini-2.5-flash` — why?"**
 > "The featured benchmark configuration is the one that completed a clean,

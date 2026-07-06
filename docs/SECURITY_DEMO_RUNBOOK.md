@@ -164,7 +164,8 @@ directly relevant to the hardened upload path.
 
 ## 8. What NOT to claim
 
-- ❌ "production-grade", "enterprise-ready", "secure by default", "penetration-
-  tested", "zero vulnerabilities". ✅ "demo-hardened" / "public-demo hardened".
+- ❌ "production-grade", "enterprise-ready", "secure by default".
+- ❌ "penetration-tested", "zero vulnerabilities".
+- ✅ "demo-hardened" / "public-demo hardened".
 - ❌ that rate limiting is DDoS protection (it is single-instance, best-effort).
 - ❌ that auth is a real access-control system (it is an optional demo token).

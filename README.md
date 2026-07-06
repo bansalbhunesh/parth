@@ -19,7 +19,7 @@
   <img src="https://img.shields.io/badge/benchmark_v1.2_pairs-53-35c98b?style=flat-square&labelColor=0d1a14" alt="53 spec-submittal pairs on the ps4_external_v1 v1.2 benchmark">
   <img src="https://img.shields.io/badge/clean--negative_false_alerts-0-35c98b?style=flat-square&labelColor=0d1a14" alt="0 false alerts on 64 clean-negative controls">
   <img src="https://img.shields.io/badge/benchmark_recall-0.862-ffb020?style=flat-square&labelColor=1a1508" alt="Benchmark v1.2 mean recall 0.862">
-  <img src="https://img.shields.io/badge/tests-587-5b8cff?style=flat-square&labelColor=111820" alt="587 tests">
+  <img src="https://img.shields.io/badge/tests-594-5b8cff?style=flat-square&labelColor=111820" alt="594 tests">
   <img src="https://img.shields.io/badge/architecture-reasoning_graph-5b8cff?style=flat-square&labelColor=111820" alt="compliance reasoning graph — 1 LLM core + deterministic services">
   <img src="https://img.shields.io/badge/countries-11-ffb020?style=flat-square&labelColor=1a1508" alt="11 countries">
   <img src="https://img.shields.io/github/actions/workflow/status/bansalbhunesh/parth/ci.yml?style=flat-square&labelColor=111820&label=CI" alt="CI">
@@ -64,7 +64,7 @@
 3. **See the evidence, labelled** → [Evidence dashboard](https://parth-tan.vercel.app/evidence): the frozen v1.2 benchmark (recall 0.862 · precision 0.953 · F1 0.905 · FAR 0.000), with reviewer-2 shown as **pending** and the automated cross-check labelled **machine QA, not human**.
 4. **The 3-minute pitch video** → *(link lands here on submission)* · script: [`PITCH.md`](PITCH.md)
 5. **Business case in one page** → [`docs/BUSINESS.md`](docs/BUSINESS.md) — what one caught deviation is worth ($10–40M/month of commissioning slip).
-6. **Every value in the real pairs is citable** → [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md).
+6. **Every value in the real pairs is citable** → [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md) — now with a resolvable source link per attribution (fetch-checked 2026-07-06).
 7. **It reads the drawing, not just text** → [`data/samples/real/VISION_RESULT.md`](data/samples/real/VISION_RESULT.md): given a datasheet **image**, Gemini vision read the values from the picture and caught all 3 deviations (incl. a missing-capability omission), clearing the compliant IP rating.
 
 > **Submitting?** The one-page pre-flight is [`docs/FINAL_SUBMISSION_CHECKLIST.md`](docs/FINAL_SUBMISSION_CHECKLIST.md) — every URL, artifact, and truth-gate in one place.
@@ -372,8 +372,8 @@ python3 eval/multi_project_eval.py --json
 python3 data/generate_corpus.py                    # Project Meghdoot (primary)
 python3 data/generate_projects.py                  # 11 additional projects
 
-# 2. Run the test suite (587 tests, no API key needed)
-python3 -m pytest tests/ -q                       # → 587 passed (local; count varies slightly by Python version)
+# 2. Run the test suite (594 tests, no API key needed)
+python3 -m pytest tests/ -q                       # → 594 passed (local; count varies slightly by Python version)
 
 # 3. Prove the pipeline + eval harness (3 independent paths — all synthetic, by construction)
 python3 eval/run_eval.py --detector baseline      # → recovers all seeded deviations (synthetic integrity check)
@@ -397,7 +397,7 @@ cd frontend && npm install && npm run dev          # → localhost:3000
 curl http://localhost:8000/export/audit/html > evidence.html
 ```
 
-> **No API key?** The dashboard runs fully with ground-truth fallback data. All 30+ API endpoints return 200. Both eval harnesses (structured + text-based), the corpus, and the frontend work offline. 587 tests pass without any external dependencies.
+> **No API key?** The dashboard runs fully with ground-truth fallback data. All 30+ API endpoints return 200. Both eval harnesses (structured + text-based), the corpus, and the frontend work offline. 594 tests pass without any external dependencies.
 >
 > **Or just open the live demo:** [parth-tan.vercel.app](https://parth-tan.vercel.app) (frontend) · [parth-1-ma30.onrender.com](https://parth-1-ma30.onrender.com/health) (API)
 
@@ -410,7 +410,7 @@ curl http://localhost:8000/export/audit/html > evidence.html
 | **Render** (backend) | `PRAMAAN_LLM_TIMEOUT` | optional | seconds the sync `/analyze` waits on the LLM before falling back (default `60`). |
 | **Render** (backend) | `PRAMAAN_SCHEDULE` / `PRAMAAN_SUPPLY` / `PRAMAAN_GRAPH` | optional | PS4 layers; default `1` (on). Set `0` to hide a section. |
 | **Vercel** (frontend) | `NEXT_PUBLIC_API` | **required** | set to the Render backend URL (e.g. `https://parth-1-ma30.onrender.com`). Inlined at build time. **Without it the frontend falls back to bundled data** (which mirrors live engine output, so the demo still renders correctly but is not live-served). |
-| **Render** (backend) | `OPENAI_API_KEY`/`OPENAI_BASE_URL`/`OPENAI_MODEL`, `GROQ_API_KEY` (+ optional `ANTHROPIC_API_KEY`) | resilience | **Automatic provider failover.** Configure more providers and the backend fails over on quota/429/timeout in order — **gemini → Groq → OpenAI-compatible gateway (Qwen) → claude → deterministic rule engine** — no redeploy, no code change. A single-key setup is unchanged. `/llm-check` shows the live chain, which provider last answered, and the last failover reason. **Failover is for reliability, not accuracy** — the rule engine remains the safe floor. Verified recall on the real pairs: Gemini 1.000 · Qwen3-235B 0.82 · Groq Llama-3.3-70B strong recall with a mild over-flag tendency. Groq sits second in the hosted demo because it is a funded, always-on free tier; the Qwen gateway leg needs paid OpenRouter credits (it returns 402 until funded — verified 2026-07-05). |
+| **Render** (backend) | `OPENAI_API_KEY`/`OPENAI_BASE_URL`/`OPENAI_MODEL`, `GROQ_API_KEY` (+ optional `ANTHROPIC_API_KEY`) | resilience | **Automatic provider failover.** Configure more providers and the backend fails over on quota/429/timeout in order — **gemini → Groq → OpenAI-compatible gateway (Qwen) → claude → deterministic rule engine** — no redeploy, no code change. A single-key setup is unchanged. `/llm-check` shows the live chain, which provider last answered, and the last failover reason. **Failover is for reliability, not accuracy** — the rule engine remains the safe floor. Verified recall on the real pairs: Gemini 1.000 · Qwen3-235B 0.82 · Groq Llama-3.3-70B strong recall with a mild over-flag tendency. Groq sits second in the hosted demo because it is a funded, always-on free tier; the Qwen gateway leg needs paid OpenRouter credits (it returns 402 until funded) and the Claude leg is inert until a key is set — so the hosted demo's *working* chain today is **gemini → Groq → rule engine** (re-verified 2026-07-06 via `/llm-check?probe_all=1`; always re-probe before a demo). |
 
 > Render free-tier services **suspend after extended inactivity** and cold-start on the first hit (~30–50 s). If `/health` returns a "Service Suspended" page, resume/redeploy the service from the Render dashboard before the demo.
 >
@@ -430,7 +430,7 @@ docker compose up --build
 # Option 2: Makefile
 make setup          # Install all dependencies
 make corpus         # Generate 12 project datasets
-make test           # Run 587 tests
+make test           # Run 594 tests
 make eval-all       # Run all 3 eval paths
 make verify         # One-command: tests + all evals + type check
 make run            # Start backend API
@@ -442,7 +442,7 @@ make run            # Start backend API
 
 ## Frontend — 22-Section Dashboard
 
-The dashboard is a single-page application designed for a **60-second demo narrative**, built with **27 React components** (including `ErrorBoundary` for graceful failure recovery):
+The dashboard is a single-page application designed for a **60-second demo narrative**, built with **28 React components** (including `ErrorBoundary` for graceful failure recovery):
 
 | # | Section | What judges see |
 |---|---------|----------------|
@@ -585,7 +585,7 @@ pramaan/
 │   │   ├── page.tsx               # Main dashboard — 22 sections
 │   │   ├── layout.tsx             # Root layout with fonts
 │   │   └── globals.css            # Full design system (~1100 lines)
-│   ├── components/                # 27 React components
+│   ├── components/                # 28 React components
 │   │   ├── HeroIntro.tsx          # Problem statement for judges
 │   │   ├── NavBar.tsx             # 22-section sticky nav
 │   │   ├── SectionIndex.tsx       # Interactive section directory
@@ -608,6 +608,7 @@ pramaan/
 │   │   ├── CopilotPanel.tsx       # Streaming RAG Q&A with presets
 │   │   ├── ScheduleRisk.tsx       # Monte-Carlo CPM: P50/P80/P90, tornado, milestone slip
 │   │   ├── SupplyChainPanel.tsx   # Shipment risk + supplier decomposition + world map
+│   │   ├── RemediationSimulator.tsx # What-if: cost/slip vs the week a deviation is caught
 │   │   ├── ProjectGraph.tsx       # Living project graph + blast-radius explorer
 │   │   ├── AcademicRefs.tsx       # 4 peer-reviewed references
 │   │   ├── ExportButton.tsx       # Evidence pack download
@@ -617,7 +618,7 @@ pramaan/
 │       └── api.ts                 # API client + SSE parser + bundled fallback data
 ├── scripts/
 │   └── verify_live.py             # Pre-demo gate: is the DEPLOYED stack demo-ready?
-└── tests/                         # 21 test files, 587 tests
+└── tests/                         # 30 test files, 594 tests
     ├── test_api.py                # API tests (sync + streaming + upload + llm-check)
     ├── test_agents.py             # Agent unit tests (ingestion, extraction, cx, reconciliation)
     ├── test_corpus.py             # Corpus integrity tests (JSON/Markdown validation)
@@ -630,7 +631,7 @@ pramaan/
     └── …                          # real-pairs, OCR, retrieval-loop, self-critique, hardening
 ```
 
-**60+ source files · 16,800+ lines of code · 587 tests · 12 projects · 30+ endpoints**
+**60+ source files · 16,800+ lines of code · 594 tests · 12 projects · 30+ endpoints**
 
 ---
 
@@ -714,7 +715,7 @@ python3 eval/run_eval.py --detector llm
 |------------------|-----------------|----------|
 | **Innovation** | Goes past AI submittal review (the commercial state of the art — BuildSync, Spec-ID, InspectMind) by predicting **which commissioning test each deviation will fail, and how many weeks early** — cross-referencing spec + submittal + governing standard with a full citation chain. Demonstrated beyond the synthetic corpus (values cited from public datasheets) | LangGraph orchestration, deterministic domain services, citation chain, commissioning-risk twin, [`REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md) |
 | **Business Impact** | 1,024 lead-time-weeks summed across 50 synthetic findings (a portfolio sum of lookup-table lead times, *not* calendar delay avoided) illustrates the cost-of-late-detection thesis | Interactive ROI calculator (scenario model), cost-of-delay timeline, before/after comparison |
-| **Technical Excellence** | Dual eval harness (structured + text-based). The synthetic portfolio scores 1.000 **by construction** (we label it a plumbing/breadth check, not a flex); the honest signal is the frozen **ps4_external_v1 benchmark (v1.2) — 53 pairs, 129 labels, recall 0.862 · precision 0.953 · F1 0.905 · FAR 0.000 vs a 0.111 rule baseline** (reviewer-2 pending), complemented by 15 team-authored real-datasheet pairs; results reported with not-run pairs counted, never as a fixed 1.000. Full test + lint + build CI (587 tests) | Independent text-extraction + live-LLM eval, semantic + strict scoring, no-key offline harness (`eval/real_pairs_offline.py`), 25+ standards |
+| **Technical Excellence** | Dual eval harness (structured + text-based). The synthetic portfolio scores 1.000 **by construction** (we label it a plumbing/breadth check, not a flex); the honest signal is the frozen **ps4_external_v1 benchmark (v1.2) — 53 pairs, 129 labels, recall 0.862 · precision 0.953 · F1 0.905 · FAR 0.000 vs a 0.111 rule baseline** (reviewer-2 pending), complemented by 15 team-authored real-datasheet pairs; results reported with not-run pairs counted, never as a fixed 1.000. Full test + lint + build CI (594 tests) | Independent text-extraction + live-LLM eval, semantic + strict scoring, no-key offline harness (`eval/real_pairs_offline.py`), 25+ standards |
 | **Robustness** | Graceful degradation everywhere — no API key, malformed PDFs, cold backend all return 200; `/llm-check` surfaces the true LLM status | 50-test resilience suite, ISR-cached frontend, deterministic fallback |
 | **Scalability** | 12 projects → enterprise portfolio via multi-project eval + batch ingest + vector store | Multi-project dashboard, architecture diagram, scale story |
 | **UX** | Two surfaces: a focused **Judge Mode** (90-second proof) and a 22-section deep-dive dashboard, both ISR-cached for instant loads, streaming AI | `/judge` + full dashboard, live PDF upload, dark theme, responsive |
@@ -723,12 +724,14 @@ python3 eval/run_eval.py --detector llm
 
 ## Academic References
 
+All four verified against the publisher (title/volume/year as published, resolvable links):
+
 | # | Citation | Relevance to Pramaan |
 |---|----------|---------------------|
-| 1 | "Generative AI-Assisted Compliance Checking for Construction Requirements" — *ASCE J. Constr. Eng. Mgmt.*, Vol 152 No 8 (2024) | GenAI for automated construction compliance; benchmark of 100 scenarios |
-| 2 | "Graph-RAG for Construction Compliance" — *arXiv 2412.08593* (2024) | Hybrid knowledge graph + RAG for regulatory compliance — architectural precedent |
-| 3 | "I-SNACC: Invariant Signature, Logic Reasoning, and Semantic NLP-Based Automated Building Code Compliance" — *J. IT in Construction* (2023) | NLP framework for automated code compliance — validates cross-document reasoning |
-| 4 | "Identification and Categorization of Defects in Construction Specifications Utilizing NLP" — *ASCE JCEM* Vol 152 No 5 (2026) | NLP defect detection in construction specs — directly comparable to Pramaan's approach |
+| 1 | ["Generative AI-Assisted Compliance Checking for Construction Requirements"](https://ascelibrary.org/doi/10.1061/JCEMD4.COENG-18122) — *ASCE J. Constr. Eng. Mgmt.*, Vol 152 No 8 (2026) | GenAI for automated construction requirement compliance — the closest published task to Pramaan's reconcile step |
+| 2 | ["Leveraging Graph-RAG and Prompt Engineering to Enhance LLM-Based Automated Requirement Traceability and Compliance Checks"](https://arxiv.org/abs/2412.08593) — *arXiv 2412.08593* (2024) | Graph-RAG + prompting for requirement traceability/compliance in regulated industries — architectural precedent (cross-domain, not construction-specific) |
+| 3 | ["Invariant Signature, Logic Reasoning, and Semantic NLP-Based Automated Building Code Compliance Checking (I-SNACC) Framework"](https://www.itcon.org/paper/2023/1) — *J. Information Technology in Construction (ITcon)*, Vol 28 (2023) | NLP + logic framework for automated code compliance — validates cross-document reasoning |
+| 4 | ["Identification and Categorization of Defects in Construction Specifications Utilizing Natural Language Processing"](https://ascelibrary.org/doi/10.1061/JCEMD4.COENG-17750) — *ASCE J. Constr. Eng. Mgmt.*, Vol 152 No 5 (2026) | NLP defect detection in construction specs — directly comparable to Pramaan's extraction stage |
 
 ---
 
@@ -782,5 +785,5 @@ python3 eval/run_eval.py --detector llm
 <p align="center">
   <strong>PRA<span style="color:#36d6e7">MAAN</span></strong><br>
   <em>EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4</em><br>
-  <sub>12 Projects &middot; 11 Countries &middot; 30+ Endpoints &middot; 50 Synthetic Deviations &middot; 1,024 Lead-time-weeks (synthetic sum) &middot; Benchmark v1.2: 53 pairs / recall 0.862 / FAR 0.000 &middot; 587 tests &middot; CI green</sub>
+  <sub>12 Projects &middot; 11 Countries &middot; 30+ Endpoints &middot; 50 Synthetic Deviations &middot; 1,024 Lead-time-weeks (synthetic sum) &middot; Benchmark v1.2: 53 pairs / recall 0.862 / FAR 0.000 &middot; 594 tests &middot; CI green</sub>
 </p>

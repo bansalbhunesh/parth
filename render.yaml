@@ -30,9 +30,13 @@ services:
       # The env keys below use the older OPENAI_*/GROQ_* names; the code also
       # accepts the canonical QWEN_GATEWAY_*/CLAUDE_* names (see .env.example).
       # Groq sits SECOND: the Qwen/OpenRouter gateway leg returns 402 until the
-      # OpenRouter account is funded (verified 2026-07-05 via /llm-check?probe_all=1),
+      # OpenRouter account is funded (re-verified 2026-07-06 via /llm-check?probe_all=1)
+      # and the Claude leg is inert until CLAUDE_API_KEY/ANTHROPIC_API_KEY is set,
       # so a mid-demo Gemini 429 should fail over to a leg that actually answers
-      # before trying the gateway. Restore gemini,qwen,groq,claude once funded.
+      # before trying the gateway. Working chain today: gemini -> groq -> rule floor.
+      # Restore gemini,qwen,groq,claude once funded. NOTE: the live service's env
+      # is dashboard-managed - edits here do NOT auto-apply; change it in the
+      # Render dashboard as well.
       - key: PRAMAAN_LLM_PROVIDER_ORDER
         value: gemini,groq,qwen,claude
       - key: GEMINI_API_KEY

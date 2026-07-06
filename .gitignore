@@ -24,3 +24,7 @@ data/corpus/
 # placeholder and normalized text extracts are tracked.
 benchmarks/ps4_external_v1/sources/raw/*
 !benchmarks/ps4_external_v1/sources/raw/.gitkeep
+
+# Internal audit notes (win-probability estimates, competitor scans) stay private —
+# never publish the attack surface alongside the submission.
+docs/EXTERNAL_AUDIT_*.md

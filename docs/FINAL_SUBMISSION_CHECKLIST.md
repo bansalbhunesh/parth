@@ -50,11 +50,11 @@
 
 Run from repo root.
 
-- [ ] **Tests** — `python -m pytest tests/ -q` → 587 passed (count varies slightly by Python version).
+- [ ] **Tests** — `python -m pytest tests/ -q` → 594 passed (count varies slightly by Python version).
 - [ ] **Lint** — `ruff check .` → clean.
 - [ ] **Benchmark integrity untouched** — `git status --porcelain benchmarks/` → empty (labels/scores/reviewer files pristine).
 - [ ] **Frontend** — `cd frontend && npx tsc --noEmit && npm run build` → clean.
-- [ ] **Banned wording** — no headline `5 agents` / `multi-agent`, `100% recall` / `F1 = 1.000` as a proof, `production-grade`, `field-validated`, `real-world accuracy`, `customer ROI`, `real unseen datasheets` outside the `CLAIMS_REGISTER.md` "do not say" lists and audit/disclaimer contexts.
+- [ ] **Banned wording (automated)** — `python -m pytest tests/test_claims_register.py -q` → green. The gate scans README, PITCH, COMPETITIVE, deck + detailed sources, all docs, frontend text, benchmark + sample docs for every `CLAIMS_REGISTER.md` banned phrase (affirmative use fails; same-sentence disclaimers pass).
 - [ ] **No secrets** — no real API keys committed; `.env` gitignored; grep for `GEMINI_API_KEY=`/`sk-`/`AIza` returns only placeholders.
 - [ ] **PDF sanity** — both PDFs open, page counts as above, each < 50 MB; detailed PDF text-extracts (searchable).
 - [ ] **Number consistency** — benchmark reads **53 pairs · 129 labels · 17 systems · 64 clean negatives · recall 0.862 · precision 0.953 · F1 0.905 · FAR 0.000 · rule baseline 0.111 · p50 ~2.5 s** across /evidence, README, deck, pitch, detailed PDF, architecture docs.

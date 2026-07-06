@@ -151,5 +151,5 @@ both semantic and strict scoring with faithful citations** on that dated run —
 June result reproduced in July on the current model. A clean sweep on 15
 team-authored pairs is exactly *why* we do not headline it: the number we actually
 report is the frozen ps4_external_v1 benchmark (v1.2) — **recall 0.862, precision
-0.953, FAR 0.000** — where the labels are held out and adversarial clean negatives
-are in the mix.
+0.953, FAR 0.000** — where the labels are frozen (single-author, hash-pinned)
+and adversarial clean negatives are in the mix.

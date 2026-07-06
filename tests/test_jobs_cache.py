@@ -93,6 +93,23 @@ def test_single_flight_computes_once(monkeypatch):
     assert sum(1 for v in views if v["cached"]) >= 1
 
 
+def test_degraded_result_does_not_pin_the_cache(monkeypatch):
+    """A rule-floor (non-LLM) result must not occupy the cache for the full
+    TTL: the demo pair is a fixed input, so one transient 429 during warm-up
+    would otherwise serve every subsequent judge the degraded fallback for up
+    to an hour after the provider recovered. Degraded entries expire fast;
+    within their short TTL they are still reused (idempotency preserved)."""
+    _no_llm(monkeypatch)
+    monkeypatch.setattr(jobs, "_DEGRADED_TTL_S", 0.05)
+    v1 = jobs.analyze_cached(_SPEC, _SUB, "UPS")
+    assert v1["mode"] != "llm" and v1["cached"] is False
+    v2 = jobs.analyze_cached(_SPEC, _SUB, "UPS")
+    assert v2["cached"] is True            # reused within the short TTL
+    time.sleep(0.06)
+    v3 = jobs.analyze_cached(_SPEC, _SUB, "UPS")
+    assert v3["cached"] is False           # degraded entry expired quickly
+
+
 # ── job flow ────────────────────────────────────────────────────────
 
 def test_job_flow_submit_poll_result(monkeypatch):

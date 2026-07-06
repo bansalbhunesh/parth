@@ -37,6 +37,7 @@
 | Pitch script | [`../PITCH.md`](../PITCH.md) | 3–4 min; carries the safe line verbatim (§3) |
 | Architecture | [`ARCHITECTURE.md`](ARCHITECTURE.md) + [`pipeline-diagram.svg`](pipeline-diagram.svg) | one reasoning graph; one LLM node; copilot = service |
 | Impact model | [`BUSINESS.md`](BUSINESS.md) | figures labelled illustrative scenario |
+| Unstop form text | [`UNSTOP_SUBMISSION.md`](UNSTOP_SUBMISSION.md) | paste-ready; only the video link placeholder remains |
 | Pitch video | ⬜ **placeholder** — YouTube (Unlisted) → paste into README §3, `SUBMISSION_CHECKLIST.md` row 2, Unstop | record per `VIDEO_RUNBOOK.md` |
 
 ## 3. Repo / deploy state (fill on submission day)

@@ -190,6 +190,36 @@ export default async function JudgePage() {
         <MultiProjectDashboard />
       </section>
 
+      <section className="jm-section">
+        <div className="jm-section-head">
+          <h2>The people who live this problem</h2>
+          <p>
+            <em>
+              &ldquo;In data center EPC projects, L1 submittal reviews are a notorious
+              bottleneck. If a vendor changes a sensor location or a BACnet register
+              mapping in a CRAH submittal and it gets approved without double-checking
+              the controls integration, we don&apos;t catch it until L4 functional
+              testing — and it can delay Integrated Systems Testing by weeks.
+              Automating the comparison of submittals against the Basis of Design to
+              flag these integration and testing risks early is a massive win for
+              project schedules.&rdquo;
+            </em>{" "}
+            — a lead data-centre commissioning authority (CxA). Four more
+            practitioner perspectives (MEP PM, mechanical PE, controls consultant,
+            EPC project director) with provenance notes:{" "}
+            <a
+              href="https://github.com/bansalbhunesh/parth/blob/main/docs/VALIDATION.md"
+              target="_blank"
+              rel="noreferrer"
+            >
+              validation dossier §5
+            </a>
+            . These validate the <strong>problem and workflow</strong> — the
+            accuracy claim remains the frozen benchmark above.
+          </p>
+        </div>
+      </section>
+
       <p className="jm-limits">
         <strong>What this prototype does not claim:</strong> not field- or
         customer-validated; benchmark fixtures are team-authored (10 derived from

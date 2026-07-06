@@ -31,15 +31,16 @@ services:
       # accepts the canonical QWEN_GATEWAY_*/CLAUDE_* names (see .env.example).
       # Gateway leg FUNDED via aicredits.in (2026-07-06, key verified live) and
       # pinned to google/gemini-3.1-flash-lite — the exact benchmark-featured
-      # model — so the canonical order gemini,qwen,groq,claude is restored (the
-      # first failover lands on the featured configuration). The Claude leg
-      # stays inert until CLAUDE_API_KEY/ANTHROPIC_API_KEY is set. The paid leg
+      # model — so the order gemini,qwen,groq puts the featured configuration (the
+      # first failover lands on the featured configuration). Claude is deliberately
+      # NOT in the order — no key exists; re-add it here AND in the dashboard
+      # only when a CLAUDE_API_KEY is actually set. The paid leg
       # is spend-guarded by OPENAI_BUDGET_PER_HOUR below. NOTE: the live
       # service's env is dashboard-managed - edits here do NOT auto-apply;
       # change values in the Render dashboard as well, then Manual Deploy and
       # confirm with /llm-check?probe_all=1.
       - key: PRAMAAN_LLM_PROVIDER_ORDER
-        value: gemini,qwen,groq,claude
+        value: gemini,qwen,groq
       - key: GEMINI_API_KEY
         sync: false   # set this secret in the Render dashboard
       # --- Automatic failover leg: OpenAI-compatible gateway (aicredits.in) ---

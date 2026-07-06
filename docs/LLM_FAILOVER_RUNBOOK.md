@@ -23,12 +23,13 @@ gemini  →  Groq  →  Qwen / OpenAI-compatible gateway  →  Claude  →  loca
 > **Hosted-demo note (updated 2026-07-06):** the gateway leg is **funded via
 > aicredits.in** and pinned to `google/gemini-3.1-flash-lite` — the exact
 > benchmark-featured model — so the canonical order
-> `PRAMAAN_LLM_PROVIDER_ORDER=gemini,qwen,groq,claude` is restored: the first
+> `PRAMAAN_LLM_PROVIDER_ORDER=gemini,qwen,groq` applies: the first
 > failover lands on the featured configuration. The paid leg carries a **spend
 > guard** (`OPENAI_BUDGET_PER_HOUR`, default 30 on the hosted demo): an
 > exhausted hourly budget counts as a leg failure and the chain walks on to
 > Groq / the free rule floor, so abuse or a failover storm can never run up the
-> bill. The Claude leg stays **unconfigured** (no key set). The live service's
+> bill. Claude is deliberately **left out of the order** (no key exists) — re-add
+> it to the order AND set its key together, never one without the other. The live service's
 > env is **dashboard-managed** — set values in the Render dashboard (render.yaml
 > is documentation for fresh deploys), then Manual Deploy. Do not describe any
 > leg as live unless `/llm-check?probe_all=1` shows it `ok:true` that day
@@ -72,7 +73,7 @@ deployment wired with the old names keeps running unchanged).
 | ollama | *(keyless)* `LOCAL_LLM_ENABLED=1` | `OLLAMA_BASE_URL` (`http://localhost:11434`), `OLLAMA_MODEL` (`llama3.1`) | local daemon; needs no network/quota |
 | — | `PRAMAAN_LLM` | primary provider id | `gemini` \| `qwen` \| `claude` \| `ollama` |
 | — | `PRAMAAN_LLM_TIMEOUT` | seconds (`60`) | sync `/analyze` wait before the rule floor |
-| — | `PRAMAAN_LLM_PROVIDER_ORDER` | e.g. `gemini,qwen,groq,claude,ollama` | overrides the whole order |
+| — | `PRAMAAN_LLM_PROVIDER_ORDER` | e.g. `gemini,qwen,groq` | overrides the whole order |
 
 ### The Qwen gateway must be a genuinely separate quota
 

@@ -335,12 +335,43 @@ def complete(prompt: str, system: str = "", json_mode: bool = True) -> str:
 
 
 def complete_json(prompt: str, system: str = ""):
-    raw = complete(prompt, system, json_mode=True)
-    try:
-        return _extract_json(raw)
-    except (json.JSONDecodeError, ValueError) as exc:
-        log.error("JSON extraction failed: %s — raw[:200]: %s", exc, raw[:200])
-        raise LLMError(f"LLM returned unparseable JSON: {exc}") from exc
+    """JSON completion over the failover chain, with the JSON extraction INSIDE
+    each per-provider attempt: a provider that returns an empty or unparseable
+    response (safety block, thinking-budget exhaustion yielding no text, gateway
+    truncation the salvager can't recover) counts as THAT PROVIDER failing, and
+    the chain walks on to the next configured provider.
+
+    Found live 2026-07-06: the sync /analyze path intermittently dropped to the
+    rule floor in ~3s while /analyze/stream succeeded on the same input —
+    Gemini's JSON-mode response for the largest pair came back empty/unparseable,
+    and the old two-step (complete() first, parse after) treated that as a
+    terminal error, never trying the healthy Groq leg. Raises LLMError only when
+    every configured provider fails to produce parseable JSON."""
+    chain = provider_chain()
+    if not chain:
+        raise LLMError("No LLM provider configured (set GEMINI_API_KEY, "
+                       "OPENAI_API_KEY, or ANTHROPIC_API_KEY)")
+    last_exc = None
+    for i, provider in enumerate(chain):
+        try:
+            raw = _DISPATCH[provider](prompt, system, True)
+            if raw is None or not str(raw).strip():
+                raise LLMError("provider returned an empty response")
+            result = _extract_json(raw)
+            if i > 0:
+                _record_failover(chain[i - 1], provider,
+                                 last_exc or "previous provider failed")
+                log.info("JSON failover succeeded on %s (after %s)",
+                         provider, chain[i - 1])
+            _record_success(provider)
+            return result
+        except Exception as exc:  # noqa: BLE001 — try the next provider
+            last_exc = _redact(str(exc))[:200]
+            nxt = chain[i + 1] if i + 1 < len(chain) else "rule-engine floor"
+            log.warning("Provider %s failed JSON completion (%s) — falling "
+                        "back to %s", provider, last_exc, nxt)
+    raise LLMError(f"All {len(chain)} configured provider(s) failed to return "
+                   f"parseable JSON; last error: {last_exc}")
 
 
 def _openai_compatible_vision(prompt, image_bytes, mime_type, system, *, label,

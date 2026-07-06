@@ -219,3 +219,40 @@ def test_llm_check_reports_chain_and_floor(monkeypatch):
     data = client.get("/llm-check").json()
     assert data["failover"]["chain"] == ["gemini"]
     assert "SECRET_XYZ" not in str(data)
+
+
+# ── JSON-completion failover (parse failure == provider failure) ─────
+# Found live 2026-07-06: an empty/unparseable JSON-mode response from the
+# first provider used to be terminal — the healthy next leg was never tried
+# and the sync /analyze path dropped to the rule floor while /analyze/stream
+# succeeded on the same input.
+
+def test_unparseable_json_fails_over_to_next_provider(monkeypatch):
+    monkeypatch.setenv("GEMINI_API_KEY", "g")
+    monkeypatch.setenv("OPENAI_API_KEY", "o")
+    _stub(monkeypatch, "gemini", result="I am not JSON at all, sorry.")
+    _stub(monkeypatch, "openai", result='[{"component": "UPS-02"}]')
+    out = L.complete_json("prompt")
+    assert out == [{"component": "UPS-02"}]
+    assert L.FAILOVER_STATUS["last_successful_provider"] == "openai"
+    assert L.FAILOVER_STATUS["last_failover"]["from"] == "gemini"
+
+
+def test_empty_json_response_fails_over(monkeypatch):
+    """A None/blank response (safety block / thinking-budget exhaustion) is a
+    provider failure, not a crash and not a terminal parse error."""
+    monkeypatch.setenv("GEMINI_API_KEY", "g")
+    monkeypatch.setenv("OPENAI_API_KEY", "o")
+    _stub(monkeypatch, "gemini", result=None)
+    _stub(monkeypatch, "openai", result='{"needs_revision": false}')
+    assert L.complete_json("prompt") == {"needs_revision": False}
+    assert L.FAILOVER_STATUS["last_successful_provider"] == "openai"
+
+
+def test_all_providers_unparseable_raises_llmerror(monkeypatch):
+    monkeypatch.setenv("GEMINI_API_KEY", "g")
+    monkeypatch.setenv("OPENAI_API_KEY", "o")
+    _stub(monkeypatch, "gemini", result="garbage")
+    _stub(monkeypatch, "openai", result="also garbage")
+    with pytest.raises(L.LLMError):
+        L.complete_json("prompt")

@@ -246,6 +246,7 @@ export default async function Page() {
       </div>
 
       <StatsBar
+        totalLeadWeeks={rows.reduce((a, r) => a + (r.lead_time_weeks ?? 0), 0)}
         totalFindings={rows.length}
         critical={critical}
         major={major}

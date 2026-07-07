@@ -44,7 +44,12 @@ public value to check the derivation.
 - `high` / `medium` / `low`
 
 ## How to record
-Fill one row per label in `reviewer_form.csv` (or `reviewer_form.jsonl`). The
-`label_review_packet.md` file shows the same labels in a readable layout if you
-prefer to read there and record in the form. Leave a field blank only if a
-question does not apply, and use `reviewer_notes` for anything else.
+The easiest way is `reviewer_form.html` — open it in any browser, answer each
+label, and click **Download my CSV** (your answers autosave locally as you go;
+nothing leaves your machine until you send the file back yourself).
+
+Alternatively, fill one row per label in `reviewer_form.csv` (or
+`reviewer_form.jsonl`). The `label_review_packet.md` file shows the same labels
+in a readable layout if you prefer to read there and record in the form. Leave
+a field blank only if a question does not apply, and use `reviewer_notes` for
+anything else.

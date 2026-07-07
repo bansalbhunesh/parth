@@ -1468,6 +1468,10 @@ table.reg .row-critical { border-left: 2px solid var(--fault); }
   .diff-panels { grid-template-columns: 1fr; }
 }
 @media (max-width: 600px) {
+  /* Containment for the last few px of horizontal spill on small phones:
+     anything still wider than the screen scrolls inside its own container
+     instead of being clipped by body{overflow-x:hidden}. */
+  .sidx-grid, .risk-matrix, .cx-gantt-body { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .stats-bar { grid-template-columns: repeat(2, 1fr); }
   .health-grid { grid-template-columns: repeat(2, 1fr); }
   .topbar { flex-wrap: wrap; }

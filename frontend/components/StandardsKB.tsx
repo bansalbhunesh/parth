@@ -62,7 +62,7 @@ export default function StandardsKB() {
     <div className="standards-kb">
       <div className="standards-kb-grid">
         {STANDARDS.map((s) => (
-          <div key={s.id} className="std-card" style={{ borderLeftColor: s.color }}>
+          <div key={s.id} className="std-card">
             <div className="std-card-header">
               <span className="std-card-name" style={{ color: s.color }}>{s.name}</span>
               {s.deviations > 0 && (

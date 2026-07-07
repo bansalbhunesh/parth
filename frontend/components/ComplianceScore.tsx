@@ -131,7 +131,7 @@ export default function ComplianceScore() {
             <div className="compliance-sys-bar">
               <div
                 className="compliance-sys-fill"
-                style={{ width: `${s.score}%`, background: s.color }}
+                style={{ transform: `scaleX(${s.score / 100})`, background: s.color }}
               />
             </div>
             <div className="compliance-sys-detail">

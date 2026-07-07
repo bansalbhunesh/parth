@@ -49,7 +49,7 @@ function AnimatedMetric({ value, label, suffix = "", color = "var(--lead)", dela
       <div className="eval-metric-bar">
         <div
           className="eval-metric-fill"
-          style={{ width: `${current * 100}%`, background: color }}
+          style={{ transform: `scaleX(${current})`, background: color }}
         />
       </div>
     </div>

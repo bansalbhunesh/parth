@@ -196,7 +196,7 @@ body {
 .chain .v .ref { font-family: var(--mono); font-size: 10px; color: var(--accent);
   display: block; margin-top: 4px; }
 
-/* ---- total savings hero ---- */
+/* ---- lead-time window hero ---- */
 .savings-hero {
   position: relative;
   text-align: center; padding: 48px 24px;

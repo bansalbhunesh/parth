@@ -196,11 +196,11 @@ export default function DeviationRegister({ rows }: { rows: Deviation[] }) {
         )}
         {filtered.length > 0 && (
           <div className="register-footer">
-            Showing {filtered.length} of {rows.length} deviations. Total savings:{" "}
+            Showing {filtered.length} of {rows.length} deviations. Combined lead-time window:{" "}
             {filtered
               .filter((r) => r.lead_time_weeks != null)
               .reduce((a, r) => a + (r.lead_time_weeks ?? 0), 0)}{" "}
-            weeks of avoided commissioning rework. Click any row to expand rationale.
+            weeks across shown findings (scenario figure, not a measured saving). Click any row to expand rationale.
           </div>
         )}
       </div>

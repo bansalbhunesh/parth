@@ -1982,6 +1982,9 @@ table.reg .row-critical { border-left: 2px solid var(--fault); }
   border: 1px solid var(--line); border-radius: 10px; padding: 10px 16px; min-width: 110px; }
 .sc-pill-val { font-family: var(--mono, monospace); font-size: 24px; font-weight: 800; }
 .sc-pill-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+/* Same pattern as .register-wrap: on narrow screens the table scrolls
+   inside its own container instead of being clipped by body overflow. */
+.sc-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .sc-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .sc-table th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em;
   color: var(--muted); padding: 6px 10px; border-bottom: 1px solid var(--line); }

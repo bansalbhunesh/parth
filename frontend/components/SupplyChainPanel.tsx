@@ -120,6 +120,10 @@ export default function SupplyChainPanel({ analysis }: { analysis: SupplyChainAn
         </g>
       </svg>
 
+      {/* Horizontal scroll container: on phones the table is wider than the
+          viewport, and body{overflow-x:hidden} would otherwise clip the right
+          columns with no way to reach them (same pattern as .register-wrap). */}
+      <div className="sc-table-wrap">
       <table className="sc-table">
         <thead>
           <tr>
@@ -144,6 +148,7 @@ export default function SupplyChainPanel({ analysis }: { analysis: SupplyChainAn
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

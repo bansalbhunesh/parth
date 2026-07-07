@@ -10,6 +10,11 @@ pymupdf>=1.24,<2.0
 pdfplumber>=0.10,<1.0
 pytesseract>=0.3.10,<1.0
 Pillow>=10.0,<12.0
-python-multipart>=0.0.7,<1.0
+# Floor covers CVE-2024-24762/53981 AND the 2026 trio (CVE-2026-53539
+# QuerystringParser quadratic DoS fixed 0.0.30; CVE-2026-40347 preamble DoS
+# fixed 0.0.31; CVE-2026-24486 path traversal - non-default config we don't
+# use, covered anyway). Public demo parses untrusted multipart uploads, so
+# the parser floor must guarantee patched installs, not rely on resolution.
+python-multipart>=0.0.31,<1.0
 httpx>=0.27,<1.0
 openai>=1.0.0

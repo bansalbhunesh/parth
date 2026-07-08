@@ -15,7 +15,7 @@ const STEPS_AFTER = [
   { phase: "AI extraction", duration: "< 1 minute", pain: "Deterministic ingest + extraction stages parse all documents simultaneously" },
   { phase: "Cross-reference", duration: "< 1 minute", pain: "The LLM reasoning core checks every requirement × every submittal × 7 standards" },
   { phase: "Register + Cx prediction", duration: "Instant", pain: "Full register with severity, lead time, and predicted Cx test failure" },
-  { phase: "Week 11 detection", duration: "Same day", pain: "Caught at upload — 149 weeks before commissioning would find them" },
+  { phase: "Week 11 detection", duration: "Same day", pain: "Caught at upload — 27–33 weeks before commissioning would surface them (scenario)" },
 ];
 
 export default function BeforeAfter() {
@@ -58,7 +58,7 @@ export default function BeforeAfter() {
             <div className="ba-outcome-icon">✗</div>
             <div>
               <div className="ba-outcome-title">Deviations found at Week 38–44</div>
-              <div className="ba-outcome-detail">Rework, schedule delays, cost overruns — average ₹12L per finding</div>
+              <div className="ba-outcome-detail">Rework, schedule slip, long-lead re-orders — the most expensive place to find them</div>
             </div>
           </div>
         </div>
@@ -82,7 +82,7 @@ export default function BeforeAfter() {
             <div className="ba-outcome-icon">✓</div>
             <div>
               <div className="ba-outcome-title">Deviations caught at Week 11</div>
-              <div className="ba-outcome-detail">149 weeks of lead time — resolved before site mobilisation</div>
+              <div className="ba-outcome-detail">27–33 weeks of lead time in hand (scenario) — resolved before site mobilisation</div>
             </div>
           </div>
         </div>

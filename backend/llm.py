@@ -1,8 +1,8 @@
 """
 LLM wrapper with an automatic, self-healing provider failover chain.
 
-Headline order: gemini → Qwen / OpenAI-compatible gateway → Claude → local
-Ollama → the deterministic rule engine (the always-present floor). `PRAMAAN_LLM`
+Headline order: gemini → Qwen / OpenAI-compatible gateway → Groq → Claude →
+local Ollama → the deterministic rule engine (the always-present floor). `PRAMAAN_LLM`
 still selects the *primary* provider; on quota/429, timeout, rate-limit, or any
 provider failure the chain walks to the next *configured* provider. When every
 LLM leg fails (or none is configured) an LLMError is raised and the callers

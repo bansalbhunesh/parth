@@ -56,9 +56,11 @@ computing from the deviation register. Narratives that an LLM writes carry a
 ## 3. Reliability: failover is availability, not accuracy
 
 `backend/llm.py` implements the provider chain. Order (only *configured* providers
-are attempted): `gemini → Groq → Qwen gateway → Claude → local Ollama →
-deterministic rule engine` (hosted-demo order; the Qwen gateway leg needs funded
-OpenRouter credits, so Groq sits second until then).
+are attempted): `gemini → Qwen/OpenAI-compatible gateway → Groq → Claude → local
+Ollama → deterministic rule engine`. The hosted demo runs `gemini,qwen,groq` —
+the gateway leg is funded (aicredits.in) and pinned to the benchmark-featured
+`gemini-3.1-flash-lite`, so the first failover lands on the featured
+configuration; Claude has no key and is left out of the order.
 
 - Every leg is scored the same in the benchmark — **failover never improves
   accuracy**, it only keeps the demo answering.

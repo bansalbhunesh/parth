@@ -104,7 +104,7 @@ results (schedule, supply-chain, graph), and the narrative is labelled with its
 
 ## Reliability layer
 
-- **LLM provider failover (availability, not accuracy):** on quota/429/timeout the demo fails over `gemini → Groq → Qwen gateway → Claude → local Ollama → deterministic rule engine`. Only configured providers are tried. Every leg is scored the same — **failover buys uptime, never accuracy.** `/llm-check` shows the live chain and last failover reason.
+- **LLM provider failover (availability, not accuracy):** on quota/429/timeout the demo fails over `gemini → Qwen gateway → Groq → Claude → local Ollama → deterministic rule engine`. Only configured providers are tried (the hosted demo runs `gemini,qwen,groq` — Claude has no key and is left out). Every leg is scored the same — **failover buys uptime, never accuracy.** `/llm-check` shows the live chain and last failover reason.
 - **Deterministic rule fallback (no silent zeros):** if no provider answers, the rule engine still returns the headline deviations with Cx mapping, computed from the real documents — never from seeded labels. It is deliberately low-recall (a floor).
 - **OCR runtime availability:** OCR is text-first with a Tesseract fallback and needs the tesseract binary. `GET /ocr-check` is the ground truth for a given deployment; the UI reads it and never implies OCR where it isn't installed.
 - **Public-demo security:** optional token auth, per-IP (single-instance, in-memory) rate limiting, MIME/magic-byte/size upload validation, prompt-injection-resistant prompts, no secret leakage in status endpoints. This is **demo hardening, not production security.**

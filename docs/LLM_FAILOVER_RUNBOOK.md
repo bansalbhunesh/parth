@@ -16,8 +16,8 @@ order override, separate-quota guard, no-secret-leak).
 ## The chain
 
 ```
-gemini  →  Groq  →  Qwen / OpenAI-compatible gateway  →  Claude  →  local Ollama  →  deterministic rule engine
-(primary) (insurance)        (separate quota)           (failover)   (offline)        (always-present floor)
+gemini  →  Qwen / OpenAI-compatible gateway  →  Groq  →  Claude  →  local Ollama  →  deterministic rule engine
+(primary)          (separate quota)         (insurance) (failover)   (offline)        (always-present floor)
 ```
 
 > **Hosted-demo note (updated 2026-07-06):** the gateway leg is **funded via

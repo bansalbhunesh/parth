@@ -76,9 +76,10 @@ separately and behind a login.
 
 ## 3. Evidence hierarchy (strongest first)
 
-1. **Real third-party document** — a Vertiv Liebert datasheet the system never
-   saw, analysed live: 8 genuine deviations incl. derived arithmetic
-   (3 kVA × 0.8 PF → 2.4 kW) and a value omission. See
+1. **Third-party-derived document** — a Vertiv Liebert datasheet built from
+   Vertiv's published figures, outside the seeded corpus, analysed live: 8 genuine
+   deviations incl. derived arithmetic (3 kVA × 0.8 PF → 2.4 kW) and a value
+   omission. See
    [`data/samples/REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md).
 2. **Real-LLM eval** — a frontier model reasons over raw documents and recovers
    the seeded deviations (semantic + strict scoring).
@@ -171,3 +172,57 @@ runs, which is what makes them a moat rather than a checklist:
   the commissioning-risk layer + open-eval credibility (≈ a strong head start),
   not yet network-effect lock-in. Closing the practitioner-validation gap
   ([`docs/OUTREACH.md`](docs/OUTREACH.md)) is what starts the flywheel.
+
+### Why naming that gap is itself a strength — auditability beats opacity
+
+The two caveats above are stated plainly on purpose. In *this* market the honesty
+is not a weakness we tolerate — it is the strongest card we hold. Two things are
+both true, and we say both:
+
+1. **The incumbents have real field data; we do not.** Document Crunch (acquired
+   by Trimble, April 2026), BuildSync, InspectMind, and Trunk Tools have run on
+   live projects for years and have accumulated real submittals, real engineer
+   corrections, and real commissioning outcomes. Pramaan is a weeks-old build
+   evaluated on **team-authored fixtures** (§2a, §3); it is **not** field-validated,
+   and every benchmark surface says so. On accumulated field evidence, they lead —
+   full stop, no asterisk.
+
+2. **We are the only one you can actually check.** Every number Pramaan reports
+   ships with the means to reproduce it: a frozen 53-pair / 129-label benchmark,
+   the eval scripts, the labels, the deterministic rule baseline, and a **claims
+   register that enumerates its own limits** ([`docs/CLAIMS_REGISTER.md`](docs/CLAIMS_REGISTER.md))
+   — enforced by a test that fails the build if any surface overstates. The
+   commercial tools are closed SaaS: you get a marketing accuracy figure and a
+   login. You cannot see their eval, run it, inspect one label, or discover where
+   the tool is *weak*.
+
+For most software, "less field data" is just a deficit. Here it is a smaller
+deficit than it looks, because of *who signs*. The buyer of commissioning-risk
+intelligence is the owner's engineer or commissioning agent (CxA) — a licensed
+professional who puts their name on the deviation register and carries personal
+liability if a missed non-conformance surfaces at Level-4/5 commissioning. For that
+buyer the decisive property is not the vendor's accuracy claim; it is *whether they
+can audit the tool before they stake their stamp on it.* A system that ships its
+eval and openly marks where it is not yet validated is more defensible to sign
+against than a black box that asks for trust — precisely because the liability sits
+with the professional, not the vendor.
+
+That reframes the gap as one of **timing, not architecture:**
+
+- **Their field-data lead is a head start we close by running.** The data flywheel
+  (item 2 above) is built and waiting; the moment real deployments begin, every
+  correction a CxA makes labels the deviation→Cx→lead-time mapping. The gap narrows
+  with our usage.
+- **Their opacity never becomes auditable.** It is structural to a closed product.
+  A judge — or a liability-bearing buyer — can run *our* eval this afternoon; they
+  cannot run the incumbents' at all, ever.
+
+So "we do not have their field data" is not a hedge we merely tolerate — it is the
+setup for the sentence that follows it: **Pramaan is the only entrant, commercial
+or hackathon, whose every claim you can verify yourself before you trust it.**
+Naming our own gap is what makes that credible; a tool that hides its limits has
+already shown you it will hide the next one.
+
+> The claims register is not a confession — it is a due-diligence artifact the
+> closed incumbents cannot produce. For a buyer whose signature is on the line, it
+> is the most persuasive object in the repository.

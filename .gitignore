@@ -28,3 +28,6 @@ benchmarks/ps4_external_v1/sources/raw/*
 # Internal audit notes (win-probability estimates, competitor scans) stay private —
 # never publish the attack surface alongside the submission.
 docs/EXTERNAL_AUDIT_*.md
+
+# Local agent/runtime hooks. Keep submission repo portable and judge-facing.
+.codex/

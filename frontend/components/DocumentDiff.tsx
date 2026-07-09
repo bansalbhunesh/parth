@@ -29,7 +29,7 @@ function highlightDeviations(text: string, deviations: Deviation[], side: "spec"
   return <pre className="diff-pre" dangerouslySetInnerHTML={{ __html: result }} />;
 }
 
-const API = process.env.NEXT_PUBLIC_API ?? "http://localhost:8000";
+const API = process.env.NEXT_PUBLIC_API ?? "http://127.0.0.1:8000";
 
 export default function DocumentDiff({ rows }: { rows: Deviation[] }) {
   const [selected, setSelected] = useState("UPS");

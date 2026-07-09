@@ -26,7 +26,7 @@ export default async function JudgePage() {
   const hero = rows.find((r) => r.component === "UPS-02") ?? rows[0];
   // Track whatever backend this build points at (NEXT_PUBLIC_API), so the
   // health link never goes stale when the backend URL changes.
-  const apiBase = process.env.NEXT_PUBLIC_API ?? "http://localhost:8000";
+  const apiBase = process.env.NEXT_PUBLIC_API ?? "http://127.0.0.1:8000";
 
   return (
     <main className="jm-wrap">
@@ -46,25 +46,44 @@ export default async function JudgePage() {
           EPC Deviation Intelligence · ET AI Hackathon 2026 · Problem Statement 4
         </div>
         <h1>
-          It catches the spec deviation the day the submittal lands —
-          <span> not in commissioning, six months and a few crore too late.</span>
+          The missed UPS deviation is not a finding.
+          <span> It is a future commissioning failure with a date on it.</span>
         </h1>
         <p className="jm-sub">
-          <strong>What only Pramaan does:</strong> other tools stop at the
-          spec-vs-submittal mismatch. Pramaan names the exact{" "}
-          <strong>commissioning test</strong> that deviation will fail and the{" "}
-          <strong>weeks of lead time</strong> you have to fix it first — a
-          domain-informed rule + LLM hybrid that turns a design-review miss into a
-          scheduled, preventable commissioning failure.
+          <strong>The differentiator:</strong> Pramaan does not stop at
+          spec-vs-submittal mismatch. It names the <strong>commissioning test</strong>{" "}
+          that will fail, the <strong>lead-time window</strong> still available,
+          and the evidence chain a CxA can audit before signing.
         </p>
         {hero && (
-          <p className="jm-sub">
-            Live example — <strong>{hero.component} {hero.parameter.replace(/_/g, " ")}</strong>:
-            {" "}provided <strong className="bad">{String(hero.provided_value)} {hero.unit}</strong> vs
-            {" "}<strong>{String(hero.required_value)} {hero.unit}</strong> required —
-            flagged <strong className="good">{hero.lead_time_weeks} weeks</strong> before the
-            commissioning test it would have failed.
-          </p>
+          <div className="jm-failure-strip" aria-label="Hero deviation timeline">
+            <div className="jm-failure-step win">
+              <div className="jm-failure-k">Caught at review</div>
+              <div className="jm-failure-v">Week {hero.week_caught}</div>
+              <div className="jm-failure-note">
+                {hero.component} {hero.parameter.replace(/_/g, " ")}:
+                {" "}<strong>{String(hero.provided_value)} {hero.unit}</strong> submitted
+                against <strong>{String(hero.required_value)} {hero.unit}</strong> required.
+              </div>
+            </div>
+            <div className="jm-failure-arrow" aria-hidden="true">→</div>
+            <div className="jm-failure-step danger">
+              <div className="jm-failure-k">Would fail at</div>
+              <div className="jm-failure-v">Week {hero.week_fail}</div>
+              <div className="jm-failure-note">
+                The deviation maps to <strong>{hero.predicted_cx_test}</strong>,
+                not a vague risk bucket.
+              </div>
+            </div>
+            <div className="jm-failure-arrow" aria-hidden="true">→</div>
+            <div className="jm-failure-step">
+              <div className="jm-failure-k">Action window</div>
+              <div className="jm-failure-v">{hero.lead_time_weeks} weeks</div>
+              <div className="jm-failure-note">
+                Early enough for an RFI or re-submittal, not a late commissioning recovery plan.
+              </div>
+            </div>
+          </div>
         )}
       </section>
 

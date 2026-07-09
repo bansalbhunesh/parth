@@ -37,8 +37,8 @@
 | Pitch script | [`../PITCH.md`](../PITCH.md) | 3–4 min; carries the safe line verbatim (§3) |
 | Architecture | [`ARCHITECTURE.md`](ARCHITECTURE.md) + [`pipeline-diagram.svg`](pipeline-diagram.svg) | one reasoning graph; one LLM node; copilot = service |
 | Impact model | [`BUSINESS.md`](BUSINESS.md) | figures labelled illustrative scenario |
-| Unstop form text | [`UNSTOP_SUBMISSION.md`](UNSTOP_SUBMISSION.md) | paste-ready; only the video link placeholder remains |
-| Pitch video | ⬜ **placeholder** — YouTube (Unlisted) → paste into README §3, `SUBMISSION_CHECKLIST.md` row 2, Unstop | record per `VIDEO_RUNBOOK.md` |
+| Unstop form text | [`UNSTOP_SUBMISSION.md`](UNSTOP_SUBMISSION.md) | paste-ready after the video URL is inserted |
+| Pitch video | ⬜ **BLOCKER** — YouTube (Unlisted) → paste into README §3, `SUBMISSION_CHECKLIST.md` row 2, Unstop, and detailed submission source | record per `VIDEO_RUNBOOK.md` |
 
 ## 3. Repo / deploy state (fill on submission day)
 
@@ -53,6 +53,7 @@ Run from repo root.
 
 - [ ] **Tests** — `python -m pytest tests/ -q` → 605 passed (count varies slightly by Python version).
 - [ ] **Lint** — `ruff check .` → clean.
+- [ ] **Mandatory placeholders** — `python scripts/check_submission_ready.py` → green only after the pitch-video URL is public and logged-out accessible.
 - [ ] **Benchmark integrity untouched** — `git status --porcelain benchmarks/` → empty (labels/scores/reviewer files pristine).
 - [ ] **Frontend** — `cd frontend && npx tsc --noEmit && npm run build` → clean.
 - [ ] **Banned wording (automated)** — `python -m pytest tests/test_claims_register.py -q` → green. The gate scans README, PITCH, COMPETITIVE, deck + detailed sources, all docs, frontend text, benchmark + sample docs for every `CLAIMS_REGISTER.md` banned phrase (affirmative use fails; same-sentence disclaimers pass).

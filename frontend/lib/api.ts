@@ -81,7 +81,7 @@ export interface MultiProjectEval {
   }>;
 }
 
-const API = process.env.NEXT_PUBLIC_API ?? "http://localhost:8000";
+const API = process.env.NEXT_PUBLIC_API ?? "http://127.0.0.1:8000";
 
 // Time-box server-rendered data fetches. A cold Render free-tier backend can
 // take 30s+ to wake; without a timeout the page render blocks on it. With one,
@@ -369,7 +369,7 @@ export async function streamCopilot(
     });
     onDone();
   } catch {
-    onError("Backend not connected. Ensure the API is running at localhost:8000.");
+    onError("Backend not connected. Ensure the API is running at 127.0.0.1:8000.");
   }
 }
 

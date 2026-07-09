@@ -3,7 +3,25 @@
 > Honest landscape analysis. We don't claim to be the only system that reads
 > submittals; we claim a specific, defensible edge and back every number.
 
-## 1. The visible hackathon field (surveyed 2026-07-03)
+## 1. The visible hackathon field (updated 2026-07-09)
+
+The all-track public scan is now broader than the original PS4-only sweep.
+Pramaan should be positioned as **dominant on verifiable engineering**, not as an
+automatic overall favorite. The strongest public all-track threats are strong
+for different reasons:
+
+| Threat | Why it can beat us in a judge room | Pramaan's answer |
+|---|---|---|
+| `sanskar9999/prahari` | Public-safety/fraud story is emotionally immediate; GitHub Pages demo runs in-browser; README leads with real audio/STT/CV modules and a tight 3-4 min demo flow. | We cannot out-drama digital-arrest scams. We out-verify: backend + frontend deploys, 605 tests, frozen benchmark, claims register, live health/LLM/OCR probes, no hidden eval. |
+| `Agent-A345/PlantIQ` | Industrial domain is close to ours; README claims a multi-module specialist architecture, real regulatory PDFs, knowledge graph, predictive maintenance, 22+ features. | We avoid "feature fog": one LLM reasoning core, deterministic services, benchmark card, CI, and a judge path that proves the core claim in 90 seconds. |
+| `Exyons/ET-GenAI-Hackathon` | Agriculture has broad social impact, live frontend, multilingual web/SMS/WhatsApp/drone story. | We make the business consequence concrete: a vendor deviation becomes a dated commissioning failure and schedule-risk event, with citations and reproducible checks. |
+
+Do **not** claim "best overall all-track project." The defensible claim is:
+**among visible public submissions, Pramaan is the strongest evidence and
+reproducibility package I found, and the strongest visible PS4 project.** That is
+more persuasive than pretending emotional/social-impact tracks do not exist.
+
+## 1a. Earlier visible-field snapshot (surveyed 2026-07-03)
 
 A GitHub sweep (repo + code search on "ET AI Hackathon" and every
 problem-statement keyword) catalogued **~70 public participant repositories

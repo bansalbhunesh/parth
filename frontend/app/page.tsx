@@ -1,4 +1,4 @@
-import { getRegister, getCxPlan, getSchedule, getSupplyChain, getProjectGraph, getRemediation, Deviation, CxPlan } from "../lib/api";
+import { getRegister, getCxPlan, getSchedule, getSupplyChain, getProjectGraph, getRemediation, Deviation } from "../lib/api";
 import DeviationRegister from "../components/DeviationRegister";
 import CommissioningTwin from "../components/CommissioningTwin";
 import ScheduleRisk from "../components/ScheduleRisk";
@@ -252,7 +252,6 @@ export default async function Page() {
         major={major}
         maxLeadWeeks={maxLead}
         meanLeadWeeks={meanLead}
-        systemsScanned={10}
       />
 
       {hero && <Sentinel d={hero} />}

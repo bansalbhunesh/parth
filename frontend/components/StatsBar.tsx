@@ -38,14 +38,12 @@ export default function StatsBar({
   major,
   maxLeadWeeks,
   meanLeadWeeks,
-  systemsScanned,
 }: {
   totalFindings: number;
   critical: number;
   major: number;
   maxLeadWeeks: number;
   meanLeadWeeks: number;
-  systemsScanned: number;
   totalLeadWeeks: number;
 }) {
 

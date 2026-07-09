@@ -39,17 +39,17 @@
   <rect width="1000" height="380" rx="16" stroke="#1a2030" stroke-width="1" fill="none"/>
 
   <!-- Title -->
-  <text x="500" y="32" text-anchor="middle" font-family="Inter, Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#00d4ff" letter-spacing="2">LANGGRAPH REASONING GRAPH</text>
+  <text x="500" y="32" text-anchor="middle" font-family="Sora, Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#00d4ff" letter-spacing="2">COMPLIANCE REASONING GRAPH</text>
 
   <!-- Input labels (left side) -->
   <rect x="16" y="80" width="120" height="36" rx="8" fill="#111820" stroke="#1a2030" stroke-width="1"/>
-  <text x="76" y="103" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#8892a0">Design Basis</text>
+  <text x="76" y="103" text-anchor="middle" font-family="Sora, sans-serif" font-size="11" font-weight="600" fill="#8892a0">Design Basis</text>
 
   <rect x="16" y="140" width="120" height="36" rx="8" fill="#111820" stroke="#1a2030" stroke-width="1"/>
-  <text x="76" y="163" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#8892a0">Standards</text>
+  <text x="76" y="163" text-anchor="middle" font-family="Sora, sans-serif" font-size="11" font-weight="600" fill="#8892a0">Standards</text>
 
   <rect x="16" y="200" width="120" height="36" rx="8" fill="#111820" stroke="#1a2030" stroke-width="1"/>
-  <text x="76" y="223" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#8892a0">Submittals</text>
+  <text x="76" y="223" text-anchor="middle" font-family="Sora, sans-serif" font-size="11" font-weight="600" fill="#8892a0">Submittals</text>
 
   <!-- Arrows from inputs -->
   <line x1="136" y1="98" x2="170" y2="98" stroke="#00d4ff" stroke-width="1.5" opacity="0.4"/>
@@ -59,9 +59,9 @@
   <!-- Node 1: Ingestion -->
   <rect x="170" y="70" width="140" height="80" rx="12" fill="#111820" stroke="#00d4ff" stroke-width="1.5" opacity="0.9"/>
   <rect x="185" y="82" width="48" height="18" rx="9" fill="rgba(0,212,255,0.15)"/>
-  <text x="209" y="95" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#00d4ff">NODE 1</text>
-  <text x="240" y="117" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#e8ecf0">Ingestion</text>
-  <text x="240" y="137" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#8892a0">PDF → Markdown</text>
+  <text x="209" y="95" text-anchor="middle" font-family="Sora, sans-serif" font-size="9" font-weight="700" fill="#00d4ff">NODE 1</text>
+  <text x="240" y="117" text-anchor="middle" font-family="Sora, sans-serif" font-size="14" font-weight="700" fill="#e8ecf0">Ingestion</text>
+  <text x="240" y="137" text-anchor="middle" font-family="Sora, sans-serif" font-size="10" fill="#8892a0">PDF → Markdown</text>
 
   <!-- Arrow 1→2 -->
   <line x1="310" y1="110" x2="350" y2="110" stroke="#00d4ff" stroke-width="1.5" opacity="0.5"/>
@@ -70,9 +70,9 @@
   <!-- Node 2: Load standards (deterministic KB read) -->
   <rect x="358" y="70" width="140" height="80" rx="12" fill="#111820" stroke="#00d4ff" stroke-width="1.5" opacity="0.9"/>
   <rect x="373" y="82" width="48" height="18" rx="9" fill="rgba(0,212,255,0.15)"/>
-  <text x="397" y="95" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#00d4ff">NODE 2</text>
-  <text x="428" y="117" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#e8ecf0">Load Standards</text>
-  <text x="428" y="137" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#8892a0">Governing corpus</text>
+  <text x="397" y="95" text-anchor="middle" font-family="Sora, sans-serif" font-size="9" font-weight="700" fill="#00d4ff">NODE 2</text>
+  <text x="428" y="117" text-anchor="middle" font-family="Sora, sans-serif" font-size="14" font-weight="700" fill="#e8ecf0">Load Standards</text>
+  <text x="428" y="137" text-anchor="middle" font-family="Sora, sans-serif" font-size="10" fill="#8892a0">Governing corpus</text>
 
   <!-- Arrow 2→Validate -->
   <line x1="498" y1="110" x2="530" y2="110" stroke="#00d4ff" stroke-width="1.5" opacity="0.5"/>
@@ -80,11 +80,11 @@
 
   <!-- Validate Gate (diamond) -->
   <polygon points="568,80 608,110 568,140 528,110" fill="#111820" stroke="#ffb020" stroke-width="2"/>
-  <text x="568" y="107" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#ffb020">VALIDATE</text>
-  <text x="568" y="119" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#ffb020">GATE</text>
+  <text x="568" y="107" text-anchor="middle" font-family="Sora, sans-serif" font-size="9" font-weight="700" fill="#ffb020">VALIDATE</text>
+  <text x="568" y="119" text-anchor="middle" font-family="Sora, sans-serif" font-size="8" fill="#ffb020">GATE</text>
 
   <!-- Conditional label -->
-  <text x="568" y="155" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#8892a0" font-style="italic">conditional routing</text>
+  <text x="568" y="155" text-anchor="middle" font-family="Sora, sans-serif" font-size="8" fill="#8892a0" font-style="italic">conditional routing</text>
 
   <!-- Arrow Validate->Node 3 -->
   <line x1="608" y1="110" x2="640" y2="110" stroke="#ffb020" stroke-width="1.5" opacity="0.5"/>
@@ -93,10 +93,10 @@
   <!-- Node 3: Reconciliation (THE LLM CORE - highlighted) -->
   <rect x="648" y="62" width="150" height="96" rx="14" fill="#111820" stroke="#ff4d4d" stroke-width="2.5" filter="url(#glow-sm)"/>
   <rect x="663" y="74" width="90" height="18" rx="9" fill="rgba(255,77,77,0.15)"/>
-  <text x="708" y="87" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#ff4d4d">NODE 3 — LLM CORE</text>
-  <text x="723" y="113" text-anchor="middle" font-family="Inter, sans-serif" font-size="15" font-weight="800" fill="#e8ecf0">Reconciliation</text>
-  <text x="723" y="133" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#ff4d4d">Cross-doc reasoning</text>
-  <text x="723" y="148" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#8892a0">+ citation chain</text>
+  <text x="708" y="87" text-anchor="middle" font-family="Sora, sans-serif" font-size="9" font-weight="700" fill="#ff4d4d">NODE 3 — LLM CORE</text>
+  <text x="723" y="113" text-anchor="middle" font-family="Sora, sans-serif" font-size="15" font-weight="800" fill="#e8ecf0">Reconciliation</text>
+  <text x="723" y="133" text-anchor="middle" font-family="Sora, sans-serif" font-size="10" fill="#ff4d4d">Cross-doc reasoning</text>
+  <text x="723" y="148" text-anchor="middle" font-family="Sora, sans-serif" font-size="9" fill="#8892a0">+ citation chain</text>
 
   <!-- Arrow 3→4 -->
   <line x1="723" y1="158" x2="723" y2="190" stroke="#ff4d4d" stroke-width="1.5" opacity="0.5"/>
@@ -105,9 +105,9 @@
   <!-- Node 4: Cx Predictor -->
   <rect x="648" y="200" width="150" height="80" rx="12" fill="#111820" stroke="#35c98b" stroke-width="1.5" opacity="0.9"/>
   <rect x="663" y="212" width="48" height="18" rx="9" fill="rgba(53,201,139,0.15)"/>
-  <text x="687" y="225" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#35c98b">NODE 4</text>
-  <text x="723" y="249" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#e8ecf0">Cx Predictor</text>
-  <text x="723" y="269" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#8892a0">Test + Lead Time</text>
+  <text x="687" y="225" text-anchor="middle" font-family="Sora, sans-serif" font-size="9" font-weight="700" fill="#35c98b">NODE 4</text>
+  <text x="723" y="249" text-anchor="middle" font-family="Sora, sans-serif" font-size="14" font-weight="700" fill="#e8ecf0">Cx Predictor</text>
+  <text x="723" y="269" text-anchor="middle" font-family="Sora, sans-serif" font-size="10" fill="#8892a0">Test + Lead Time</text>
 
   <!-- Arrow 4→Output -->
   <line x1="798" y1="240" x2="840" y2="240" stroke="#35c98b" stroke-width="1.5" opacity="0.5"/>
@@ -115,11 +115,11 @@
 
   <!-- Output: Deviation Register -->
   <rect x="848" y="70" width="140" height="100" rx="12" fill="#111820" stroke="#00d4ff" stroke-width="1.5"/>
-  <text x="918" y="100" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#00d4ff">OUTPUT</text>
-  <text x="918" y="120" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#e8ecf0">Deviation Register</text>
-  <text x="918" y="137" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#8892a0">+ Citation Chain</text>
-  <text x="918" y="152" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#8892a0">+ Lead Time</text>
-  <text x="918" y="167" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#8892a0">+ Cx Test Mapping</text>
+  <text x="918" y="100" text-anchor="middle" font-family="Sora, sans-serif" font-size="12" font-weight="700" fill="#00d4ff">OUTPUT</text>
+  <text x="918" y="120" text-anchor="middle" font-family="Sora, sans-serif" font-size="11" font-weight="600" fill="#e8ecf0">Deviation Register</text>
+  <text x="918" y="137" text-anchor="middle" font-family="Sora, sans-serif" font-size="9" fill="#8892a0">+ Citation Chain</text>
+  <text x="918" y="152" text-anchor="middle" font-family="Sora, sans-serif" font-size="9" fill="#8892a0">+ Lead Time</text>
+  <text x="918" y="167" text-anchor="middle" font-family="Sora, sans-serif" font-size="9" fill="#8892a0">+ Cx Test Mapping</text>
 
   <!-- Arrow from Node 3/4 area to output -->
   <line x1="798" y1="110" x2="848" y2="110" stroke="#00d4ff" stroke-width="1.5" opacity="0.4"/>
@@ -127,31 +127,31 @@
   <!-- RFI Copilot: a separate service, NOT a graph node -->
   <rect x="848" y="210" width="140" height="80" rx="12" fill="#111820" stroke="#a855f7" stroke-width="1.5" opacity="0.9" stroke-dasharray="4 3"/>
   <rect x="863" y="222" width="56" height="18" rx="9" fill="rgba(168,85,247,0.15)"/>
-  <text x="891" y="235" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#a855f7">SERVICE</text>
-  <text x="918" y="259" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#e8ecf0">RFI Copilot</text>
-  <text x="918" y="279" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#8892a0">BM25 retrieval + cited answer</text>
+  <text x="891" y="235" text-anchor="middle" font-family="Sora, sans-serif" font-size="9" font-weight="700" fill="#a855f7">SERVICE</text>
+  <text x="918" y="259" text-anchor="middle" font-family="Sora, sans-serif" font-size="14" font-weight="700" fill="#e8ecf0">RFI Copilot</text>
+  <text x="918" y="279" text-anchor="middle" font-family="Sora, sans-serif" font-size="10" fill="#8892a0">BM25 retrieval + cited answer</text>
 
   <!-- Bottom stats bar -->
   <rect x="16" y="320" width="968" height="46" rx="10" fill="#111820" stroke="#1a2030" stroke-width="1"/>
 
   <circle cx="60" cy="343" r="6" fill="#00d4ff" opacity="0.3"/><circle cx="60" cy="343" r="3" fill="#00d4ff"/>
-  <text x="76" y="347" font-family="Inter, sans-serif" font-size="11" fill="#8892a0">StateGraph</text>
+  <text x="76" y="347" font-family="Sora, sans-serif" font-size="11" fill="#8892a0">StateGraph</text>
 
   <circle cx="180" cy="343" r="6" fill="#ffb020" opacity="0.3"/><circle cx="180" cy="343" r="3" fill="#ffb020"/>
-  <text x="196" y="347" font-family="Inter, sans-serif" font-size="11" fill="#8892a0">Conditional Edges</text>
+  <text x="196" y="347" font-family="Sora, sans-serif" font-size="11" fill="#8892a0">Conditional Edges</text>
 
   <circle cx="340" cy="343" r="6" fill="#a855f7" opacity="0.3"/><circle cx="340" cy="343" r="3" fill="#a855f7"/>
-  <text x="356" y="347" font-family="Inter, sans-serif" font-size="11" fill="#8892a0">TypedDict State</text>
+  <text x="356" y="347" font-family="Sora, sans-serif" font-size="11" fill="#8892a0">TypedDict State</text>
 
   <circle cx="500" cy="343" r="6" fill="#35c98b" opacity="0.3"/><circle cx="500" cy="343" r="3" fill="#35c98b"/>
-  <text x="516" y="347" font-family="Inter, sans-serif" font-size="11" fill="#8892a0">1 LLM core + services</text>
+  <text x="516" y="347" font-family="Sora, sans-serif" font-size="11" fill="#8892a0">1 LLM core + services</text>
 
   <circle cx="610" cy="343" r="6" fill="#ff4d4d" opacity="0.3"/><circle cx="610" cy="343" r="3" fill="#ff4d4d"/>
-  <text x="626" y="347" font-family="Inter, sans-serif" font-size="11" fill="#8892a0">14 Deviations</text>
+  <text x="626" y="347" font-family="Sora, sans-serif" font-size="11" fill="#8892a0">14 Deviations</text>
 
   <circle cx="740" cy="343" r="6" fill="#00d4ff" opacity="0.3"/><circle cx="740" cy="343" r="3" fill="#00d4ff"/>
-  <text x="756" y="347" font-family="Inter, sans-serif" font-size="11" fill="#8892a0">267 lead-time wks (synth)</text>
+  <text x="756" y="347" font-family="Sora, sans-serif" font-size="11" fill="#8892a0">267 lead-time wks (synth)</text>
 
   <circle cx="890" cy="343" r="6" fill="#35c98b" opacity="0.3"/><circle cx="890" cy="343" r="3" fill="#35c98b"/>
-  <text x="906" y="347" font-family="Inter, sans-serif" font-size="11" fill="#8892a0">2 bounded cycles</text>
+  <text x="906" y="347" font-family="Sora, sans-serif" font-size="11" fill="#8892a0">2 bounded cycles</text>
 </svg>

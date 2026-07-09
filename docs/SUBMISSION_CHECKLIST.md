@@ -19,7 +19,7 @@
 | # | Deliverable (per rules) | Artifact | Status |
 |---|---|---|---|
 | 1 | **Public GitHub repository** | `https://github.com/bansalbhunesh/parth` | ✅ public since 2026-07-03; CI badge verified "passing" logged-out. NOTE: the repo home renders `main`'s README — keep `main` fast-forwarded to the submission tip |
-| 2 | **Pitch video** (3 min) | YouTube unlisted link → also placed in README "Judges: start here" §3 | ⬜ record per `docs/VIDEO_RUNBOOK.md` (script: `PITCH.md`) |
+| 2 | **Pitch video** (3 min) | YouTube unlisted link → also placed in README "Judges: start here" §3, `UNSTOP_SUBMISSION.md`, `FINAL_SUBMISSION_CHECKLIST.md`, and `docs/detailed_submission.html` | ⬜ **BLOCKER** — record per `docs/VIDEO_RUNBOOK.md` (script: `PITCH.md`) |
 | 3 | **Architecture document** | [`docs/ARCHITECTURE.md`](ARCHITECTURE.md) (+ `docs/pipeline-diagram.svg`) | ✅ |
 | 4 | **Impact model** (quantified business benefit) | [`docs/BUSINESS.md`](BUSINESS.md) — every figure cited | ✅ |
 | 5 | Pitch deck (if the form takes a file) | [`docs/Pramaan_Deck.pdf`](Pramaan_Deck.pdf) — 12 pages, regenerate with `python scripts/export_deck.py` after any deck edit | ✅ |
@@ -34,7 +34,8 @@
    layers, deep LLM probe, real GXT5 pair through both analyze paths, frontend).
 4. `make verify` on a **fresh clone** (proves the judge's-laptop story).
 5. Repo public → open the README logged-out: CI badge green, screenshots load,
-   Judge-Mode link works, video link present (not the placeholder).
+   Judge-Mode link works, video link present (not the placeholder), and
+   `python scripts/check_submission_ready.py` passes.
 6. Submit the form; screenshot the confirmation page.
 
 ## Warm-up before ANY judged demo

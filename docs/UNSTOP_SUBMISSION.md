@@ -1,9 +1,9 @@
 # Unstop Submission Text — paste-ready
 
-> Copy-paste blocks for the Phase-2 submission form. Fill the ONE placeholder
-> (video link) after recording. Everything else is final and consistent with
-> the claims register. Keep the judge journey at the very top — judges decide
-> in the first 30 seconds whether to engage.
+> Copy-paste blocks for the Phase-2 submission form. Fill the ONE mandatory
+> blocker (the video link) after recording. Everything else is final and
+> consistent with the claims register. Keep the judge journey at the very top
+> — judges decide in the first 30 seconds whether to engage.
 
 ---
 
@@ -70,8 +70,9 @@ same problem. Data-centre EPC is the highest-stakes instance we proved it on.
 ## Pre-submit gate
 
 Run `docs/FINAL_SUBMISSION_CHECKLIST.md` end-to-end first — every truth-gate
-must be green, `make verify-live` must say `GREEN -- demo away.`, and the
-video link must open in an incognito window.
+must be green, `make verify-live` must say `GREEN -- demo away.`, `make
+verify-submission` must pass, and the video link must open in an incognito
+window.
 
 ## The one line to never contradict (also in the video)
 

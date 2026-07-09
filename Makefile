@@ -1,4 +1,4 @@
-.PHONY: setup test eval eval-text eval-multi run build docker help verify-live
+.PHONY: setup test eval eval-text eval-multi run build docker help verify-live verify-submission frontend-test frontend-typecheck
 
 help:  ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-18s\033[0m %s\n", $$1, $$2}'
@@ -62,7 +62,7 @@ verify-ocr:  ## Prove OCR works locally (skips cleanly if tesseract absent)
 verify-ocr-docker:  ## Prove OCR works in the shipping backend image (needs Docker)
 	sh scripts/verify_ocr_docker.sh
 
-verify:  ## One-command verification: tests + all evals + frontend type check
+verify:  ## One-command verification: tests + evals + frontend checks
 	@echo "╔══════════════════════════════════════════════════════════════╗"
 	@echo "║  PRAMAAN — Full Verification Suite                         ║"
 	@echo "╚══════════════════════════════════════════════════════════════╝"
@@ -79,8 +79,14 @@ verify:  ## One-command verification: tests + all evals + frontend type check
 	@echo "▸ [4/5] Multi-project eval (12 projects, 50 devs)..."
 	python3 eval/multi_project_eval.py
 	@echo ""
-	@echo "▸ [5/5] Frontend type check..."
-	cd frontend && npx tsc --noEmit
+	@echo "▸ [5/7] Frontend type check..."
+	cd frontend && npm run typecheck
+	@echo ""
+	@echo "Frontend component tests..."
+	cd frontend && npm test
+	@echo ""
+	@echo "Frontend production audit + build..."
+	cd frontend && npm audit && npm run build
 	@echo ""
 	@echo "╔══════════════════════════════════════════════════════════════╗"
 	@echo "║  ✓ ALL CHECKS PASSED                                      ║"
@@ -89,5 +95,14 @@ verify:  ## One-command verification: tests + all evals + frontend type check
 build:  ## Build frontend for production
 	cd frontend && npm run build
 
+frontend-typecheck:  ## Run strict frontend TypeScript checks
+	cd frontend && npm run typecheck
+
+frontend-test:  ## Run frontend component tests
+	cd frontend && npm test
+
 verify-live:  ## Pre-demo gate: is the DEPLOYED stack demo-ready right now?
 	python3 scripts/verify_live.py
+
+verify-submission:  ## Final Unstop gate: fail if mandatory submission placeholders remain
+	python3 scripts/check_submission_ready.py

@@ -55,7 +55,7 @@ TEMPLATE = """<!doctype html>
   .muted { color: var(--muted); }
   .card { background: var(--card); border: 1px solid var(--line);
     border-radius: 10px; padding: 18px 20px; margin: 14px 0; }
-  .callout { border-left: 4px solid var(--accent); }
+  .callout { border-color: var(--accent); background: var(--quote); }
   code, pre { font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
   pre.ctx { background: var(--quote); border: 1px solid var(--line);
     border-radius: 8px; padding: 12px 14px; white-space: pre-wrap;
@@ -107,7 +107,7 @@ TEMPLATE = """<!doctype html>
   .evidence { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
   @media (max-width: 680px) { .evidence { grid-template-columns: 1fr; } }
   .evidence blockquote { margin: 0; background: var(--quote);
-    border-left: 3px solid var(--accent); border-radius: 6px;
+    border: 1px solid var(--accent); border-radius: 6px;
     padding: 8px 12px; font-size: 13.5px; }
   .evidence .src { display: block; font-size: 12px; font-weight: 700;
     color: var(--muted); margin-bottom: 4px; text-transform: uppercase;

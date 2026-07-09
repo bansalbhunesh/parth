@@ -1,6 +1,6 @@
 # PS4 External Benchmark — Report (v1.2.0)
 
-_Generated 2026-07-04T07:17:41+00:00 · run
+_Generated 2026-07-09T06:29:27+00:00 · run
 `scripts/benchmark_report.py` to refresh. Every metric carries an evidence label._
 
 > **Positioning (judge-safe):** Pramaan reports the repeatable 3-pass

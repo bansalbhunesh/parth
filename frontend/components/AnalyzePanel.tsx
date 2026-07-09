@@ -110,7 +110,7 @@ interface AnalyzeResult {
   mode: string;
 }
 
-const API = process.env.NEXT_PUBLIC_API ?? "http://localhost:8000";
+const API = process.env.NEXT_PUBLIC_API ?? "http://127.0.0.1:8000";
 
 // Robust against a missing elapsed_ms (e.g. an older streaming payload): show a
 // neutral dash rather than the literal "undefinedms".
@@ -219,7 +219,7 @@ function DropZone({
         ref={inputRef}
         type="file"
         accept={accept}
-        style={{ display: "none" }}
+        style={{ display: "none", caretColor: "transparent" }}
         onChange={(e) => {
           const f = e.target.files?.[0];
           if (f) onFile(f);
@@ -414,6 +414,7 @@ export default function AnalyzePanel() {
           className={`analyze-mode-btn ${mode === "pdf" ? "active" : ""}`}
           onClick={() => setMode("pdf")}
           disabled={loading}
+          aria-pressed={mode === "pdf"}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
@@ -425,6 +426,7 @@ export default function AnalyzePanel() {
           className={`analyze-mode-btn ${mode === "text" ? "active" : ""}`}
           onClick={() => setMode("text")}
           disabled={loading}
+          aria-pressed={mode === "text"}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="4 7 4 4 20 4 20 7" />
@@ -433,14 +435,14 @@ export default function AnalyzePanel() {
           </svg>
           Paste Text
         </button>
-        <button className="analyze-example-btn" onClick={loadExample} disabled={loading}>
-          Load example
-        </button>
         <button className="analyze-example-btn" onClick={loadRealSample} disabled={loading} title="A realistic vendor datasheet vs design basis — natural prose, not the structured corpus. Catches a hidden 2N→N+1 and 10min→8min non-compliance.">
           Load deviation demo ★
         </button>
         <button className="analyze-example-btn" onClick={loadCleanSample} disabled={loading} title="Same design basis, a fully compliant submittal. The correct answer is zero deviations — it shows Pramaan does not false-alarm on a compliant document.">
           Load compliant demo ✓
+        </button>
+        <button className="analyze-example-btn" onClick={loadExample} disabled={loading}>
+          Load compact example
         </button>
       </div>
 
@@ -575,7 +577,7 @@ export default function AnalyzePanel() {
 
       {streaming && streamText && (
         <div className="analyze-stream">
-          <div className="analyze-stream-label">AI reasoning</div>
+          <div className="analyze-stream-label">Model reasoning</div>
           <pre className="analyze-stream-text">
             {streamText}
             <span className="copilot-cursor" />

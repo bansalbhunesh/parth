@@ -62,11 +62,16 @@
 1. **See it catch a real deviation** → [Judge Mode](https://parth-tan.vercel.app/judge): click **Load deviation demo ★**, hit **Analyze**, watch it catch a hidden 2N→N+1 redundancy drop and a battery-autonomy shortfall (10→8 min) in a realistic vendor submittal — each cited to the standard and mapped to the commissioning test it fails.
 2. **Don't take our word for any number** → `git clone … && make verify` — the unit-test suite, the deterministic eval harnesses, and the frontend type-check reproduce offline with no API key. The **live-model** team-authored cited-value findings (23 of the 27 hard claims) vary run-to-run and are reported as such, not as a fixed score. No-key deterministic harness: `python eval/real_pairs_offline.py`.
 3. **See the evidence, labelled** → [Evidence dashboard](https://parth-tan.vercel.app/evidence): the frozen v1.2 benchmark (recall 0.862 · precision 0.953 · F1 0.905 · FAR 0.000), with reviewer-2 shown as **pending** and the automated cross-check labelled **machine QA, not human**.
-4. **The 3-minute pitch video** → *(link lands here on submission)* · script: [`PITCH.md`](PITCH.md)
+4. **The 3-minute pitch video** → *(BLOCKER until the public link is pasted here)* · script: [`PITCH.md`](PITCH.md)
 5. **Business case in one page** → [`docs/BUSINESS.md`](docs/BUSINESS.md) — what one caught deviation is worth ($10–40M/month of commissioning slip).
 6. **Every value in the real pairs is citable** → [`data/samples/real/PROVENANCE.md`](data/samples/real/PROVENANCE.md) — now with a resolvable source link per attribution (fetch-checked 2026-07-06).
 7. **Practitioners confirm the problem** → [`docs/VALIDATION.md §5`](docs/VALIDATION.md): five discipline-tailored quotes (CxA, MEP PM, mechanical PE, controls consultant, EPC PD) collected July 2026 — problem validation, not an accuracy claim.
 8. **It reads the drawing, not just text** → [`data/samples/real/VISION_RESULT.md`](data/samples/real/VISION_RESULT.md): given a datasheet **image**, Gemini vision read the values from the picture and caught all 3 deviations (incl. a missing-capability omission), clearing the compliant IP rating.
+
+> **Why this survives the all-track judge room:** fraud and agriculture demos can
+> feel more instantly emotional. Pramaan's edge is different: it turns one missed
+> vendor line into a dated commissioning failure, then lets a judge reproduce the
+> tests, benchmark, deployment checks, limitations, and claims gate from the repo.
 
 > **Submitting?** The one-page pre-flight is [`docs/FINAL_SUBMISSION_CHECKLIST.md`](docs/FINAL_SUBMISSION_CHECKLIST.md) — every URL, artifact, and truth-gate in one place.
 
@@ -218,7 +223,7 @@ Pramaan is **one compliance reasoning graph, a set of connected deterministic in
 | ROI Calculator | <img src="docs/screenshots/15-roi.png" width="600"> |
 | Scale Story | <img src="docs/screenshots/16-scale.png" width="600"> |
 
-The **Live Analysis** panel streams real token-by-token AI reasoning — best seen
+The **Live Analysis** panel streams token-by-token model reasoning — best seen
 live at **[parth-tan.vercel.app](https://parth-tan.vercel.app)**; the
 real-document run is captured in
 [`REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md).
@@ -243,7 +248,7 @@ real-document run is captured in
 | Cx prediction | **1.000** | ≥ 0.85 |
 | Citation faithfulness | N/A | ≥ 0.95 |
 
-<sub>**Baseline column = a by-construction integrity check** — it compares pre-extracted triples to ground truth, so P/R/F1 read 1.000 *by construction*, and **baseline Cx is echoed from the answer key, not predicted**. The honest capability signal is the **team-authored evaluation pairs** (4 checked deterministically offline with 0 false positives on those; the remaining 23 live-model, reported with not-run pairs counted) and the LLM-agent column — we label this rather than headline it.</sub>
+<sub>**Baseline column = a by-construction integrity check** — it compares pre-extracted triples to ground truth, so P/R/F1 read 1.000 *by construction*, and **baseline Cx is echoed from the answer key, not predicted**. The honest capability signal is the **team-authored evaluation pairs** (4 checked deterministically offline with 0 false positives on those; the remaining 23 live-model, reported with not-run pairs counted) and the live-model column — we label this rather than headline it.</sub>
 
 </td>
 <td>
@@ -466,7 +471,7 @@ The dashboard is a single-page application designed for a **60-second demo narra
 | 17 | **Standards KB** | 7 color-coded standard cards with finding counts |
 | 18 | **Multi-Project Eval** | 12 project cards with per-project P/R/F1, aggregate metrics |
 | 19 | **Eval Dashboard** | Animated P/R/F1 counters + baseline vs LLM comparison table |
-| 20 | **Live Analysis** | Upload PDFs or paste text for end-to-end deviation detection with streaming AI reasoning |
+| 20 | **Live Analysis** | Upload PDFs or paste text for end-to-end deviation detection with streaming model reasoning |
 | 21 | **ROI Calculator** | Interactive slider: project value → rework avoided → payback days |
 | 22 | **Scale Story** | 10 → 203 → 87 → 14K animated progression + architecture details |
 
@@ -503,7 +508,7 @@ Pramaan cross-references against **7 governing standards** — all content is pa
 | `POST` | `/ingest/{system_id}` | Run full pipeline for one system |
 | `GET` | `/deviations` | Complete deviation register with citations |
 | `POST` | `/analyze` | Live analysis: paste any spec + submittal text |
-| `POST` | `/analyze/stream` | Streaming analysis with token-by-token AI reasoning |
+| `POST` | `/analyze/stream` | Streaming analysis with token-by-token model reasoning |
 | `POST` | `/analyze/upload` | PDF upload: end-to-end document-to-deviation |
 | `POST` | `/analyze/upload/stream` | Streaming PDF upload with text extraction preview |
 | `POST` | `/copilot` | RAG-powered project Q&A with prior-RFI matching |
@@ -512,7 +517,7 @@ Pramaan cross-references against **7 governing standards** — all content is pa
 | `GET` | `/cx-graph` | Commissioning knowledge graph (16 cited deviation→test edges over 5 levels) |
 | `GET` | `/rfi-log` | Full RFI log (8 historical RFIs) |
 | `GET` | `/metrics` | Live eval metrics (P/R/F1, lead time, confidence) |
-| `GET` | `/pipeline` | Agent pipeline topology (nodes + edges) |
+| `GET` | `/pipeline` | Reasoning-graph topology (nodes + edges; one LLM core + deterministic services) |
 | `GET` | `/corpus/doc/{type}/{id}` | Raw spec or submittal document text |
 | `GET` | `/corpus/stats` | Corpus statistics (systems, standards, documents) |
 | `GET` | `/export/audit` | JSON compliance evidence pack — an NCR-shaped **QMS audit trail** (deviation, severity, clause, standard citation, Cx test, lead time, timestamp, rationale) |
@@ -539,7 +544,7 @@ pramaan/
 │   ├── orchestrator.py            # LangGraph pipeline with conditional routing
 │   ├── llm.py                     # LLM provider abstraction (Gemini / gateway / Claude) + streaming + number-grounded narration
 │   ├── requirements.txt
-│   └── agents/                    # 10 agent modules
+│   └── agents/                    # domain modules (legacy package name)
 │       ├── ingestion.py           # PDF/Markdown intake (pdfplumber + PyMuPDF)
 │       ├── extraction.py          # Raw doc → structured triples
 │       ├── reconciliation.py      # Cross-document deviation detection (THE BRAIN)
@@ -647,7 +652,7 @@ The demo corpus models **10 systems** with **33 requirements**. The architecture
 | 203 requirements tracked | 14,000+ line items per project |
 | 50 deviations detected | Continuous monitoring pipeline |
 | TF-IDF retriever | pgvector / Qdrant vector store |
-| Synchronous agents | LangGraph async + queue |
+| Synchronous pipeline | LangGraph async + queue |
 | PDF text extraction | Gemini multimodal (drawings, tables, P&IDs) |
 
 **Scale mechanisms:**
@@ -682,7 +687,7 @@ python3 eval/text_eval.py
 python3 eval/multi_project_eval.py
 # → 12 projects, all 50 seeded deviations recovered by construction, 1024 lead-time-weeks summed (synthetic)
 
-# Path 4: LLM agent — recovers deviations from raw unstructured documents
+# Path 4: live-model path — recovers deviations from raw unstructured documents
 python3 eval/run_eval.py --detector llm
 # → Scores from actual LLM reasoning, not hardcoded answers
 ```
@@ -706,7 +711,7 @@ python3 eval/run_eval.py --detector llm
 - **F1 Score** — harmonic mean of precision and recall
 - **Cx prediction accuracy** — does each deviation map to the correct commissioning test?
 - **Citation faithfulness** — does every finding cite a real spec clause and standard?
-- **Confidence mean** — agent's own confidence calibration
+- **Confidence mean** — model-reported confidence calibration
 
 ---
 
@@ -779,7 +784,7 @@ All four verified against the publisher (title/volume/year as published, resolva
 | Retrieval | TF-IDF (demo) → pgvector / Qdrant (scale) |
 | Eval | Dual harness: structured + text-based; P/R/F1 + Cx accuracy + citation faithfulness |
 | Scraping | Firecrawl → Crawl4ai → Playwright (3-tier fallback) |
-| Design | Dark theme, JetBrains Mono + Inter, CSS custom properties |
+| Design | Dark theme, JetBrains Mono + Sora, CSS custom properties |
 
 ---
 

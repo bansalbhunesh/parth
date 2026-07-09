@@ -140,13 +140,20 @@ backfills the seeded demo answer key. Covered by `tests/test_prompt_injection.py
 
 ---
 
-## 6. Dependency audit (2026-07-05)
+## 6. Dependency audit (2026-07-09)
 
 `pip-audit` was run against the environment and `npm audit` against the frontend.
 
 **Fixed:** `python-multipart` pinned to `>=0.0.31` in `pyproject.toml` — the
 multipart upload parser had DoS CVEs (CVE-2026-40347 / 42561 / 53538–53540);
 directly relevant to the hardened upload path.
+
+**Fixed:**
+- Frontend `npm audit --omit=dev` flagged a moderate PostCSS advisory through
+  `next -> postcss@8.4.31`. `frontend/package.json` now has a narrow
+  `overrides.postcss = ^8.5.10`, and the refreshed lockfile resolves Next,
+  Vite, and Vitest to PostCSS `8.5.16`. Verification: `npm audit --omit=dev`
+  reports `found 0 vulnerabilities`, and `npm run build` passes.
 
 **Mitigated / documented (no change):**
 - The Pramaan Docker image installs **only** `pyproject` dependencies. Most
@@ -156,11 +163,6 @@ directly relevant to the hardened upload path.
   clients and are pulled by version **range**, so a fresh image build resolves
   to the current patched releases; not force-pinned to avoid a resolver
   conflict with FastAPI. No large framework upgrade (goal constraint).
-- **Frontend `npm audit`** (7 findings): all in **dev/build tooling**
-  (`vitest`/`vite`/`vite-node`/`postcss`) — not present in the deployed static
-  Next.js bundle. `npm audit fix --force` was **NOT** run because it downgrades
-  Next.js 16 → 9 (a breaking framework change). Tracked as a dev-tooling
-  upgrade, not a shipped-artifact vulnerability.
 
 ---
 

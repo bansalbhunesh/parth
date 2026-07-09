@@ -17,7 +17,7 @@
 ### Slide 2 — The problem
 - A late submittal deviation becomes a **commissioning + schedule failure**.
 - Caught at commissioning (Weeks 16–44, *scenario*) vs caught at submittal review (Week 11).
-- **Speaker note:** make a business judge feel the cost of finding it late.
+- **Speaker note:** make a business judge feel the date: "this does not become a problem someday; it fails IST-07 in Week 38."
 
 ### Slide 3 — Why current review fails
 - Owner requirement · vendor submittal · commissioning/schedule = **3 documents, 3 parties**.
@@ -32,7 +32,7 @@
 ### Slide 5 — Live product / Judge Mode ★
 - `/judge`: **Load deviation demo ★** (hidden 2N→N+1, 10→8 min) and **Load compliant demo ✓** (zero deviations — no false alarm).
 - Token-by-token reasoning; a truthful provenance chip on every result (live LLM · vision · rule floor · OCR).
-- **Speaker note:** demo live if you can; let the derived catch land in silence.
+- **Speaker note:** demo live if you can; let the failure timeline land before the metrics.
 
 ### Slide 6 — Architecture truth
 - **One compliance reasoning graph + connected deterministic services + reliability layer.**
@@ -66,6 +66,7 @@
 
 ### Slide 12 — Close
 - **Evidence before confidence.** Benchmark v1.2 headline; one reasoning graph + deterministic services + reliability layer; reviewer-2 pending, and we say so.
+- **All-track answer:** others may win the room with drama; Pramaan wins the technical bar by making every claim inspectable.
 - Links: `/judge` · `/evidence` · GitHub · live demo.
 
 ---

@@ -1005,8 +1005,8 @@ def export_audit_html():
 <html><head><meta charset="utf-8">
 <title>Pramaan Compliance Evidence Pack — {_esc(data['project'])}</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
-body {{ font-family: 'Inter', -apple-system, system-ui, sans-serif; margin: 0; background: #fafbfc; color: #1a1a2e; }}
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+body {{ font-family: 'Sora', -apple-system, system-ui, sans-serif; margin: 0; background: #fafbfc; color: #1a1a2e; }}
 .header {{ background: linear-gradient(135deg, #0c0f13 0%, #1a2233 100%); color: #e7ecf3;
   padding: 40px; margin-bottom: 32px; }}
 .header h1 {{ font-family: 'JetBrains Mono', monospace; font-size: 28px; margin: 0 0 8px;
@@ -1110,20 +1110,26 @@ tr:hover td {{ background: #f0f4ff; }}
 @app.get("/pipeline")
 def pipeline_info():
     return {
-        "name": "Pramaan Agent Graph (with self-critique loop)",
+        "name": "Pramaan Compliance Reasoning Graph (with bounded retrieval + critique cycles)",
         "framework": "LangGraph",
+        "llm_footprint": "single LLM reasoning core at node_reconcile; other nodes are deterministic-first",
         "nodes": [
-            {"id": "ingest", "agent": "Ingestion Agent", "description": "Document intake, parsing, normalization"},
-            {"id": "load_standards", "agent": "Standards Loader", "description": "Load governing standards corpus"},
-            {"id": "validate", "agent": "Validation Gate",
+            {"id": "ingest", "node": "Ingestion", "kind": "deterministic",
+             "description": "Document intake, parsing, normalization"},
+            {"id": "load_standards", "node": "Standards Loader", "kind": "deterministic",
+             "description": "Load governing standards corpus"},
+            {"id": "validate", "node": "Validation Gate", "kind": "deterministic",
              "description": "Check spec+submittal exist; conditional routing"},
-            {"id": "reconcile", "agent": "Reconciliation Agent", "description": "Cross-document deviation reasoning"},
-            {"id": "retrieve", "agent": "Standards Retrieval Tool",
+            {"id": "reconcile", "node": "Reconciliation", "kind": "llm_core",
+             "description": "Cross-document deviation reasoning"},
+            {"id": "retrieve", "node": "Standards Retrieval Tool", "kind": "deterministic",
              "description": "Fetches a cited standard absent from context; loops back to reconcile (tool-call cycle)"},
-            {"id": "critique", "agent": "Self-Critique Agent",
+            {"id": "critique", "node": "Self-Critique Gate", "kind": "deterministic_by_default",
              "description": "Verifies its own findings; loops back to reconcile on a failed self-check (reflexion)"},
-            {"id": "cx_predict", "agent": "Cx Predictor", "description": "Map deviations to commissioning tests"},
-            {"id": "format_output", "agent": "Output Formatter", "description": "Enrich and structure findings"},
+            {"id": "cx_predict", "node": "Cx Predictor", "kind": "rule_graph_first",
+             "description": "Map deviations to commissioning tests"},
+            {"id": "format_output", "node": "Output Formatter", "kind": "deterministic",
+             "description": "Enrich and structure findings"},
         ],
         "edges": [
             ["ingest", "load_standards"],
@@ -1139,9 +1145,9 @@ def pipeline_info():
                           "(bounded by PRAMAAN_MAX_REVISIONS), else proceed"},
             ["cx_predict", "format_output"],
         ],
-        "separate_agents": [
-            {"id": "extraction", "agent": "Extraction Agent", "description": "Raw document to structured triples"},
-            {"id": "rfi_copilot", "agent": "RFI Copilot",
+        "services": [
+            {"id": "extraction", "service": "Extraction service", "description": "Raw document to structured triples"},
+            {"id": "rfi_copilot", "service": "RFI Copilot",
              "description": "RAG over project corpus with prior-RFI matching"},
         ],
     }

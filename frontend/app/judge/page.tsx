@@ -36,6 +36,7 @@ export default async function JudgePage() {
           <em>Judge Mode</em>
         </div>
         <nav className="jm-topnav" aria-label="Judge navigation">
+          <Link href="/war-room" className="jm-link">War room</Link>
           <Link href="/evidence" className="jm-link jm-link-alt">Evidence &amp; proof</Link>
           <Link href="/" className="jm-link">Full dashboard →</Link>
         </nav>

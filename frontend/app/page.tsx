@@ -237,6 +237,7 @@ export default async function Page() {
         </div>
         <div className="project">Project Meghdoot &middot; 40 MW &middot; Navi Mumbai</div>
         <div className="spacer" />
+        <a className="top-link" href="/war-room">War room</a>
         <ExportButton />
         <div className="live-badge">
           <span className="live-dot" />

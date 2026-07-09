@@ -2353,6 +2353,21 @@ table.reg .row-critical td { background: rgba(255,77,77,0.045); }
   border: 1px solid var(--line); background: var(--bg); border-radius: 7px; padding: 11px;
 }
 .wr-evidence strong { color: var(--ink); }
+.wr-playbook {
+  margin-top: 10px; border: 1px solid rgba(54,214,231,0.28);
+  background: color-mix(in srgb, var(--lead) 5%, var(--bg)); border-radius: 7px; padding: 12px;
+}
+.wr-playbook-head {
+  display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 10px;
+}
+.wr-playbook-head span { color: var(--muted); font-family: var(--mono); font-size: 0.66rem; }
+.wr-playbook-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.wr-playbook-grid div { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 10px; }
+.wr-playbook-grid strong {
+  display: block; color: var(--ink); font-size: 0.78rem; line-height: 1.35;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.wr-playbook-grid span { display: block; margin-top: 5px; color: var(--muted); font-size: 0.68rem; }
 .wr-score strong { color: var(--lead); font-size: 2.2rem; }
 .wr-mini-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; }
 .wr-mini-grid div { border: 1px solid var(--line); background: var(--bg); border-radius: 7px; padding: 11px; }
@@ -2387,7 +2402,7 @@ table.reg .row-critical td { background: rgba(255,77,77,0.045); }
   .wr-nav { justify-content: flex-start; padding-inline: 16px; }
   .wr-nav a { flex: 1 1 auto; justify-content: center; }
   .wr-wrap { padding-inline: 16px; }
-  .wr-hero, .wr-command-grid, .wr-lower-grid, .wr-impact, .wr-evidence {
+  .wr-hero, .wr-command-grid, .wr-lower-grid, .wr-impact, .wr-evidence, .wr-playbook-grid {
     grid-template-columns: 1fr;
   }
   .wr-thread { grid-template-columns: 1fr; }

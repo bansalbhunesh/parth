@@ -17,6 +17,7 @@ export const metadata = {
 };
 
 export default async function WarRoomPage() {
+  const apiBase = process.env.NEXT_PUBLIC_API ?? "http://127.0.0.1:8000";
   const [deviations, schedule, supply, graph, remediation, projects] = await Promise.all([
     getRegister(),
     getSchedule(),
@@ -40,6 +41,7 @@ export default async function WarRoomPage() {
         graph={graph}
         remediation={remediation}
         projects={projects}
+        apiBase={apiBase}
       />
     </main>
   );

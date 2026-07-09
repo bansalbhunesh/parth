@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type {
+  BlastRadius,
   Deviation,
   ProjectGraph,
   ProjectSummary,
@@ -42,6 +43,7 @@ export default function WarRoomConsole({
   graph,
   remediation,
   projects,
+  apiBase,
 }: {
   deviations: Deviation[];
   schedule: ScheduleAnalysis;
@@ -49,6 +51,7 @@ export default function WarRoomConsole({
   graph: ProjectGraph;
   remediation: RemediationSim;
   projects: ProjectSummary[];
+  apiBase: string;
 }) {
   const ranked = useMemo(() => {
     return deviations
@@ -62,18 +65,47 @@ export default function WarRoomConsole({
 
   const [selected, setSelected] = useState(ranked[0]?.id ?? "DEV-001");
   const [catchWeek, setCatchWeek] = useState(remediation.scenarios.pramaan.catch_week);
+  const [selectedRemediation, setSelectedRemediation] = useState<RemediationSim | null>(remediation);
+  const [blastRadius, setBlastRadius] = useState<BlastRadius | null>(null);
+  const [loadingGraph, setLoadingGraph] = useState(false);
 
   const selectedItem = ranked.find((item) => item.id === selected) ?? ranked[0];
   const selectedDeviation = selectedItem?.d;
 
+  useEffect(() => {
+    let alive = true;
+    setLoadingGraph(true);
+    Promise.all([
+      fetch(`${apiBase}/projects/meghdoot/remediation/${selected}`, { cache: "no-store" })
+        .then((response) => (response.ok ? response.json() : null))
+        .catch(() => null),
+      fetch(`${apiBase}/projects/meghdoot/blast-radius/${selected}`, { cache: "no-store" })
+        .then((response) => (response.ok ? response.json() : null))
+        .catch(() => null),
+    ]).then(([remediationPayload, blastPayload]) => {
+      if (!alive) return;
+      setSelectedRemediation(
+        remediationPayload?.available && remediationPayload?.scenarios
+          ? remediationPayload as RemediationSim
+          : null,
+      );
+      setBlastRadius(blastPayload?.available ? blastPayload as BlastRadius : null);
+      setLoadingGraph(false);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [apiBase, selected]);
+
   const intervention = useMemo(() => {
-    const fixLead = remediation.fix_lead_weeks || selectedDeviation?.lead_time_weeks || 0;
-    const failWeek = selectedDeviation?.week_fail ?? remediation.cx_planned_week;
+    const activeRemediation = selectedRemediation ?? remediation;
+    const fixLead = selectedRemediation?.fix_lead_weeks ?? selectedDeviation?.lead_time_weeks ?? 0;
+    const failWeek = selectedDeviation?.week_fail ?? selectedRemediation?.cx_planned_week ?? remediation.cx_planned_week;
     const slipWeeks = Math.max(0, catchWeek + fixLead - failWeek);
-    const costLakh = slipWeeks * remediation.cost_per_week_lakh;
-    const savedVsCommissioning = Math.max(0, remediation.scenarios.commissioning.slip_weeks - slipWeeks);
-    return { fixLead, failWeek, slipWeeks, costLakh, savedVsCommissioning };
-  }, [catchWeek, remediation, selectedDeviation]);
+    const costLakh = slipWeeks * activeRemediation.cost_per_week_lakh;
+    const savedVsCommissioning = Math.max(0, activeRemediation.scenarios.commissioning.slip_weeks - slipWeeks);
+    return { fixLead, failWeek, slipWeeks, costLakh, savedVsCommissioning, activeRemediation };
+  }, [catchWeek, remediation, selectedDeviation, selectedRemediation]);
 
   const lateShipments = useMemo(() => {
     return [...supply.shipments].sort((a, b) => b.delivery_risk.score - a.delivery_risk.score).slice(0, 4);
@@ -125,6 +157,8 @@ export default function WarRoomConsole({
                 onClick={() => {
                   setSelected(id);
                   setCatchWeek(d.week_caught);
+                  setSelectedRemediation(null);
+                  setBlastRadius(null);
                 }}
                 type="button"
               >
@@ -144,7 +178,7 @@ export default function WarRoomConsole({
               <h2>{selectedDeviation ? `${selected} / ${selectedDeviation.component}` : "No finding selected"}</h2>
             </div>
             <span className={`wr-chip ${selectedDeviation?.severity.toLowerCase() ?? ""}`}>
-              {selectedDeviation?.severity ?? "-"}
+              {loadingGraph ? "loading graph" : selectedDeviation?.severity ?? "-"}
             </span>
           </div>
 
@@ -200,6 +234,31 @@ export default function WarRoomConsole({
                 <p><strong>Submitted:</strong> {String(selectedDeviation.provided_value)} {selectedDeviation.unit}</p>
                 <p><strong>Standard:</strong> {selectedDeviation.standard_ref} / {selectedDeviation.spec_clause}</p>
                 <p><strong>Failure mode:</strong> {selectedDeviation.rationale ?? "backend rationale unavailable"}</p>
+              </div>
+
+              <div className="wr-playbook">
+                <div className="wr-playbook-head">
+                  <p className="wr-label">Action playbook</p>
+                  <span>{blastRadius ? "live graph response" : "derived fallback"}</span>
+                </div>
+                <div className="wr-playbook-grid">
+                  <div>
+                    <strong>{blastRadius?.cx_tests_at_risk[0]?.id ?? selectedDeviation.predicted_cx_test ?? "Cx test"}</strong>
+                    <span>test at risk</span>
+                  </div>
+                  <div>
+                    <strong>{fmt(blastRadius?.weeks_at_risk ?? intervention.slipWeeks, " wk")}</strong>
+                    <span>weeks exposed</span>
+                  </div>
+                  <div>
+                    <strong>{blastRadius?.suppliers[0]?.label ?? "supplier path unknown"}</strong>
+                    <span>supplier exposure</span>
+                  </div>
+                  <div>
+                    <strong>{blastRadius?.milestones[0]?.label ?? "RFS impact scenario"}</strong>
+                    <span>milestone threatened</span>
+                  </div>
+                </div>
               </div>
             </>
           )}

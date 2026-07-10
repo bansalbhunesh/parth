@@ -32,10 +32,13 @@ it live: **parth-tan.vercel.app/judge**.
 ## The business
 - **Buyers:** the owner's engineer, the construction contractor, the data-centre
   operator, the commissioning authority — anyone on the hook for the delay.
-- **Value:** one prevented slip is worth **$4–25M**; the check costs rupees. That's
-  a **10–100× return on a single catch.**
-- **Market:** India alone is investing **~$30B toward 2 GW of data centres by 2026**;
-  every build does this check by hand today.
+- **Value:** an expected-value model (not a best case) puts the base-case
+  return at **~3.2×** a $100–500K licence; the honest range runs from negative
+  in the pessimistic scenario to ~24× in the optimistic one — see
+  [`docs/BUSINESS.md`](BUSINESS.md) §2/§7 for the full model and why.
+- **Market:** India has committed **>$120B** to data-centre build-out, on a
+  market growing from ~$1.7B (FY26) to ~$6.8B (FY30) (KPMG); every build does
+  this check by hand today.
 
 ## What's proven vs what's next
 - **Benchmarked (not field-validated):** an open, reproducible evaluation suite —

@@ -23,9 +23,14 @@ industry, at the one moment it's still free to fix.
 
 ## 2. The market is real and large (independent sources)
 
-- India data-centre market **doubling to ~$22B by 2030** (IBEF; Business Standard).
-- **~$30B invested toward 2 GW by 2026**; **$60–70B announced over five years**;
-  **>700 MW under construction now** (JLL; BusinessToday).
+- India data-centre market **~$1.7B (FY26) growing to ~$6.8B by FY30**, taking
+  India from ~2–3% to ~5% of the global data-centre market (KPMG, July 2026).
+  *(Supersedes an earlier ~$22B-by-2030 estimate from IBEF/Business Standard —
+  a different, less-documented methodology; see
+  [`docs/BUSINESS.md`](BUSINESS.md) §3 for why the two aren't comparable.)*
+- **>$120B already committed** by hyperscalers and global/Indian operators;
+  **~1.9 GW installed capacity (FY26)** with **~4.5 GW more in the five-year
+  pipeline** (KPMG, July 2026).
 - Global data-centre capex runs into the **hundreds of billions per year** — the
   problem is not India-specific; India is the fastest-growing wedge.
 

@@ -1,4 +1,4 @@
-.PHONY: setup test eval eval-text eval-multi run build docker help verify-live verify-submission frontend-test frontend-typecheck
+.PHONY: setup test eval eval-text eval-multi run build docker help verify-live verify-submission verify-sources frontend-test frontend-typecheck
 
 help:  ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-18s\033[0m %s\n", $$1, $$2}'
@@ -103,6 +103,9 @@ frontend-test:  ## Run frontend component tests
 
 verify-live:  ## Pre-demo gate: is the DEPLOYED stack demo-ready right now?
 	python3 scripts/verify_live.py
+
+verify-sources:  ## Re-check public real-sample provenance URLs
+	python3 scripts/check_real_source_links.py
 
 verify-submission:  ## Final Unstop gate: fail if mandatory submission placeholders remain
 	python3 scripts/check_submission_ready.py

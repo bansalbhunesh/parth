@@ -8,7 +8,7 @@ traceable to a cited public source below. Some pairs mix a hard published ceilin
 with a realistic proposal choice; those are flagged inline as "scenario" in the
 honesty notes rather than presented as fixed datasheet maxima.
 
-## Source links (checked 2026-07-06)
+## Source links (initially checked 2026-07-06; re-checkable)
 
 Every attribution below is backed by a resolvable public link where one exists.
 Each URL was fetched on **2026-07-06**; two vendor sites (vertiv.com, se.com)
@@ -18,6 +18,9 @@ not the same as externally validated** — these links let a reviewer check ever
 derivation; they do not make team-authored fixtures real vendor submittals. No
 proprietary standard text is reproduced anywhere in this repo; paywalled
 standards are cited by designation only.
+
+Refresh current link availability with `python scripts/check_real_source_links.py`;
+the generated report is `docs/REAL_SOURCE_LINK_CHECK.md`.
 
 | Source | Supports | Link | Fetch check |
 |---|---|---|---|

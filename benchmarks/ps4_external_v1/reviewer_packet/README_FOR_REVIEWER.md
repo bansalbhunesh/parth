@@ -12,6 +12,15 @@ vendor/submittal excerpts and the evidence each label relies on.
 > **Do not judge the product, UI, model quality, or business idea. Only judge
 > whether the benchmark labels and evidence are correct.**
 
+## Who should fill this out
+
+Ideal reviewers have practical EPC, data-center, MEP, commissioning, QA/QC, or
+facilities experience and can judge whether a spec/submittal evidence span really
+supports a deviation label. Good examples: CxA/commissioning engineer, electrical
+or mechanical engineer, EPC project manager, QA/QC lead, data-center facilities
+engineer, controls/BMS engineer, or technical reviewer who has handled
+submittals/RFIs. Please avoid reviewers who helped author these labels.
+
 ## What this is (and is not)
 - The documents are **team-authored fixtures** modeled on public reference values
   — they are **not** real vendor datasheets or real submittals.
@@ -40,6 +49,9 @@ install, no internet needed). It shows every label with its evidence and pair
 context, saves your answers in the browser as you go, and gives you a
 **Download my CSV** button at the end. Send back that one file.
 
+If you received this as a ZIP, unzip it first. The CSV download works from an
+unzipped local folder; browser ZIP preview modes may block local downloads.
+
 **Spreadsheet path**, if you prefer:
 1. Read `reviewer_instructions.md`.
 2. For each label, read its sheet in `label_review_packet.md` (and the matching
@@ -60,4 +72,7 @@ summary. Your original file is never overwritten.
 - Single-author frozen labels (this review is the second opinion).
 - A subset of labels was auto-flagged by a consistency check as worth a closer
   look; those are included here and marked in `selected_labels.csv`.
-- Stored primary-source PDFs and full two-person adjudication are still pending.
+- Raw third-party source binaries are not bundled unless their license/usage
+  basis permits it; public provenance URLs are included for source-derived rows.
+- Full two-person adjudication is still pending until the returned CSV is
+  imported and disagreements are resolved.

@@ -1,6 +1,7 @@
 # sources/
 
-Immutable primary sources and their normalized text extracts.
+Immutable primary sources and their normalized text extracts when redistribution
+is legally and technically appropriate.
 
 - `raw/` — the original downloaded file (PDF/HTML/PNG), stored **only** if the
   license/usage permits. Large binaries are git-ignored except `.gitkeep`; commit
@@ -12,6 +13,12 @@ Immutable primary sources and their normalized text extracts.
   every tracked document, cross-checked against `manifest.csv`.
 
 The v1 seed is team-authored (the pair documents under `pairs/`), so `raw/` and
-`normalized/` are placeholders pending primary-source acquisition (see
-`../BENCHMARK_PROTOCOL.md`). Never fabricate a URL; if a source cannot be verified,
-mark its origin `unknown_do_not_use_for_claims`.
+`normalized/` are intentionally sparse until a source can be stored with a clear
+license/usage basis (see `../BENCHMARK_PROTOCOL.md`). Do not treat "not stored"
+as "not cited": public derivation URLs are tracked in the manifest and
+`data/samples/real/PROVENANCE.md`, and real-sample links are re-checkable with
+`python scripts/check_real_source_links.py`.
+
+Never fabricate a URL. If a source cannot be verified or stored with a clear
+usage basis, mark its origin `unknown_do_not_use_for_claims` and keep it out of
+public claims.

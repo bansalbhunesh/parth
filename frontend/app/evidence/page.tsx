@@ -66,7 +66,7 @@ const TEST_COUNT = 605; // `python -m pytest tests --collect-only` (measured, no
 
 // Verbatim limitation line required next to the benchmark card.
 const LIMITATION =
-  "Mostly team-authored fixtures, 10 primary-source-derived documents, reviewer-2 human adjudication pending, not a field/customer validation.";
+  "Mostly team-authored fixtures, 10 primary-source-derived documents, public-link provenance tracked, reviewer-2 human adjudication pending, not a field/customer validation.";
 
 function pct(x: number) {
   return x.toFixed(3);
@@ -279,7 +279,7 @@ export default async function EvidencePage() {
         <div className="ev-section-head"><h2>Limitations we do not hide</h2></div>
         <ul className="ev-limits">
           <li>Benchmark fixtures are <strong>team-authored</strong> (10 derived from public primary sources, 5 with a verified URL) — not downloaded real datasheets.</li>
-          <li>Labels are <strong>single-author frozen</strong>; two-person human adjudication is <strong>pending</strong>. Stored primary-source PDFs are pending.</li>
+          <li>Labels are <strong>single-author frozen</strong>; two-person human adjudication is <strong>pending</strong>. Raw third-party PDFs are not bundled unless the license/usage basis permits it.</li>
           <li>Numbers are a <strong>benchmark result</strong>, not field- or customer-validated; no real-world-accuracy claim is made.</li>
           <li>The rule baseline is deliberately <strong>low recall</strong> (0.111) — it is an availability floor, computed from the documents, never from seeded labels.</li>
           <li>OCR needs the Tesseract binary and is best-effort (not lossless); <code>/ocr-check</code> is authoritative per deployment.</li>

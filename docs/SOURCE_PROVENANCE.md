@@ -9,6 +9,9 @@ can cross-examine provenance and get consistent, honest answers.
   (per-file `source_origin`, `source_url`, `source_owner`, `retrieval_date`,
   `sha256`, `license_or_usage_basis`, `primary_or_secondary`).
 - Real-pair provenance narrative: [`data/samples/real/PROVENANCE.md`](../data/samples/real/PROVENANCE.md).
+- Public-link verification report: [`REAL_SOURCE_LINK_CHECK.md`](REAL_SOURCE_LINK_CHECK.md),
+  generated from the real-pair provenance links by
+  `python scripts/check_real_source_links.py`.
 - Review status: [`benchmarks/ps4_external_v1/labels/REVIEW_STATUS.md`](../benchmarks/ps4_external_v1/labels/REVIEW_STATUS.md).
 - Standards/IP: [`../THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md),
   [`STANDARDS_AND_SOURCE_LIMITATIONS.md`](STANDARDS_AND_SOURCE_LIMITATIONS.md).
@@ -34,7 +37,9 @@ can cross-examine provenance and get consistent, honest answers.
    `license_or_usage_basis` states "no proprietary standard text copied").
 5. **Public URLs are used for provenance where available.** Government/public
    sources carry a retrieved `source_url` in the manifest so a reviewer can check
-   the derivation.
+   the derivation. The real-sample narrative also has an automated link-check
+   report; browser-blocked vendor pages stay labeled as manual-checkable rather
+   than silently treated as verified downloads.
 6. **Trademarks belong to their owners.** All product/vendor/standards-body names
    are used nominatively for identification only; **no endorsement is implied**.
 7. **Benchmark limitations stay visible.** These are team-authored fixtures;
@@ -49,7 +54,7 @@ can cross-examine provenance and get consistent, honest answers.
 |---|---|
 | `source_origin` | all **team-authored** (`owner_design_basis_team_authored`, `team_authored_from_public_values`, `adversarial_team_authored`, `synthetic_negative`) |
 | `primary_or_secondary` | `primary_derived` or `secondary` — **none are stored primary files** |
-| Verified public `source_url` | **5** rows carry a checkable public URL |
+| Verified public `source_url` | **5** manifest rows carry a checkable public URL; the broader real-sample narrative has a separate public-link check report |
 | Proprietary standard text | **none copied/redistributed** (per every row's `license_or_usage_basis`) |
 | `sha256` per file | present (integrity; verified by `scripts/benchmark_hash_sources.py`) |
 | Human review | single-author frozen; **reviewer-2 adjudication pending** |
@@ -62,6 +67,12 @@ Tate, Schneider) — see `data/samples/real/PROVENANCE.md` for the per-value
 citation. Standards named (paraphrased only): Uptime Tier IV, TIA-942, BICSI-002,
 NFPA 75/76/110/2001/855, IEC 61439/61641/60076, IEEE 519/1188, ASHRAE 90.1/TC9.9,
 IS 1893, EU F-Gas, US AIM Act.
+
+Automated provenance re-check: run
+`python scripts/check_real_source_links.py` to refresh
+`docs/REAL_SOURCE_LINK_CHECK.md`. This check proves URL availability only. It
+does not redistribute third-party source files, validate licensed standards
+text, or replace human engineering review.
 
 ---
 

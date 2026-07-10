@@ -188,11 +188,11 @@ def main() -> int:
         f"({st['docs_with_verified_url']} with a verified public URL).",
         "Single-author frozen labels.",
         "Reviewer-2 (two-person human) adjudication pending.",
-        "Stored primary-source PDFs pending.",
+        "Source files are not stored in this benchmark yet; source links/derivations are tracked.",
     ]
     non_claims = [
         "NOT a real-world-accuracy, field-validation, or real-datasheet-accuracy claim.",
-        "Seed is team-authored and single-author labeled; primary-source acquisition and "
+        "Seed is team-authored and single-author labeled; source-archive acquisition and "
         "two-person reviewer adjudication are pending.",
     ]
 

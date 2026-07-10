@@ -39,6 +39,8 @@
     Submission artifacts:
     <a href="docs/BUSINESS.md">Business case &amp; impact model</a> ·
     <a href="docs/VALIDATION.md">Validation dossier</a> ·
+    <a href="docs/JUDGE_BRIEF.md">Judge brief</a> ·
+    <a href="docs/PRODUCTION_BLUEPRINT.md">Production blueprint</a> ·
     <a href="docs/ARCHITECTURE.md">Architecture one-pager</a> ·
     <a href="docs/DECK.md">Pitch deck outline</a> ·
     <a href="PITCH.md">3-min video script</a> ·
@@ -58,6 +60,8 @@
 ---
 
 ## ⚡ Judges: start here (2 minutes)
+
+Fastest repo path: [`docs/JUDGE_BRIEF.md`](docs/JUDGE_BRIEF.md). Target service path: [`docs/PRODUCTION_BLUEPRINT.md`](docs/PRODUCTION_BLUEPRINT.md). Competitor-response fixes: [`docs/COMPETITOR_RESPONSE_ACTIONS_2026-07-10.md`](docs/COMPETITOR_RESPONSE_ACTIONS_2026-07-10.md).
 
 1. **See it catch a real deviation** → [Judge Mode](https://parth-tan.vercel.app/judge): click **Load deviation demo ★**, hit **Analyze**, watch it catch a hidden 2N→N+1 redundancy drop and a battery-autonomy shortfall (10→8 min) in a realistic vendor submittal — each cited to the standard and mapped to the commissioning test it fails.
 2. **Don't take our word for any number** → `git clone … && make verify` — the unit-test suite, the deterministic eval harnesses, and the frontend type-check reproduce offline with no API key. The **live-model** team-authored cited-value findings (23 of the 27 hard claims) vary run-to-run and are reported as such, not as a fixed score. No-key deterministic harness: `python eval/real_pairs_offline.py`.

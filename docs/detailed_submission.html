@@ -96,7 +96,7 @@
 <p>The scorer performs <strong>one-to-one (bipartite) matching</strong> — each finding is credited to at most one label and vice-versa, so a broad finding cannot inflate recall, and unmatched findings count as false positives. Recall counts not-run (quota/outage) pairs as misses. The reasoning core clears the deterministic floor on the same frozen labels (0.862 vs 0.111).</p>
 <p><strong class="k">Provenance &amp; review status (the limitations that must travel with the numbers).</strong></p>
 <ul>
-  <li>Fixtures are <strong>team-authored</strong>; <strong>10</strong> are derived from public primary sources (<strong>5</strong> with a verified public URL). <span class="lab pend">stored primary-source PDFs pending</span></li>
+  <li>Fixtures are <strong>team-authored</strong>; <strong>10</strong> are derived from public primary sources (<strong>5</strong> with a verified public URL). <span class="lab pend">source files not stored yet</span></li>
   <li>Labels are <strong>single-author frozen</strong>. A second human reviewer (reviewer-2) has <strong>not</strong> run: <span class="lab pend">two-person adjudication pending</span>.</li>
   <li>An automated consistency audit checks each label against its own documents (123/129 consistent, 6 flagged). This is <strong>machine QA, not a human reviewer</strong>, and does not substitute for the pending adjudication.</li>
   <li>This is a <strong>benchmark result — not</strong> a real-world-accuracy, field-validation, or customer claim.</li>
@@ -137,11 +137,11 @@
 
 <h2>9. Known limitations &amp; roadmap</h2>
 <ul>
-  <li><strong>Benchmark:</strong> team-authored fixtures, single-author frozen labels; stored primary-source PDFs and two-person (reviewer-2) adjudication are <span class="lab pend">pending</span>. Not field- or customer-validated.</li>
+  <li><strong>Benchmark:</strong> team-authored fixtures, single-author frozen labels; source-file archiving and two-person (reviewer-2) adjudication are <span class="lab pend">pending</span>. Not field- or customer-validated.</li>
   <li><strong>Schedule risk is simulation</strong>, not field-calibrated prediction; deviation probabilities are seeded, not empirical. Supply-chain intelligence is closed-form over static data (no live feed).</li>
   <li><strong>No measured coordination-hours study</strong> yet; any cost/ROI figure is an explicitly-labelled scenario, not realized savings.</li>
   <li><strong>Prototype hardening:</strong> single-instance in-memory rate limiting, optional demo token; synchronous LLM calls; not a production-load service.</li>
-  <li><strong>Next milestones (trust-first):</strong> stored primary-source PDFs + expanded primary-source-derived pairs; reviewer-2 two-person adjudication and resolving the 6 audit-flagged labels; production hardening (shared-store auth/rate-limit, pgvector/Qdrant, async, delta re-checks).</li>
+  <li><strong>Next milestones (trust-first):</strong> archived source artifacts + expanded primary-source-derived pairs; reviewer-2 two-person adjudication and resolving the 6 audit-flagged labels; production hardening (shared-store auth/rate-limit, pgvector/Qdrant, async, delta re-checks).</li>
 </ul>
 
 <h2>10. Links</h2>
@@ -166,7 +166,7 @@
 </table>
 
 <h2>Anticipated judge questions (honest answers)</h2>
-<p><strong class="k">Is the data real?</strong> The benchmark fixtures are team-authored — 10 derived from public primary sources, 5 with a verified URL — and stored primary-source PDFs are pending. We do not call them real datasheets. The benchmark measures a reliable first-pass workflow, not real-world accuracy.</p>
+<p><strong class="k">Is the data real?</strong> The benchmark fixtures are team-authored — 10 derived from public primary sources, 5 with a verified URL — and source files are not stored in this benchmark yet. We do not call them real datasheets. The benchmark measures a reliable first-pass workflow, not real-world accuracy.</p>
 <p><strong class="k">Is the benchmark independently reviewed?</strong> Not yet. Labels are single-author frozen; the automated consistency audit (123/129) is machine QA, not a second human reviewer. Two-person adjudication is the next validation milestone.</p>
 <p><strong class="k">Why not "five agents"?</strong> Exactly one node reasons with an LLM (<code>reconcile</code>); ingestion, retrieval, self-critique, and commissioning mapping are deterministic and inspectable, plus deterministic schedule/supply/graph services. One reasoning graph + deterministic services, not five agents.</p>
 <p><strong class="k">What if the LLM is down during judging?</strong> Every endpoint returns 200, the rule engine still finds headline deviations, and the UI labels that as the low-recall floor — not a clean bill of health. <code>/llm-check</code> reports the true status.</p>

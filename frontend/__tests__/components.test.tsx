@@ -4,9 +4,10 @@ import { describe, expect, it } from "vitest";
 import ScheduleRisk from "../components/ScheduleRisk";
 import SupplyChainPanel from "../components/SupplyChainPanel";
 import ProjectGraphView from "../components/ProjectGraph";
+import { highlightDeviations } from "../components/DocumentDiff";
 import {
   FALLBACK_SCHEDULE, FALLBACK_SUPPLY, FALLBACK_GRAPH,
-  ScheduleAnalysis, SupplyChainAnalysis, ProjectGraph,
+  Deviation, ScheduleAnalysis, SupplyChainAnalysis, ProjectGraph,
 } from "../lib/api";
 
 // Render to a string; assert it doesn't throw and contains no "NaN"/"undefined"
@@ -64,5 +65,32 @@ describe("ProjectGraphView", () => {
   });
   it("survives empty graph without NaN", () => {
     render(<ProjectGraphView graph={EMPTY_GRAPH} />);
+  });
+});
+
+describe("DocumentDiff", () => {
+  it("escapes document text while highlighting deviations", () => {
+    const injected = '<img src=x onerror="alert(1)">';
+    const deviation: Deviation = {
+      component: "UPS-1",
+      parameter: "battery_autonomy_min",
+      required_value: 10,
+      provided_value: injected,
+      unit: "min",
+      standard_ref: "Owner Basis",
+      spec_clause: "UPS",
+      severity: "Major",
+      predicted_cx_test: "Integrated UPS autonomy test",
+      predicted_cx_level: 4,
+      week_caught: 8,
+      week_fail: 32,
+      lead_time_weeks: 24,
+    };
+
+    const html = render(highlightDeviations(`Vendor table: ${injected}`, [deviation], "submittal"));
+    expect(html).toContain("diff-highlight-sub");
+    expect(html).toContain("&lt;img");
+    expect(html).not.toContain("<img src=");
+    expect(html).not.toContain("dangerouslySetInnerHTML");
   });
 });

@@ -1,4 +1,5 @@
 "use client";
+import type { ReactNode } from "react";
 import { useState } from "react";
 import { Deviation } from "../lib/api";
 
@@ -12,21 +13,57 @@ const SYSTEMS = [
   { id: "STRUCT", label: "Structural" },
 ];
 
-function highlightDeviations(text: string, deviations: Deviation[], side: "spec" | "submittal") {
+type HighlightRule = {
+  value: string;
+  className: string;
+};
+
+function highlightParts(text: string, rules: HighlightRule[]): ReactNode[] {
+  const parts: ReactNode[] = [];
+  let cursor = 0;
+
+  while (cursor < text.length) {
+    let nextIndex = -1;
+    let nextRule: HighlightRule | null = null;
+
+    for (const rule of rules) {
+      const index = text.indexOf(rule.value, cursor);
+      if (index !== -1 && (nextIndex === -1 || index < nextIndex)) {
+        nextIndex = index;
+        nextRule = rule;
+      }
+    }
+
+    if (!nextRule || nextIndex === -1) {
+      parts.push(text.slice(cursor));
+      break;
+    }
+
+    if (nextIndex > cursor) {
+      parts.push(text.slice(cursor, nextIndex));
+    }
+    parts.push(
+      <span key={`${nextIndex}-${nextRule.value}`} className={nextRule.className}>
+        {nextRule.value}
+      </span>
+    );
+    cursor = nextIndex + nextRule.value.length;
+  }
+
+  return parts;
+}
+
+export function highlightDeviations(text: string, deviations: Deviation[], side: "spec" | "submittal") {
   if (!deviations.length) return <pre className="diff-pre">{text}</pre>;
 
-  let result = text;
-  for (const d of deviations) {
-    const val = side === "spec" ? String(d.required_value) : String(d.provided_value);
-    if (val && result.includes(val)) {
-      const cls = side === "spec" ? "diff-highlight-spec" : "diff-highlight-sub";
-      result = result.replace(
-        new RegExp(`(\\*\\*${val.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[^*]*)`, 'g'),
-        `<span class="${cls}">$1</span>`
-      );
-    }
-  }
-  return <pre className="diff-pre" dangerouslySetInnerHTML={{ __html: result }} />;
+  const className = side === "spec" ? "diff-highlight-spec" : "diff-highlight-sub";
+  const rules = deviations
+    .map((d) => side === "spec" ? d.required_value : d.provided_value)
+    .map((value) => String(value).trim())
+    .filter((value, index, values) => value.length > 0 && values.indexOf(value) === index)
+    .map((value) => ({ value, className }));
+
+  return <pre className="diff-pre">{highlightParts(text, rules)}</pre>;
 }
 
 const API = process.env.NEXT_PUBLIC_API ?? "http://127.0.0.1:8000";

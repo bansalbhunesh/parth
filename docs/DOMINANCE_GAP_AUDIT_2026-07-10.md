@@ -201,24 +201,17 @@ Fix:
   citation note where license permits.
 - Keep proprietary standards citation-only.
 
-### P1.3 - `dangerouslySetInnerHTML` in `DocumentDiff` is avoidable XSS debt
+### P1.3 - CLOSED: `DocumentDiff` XSS debt removed
 
 Location:
-- `frontend/components/DocumentDiff.tsx:29`
+- `frontend/components/DocumentDiff.tsx`
+- `frontend/__tests__/components.test.tsx`
 
-Impact:
-- Today it renders controlled corpus docs, not arbitrary uploads, and IDs are
-  path-sanitized. That keeps practical risk lower.
-- Still, React `dangerouslySetInnerHTML` is exactly the kind of red flag a
-  technical reviewer notices.
-- If future code points this component at uploaded/user text, it becomes a real
-  XSS bug.
-
-Fix:
-- Replace HTML string replacement with tokenized React spans.
-- Escape text by construction.
-- Add a test with `<img onerror=...>` inside corpus text to prove it renders as
-  text, not markup.
+Status:
+- Replaced HTML string replacement with tokenized React spans.
+- Text now escapes by construction through React rendering.
+- Added a regression test with hostile document text to prove it renders as
+  text, not markup, while preserving highlight styling.
 
 ### P1.4 - CI is good, but not winner-grade DevSecOps yet
 
@@ -337,24 +330,23 @@ Fix:
 - Add warning filters for known third-party deprecations.
 - Track a separate "warnings must not increase" gate.
 
-### P2.2 - Some public docs still use older "stored PDFs pending" framing
+### P2.2 - CLOSED: older "stored PDFs pending" framing normalized
 
-Location examples:
+Updated locations:
 - `docs/CLAIMS_REGISTER.md:37`
 - `docs/ARCHITECTURE.md:121-123`
 - `docs/detailed_submission.html:99`
 - `docs/detailed_submission.html:140`
 - `docs/detailed_submission.html:169`
+- `scripts/benchmark_report.py`
+- `benchmarks/ps4_external_v1/reports/benchmark_card.json`
+- `benchmarks/ps4_external_v1/reports/benchmark_report.md`
 
-Impact:
-- The newer position is better: raw third-party binaries are license-limited,
-  while source links and derivations are tracked.
-- The older "stored PDFs pending" phrasing can sound like missing homework.
-
-Fix:
-- Replace with: "raw third-party binaries are not bundled unless license/usage
-  permits; public derivation links and hashes are tracked."
-- Keep "expanded source archive" as an optional milestone, not a current defect.
+Status:
+- Replaced the weaker phrasing with: "source files are not stored in this
+  benchmark yet; source links/derivations are tracked."
+- Kept source-file archiving as a trust-building backlog item, not a hidden
+  current claim.
 
 ### P2.3 - CORS/auth posture is correct for demo, weak for production
 
@@ -486,17 +478,17 @@ than a polished demo.
 1. Finish video and clear `check_submission_ready.py`.
 2. Verify practitioner quote consent records; remove anything not provable.
 3. Get reviewer-2 CSV from one qualified reviewer.
-4. Fix `DocumentDiff.tsx` to avoid `dangerouslySetInnerHTML`.
-5. Add `docs/JUDGE_BRIEF.md`.
+4. DONE: Fix `DocumentDiff.tsx` to avoid `dangerouslySetInnerHTML`.
+5. DONE: Add `docs/JUDGE_BRIEF.md`.
 
 ### Next 48 hours
 
 1. Import reviewer-2 feedback and publish agreement stats.
-2. Add CI gates for `npm test`, `npm audit`, source verifier, and release-only
-   submission guard.
+2. PARTIAL: Add CI gates for `npm test`, `npm audit`, benchmark manifest/hash
+   checks; source URL verifier and release-only submission guard remain separate.
 3. Add Playwright smoke screenshots for `/judge`, `/evidence`, `/war-room`.
-4. Normalize remaining "stored PDFs pending" wording.
-5. Add production blueprint: Redis, Postgres, object storage, worker, observability.
+4. DONE: Normalize remaining "stored PDFs pending" wording.
+5. DONE: Add production blueprint: Redis, Postgres, object storage, worker, observability.
 
 ### After submission / if continuing as a company
 

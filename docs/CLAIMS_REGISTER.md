@@ -34,7 +34,7 @@ scenario / pending / do-not-use.
 | 12 | Primary-source-derived docs | **10 (5 verified URLs)** | manifest | measured | "10 documents derived from public primary sources; 5 cite a verified public URL" | "10 stored primary-source PDFs", "10 real datasheets" | all | derived ≠ stored primary file | verified |
 | 13 | Fixture nature | **team-authored fixtures** | manifest source_origin | team_authored | "team-authored fixtures modeled on public reference values" | "real vendor datasheets", "real unseen submittals" | all | this IS the limitation | verified |
 | 14 | Reviewer status | **reviewer-2 pending** | `REVIEW_STATUS.md` | pending | "single-author frozen; automated consistency audit run (123/129 consistent, 6 flagged); two-person adjudication pending" | "two-reviewer adjudicated", "independently reviewed" | all | second human review not yet done | pending |
-| 15 | Stored primary sources | **stored primary PDFs pending** | BENCHMARK_PROTOCOL backlog | pending | "stored primary-source PDFs are a backlog item" | "stored primary-source benchmark", "sourced from real datasheets" | all | only citations/derivations exist today | pending |
+| 15 | Stored primary sources | **source files not stored yet** | BENCHMARK_PROTOCOL backlog | pending | "source files are not stored in this benchmark yet; source links/derivations are tracked" | "stored primary-source benchmark", "sourced from real datasheets" | all | only citations/derivations exist today | pending |
 | 16 | Field validation | **none** | — | pending | "not yet validated in the field" | "field-validated", "real-world accuracy", "proven in production" | all (as a disclaimer) | — | do-not-use |
 | 17 | Production maturity | **none** | — | pending | "prototype / hackathon build" | "production-grade", "enterprise-ready" | all | — | do-not-use |
 | 18 | Datasheet realism | **none** | — | team_authored | "fixtures, not real datasheets" | "real-datasheet accuracy", "tested on real unseen datasheets" | all | — | do-not-use |
@@ -101,5 +101,5 @@ detailed PDF source, or video script:
 > negatives**, vs a deterministic rule baseline of 0.111. Fixtures are
 > team-authored (10 derived from public primary sources, 5 with verified URLs);
 > labels are single-author frozen with two-person adjudication and stored
-> primary-source PDFs still pending. This is a benchmark result, **not** a
+> source files not yet stored in the benchmark. This is a benchmark result, **not** a
 > real-world-accuracy or field-validation claim."

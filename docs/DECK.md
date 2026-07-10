@@ -47,7 +47,7 @@
 
 ### Slide 8 — Trust & limitations
 - Stand behind: 0 false alerts on 64 clean negatives · citations · reproducible.
-- Do not claim: team-authored fixtures (10 primary-source-derived, 5 URLs; **stored PDFs pending**) · **reviewer-2 pending** · automated cross-check is **machine QA, not human** · not field/customer-validated.
+- Do not claim: team-authored fixtures (10 primary-source-derived, 5 URLs; source files not stored yet) · **reviewer-2 pending** · automated cross-check is **machine QA, not human** · not field/customer-validated.
 - **Speaker note:** the honesty beat — trust beats a perfect score.
 
 ### Slide 9 — Reliability (built for the bad day)
@@ -61,7 +61,7 @@
 - **Speaker note:** the asymmetry is the business case; do not overclaim.
 
 ### Slide 11 — Roadmap
-- Evidence depth (stored primary sources) · independent review (reviewer-2 adjudication) · production hardening (shared-store auth/rate-limit, pgvector, async).
+- Evidence depth (archived source artifacts) · independent review (reviewer-2 adjudication) · production hardening (shared-store auth/rate-limit, pgvector, async).
 - **Speaker note:** ordered by what most increases trust first.
 
 ### Slide 12 — Close

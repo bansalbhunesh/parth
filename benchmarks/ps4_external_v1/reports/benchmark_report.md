@@ -58,7 +58,7 @@ _Generated 2026-07-09T06:29:27+00:00 · run
 - 10 primary-source-derived documents (5 with a verified public URL).
 - Single-author frozen labels.
 - Reviewer-2 (two-person human) adjudication pending.
-- Stored primary-source PDFs pending.
+- Source files are not stored in this benchmark yet; source links/derivations are tracked.
 
 ## Non-claims
 - NOT a real-world-accuracy, field-validation, or real-datasheet-accuracy claim.

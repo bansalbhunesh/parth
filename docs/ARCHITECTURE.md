@@ -119,7 +119,8 @@ single-author-frozen labels, 17 systems, 64 clean negatives** → mean semantic
 64 clean negatives, p50 ~2.5 s, vs a deterministic rule baseline of **0.111**.
 Fixtures are team-authored (10 derived from public primary sources, 5 with
 verified URLs); labels are single-author frozen with **two-person human
-adjudication pending** and stored primary-source PDFs pending. This is a
+adjudication pending**. Source files are not stored in this benchmark yet; source
+links and derivations are tracked. This is a
 benchmark result, **not** a real-world-accuracy or field-validation claim. Full
 numbers, limitations and links: [`/evidence`](../frontend/app/evidence/page.tsx)
 · [`CLAIMS_REGISTER.md`](CLAIMS_REGISTER.md) ·

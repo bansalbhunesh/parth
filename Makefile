@@ -1,4 +1,4 @@
-.PHONY: setup test eval eval-text eval-multi run build docker help verify-live verify-submission verify-sources frontend-test frontend-typecheck
+.PHONY: setup test eval eval-text eval-multi run build docker help verify-live verify-submission verify-sources frontend-test frontend-typecheck demo-gate
 
 help:  ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-18s\033[0m %s\n", $$1, $$2}'
@@ -91,6 +91,17 @@ verify:  ## One-command verification: tests + evals + frontend checks
 	@echo "╔══════════════════════════════════════════════════════════════╗"
 	@echo "║  ✓ ALL CHECKS PASSED                                      ║"
 	@echo "╚══════════════════════════════════════════════════════════════╝"
+
+demo-gate:  ## Pre-judge gate: repo checks, frontend checks, live health; video handled separately
+	python3 -m ruff check .
+	python3 -m pytest tests/ -q --tb=short
+	python3 scripts/benchmark_manifest_check.py
+	python3 scripts/benchmark_hash_sources.py
+	cd frontend && npm test
+	cd frontend && npm run typecheck
+	cd frontend && npm audit --audit-level=moderate
+	cd frontend && npm run build
+	python3 scripts/verify_live.py
 
 build:  ## Build frontend for production
 	cd frontend && npm run build

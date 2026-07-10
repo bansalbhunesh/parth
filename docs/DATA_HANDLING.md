@@ -37,9 +37,12 @@ the repo-bundled demo corpus (`data/corpus/`, `data/projects/` —
 team-authored fixtures shipped with the app), **not** from anything a user
 uploads. It does not touch uploaded document content.
 
-No account, project, or organization concept exists. There is no field for a
-user's name, email, or company — the only identity signal captured anywhere is
-a request's source IP (used only for rate-limit bucketing, see §6) and an
+No user account or organization concept exists. There is no field for a
+user's name, email, or company anywhere. The one project-shaped exception is
+the case workflow (§4): a `POST /cases` caller gets a case_id + secret, which
+functions as a workspace, not a user identity — nothing links two cases to
+the same person. The only other identity signal captured anywhere is a
+request's source IP (used only for rate-limit bucketing, see §6) and an
 optional demo token.
 
 ---
@@ -132,13 +135,11 @@ made and no document content leaves the process for that request.
 ## 3. Retention & deletion
 
 **Raw uploaded document text is not stored anywhere beyond the request that
-processes it.** There is no database in this codebase — confirmed by
-searching `backend/` for `sqlite`, `postgres`, `redis`, and `.db`: the only
-hits are code comments in `backend/jobs.py` and `backend/security.py`
-explicitly contrasting today's in-memory approach with what "a production
-deployment would" use (Redis, a persistent store) — neither exists today.
+processes it — this is still true after the addition below.** What changed
+(2026-07-11): `backend/case_store.py` added a real, disk-backed SQLite store
+for one opt-in workflow (see §4); everything else on this page is unchanged.
 
-What **does** persist, in-process only (`backend/jobs.py`):
+**In-memory only** (`backend/jobs.py`), unchanged from before:
 
 - **A result cache**, keyed by `sha256(spec_text + submittal_text + system_id +
   pipeline_signature)`. The hash is one-way and not reversible to the
@@ -156,17 +157,66 @@ What **does** persist, in-process only (`backend/jobs.py`):
 
 All of it is a plain Python dict in the worker process's memory. **A process
 restart, redeploy, or a second replica loses all of it** — there is no
-cross-instance sharing and nothing is flushed to disk on purpose. This is a
-single-instance, in-memory prototype, not a persistence layer.
+cross-instance sharing and nothing is flushed to disk on purpose.
 
-**Net answer:** raw uploaded document content does not persist beyond the
-single request that analyzes it. Derived findings (short excerpts/paraphrases
-of the documents, not the full text) persist in server memory for up to 1
-hour or until the process restarts, whichever comes first.
+**Disk-backed, opt-in** (`backend/case_store.py`, the `/cases/*` routes):
+a **case** — created explicitly via `POST /cases`, never automatically —
+persists its findings, drafted RFIs, and audit log to a SQLite file
+(`PRAMAAN_CASE_DB_PATH`, default a file in the OS temp directory). This
+stores **derived findings you explicitly submit to a case** (component,
+parameter, required/provided values, rationale) and **drafted RFI text**,
+never raw uploaded document bytes — the same "findings, not source text"
+boundary jobs.py already draws. On the hosted Render deployment this
+persists across requests **within the same running instance only**; Render's
+free-tier filesystem is not a mounted persistent volume, so a redeploy or
+scale event wipes it, identical in spirit to jobs.py's own restart caveat.
+There is no automatic deletion or TTL on case data — it persists until the
+underlying file is wiped by a platform event, which is a real gap: a caller
+who wants their case data gone before then has no delete endpoint to call.
+
+**Net answer:** raw uploaded document content never persists beyond the
+single request that analyzes it, in either the in-memory or the disk-backed
+path. Derived findings persist in server memory for up to 1 hour (or process
+restart) unless explicitly persisted into a case, in which case they persist
+until a platform-level restart/redeploy wipes the SQLite file — there is
+currently no user-triggered deletion.
 
 ---
 
-## 4. Secrets handling
+## 4. The case workflow — the one place data outlives a single request
+
+`POST /cases` → `/cases/{case_id}/findings` → `/cases/{case_id}/findings/{finding_id}/rfi`
+→ `/cases/{case_id}/rfis/{rfi_id}/export` is opt-in: nothing is written here
+unless a caller explicitly calls `POST /cases` first. It exists so a real
+submittal → RFI → audit-history workflow has somewhere to live, instead of
+every result vanishing at the TTL like the rest of this backend.
+
+- **Tenant boundary:** a case is created with a server-generated secret
+  (`secrets.token_urlsafe(24)`), shown exactly once in the creation
+  response and never recoverable after — the same "can't be recovered if
+  lost" property `DEMO_AUTH_TOKEN` already has. Every subsequent
+  `/cases/{case_id}/*` call must present that secret in an `X-Case-Secret`
+  header; a wrong or missing secret returns **404**, identical to the case
+  not existing, so a caller can't distinguish "wrong secret" from "no such
+  case" by probing IDs.
+- **What's stored per case:** persisted findings (component, parameter,
+  required/provided values, severity, standard reference, rationale — never
+  raw document text), drafted RFI text, and an append-only audit log of
+  every write (`case_created`, `finding_added`, `rfi_drafted`,
+  `rfi_exported`), each entry tagged with a hash of the presenting secret,
+  never the secret itself.
+- **Not real multi-user identity.** One case = one secret = one bearer of
+  access, the same shared-secret model `DEMO_AUTH_TOKEN` uses for the whole
+  demo, just scoped per-case instead of per-deployment. There are still no
+  user accounts anywhere in this codebase.
+- **No deletion endpoint.** A case cannot currently be deleted by its
+  owner — the only way its data goes away is a platform-level restart or
+  redeploy wiping the SQLite file (see §3). That's a real gap for anyone
+  who wants "delete my data" as an actual guarantee, not an implicit one.
+
+---
+
+## 5. Secrets handling
 
 All provider keys (`GEMINI_API_KEY`, `QWEN_GATEWAY_API_KEY`/`OPENAI_API_KEY`,
 `GROQ_API_KEY`, `CLAUDE_API_KEY`/`ANTHROPIC_API_KEY`) and the optional
@@ -193,7 +243,7 @@ repository.**
 
 ---
 
-## 5. Explicit threat boundaries — what this prototype does NOT protect against
+## 6. Explicit threat boundaries — what this prototype does NOT protect against
 
 Stated as plainly as `docs/SECURITY_DEMO_RUNBOOK.md` states it, because
 uploaded documents here are described as confidential EPC materials and that
@@ -211,14 +261,21 @@ deserves the same bluntness:
   per-user or per-session partitioning. If two different callers submit
   byte-identical spec+submittal text, the second caller is served the first
   caller's cached result. This is by design (it saves LLM quota), but it
-  means the cache has no concept of "whose data is this."
+  means the cache has no concept of "whose data is this." **This is still
+  true for `/analyze` and `/jobs/*`, unchanged.** A real alternative exists
+  for callers who need it: `POST /cases` (`backend/case_store.py`) issues a
+  per-case bearer secret, and every `/cases/{case_id}/*` route 404s
+  identically for a wrong secret or a nonexistent case (no existence oracle)
+  — genuine tenant isolation, opt-in, not retrofitted onto the original
+  cache-by-content-hash path.
 - **No ownership check on job results.** `GET /jobs/{job_id}` and
   `/jobs/{job_id}/result` require only the (optional) demo token, not proof
   that the caller submitted that job. A job ID is an unguessable 128-bit
   UUID4, so brute-forcing one is impractical — but anyone who obtains a
   job ID by any other means (a shared link, a proxy log, browser history) can
   read that analysis's result, including the derived findings from someone
-  else's document.
+  else's document. **Also still true, unchanged** — the case-secret model
+  above does not retroactively protect `/jobs/*`.
 - **No encryption at rest for the in-memory cache.** There is no persistent
   "at rest" store for raw document text (see §3), so at-rest encryption is
   not applicable there — but the derived-findings cache sits in plain,
@@ -235,9 +292,15 @@ deserves the same bluntness:
   not a substitute for network-layer protection.
 - **CORS is wildcard (`*`) by default**, with `allow_credentials=False`. This
   is an intentionally open public-demo API surface, not a restricted one.
-- **No audit trail of who uploaded what.** No per-request user identity is
-  captured or logged anywhere — only an IP-derived rate-limit bucket that is
-  never persisted beyond the current sliding window.
+- **No audit trail of who uploaded what, on `/analyze` and `/jobs/*`.** No
+  per-request user identity is captured or logged anywhere on those routes —
+  only an IP-derived rate-limit bucket that is never persisted beyond the
+  current sliding window. **The `/cases/*` path is the one exception**: every
+  write (case created, finding added, RFI drafted/exported) is appended to a
+  persisted audit log keyed by a hash of the presenting case secret — never
+  the raw secret, never a real user identity, but a real, queryable,
+  disk-backed record of "this case-secret-holder did X at time Y," which
+  `/analyze` and `/jobs/*` still have nothing equivalent to.
 - **Third-party LLM providers see full plaintext document content**, as
   described in §2 — including, on a failover event, the same content sent to
   more than one provider in sequence. This project does not control, and has
@@ -245,7 +308,7 @@ deserves the same bluntness:
 
 ---
 
-## 6. What NOT to claim about this document
+## 7. What NOT to claim about this document
 
 Per `docs/CLAIMS_REGISTER.md` and enforced by `tests/test_claims_register.py`:
 
@@ -265,15 +328,20 @@ Per `docs/CLAIMS_REGISTER.md` and enforced by `tests/test_claims_register.py`:
 
 ---
 
-## 7. Verification
+## 8. Verification
 
 ```bash
 python -m pytest tests/test_claims_register.py -q
 python -m pytest tests/test_no_secrets.py -q
 python -m pytest tests/test_security_auth_ratelimit.py tests/test_upload_hardening.py -q
+python -m pytest tests/test_cases.py -q
 grep -rn "sqlite\|postgres\|redis\|\.db\b" backend/
 ```
 
 The first two are the enforcement gates this document must not trip and the
-secret-leak guard this document describes. The `grep` is the check backing
-§3's "no database exists" claim — re-run it if `backend/` changes.
+secret-leak guard this document describes. `test_cases.py` backs every claim
+in §4 (tenant isolation via 404-not-403, cross-case isolation, audit-log
+actor hashing, offline RFI-draft fallback). The `grep` now finds real hits
+(`case_store.py`'s `sqlite3` usage, `jobs.py`/`security.py`'s comments) —
+re-run it after any `backend/` change to confirm §3's "in-memory except the
+one opt-in case store" description still matches the code.

@@ -11,9 +11,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
-from backend import security
+from backend import case_store, security
 from backend.agents.ingestion import extract_pdf_bytes, ingest_corpus
-from backend.agents.rfi_copilot import ask, ask_fallback, ask_stream
+from backend.agents.rfi_copilot import ask, ask_fallback, ask_stream, draft_rfi
 from backend.analyze import run_analysis, run_streaming_analysis
 from backend.orchestrator import run_pipeline
 from backend.paths import CORPUS, PROJECTS_DIR
@@ -1103,6 +1103,155 @@ tr:hover td {{ background: #f0f4ff; }}
   Combined lead-time window: <b>{total_lead} weeks</b> across all findings (scenario figure, not a measured saving).
 </div>
 </body></html>"""
+
+
+# ── Cases: persisted, tenant-isolated submittal -> RFI workflow ──────
+#
+# Everything above this point is either in-memory (jobs.py's result cache)
+# or static/read-only (the /projects/{project_id}/* demo fixtures). This is
+# the one workflow the project chose to deepen with real persistence instead
+# of adding more surface area — see backend/case_store.py's module docstring
+# for the honest scope (SQLite, single-instance, tenant-isolated by a
+# per-case bearer secret, not real user accounts).
+
+class CreateCaseRequest(BaseModel):
+    name: str = Field(default="", max_length=200)
+
+
+class AddFindingRequest(BaseModel):
+    component: str = Field(default="", max_length=200)
+    parameter: str = Field(default="", max_length=200)
+    required_value: str = Field(default="", max_length=500)
+    provided_value: str = Field(default="", max_length=500)
+    unit: str = Field(default="", max_length=50)
+    severity: str = Field(default="", max_length=50)
+    standard_ref: str = Field(default="", max_length=200)
+    spec_clause: str = Field(default="", max_length=200)
+    predicted_cx_test: str = Field(default="", max_length=200)
+    lead_time_weeks: float | None = None
+    rationale: str = Field(default="", max_length=2000)
+
+
+def _require_case(case_id: str, request: Request) -> str:
+    """Tenant-isolation gate for every /cases/{case_id}/* route. A wrong or
+    missing X-Case-Secret returns 404, identical to a nonexistent case_id —
+    this deliberately does not distinguish "case doesn't exist" from "wrong
+    secret" so a caller can't probe for valid case IDs. Returns the presented
+    secret (needed by the caller to compute the audit actor_key)."""
+    secret = request.headers.get("x-case-secret", "")
+    if not case_store.verify_case(case_id, secret):
+        raise HTTPException(status_code=404, detail="No such case.")
+    return secret
+
+
+@app.post("/cases", dependencies=[Depends(security.rl_case_create)])
+def create_case(req: CreateCaseRequest):
+    """Create a new case. The returned `secret` is shown exactly once — it
+    is the only credential for every /cases/{case_id}/* route on this case
+    and cannot be recovered if lost, the same way a demo token can't be."""
+    case_id, secret = case_store.create_case(req.name)
+    return {"case_id": case_id, "secret": secret,
+            "warning": "This secret is shown once and cannot be recovered. "
+                       "Store it now — it is required for every request "
+                       "against this case."}
+
+
+@app.get("/cases/{case_id}")
+def get_case(case_id: str, request: Request):
+    _require_case(case_id, request)
+    summary = case_store.case_summary(case_id)
+    return {
+        **summary,
+        "findings_count": len(case_store.list_findings(case_id)),
+        "rfis_count": len(case_store.list_rfis(case_id)),
+    }
+
+
+@app.post("/cases/{case_id}/findings")
+def add_case_finding(case_id: str, req: AddFindingRequest, request: Request):
+    secret = _require_case(case_id, request)
+    finding_id = case_store.add_finding(case_id, req.model_dump())
+    case_store.append_audit(case_id, case_store.actor_key_for(secret),
+                            "finding_added", detail=f"{req.component}.{req.parameter}")
+    return {"finding_id": finding_id}
+
+
+@app.get("/cases/{case_id}/findings")
+def list_case_findings(case_id: str, request: Request):
+    _require_case(case_id, request)
+    return {"findings": case_store.list_findings(case_id)}
+
+
+@app.post("/cases/{case_id}/findings/{finding_id}/rfi", dependencies=[Depends(security.rl_analysis)])
+def draft_case_rfi(case_id: str, finding_id: str, request: Request):
+    secret = _require_case(case_id, request)
+    finding = case_store.get_finding(case_id, finding_id)
+    if finding is None:
+        raise HTTPException(status_code=404, detail="No such finding on this case.")
+    draft = draft_rfi(finding)
+    rfi_id = case_store.add_rfi(case_id, finding_id, draft["question"],
+                                draft["drafted_text"], draft["sources"], draft["mode"])
+    case_store.append_audit(case_id, case_store.actor_key_for(secret),
+                            "rfi_drafted", detail=f"finding={finding_id} mode={draft['mode']}")
+    return {"rfi_id": rfi_id, **draft}
+
+
+@app.get("/cases/{case_id}/rfis")
+def list_case_rfis(case_id: str, request: Request):
+    _require_case(case_id, request)
+    return {"rfis": case_store.list_rfis(case_id)}
+
+
+@app.get("/cases/{case_id}/rfis/{rfi_id}/export", response_class=HTMLResponse)
+def export_case_rfi(case_id: str, rfi_id: str, request: Request):
+    secret = _require_case(case_id, request)
+    rfi = case_store.get_rfi(case_id, rfi_id)
+    if rfi is None:
+        raise HTTPException(status_code=404, detail="No such RFI on this case.")
+    finding = case_store.get_finding(case_id, rfi["finding_id"]) or {}
+    case = case_store.case_summary(case_id) or {}
+    case_store.append_audit(case_id, case_store.actor_key_for(secret),
+                            "rfi_exported", detail=rfi_id)
+    sources_html = "".join(f"<li>{_esc(s)}</li>" for s in rfi.get("sources", []))
+    return f"""<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<title>RFI Export — {_esc(case.get('name') or case_id)}</title>
+<style>
+body {{ font-family: -apple-system, system-ui, sans-serif; margin: 0; background: #fafbfc; color: #1a1a2e; }}
+.header {{ background: #0c0f13; color: #e7ecf3; padding: 32px 40px; }}
+.header h1 {{ font-size: 22px; margin: 0 0 6px; }}
+.header p {{ color: #7a8899; font-size: 13px; margin: 0; }}
+.content {{ max-width: 800px; margin: 0 auto; padding: 32px 40px; }}
+.finding {{ background: #f0f2f5; border-radius: 8px; padding: 16px 20px; margin-bottom: 24px; font-size: 13px; }}
+.drafted {{ white-space: pre-wrap; line-height: 1.6; font-size: 14px; }}
+h2 {{ font-size: 14px; text-transform: uppercase; letter-spacing: 0.04em; color: #555; }}
+</style></head>
+<body>
+<div class="header">
+  <h1>RFI Export</h1>
+  <p>Case: {_esc(case.get('name') or case_id)} · RFI {_esc(rfi_id)} · Mode: {_esc(rfi.get('mode', ''))}</p>
+</div>
+<div class="content">
+  <h2>Finding</h2>
+  <div class="finding">
+    <b>{_esc(finding.get('component', ''))}</b> — {_esc(finding.get('parameter', '').replace('_', ' '))}<br>
+    Required: {_esc(finding.get('required_value', ''))} {_esc(finding.get('unit', ''))} ·
+    Submitted: {_esc(finding.get('provided_value', ''))} {_esc(finding.get('unit', ''))} ·
+    Severity: {_esc(finding.get('severity', ''))}<br>
+    Standard: {_esc(finding.get('standard_ref', ''))} {_esc(finding.get('spec_clause', ''))}
+  </div>
+  <h2>Drafted RFI</h2>
+  <div class="drafted">{_esc(rfi.get('drafted_text', ''))}</div>
+  <h2>Cited Sources</h2>
+  <ul>{sources_html or '<li>none</li>'}</ul>
+</div>
+</body></html>"""
+
+
+@app.get("/cases/{case_id}/audit-log")
+def get_case_audit_log(case_id: str, request: Request):
+    _require_case(case_id, request)
+    return {"audit_log": case_store.get_audit_log(case_id)}
 
 
 # ── Pipeline info endpoint ───────────────────────────────────────────

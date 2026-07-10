@@ -115,6 +115,10 @@ def deep_probe_limit() -> int:
     return _int_env("PRAMAAN_DEEP_PROBE_LIMIT_PER_HOUR", 3)
 
 
+def case_create_limit() -> int:
+    return _int_env("PRAMAAN_CASE_CREATE_LIMIT_PER_HOUR", 10)
+
+
 _store: dict[str, list[float]] = {}
 _lock = threading.Lock()
 
@@ -182,6 +186,10 @@ def rl_deep_probe(request: Request) -> None:
     enforce_rate_limit(request, "deep_probe", deep_probe_limit())
 
 
+def rl_case_create(request: Request) -> None:
+    enforce_rate_limit(request, "case_create", case_create_limit())
+
+
 # ── Upload size caps (shared with the upload validator) ─────────────
 
 def max_upload_mb() -> int:
@@ -212,6 +220,7 @@ def security_status() -> dict:
             "analysis": analysis_limit(),
             "upload": upload_limit(),
             "deep_probe": deep_probe_limit(),
+            "case_create": case_create_limit(),
         } if rl_on else None,
         "max_upload_mb": max_upload_mb(),
         "max_pdf_pages": ocr_util.max_pdf_pages(),

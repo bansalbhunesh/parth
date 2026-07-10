@@ -23,7 +23,9 @@ date.
 | `40_CFR_98_Table_A-1_GWP.md` | The R-134a / HFC-227ea (FM-200) GWP claims in `../PROVENANCE.md` (Pairs 4–5) | Values here differ from the AR4-vintage figures already cited elsewhere in this repo — disclosed as an open reconciliation item in the file's own header, not silently resolved |
 
 Neither file is wired into the frozen `benchmarks/ps4_external_v1` scoring
-corpus yet — they exist as evidence for reviewers to check the two claims
-above against a primary source, and as a base for a future eval tier built
-from documents that never informed the reconcile prompt's tuning, if that's
-the direction taken next.
+corpus — they exist as evidence for reviewers to check the two claims above
+against a primary source. They also back two new pairs built specifically
+from documents that never informed the reconcile prompt's tuning: see
+[`../held_out/`](../held_out/README.md) for both, their live-verified
+results, and an honest note on what those two pairs do and don't
+demonstrate.

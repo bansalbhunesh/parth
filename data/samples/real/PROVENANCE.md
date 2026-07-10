@@ -379,3 +379,13 @@ This closes the "stores zero primary source files" gap specifically; it
 does not solve primary-source storage for vendor datasheets or paywalled
 standards (ASHRAE, NFPA, Uptime, IEC), which remain genuinely copyrighted
 and are why the rest of this corpus cites rather than stores them.
+
+## Two new pairs built from documents that never touched the prompt
+
+[`held_out/`](held_out/) uses the two primary sources above to build two
+new pairs whose specific parameters, products, and thresholds never
+appeared in this corpus or the reconcile prompt before now. Both were run
+against the live deployed backend (not simulated) on 2026-07-11 and came
+back compliant — real result, real request IDs, and an honest statement of
+what a 0-and-0 result does and doesn't prove. See that directory's own
+README for the full write-up.

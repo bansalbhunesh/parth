@@ -1,5 +1,23 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
+import { Sora, JetBrains_Mono } from "next/font/google";
+
+// next/font self-hosts these (no runtime request to fonts.gstatic.com) and
+// computes fallback-font metric overrides (ascent/descent/size-adjust) so the
+// page doesn't reflow when the webfont swaps in — this is what actually fixes
+// the layout shift a <link>-based Google Fonts import causes, not just speed.
+const sora = Sora({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-sora",
+  display: "swap",
+});
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
+});
 
 // metadataBase + Open Graph / Twitter cards: a pasted link (WhatsApp, LinkedIn,
 // Slack, the Unstop form) unfurls as a branded card instead of a bare URL —
@@ -49,19 +67,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="en" className={`${sora.variable} ${jetbrainsMono.variable}`}>
       <body>{children}</body>
     </html>
   );

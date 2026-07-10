@@ -15,8 +15,11 @@
   --lead: #36d6e7;
   --lead-glow: rgba(54, 214, 231, 0.15);
   --accent: #5b8cff;
-  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  --sans: "Sora", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  --sans: var(--font-sora), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* alias — some rules reference --font-mono/--font-sans directly */
+  --font-mono: var(--mono);
+  --font-sans: var(--sans);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1592,7 +1595,7 @@ table.reg .row-critical td { background: rgba(255,77,77,0.045); }
   border-radius: 6px;
   border: 1px solid #1e293b;
   background: #0f172a;
-  color: #64748b;
+  color: #8896ab;
   font-size: 12px;
   font-weight: 600;
   font-family: var(--font-mono);
@@ -1638,7 +1641,7 @@ table.reg .row-critical td { background: rgba(255,77,77,0.045); }
 }
 .dropzone-hint {
   font-size: 11px;
-  color: #475569;
+  color: #8896ab;
   font-family: var(--font-mono);
 }
 
@@ -1901,6 +1904,8 @@ table.reg .row-critical td { background: rgba(255,77,77,0.045); }
   font-weight: 800;
 }
 .jm-section-head p { margin-top: 12px; color: var(--muted); line-height: 1.65; }
+.jm-section-head p a { color: var(--lead); text-decoration: underline; text-underline-offset: 2px; }
+.jm-section-head p a:hover { text-decoration-thickness: 2px; }
 .jm-foot {
   margin-top: 72px;
   padding-top: 28px;
@@ -1939,15 +1944,15 @@ table.reg .row-critical td { background: rgba(255,77,77,0.045); }
 }
 .jm-orient-step strong { font-size: 0.9rem; color: var(--ink); }
 .jm-orient-step p { margin-top: 4px; font-size: 0.8rem; line-height: 1.5; color: var(--muted); }
-.jm-orient-step a { color: var(--lead); text-decoration: none; }
-.jm-orient-step a:hover { text-decoration: underline; }
+.jm-orient-step a { color: var(--lead); text-decoration: underline; text-underline-offset: 2px; }
+.jm-orient-step a:hover { text-decoration-thickness: 2px; }
 /* benchmark provenance caption under the metrics */
 .jm-metrics-note {
   margin-top: 14px; font-size: 0.82rem; line-height: 1.6; color: var(--muted);
   text-align: center; max-width: 760px; margin-left: auto; margin-right: auto;
 }
-.jm-metrics-note a { color: var(--lead); text-decoration: none; }
-.jm-metrics-note a:hover { text-decoration: underline; }
+.jm-metrics-note a { color: var(--lead); text-decoration: underline; text-underline-offset: 2px; }
+.jm-metrics-note a:hover { text-decoration-thickness: 2px; }
 /* honest scope / limitations block above the footer */
 .jm-limits {
   margin-top: 56px; padding: 16px 18px;
@@ -1955,8 +1960,8 @@ table.reg .row-critical td { background: rgba(255,77,77,0.045); }
   border-radius: 12px; font-size: 0.82rem; line-height: 1.65; color: var(--muted);
 }
 .jm-limits strong { color: var(--warn); }
-.jm-limits a { color: var(--lead); text-decoration: none; }
-.jm-limits a:hover { text-decoration: underline; }
+.jm-limits a { color: var(--lead); text-decoration: underline; text-underline-offset: 2px; }
+.jm-limits a:hover { text-decoration-thickness: 2px; }
 /* comfortable tap targets on the judge flow */
 .jm-link, .jm-foot-cta { min-height: 44px; display: inline-flex; align-items: center; }
 .jm-foot-links a { min-height: 44px; display: inline-flex; align-items: center; }

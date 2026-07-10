@@ -355,3 +355,27 @@ are no longer independent of it.
 traced to a cited public source. Not seeded. 4 checked deterministically offline;
 23 recovered on dated single live runs (19 on 2026-06-28 + 8 on 2026-07-03,
 gemini-2.5-flash), 0 false positives on those runs — not a frozen benchmark.**
+
+## Primary sources — added 2026-07-11 (first stored, not just cited)
+
+Everything above cites public sources but is team-authored text. An external
+audit correctly flagged that as this corpus's remaining evidence gap: "zero
+original primary files are stored in the benchmark." [`primary_sources/`](primary_sources/)
+is the answer, scoped to what's actually legal to store verbatim: U.S.
+federal regulatory text (a government edict, not copyrightable), fetched
+from the eCFR's public API and stored unmodified. It backs two existing
+claims above with the actual regulation text instead of a link, and in
+doing so surfaced a real nuance worth having on the record: the Cummins
+QSK60's "EPA Tier 4" requirement in Pair 1 is the project's own
+stricter-than-federal-code design choice, not a claim about what 40 CFR
+60.4202 mandates for an emergency engine of that class (which is Tier 2 or
+3) — see `primary_sources/40_CFR_60_Subpart_IIII.md` for the full
+reasoning. It also surfaced an honest discrepancy in the GWP figures used
+across Pairs 2/4/5 (AR4-vintage values here vs. the current 40 CFR Part 98
+regulatory table) — disclosed, not resolved, in
+`primary_sources/40_CFR_98_Table_A-1_GWP.md`.
+
+This closes the "stores zero primary source files" gap specifically; it
+does not solve primary-source storage for vendor datasheets or paywalled
+standards (ASHRAE, NFPA, Uptime, IEC), which remain genuinely copyrighted
+and are why the rest of this corpus cites rather than stores them.

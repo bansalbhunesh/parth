@@ -56,7 +56,10 @@ def check(ok: bool, label: str, detail: str = "") -> bool:
 
 def get_json(url: str, timeout: int):
     req = urllib.request.Request(url, headers={"User-Agent": "pramaan-verify"})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
+    # B310 accepted risk: url is built from --api, which defaults to the
+    # fixed, hardcoded production endpoint (see argparse default below); this
+    # is a maintainer-run pre-demo gate, not code reachable from untrusted input.
+    with urllib.request.urlopen(req, timeout=timeout) as r:  # nosec B310
         return r.status, json.loads(r.read())
 
 
@@ -66,7 +69,10 @@ def post_json(url: str, body: dict, timeout: int, stream: bool = False):
         "Content-Type": "application/json", "User-Agent": "pramaan-verify",
         **({"Accept": "text/event-stream"} if stream else {}),
     })
-    with urllib.request.urlopen(req, timeout=timeout) as r:
+    # B310 accepted risk: url is built from --api, which defaults to the
+    # fixed, hardcoded production endpoint (see argparse default below); this
+    # is a maintainer-run pre-demo gate, not code reachable from untrusted input.
+    with urllib.request.urlopen(req, timeout=timeout) as r:  # nosec B310
         if stream:
             return r.status, r.read().decode("utf-8", "ignore")
         return r.status, json.loads(r.read())
@@ -74,7 +80,10 @@ def post_json(url: str, body: dict, timeout: int, stream: bool = False):
 
 def head_status(url: str, timeout: int) -> int:
     req = urllib.request.Request(url, headers={"User-Agent": "pramaan-verify"})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
+    # B310 accepted risk: url is built from --app, which defaults to the
+    # fixed, hardcoded production frontend URL (see argparse default below);
+    # this is a maintainer-run pre-demo gate, not reachable from untrusted input.
+    with urllib.request.urlopen(req, timeout=timeout) as r:  # nosec B310
         return r.status
 
 

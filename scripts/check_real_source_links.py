@@ -76,7 +76,10 @@ def request_once(url: str, method: str, timeout: float) -> tuple[int, str]:
         },
     )
     context = ssl.create_default_context()
-    with urllib.request.urlopen(req, timeout=timeout, context=context) as response:
+    # B310 accepted risk: url is parsed from data/samples/real/PROVENANCE.md,
+    # a repo-tracked, maintainer-reviewed file, not runtime/attacker-controlled
+    # input; this is an offline maintainer link-check script, https(s) only.
+    with urllib.request.urlopen(req, timeout=timeout, context=context) as response:  # nosec B310
         final_url = response.geturl()
         code = response.getcode()
     detail = f"HTTP {code}"

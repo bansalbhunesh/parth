@@ -12,6 +12,10 @@ venv/
 node_modules/
 .next/
 tsconfig.tsbuildinfo
+# playwright E2E artifacts
+frontend/test-results/
+frontend/playwright-report/
+frontend/playwright/.cache/
 # data artifacts (regenerate via data/generate_corpus.py). NOTE: the seed corpus
 # the demo + tests load is force-tracked despite this rule (git keeps tracking a
 # file once added with -f). That includes specs/ground_truth/cx_plan/rfi/extracted

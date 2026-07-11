@@ -53,7 +53,7 @@ export default function RiskMatrix({ rows }: { rows: Deviation[] }) {
                   }}
                 >
                   {devs.map((d) => (
-                    <div key={d.component} className="risk-matrix-dot" title={`${d.component}: ${d.parameter}`}>
+                    <div key={`${d.component}-${d.parameter}`} className="risk-matrix-dot" title={`${d.component}: ${d.parameter}`}>
                       <span className="risk-dot-id">{d.component}</span>
                     </div>
                   ))}

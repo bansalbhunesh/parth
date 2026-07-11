@@ -12,7 +12,7 @@ for different reasons:
 
 | Threat | Why it can beat us in a judge room | Pramaan's answer |
 |---|---|---|
-| `sanskar9999/prahari` | Public-safety/fraud story is emotionally immediate; GitHub Pages demo runs in-browser; README leads with real audio/STT/CV modules and a tight 3-4 min demo flow. | We cannot out-drama digital-arrest scams. We out-verify: backend + frontend deploys, 605 tests, frozen benchmark, claims register, live health/LLM/OCR probes, no hidden eval. |
+| `sanskar9999/prahari` | Public-safety/fraud story is emotionally immediate; GitHub Pages demo runs in-browser; README leads with real audio/STT/CV modules and a tight 3-4 min demo flow. | We cannot out-drama digital-arrest scams. We out-verify: backend + frontend deploys, 635 tests, frozen benchmark, claims register, live health/LLM/OCR probes, no hidden eval. |
 | `Agent-A345/PlantIQ` | Industrial domain is close to ours; README claims a multi-module specialist architecture, real regulatory PDFs, knowledge graph, predictive maintenance, 22+ features. | We avoid "feature fog": one LLM reasoning core, deterministic services, benchmark card, CI, and a judge path that proves the core claim in 90 seconds. |
 | `Exyons/ET-GenAI-Hackathon` | Agriculture has broad social impact, live frontend, multilingual web/SMS/WhatsApp/drone story. | We make the business consequence concrete: a vendor deviation becomes a dated commissioning failure and schedule-risk event, with citations and reproducible checks. |
 
@@ -29,8 +29,8 @@ across all tracks**. Scored on hard, checkable signals, the visible field has:
 
 | Signal | Visible field (~70 repos, all tracks) | Pramaan |
 |---|---|---|
-| CI pipeline | **0** | ✅ green (tests + 3 evals + tsc + build + Docker smoke + ruff) |
-| Test suite | **1** (minimal) | ✅ 605 tests |
+| CI pipeline | **0** | ✅ green (tests + 3 evals + tsc + build + E2E + Docker smoke + ruff + pip-audit + bandit) |
+| Test suite | **1** (minimal) | ✅ 635 tests + 28 Playwright E2E |
 | Eval harness with ground truth | **0** | ✅ 4 paths + no-key real-pairs harness |
 | Quantified impact model | **0** | ✅ `docs/BUSINESS.md`, every figure cited |
 | Live deployment | 3 | ✅ 2 (Vercel + Render) |

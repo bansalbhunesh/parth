@@ -1,4 +1,4 @@
-.PHONY: setup test eval eval-text eval-multi run build docker help verify-live verify-submission verify-sources frontend-test frontend-typecheck demo-gate
+.PHONY: setup test test-e2e eval eval-text eval-multi run build docker help verify-live verify-submission verify-sources frontend-test frontend-typecheck demo-gate calibration
 
 help:  ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-18s\033[0m %s\n", $$1, $$2}'
@@ -17,6 +17,12 @@ test:  ## Run the full test suite
 
 test-cov:  ## Run tests with coverage report
 	python3 -m pytest tests/ --cov=backend --cov-report=term-missing -q
+
+test-e2e:  ## Run the Playwright E2E suite (upload, paste, evidence links, keyboard nav, mobile)
+	cd frontend && npx playwright test
+
+calibration:  ## Regenerate the benchmark's stratified confidence-interval report
+	python3 scripts/benchmark_calibration.py
 
 eval:  ## Run baseline eval (P/R/F1)
 	python3 eval/run_eval.py --detector baseline
@@ -62,45 +68,48 @@ verify-ocr:  ## Prove OCR works locally (skips cleanly if tesseract absent)
 verify-ocr-docker:  ## Prove OCR works in the shipping backend image (needs Docker)
 	sh scripts/verify_ocr_docker.sh
 
-verify:  ## One-command verification: tests + evals + frontend checks
+verify:  ## One-command verification: tests + calibration + evals + frontend checks
 	@echo "╔══════════════════════════════════════════════════════════════╗"
 	@echo "║  PRAMAAN — Full Verification Suite                         ║"
 	@echo "╚══════════════════════════════════════════════════════════════╝"
 	@echo ""
-	@echo "▸ [1/5] Running full test suite..."
+	@echo "▸ [1/6] Running full test suite..."
 	python3 -m pytest tests/ -q --tb=short
 	@echo ""
-	@echo "▸ [2/5] Baseline eval (Meghdoot, 14 devs)..."
+	@echo "▸ [2/6] Calibration report is up to date..."
+	python3 scripts/benchmark_calibration.py
+	@echo ""
+	@echo "▸ [3/6] Baseline eval (Meghdoot, 14 devs)..."
 	python3 eval/run_eval.py
 	@echo ""
-	@echo "▸ [3/5] Text-based eval (non-circular)..."
+	@echo "▸ [4/6] Text-based eval (non-circular)..."
 	python3 eval/text_eval.py
 	@echo ""
-	@echo "▸ [4/5] Multi-project eval (12 projects, 50 devs)..."
+	@echo "▸ [5/6] Multi-project eval (12 projects, 50 devs)..."
 	python3 eval/multi_project_eval.py
 	@echo ""
-	@echo "▸ [5/7] Frontend type check..."
+	@echo "▸ [6/6] Frontend type check, component tests, audit, build..."
 	cd frontend && npm run typecheck
-	@echo ""
-	@echo "Frontend component tests..."
 	cd frontend && npm test
-	@echo ""
-	@echo "Frontend production audit + build..."
 	cd frontend && npm audit && npm run build
 	@echo ""
 	@echo "╔══════════════════════════════════════════════════════════════╗"
 	@echo "║  ✓ ALL CHECKS PASSED                                      ║"
 	@echo "╚══════════════════════════════════════════════════════════════╝"
 
-demo-gate:  ## Pre-judge gate: repo checks, frontend checks, live health; video handled separately
+demo-gate:  ## Pre-judge gate: repo checks, security, E2E, frontend checks, live health; video handled separately
 	python3 -m ruff check .
+	python3 -m pip_audit --local
+	python3 -m bandit -r backend/ scripts/ --severity-level medium
 	python3 -m pytest tests/ -q --tb=short
 	python3 scripts/benchmark_manifest_check.py
 	python3 scripts/benchmark_hash_sources.py
+	python3 scripts/benchmark_calibration.py
 	cd frontend && npm test
 	cd frontend && npm run typecheck
 	cd frontend && npm audit --audit-level=moderate
 	cd frontend && npm run build
+	cd frontend && npx playwright test
 	python3 scripts/verify_live.py
 
 build:  ## Build frontend for production

@@ -28,9 +28,18 @@ can cross-examine provenance and get consistent, honest answers.
 2. **Team-authored fixture ≠ vendor datasheet.** The submittal files/images are
    *synthetic engineering documents* modeled to exercise deviation types — not
    real vendor datasheets, submittals, or unseen documents.
-3. **Primary-source-derived ≠ stored primary-source file.** Values are *derived
-   from* public figures; the manifest marks them `primary_derived` /
-   `secondary`. **No primary-source PDF is stored or redistributed** here.
+3. **Primary-source-derived ≠ stored primary-source file — true of the frozen
+   benchmark manifest specifically.** Within the 106-row manifest, values are
+   *derived from* public figures, marked `primary_derived` / `secondary`; **no
+   primary-source PDF is stored or redistributed as part of the frozen
+   benchmark.** Separately, and outside the manifest entirely, two U.S. federal
+   regulatory documents ARE now stored **verbatim** under
+   [`data/samples/real/primary_sources/`](../data/samples/real/primary_sources/) —
+   legal only because federal regulatory text is a government edict, not
+   copyrightable (*Georgia v. Public.Resource.Org*, 139 S. Ct. 1743 (2020));
+   this does not extend to vendor datasheets or paywalled standards, which
+   remain citation-only for the reason in point 4 below. See that directory's
+   own `README.md` for the exact scope.
 4. **Proprietary standards = citation-only / paraphrase-only.** Standards are
    referenced by name/clause or paraphrased for interpretation. **No proprietary
    standard text is copied or redistributed** (every manifest row's
@@ -53,15 +62,19 @@ can cross-examine provenance and get consistent, honest answers.
 | Property | Status |
 |---|---|
 | `source_origin` | all **team-authored** (`owner_design_basis_team_authored`, `team_authored_from_public_values`, `adversarial_team_authored`, `synthetic_negative`) |
-| `primary_or_secondary` | `primary_derived` or `secondary` — **none are stored primary files** |
+| `primary_or_secondary` | `primary_derived` or `secondary` — **none of these 106 rows are stored primary files** (two *are* stored, verbatim, outside the manifest — see point 3 above) |
 | Verified public `source_url` | **5** manifest rows carry a checkable public URL; the broader real-sample narrative has a separate public-link check report |
 | Proprietary standard text | **none copied/redistributed** (per every row's `license_or_usage_basis`) |
 | `sha256` per file | present (integrity; verified by `scripts/benchmark_hash_sources.py`) |
 | Human review | single-author frozen; **reviewer-2 adjudication pending** |
 
-Public sources cited for derivation (provenance only, no file stored): U.S. EPA
-eCFR 40 CFR 60 Subpart IIII; EPA GWP guidance; LBNL/ASHRAE TC9.9 thermal
-guidelines. Vendor product *values* are cited from public manufacturer
+Public sources cited for derivation within the 106-row manifest (provenance
+only, no file stored there): U.S. EPA eCFR 40 CFR 60 Subpart IIII; EPA GWP
+guidance; LBNL/ASHRAE TC9.9 thermal guidelines. Two of these — 40 CFR 60
+Subpart IIII and the 40 CFR 98 Table A-1 GWP table — are additionally stored
+verbatim outside the manifest, under `data/samples/real/primary_sources/`
+(see point 3 above); the manifest-row citations above are unchanged by that
+addition. Vendor product *values* are cited from public manufacturer
 literature (Vertiv, Cummins, STULZ, ABB, Raritan, Xtralis, Distech, Samsung SDI,
 Tate, Schneider) — see `data/samples/real/PROVENANCE.md` for the per-value
 citation. Standards named (paraphrased only): Uptime Tier IV, TIA-942, BICSI-002,
@@ -97,6 +110,9 @@ integrity is checked by `scripts/benchmark_manifest_check.py` +
 
 ## 4. What is NOT claimed
 - No proprietary standard text is redistributed anywhere in the repo.
-- No stored primary-source vendor PDFs — only derived, cited values.
+- No stored primary-source vendor PDFs — only derived, cited values. (Two
+  federal *regulatory* documents ARE stored verbatim, outside the manifest —
+  government edicts are not copyrightable, unlike vendor literature; see
+  point 3 in section 1.)
 - No vendor/standards-body endorses, sponsors, or has reviewed Pramaan.
 - No real-world or field-validation claim is made from the benchmark numbers.

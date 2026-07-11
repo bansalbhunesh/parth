@@ -42,7 +42,7 @@
 
 ### Slide 7 — Benchmark proof
 - **ps4_external_v1 (v1.2)** — 53 pairs · 129 frozen labels · 17 systems · 64 clean negatives · 3-pass (`gemini-3.1-flash-lite`).
-- **recall 0.862 · precision 0.953 · F1 0.905 · FAR 0.000 · p50 ~2.5 s** *(benchmarked)*; **rule baseline 0.111** *(deterministic)*; **605** tests.
+- **recall 0.862 · precision 0.953 · F1 0.905 · FAR 0.000 · p50 ~2.5 s** *(benchmarked)*; **rule baseline 0.111** *(deterministic)*; **635** tests.
 - **Speaker note:** the LLM core clears the deterministic floor on the same frozen labels — a benchmark result, not field validation.
 
 ### Slide 8 — Trust & limitations

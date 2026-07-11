@@ -19,7 +19,7 @@
   <img src="https://img.shields.io/badge/benchmark_v1.2_pairs-53-35c98b?style=flat-square&labelColor=0d1a14" alt="53 spec-submittal pairs on the ps4_external_v1 v1.2 benchmark">
   <img src="https://img.shields.io/badge/clean--negative_false_alerts-0-35c98b?style=flat-square&labelColor=0d1a14" alt="0 false alerts on 64 clean-negative controls">
   <img src="https://img.shields.io/badge/benchmark_recall-0.862-ffb020?style=flat-square&labelColor=1a1508" alt="Benchmark v1.2 mean recall 0.862">
-  <img src="https://img.shields.io/badge/tests-605-5b8cff?style=flat-square&labelColor=111820" alt="605 tests">
+  <img src="https://img.shields.io/badge/tests-635-5b8cff?style=flat-square&labelColor=111820" alt="635 tests">
   <img src="https://img.shields.io/badge/architecture-reasoning_graph-5b8cff?style=flat-square&labelColor=111820" alt="compliance reasoning graph — 1 LLM core + deterministic services">
   <img src="https://img.shields.io/badge/countries-11-ffb020?style=flat-square&labelColor=1a1508" alt="11 countries">
   <img src="https://img.shields.io/github/actions/workflow/status/bansalbhunesh/parth/ci.yml?style=flat-square&labelColor=111820&label=CI" alt="CI">
@@ -382,8 +382,8 @@ python3 eval/multi_project_eval.py --json
 python3 data/generate_corpus.py                    # Project Meghdoot (primary)
 python3 data/generate_projects.py                  # 11 additional projects
 
-# 2. Run the test suite (605 tests, no API key needed)
-python3 -m pytest tests/ -q                       # → 605 passed (local; count varies slightly by Python version)
+# 2. Run the test suite (635 tests, no API key needed)
+python3 -m pytest tests/ -q                       # → 635 passed (local; count varies slightly by Python version)
 
 # 3. Prove the pipeline + eval harness (3 independent paths — all synthetic, by construction)
 python3 eval/run_eval.py --detector baseline      # → recovers all seeded deviations (synthetic integrity check)
@@ -407,7 +407,7 @@ cd frontend && npm install && npm run dev          # → localhost:3000
 curl http://localhost:8000/export/audit/html > evidence.html
 ```
 
-> **No API key?** The dashboard runs fully with ground-truth fallback data. All 30+ API endpoints return 200. Both eval harnesses (structured + text-based), the corpus, and the frontend work offline. 605 tests pass without any external dependencies.
+> **No API key?** The dashboard runs fully with ground-truth fallback data. All 30+ API endpoints return 200. Both eval harnesses (structured + text-based), the corpus, and the frontend work offline. 635 tests pass without any external dependencies.
 >
 > **Or just open the live demo:** [parth-tan.vercel.app](https://parth-tan.vercel.app) (frontend) · [parth-1-ma30.onrender.com](https://parth-1-ma30.onrender.com/health) (API)
 
@@ -440,9 +440,12 @@ docker compose up --build
 # Option 2: Makefile
 make setup          # Install all dependencies
 make corpus         # Generate 12 project datasets
-make test           # Run 605 tests
+make test           # Run 635 tests
+make test-e2e       # Run the 28-test Playwright E2E suite (starts both servers itself)
+make calibration    # Regenerate the benchmark's stratified confidence-interval report
 make eval-all       # Run all 3 eval paths
-make verify         # One-command: tests + all evals + type check
+make verify         # One-command: tests + calibration + all evals + type check
+make demo-gate      # Full pre-judge gate: security scans + tests + E2E + live health
 make run            # Start backend API
 
 # Option 3: See Quick Start above for manual setup
@@ -530,8 +533,14 @@ Pramaan cross-references against **7 governing standards** — all content is pa
 | `GET` | `/projects/{id}` | Full project detail — deviations, cx plan, true negatives |
 | `GET` | `/projects/{id}/remediation/{dev}` | **What-if remediation simulator** — schedule slip + cost vs the week a deviation is caught (deterministic; the lead-time metric made causal) |
 | `GET` | `/projects/eval/aggregate` | Multi-project eval — aggregate P/R/F1 across all projects |
+| `POST` | `/cases` | Create a persisted, secret-gated case (SQLite-backed) for the submittal→RFI→audit-log workflow |
+| `POST` | `/cases/{id}/findings` | Persist a finding into a case |
+| `GET` | `/cases/{id}/findings` | List a case's findings (tenant-isolated — wrong secret 404s identically to a nonexistent case) |
+| `POST` | `/cases/{id}/findings/{fid}/rfi` | Draft a formal RFI from a finding (BM25-cited, degrades to an offline template with no LLM key) |
+| `GET` | `/cases/{id}/rfis/{rid}/export` | Printable HTML export of a drafted RFI |
+| `GET` | `/cases/{id}/audit-log` | Append-only audit trail for a case (actor keyed by a hash of the case secret, never the secret itself) |
 
-30+ endpoints. All return 200 with graceful fallback to ground-truth data when no LLM key is configured. Streaming endpoints use Server-Sent Events (SSE) for real-time token delivery.
+38+ endpoints. All return 200 with graceful fallback to ground-truth data when no LLM key is configured (except the `/cases/*` persistence workflow, which needs a reachable backend by design — see [`docs/DATA_HANDLING.md`](docs/DATA_HANDLING.md) for its honest scope and limits). Streaming endpoints use Server-Sent Events (SSE) for real-time token delivery.
 
 > **Interactive API docs:** Launch the backend and visit [localhost:8000/docs](http://localhost:8000/docs) for live Swagger UI — try every endpoint in your browser.
 
@@ -628,7 +637,7 @@ pramaan/
 │       └── api.ts                 # API client + SSE parser + bundled fallback data
 ├── scripts/
 │   └── verify_live.py             # Pre-demo gate: is the DEPLOYED stack demo-ready?
-└── tests/                         # 30 test files, 605 tests
+└── tests/                         # 34 test files, 635 tests
     ├── test_api.py                # API tests (sync + streaming + upload + llm-check)
     ├── test_agents.py             # Agent unit tests (ingestion, extraction, cx, reconciliation)
     ├── test_corpus.py             # Corpus integrity tests (JSON/Markdown validation)
@@ -641,7 +650,7 @@ pramaan/
     └── …                          # real-pairs, OCR, retrieval-loop, self-critique, hardening
 ```
 
-**60+ source files · 16,800+ lines of code · 605 tests · 12 projects · 30+ endpoints**
+**60+ source files · 16,800+ lines of code · 635 tests · 12 projects · 30+ endpoints**
 
 ---
 
@@ -675,6 +684,22 @@ The demo corpus models **10 systems** with **33 requirements**. The architecture
 > scoring lives under [`benchmarks/ps4_external_v1`](benchmarks/ps4_external_v1) —
 > metrics are reported with provenance, evidence labels, and explicit limitations
 > (seed pairs are team-authored; not an external-accuracy claim yet).
+>
+> **The pooled 0.862 recall isn't the whole story — see the stratified
+> breakdown.** [`scripts/benchmark_calibration.py`](scripts/benchmark_calibration.py)
+> computes Wilson score 95% confidence intervals by system type, difficulty
+> class, modality, and construction batch, not just the headline mean. It
+> found a real gap the pooled number hides: omission-detection recall is
+> **0.375 [0.212, 0.573]** (n=24) — a confidence interval that does not
+> overlap the headline at all. Full report:
+> [`calibration_report.md`](benchmarks/ps4_external_v1/reports/calibration_report.md).
+> Two of the benchmark's evidence citations are now backed by **stored
+> primary-source documents**, not just links — real, verbatim U.S. federal
+> regulatory text (public domain, not copyright) under
+> [`data/samples/real/primary_sources/`](data/samples/real/primary_sources/) —
+> and two new pairs built from documents that never touched the reconcile
+> prompt, live-verified against the deployed backend, sit under
+> [`data/samples/real/held_out/`](data/samples/real/held_out/).
 
 The eval harness runs **four paths**. Paths 1–3 are reproducibility / integrity checks on our **seeded** corpus (so their 1.000 is *by construction* — scale, not detection skill); Path 4 (and the real-datasheet eval outside the benchmark) is the actual capability proof:
 
@@ -725,7 +750,7 @@ python3 eval/run_eval.py --detector llm
 |------------------|-----------------|----------|
 | **Innovation** | Goes past AI submittal review (the commercial state of the art — BuildSync, Spec-ID, InspectMind) by predicting **which commissioning test each deviation will fail, and how many weeks early** — cross-referencing spec + submittal + governing standard with a full citation chain. Demonstrated beyond the synthetic corpus (values cited from public datasheets) | LangGraph orchestration, deterministic domain services, citation chain, commissioning-risk twin, [`REAL_DOCUMENT_RESULT.md`](data/samples/REAL_DOCUMENT_RESULT.md) |
 | **Business Impact** | 1,024 lead-time-weeks summed across 50 synthetic findings (a portfolio sum of lookup-table lead times, *not* calendar delay avoided) illustrates the cost-of-late-detection thesis | Interactive ROI calculator (scenario model), cost-of-delay timeline, before/after comparison |
-| **Technical Excellence** | Dual eval harness (structured + text-based). The synthetic portfolio scores 1.000 **by construction** (we label it a plumbing/breadth check, not a flex); the honest signal is the frozen **ps4_external_v1 benchmark (v1.2) — 53 pairs, 129 labels, recall 0.862 · precision 0.953 · F1 0.905 · FAR 0.000 vs a 0.111 rule baseline** (reviewer-2 pending), complemented by 15 team-authored real-datasheet pairs; results reported with not-run pairs counted, never as a fixed 1.000. Full test + lint + build CI (605 tests) | Independent text-extraction + live-LLM eval, semantic + strict scoring, no-key offline harness (`eval/real_pairs_offline.py`), 25+ standards |
+| **Technical Excellence** | Dual eval harness (structured + text-based). The synthetic portfolio scores 1.000 **by construction** (we label it a plumbing/breadth check, not a flex); the honest signal is the frozen **ps4_external_v1 benchmark (v1.2) — 53 pairs, 129 labels, recall 0.862 · precision 0.953 · F1 0.905 · FAR 0.000 vs a 0.111 rule baseline** (reviewer-2 pending), complemented by 15 team-authored real-datasheet pairs; results reported with not-run pairs counted, never as a fixed 1.000. Full test + lint + build CI (635 tests) | Independent text-extraction + live-LLM eval, semantic + strict scoring, no-key offline harness (`eval/real_pairs_offline.py`), 25+ standards |
 | **Robustness** | Graceful degradation everywhere — no API key, malformed PDFs, cold backend all return 200; `/llm-check` surfaces the true LLM status | 50-test resilience suite, ISR-cached frontend, deterministic fallback |
 | **Scalability** | 12 projects → enterprise portfolio via multi-project eval + batch ingest + vector store | Multi-project dashboard, architecture diagram, scale story |
 | **UX** | Two surfaces: a focused **Judge Mode** (90-second proof) and a 22-section deep-dive dashboard, both ISR-cached for instant loads, streaming AI | `/judge` + full dashboard, live PDF upload, dark theme, responsive |
@@ -795,5 +820,5 @@ All four verified against the publisher (title/volume/year as published, resolva
 <p align="center">
   <strong>PRA<span style="color:#36d6e7">MAAN</span></strong><br>
   <em>EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4</em><br>
-  <sub>12 Projects &middot; 11 Countries &middot; 30+ Endpoints &middot; 50 Synthetic Deviations &middot; 1,024 Lead-time-weeks (synthetic sum) &middot; Benchmark v1.2: 53 pairs / recall 0.862 / FAR 0.000 &middot; 605 tests &middot; CI green</sub>
+  <sub>12 Projects &middot; 11 Countries &middot; 30+ Endpoints &middot; 50 Synthetic Deviations &middot; 1,024 Lead-time-weeks (synthetic sum) &middot; Benchmark v1.2: 53 pairs / recall 0.862 / FAR 0.000 &middot; 635 tests &middot; CI green</sub>
 </p>

@@ -109,6 +109,7 @@ results (schedule, supply-chain, graph), and the narrative is labelled with its
 - **OCR runtime availability:** OCR is text-first with a Tesseract fallback and needs the tesseract binary. `GET /ocr-check` is the ground truth for a given deployment; the UI reads it and never implies OCR where it isn't installed.
 - **Public-demo security:** optional token auth, per-IP (single-instance, in-memory) rate limiting, MIME/magic-byte/size upload validation, prompt-injection-resistant prompts, no secret leakage in status endpoints. This is **demo hardening, not production security.**
 - **Verifiability:** `/health` exposes the running commit and analysis mode; every endpoint returns 200 without a key (bundled ground-truth data).
+- **Persisted case workflow (opt-in, honestly scoped):** `backend/case_store.py` is the one workflow this project deepened with real state instead of adding more surface area — a SQLite-backed `POST /cases` → finding → drafted-RFI → HTML export → append-only audit log path, tenant-isolated by a per-case bearer secret (wrong secret 404s identically to a nonexistent case). Explicitly **not** claimed as durable across a Render redeploy (no mounted persistent volume) — see [`DATA_HANDLING.md`](DATA_HANDLING.md) for the full scope and what it still doesn't solve (no delete-my-data endpoint yet). Everything else in this backend remains in-memory or static/read-only by design.
 
 ## Evidence
 
@@ -119,14 +120,23 @@ single-author-frozen labels, 17 systems, 64 clean negatives** → mean semantic
 64 clean negatives, p50 ~2.5 s, vs a deterministic rule baseline of **0.111**.
 Fixtures are team-authored (10 derived from public primary sources, 5 with
 verified URLs); labels are single-author frozen with **two-person human
-adjudication pending**. Source files are not stored in this benchmark yet; source
-links and derivations are tracked. This is a
+adjudication pending**. Two federal regulatory documents are now stored
+**verbatim** (not just linked) under
+[`data/samples/real/primary_sources/`](../data/samples/real/primary_sources/) —
+public-domain government-edict text, the one legally clean lane for storing a
+primary source rather than citing a copyrighted one; two further pairs built
+from documents that never touched the reconcile prompt, live-verified against
+the deployed backend, sit under
+[`data/samples/real/held_out/`](../data/samples/real/held_out/). This is a
 benchmark result, **not** a real-world-accuracy or field-validation claim. Full
 numbers, limitations and links: [`/evidence`](../frontend/app/evidence/page.tsx)
 · [`CLAIMS_REGISTER.md`](CLAIMS_REGISTER.md) ·
 [`benchmark_card.json`](../benchmarks/ps4_external_v1/reports/benchmark_card.json).
+The pooled recall isn't the whole story — stratified 95% confidence intervals
+by system type, difficulty, modality, and construction batch:
+[`calibration_report.md`](../benchmarks/ps4_external_v1/reports/calibration_report.md).
 
-**605 tests · GitHub Actions CI.** Deeper runtime detail:
+**635 tests + 28 Playwright E2E · GitHub Actions CI.** Deeper runtime detail:
 [`TECHNICAL_OVERVIEW.md`](TECHNICAL_OVERVIEW.md).
 
 ## Tech stack

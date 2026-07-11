@@ -22,3 +22,6 @@ Pillow>=12.2,<13.0
 python-multipart>=0.0.31,<1.0
 httpx>=0.27,<1.0
 openai>=1.0.0
+# Pure-Python (no Pango/Cairo system deps, unlike WeasyPrint) - chosen
+# specifically so the ITP PDF export doesn't add a Docker/Render build risk.
+fpdf2>=2.7,<3.0

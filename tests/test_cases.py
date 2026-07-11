@@ -144,6 +144,63 @@ def test_export_unknown_rfi_404s():
     assert r.status_code == 404
 
 
+def test_export_itp_pdf_returns_valid_pdf():
+    case_id, secret = _create_case("ITP Test")
+    hdr = {"X-Case-Secret": secret}
+    client.post(f"/cases/{case_id}/findings", json=_FINDING, headers=hdr)
+
+    r = client.get(f"/cases/{case_id}/export/itp.pdf", headers=hdr)
+    assert r.status_code == 200
+    assert r.headers["content-type"] == "application/pdf"
+    assert r.content.startswith(b"%PDF-")  # real PDF magic bytes, not an error page
+    assert "attachment" in r.headers["content-disposition"]
+
+
+def test_export_itp_pdf_with_no_findings_still_succeeds():
+    case_id, secret = _create_case("Empty Case")
+    r = client.get(f"/cases/{case_id}/export/itp.pdf", headers={"X-Case-Secret": secret})
+    assert r.status_code == 200
+    assert r.content.startswith(b"%PDF-")
+
+
+def test_export_itp_pdf_handles_unicode_without_crashing():
+    """fpdf2's core fonts are latin-1 only; real spec/submittal text can carry
+    arbitrary Unicode (curly quotes, em-dashes, non-Latin scripts) - this must
+    degrade gracefully, never 500."""
+    case_id, secret = _create_case("Curly ’quotes’ — 中文")
+    hdr = {"X-Case-Secret": secret}
+    unicode_finding = dict(_FINDING, component="Générateur—UPS",
+                           rationale="Battery ‘autonomy’ below spec …")
+    client.post(f"/cases/{case_id}/findings", json=unicode_finding, headers=hdr)
+
+    r = client.get(f"/cases/{case_id}/export/itp.pdf", headers=hdr)
+    assert r.status_code == 200
+    assert r.content.startswith(b"%PDF-")
+
+
+def test_export_itp_pdf_is_tenant_isolated_and_unauthenticated_404s():
+    case_a, secret_a = _create_case("A")
+    case_b, secret_b = _create_case("B")
+    client.post(f"/cases/{case_a}/findings", json=_FINDING,
+               headers={"X-Case-Secret": secret_a})
+
+    # No secret at all.
+    assert client.get(f"/cases/{case_a}/export/itp.pdf").status_code == 404
+    # Case B's secret cannot export case A's ITP.
+    cross = client.get(f"/cases/{case_a}/export/itp.pdf",
+                       headers={"X-Case-Secret": secret_b})
+    assert cross.status_code == 404
+
+
+def test_export_itp_pdf_records_audit_log_entry():
+    case_id, secret = _create_case("Audited ITP")
+    hdr = {"X-Case-Secret": secret}
+    client.get(f"/cases/{case_id}/export/itp.pdf", headers=hdr)
+    log = client.get(f"/cases/{case_id}/audit-log", headers=hdr).json()["audit_log"]
+    actions = [entry["action"] for entry in log]
+    assert "itp_pdf_exported" in actions
+
+
 def test_audit_log_records_actions_without_storing_the_raw_secret(monkeypatch):
     _no_llm(monkeypatch)
     case_id, secret = _create_case("Audited Case")

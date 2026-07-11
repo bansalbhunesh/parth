@@ -22,6 +22,9 @@ dependencies = [
     # FastAPI). <0.0.31 has several parsing DoS CVEs (CVE-2026-40347/42561/
     # 53538-53540); pin the patched floor since Phase 5 hardens the upload path.
     "python-multipart>=0.0.31",
+    # Pure-Python (no Pango/Cairo system deps, unlike WeasyPrint) - chosen
+    # specifically so the ITP PDF export doesn't add a Docker/Render build risk.
+    "fpdf2>=2.7,<3.0",
 ]
 
 [project.optional-dependencies]

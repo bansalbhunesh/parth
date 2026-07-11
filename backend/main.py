@@ -8,7 +8,7 @@ import time
 
 from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
 from backend import case_store, security
@@ -1247,6 +1247,27 @@ h2 {{ font-size: 14px; text-transform: uppercase; letter-spacing: 0.04em; color:
   <ul>{sources_html or '<li>none</li>'}</ul>
 </div>
 </body></html>"""
+
+
+@app.get("/cases/{case_id}/export/itp.pdf")
+def export_case_itp_pdf(case_id: str, request: Request):
+    """A physically-signable Inspection & Test Plan, distinct from the
+    JSON/HTML exports — a commissioning authority can print and hand this
+    off rather than work from a screen. Built from the case's own findings
+    against the same commissioning-test catalog `backend/agents/commissioning.py`
+    uses; adds no new AI reasoning, just a different export format."""
+    secret = _require_case(case_id, request)
+    case = case_store.case_summary(case_id) or {}
+    findings = case_store.list_findings(case_id)
+    from backend.agents.itp_export import build_itp_pdf
+    pdf_bytes = build_itp_pdf(case, findings)
+    case_store.append_audit(case_id, case_store.actor_key_for(secret),
+                            "itp_pdf_exported", detail=f"{len(findings)} findings")
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="itp_{case_id[:8]}.pdf"'},
+    )
 
 
 @app.get("/cases/{case_id}/audit-log")

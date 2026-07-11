@@ -37,6 +37,10 @@ jobs:
         run: |
           python scripts/benchmark_manifest_check.py
           python scripts/benchmark_hash_sources.py
+      - name: Verify calibration report is up to date
+        run: |
+          python scripts/benchmark_calibration.py
+          git diff --exit-code benchmarks/ps4_external_v1/reports/calibration_report.md benchmarks/ps4_external_v1/reports/calibration.json
       - name: Run single-project eval
         run: python eval/run_eval.py
       - name: Run multi-project eval

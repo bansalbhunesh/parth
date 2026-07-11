@@ -1,0 +1,238 @@
+{
+  "featured_model": "google/gemini-3.1-flash-lite",
+  "passes": [
+    "2026-07-04_openai_google-gemini-3.1-flash-lite_run1",
+    "2026-07-04_openai_google-gemini-3.1-flash-lite_run2",
+    "2026-07-04_openai_google-gemini-3.1-flash-lite_run3"
+  ],
+  "overall": {
+    "recall": 0.8624,
+    "ci95_low": 0.8061,
+    "ci95_high": 0.9044,
+    "n": 189
+  },
+  "false_alert_rate": {
+    "rate": 0.0,
+    "ci95_low": 0.0,
+    "ci95_high": 0.0196,
+    "n": 192
+  },
+  "by_system_type": {
+    "switchgear": {
+      "n": 24,
+      "successes": 21,
+      "recall": 0.875,
+      "ci95_low": 0.69,
+      "ci95_high": 0.9566
+    },
+    "ups": {
+      "n": 21,
+      "successes": 21,
+      "recall": 1.0,
+      "ci95_low": 0.8454,
+      "ci95_high": 1.0
+    },
+    "generator": {
+      "n": 18,
+      "successes": 18,
+      "recall": 1.0,
+      "ci95_low": 0.8241,
+      "ci95_high": 1.0
+    },
+    "chiller": {
+      "n": 18,
+      "successes": 15,
+      "recall": 0.8333,
+      "ci95_low": 0.6078,
+      "ci95_high": 0.9416
+    },
+    "cabling": {
+      "n": 15,
+      "successes": 9,
+      "recall": 0.6,
+      "ci95_low": 0.3575,
+      "ci95_high": 0.8018
+    },
+    "pdu_rpp": {
+      "n": 15,
+      "successes": 15,
+      "recall": 1.0,
+      "ci95_low": 0.7961,
+      "ci95_high": 1.0
+    },
+    "refrigerant": {
+      "n": 12,
+      "successes": 12,
+      "recall": 1.0,
+      "ci95_low": 0.7575,
+      "ci95_high": 1.0
+    },
+    "bms": {
+      "n": 9,
+      "successes": 6,
+      "recall": 0.6667,
+      "ci95_low": 0.3542,
+      "ci95_high": 0.8794
+    },
+    "ats_sts": {
+      "n": 9,
+      "successes": 4,
+      "recall": 0.4444,
+      "ci95_low": 0.1888,
+      "ci95_high": 0.7334
+    },
+    "metering_power_quality": {
+      "n": 6,
+      "successes": 6,
+      "recall": 1.0,
+      "ci95_low": 0.6097,
+      "ci95_high": 1.0
+    },
+    "crac_crah": {
+      "n": 6,
+      "successes": 3,
+      "recall": 0.5,
+      "ci95_low": 0.1876,
+      "ci95_high": 0.8124
+    },
+    "battery": {
+      "n": 6,
+      "successes": 6,
+      "recall": 1.0,
+      "ci95_low": 0.6097,
+      "ci95_high": 1.0
+    },
+    "transformer": {
+      "n": 6,
+      "successes": 6,
+      "recall": 1.0,
+      "ci95_low": 0.6097,
+      "ci95_high": 1.0
+    },
+    "fire_suppression": {
+      "n": 6,
+      "successes": 3,
+      "recall": 0.5,
+      "ci95_low": 0.1876,
+      "ci95_high": 0.8124
+    },
+    "cooling_tower": {
+      "n": 6,
+      "successes": 6,
+      "recall": 1.0,
+      "ci95_low": 0.6097,
+      "ci95_high": 1.0
+    },
+    "rack_aisle": {
+      "n": 6,
+      "successes": 6,
+      "recall": 1.0,
+      "ci95_low": 0.6097,
+      "ci95_high": 1.0
+    },
+    "networking": {
+      "n": 6,
+      "successes": 6,
+      "recall": 1.0,
+      "ci95_low": 0.6097,
+      "ci95_high": 1.0
+    }
+  },
+  "by_difficulty": {
+    "categorical_reasoning": {
+      "n": 51,
+      "successes": 50,
+      "recall": 0.9804,
+      "ci95_low": 0.897,
+      "ci95_high": 0.9965
+    },
+    "omission_detection": {
+      "n": 24,
+      "successes": 9,
+      "recall": 0.375,
+      "ci95_low": 0.2116,
+      "ci95_high": 0.5729
+    },
+    "table_or_layout": {
+      "n": 24,
+      "successes": 21,
+      "recall": 0.875,
+      "ci95_low": 0.69,
+      "ci95_high": 0.9566
+    },
+    "direct_value": {
+      "n": 18,
+      "successes": 17,
+      "recall": 0.9444,
+      "ci95_low": 0.7424,
+      "ci95_high": 0.9901
+    },
+    "domain_recall": {
+      "n": 18,
+      "successes": 18,
+      "recall": 1.0,
+      "ci95_low": 0.8241,
+      "ci95_high": 1.0
+    },
+    "adversarial_noise": {
+      "n": 18,
+      "successes": 18,
+      "recall": 1.0,
+      "ci95_low": 0.8241,
+      "ci95_high": 1.0
+    },
+    "scanned_or_image": {
+      "n": 18,
+      "successes": 18,
+      "recall": 1.0,
+      "ci95_low": 0.8241,
+      "ci95_high": 1.0
+    },
+    "derived_arithmetic": {
+      "n": 12,
+      "successes": 12,
+      "recall": 1.0,
+      "ci95_low": 0.7575,
+      "ci95_high": 1.0
+    },
+    "unit_conversion": {
+      "n": 6,
+      "successes": 0,
+      "recall": 0.0,
+      "ci95_low": 0.0,
+      "ci95_high": 0.3903
+    }
+  },
+  "by_modality": {
+    "text": {
+      "n": 171,
+      "successes": 145,
+      "recall": 0.848,
+      "ci95_low": 0.7865,
+      "ci95_high": 0.8941
+    },
+    "image": {
+      "n": 18,
+      "successes": 18,
+      "recall": 1.0,
+      "ci95_low": 0.8241,
+      "ci95_high": 1.0
+    }
+  },
+  "by_construction_batch": {
+    "pairs 16-53 (expansion batch, 2026-07-03/04)": {
+      "n": 156,
+      "successes": 133,
+      "recall": 0.8526,
+      "ci95_low": 0.7885,
+      "ci95_high": 0.8997
+    },
+    "pairs 1-15 (original real-evidence set, 2026-06-28)": {
+      "n": 33,
+      "successes": 30,
+      "recall": 0.9091,
+      "ci95_low": 0.7643,
+      "ci95_high": 0.9686
+    }
+  }
+}

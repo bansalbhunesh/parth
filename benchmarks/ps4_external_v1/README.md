@@ -6,17 +6,23 @@ ability, deliberately separate from the seeded synthetic corpus
 called a "real datasheet": pairs are **team-authored fixtures**, honestly labeled,
 with values cited from public product/standard figures where used.
 
-> **Status:** framework complete; seeded with **16 pairs / 32 source docs / 16 labels**
-> across 8 systems. Target is 40–50 pairs, 60–80 sources, 120–180 labels — see the
-> acquisition backlog in [`BENCHMARK_PROTOCOL.md`](BENCHMARK_PROTOCOL.md).
+> **Status (v1.2, frozen):** **53 pairs / 106 source docs / 129 labels** across 17
+> systems (64 clean negatives, 2 contested). Labels are **single-author frozen**;
+> a two-reviewer human adjudication is still **pending** — an automated consistency
+> audit has run (machine QA, not human; 123/129 consistent, 6 flagged), see
+> [`labels/REVIEW_STATUS.md`](labels/REVIEW_STATUS.md). Featured live run:
+> `gemini-3.1-flash-lite` via the gateway (3-pass); the public demo's default
+> primary is `gemini-2.5-flash` — both are live-model results, see
+> [`reports/benchmark_card.json`](reports/benchmark_card.json).
 
 ## What can / cannot be claimed
-- **Can:** "An independent, frozen, provenance-tracked benchmark of N pairs; the
-  rule engine catches X of the deterministic checks with 0 false alerts; the
-  live model recovers Y more, reported per-run with not-run counted as misses."
-- **Cannot (yet):** any headline external-accuracy number, because the seed is
-  team-authored (not downloaded primary sources) and single-author labeled. A
-  two-reviewer adjudication and primary-source acquisition are backlog items.
+- **Can:** the frozen v1.2 benchmark result — mean semantic recall 0.862
+  (0.841–0.873), precision 0.953, F1 0.905, 0 false alerts on the 64 clean
+  negatives, vs a deterministic rule baseline of 0.111 — reported **as a benchmark
+  result**, per-run, with not-run pairs counted as misses.
+- **Cannot:** any field-accuracy claim. The pairs are team-authored fixtures (not
+  downloaded primary sources) and labels are single-author frozen with two-person
+  adjudication pending — this is a benchmark number, not a field-validation result.
 
 ## Layout
 ```

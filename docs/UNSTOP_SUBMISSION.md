@@ -47,7 +47,7 @@ deterministic services — commissioning-test mapping, Monte-Carlo schedule
 risk, supply-chain risk, and a blast-radius project graph — plus a reliability
 layer: multi-provider failover with per-provider spend guards, a deterministic
 rule floor (no silent zeros), OCR for scanned submittals, and honest
-provenance chips on every result. 635 automated tests, full CI, live on
+provenance chips on every result. 644 automated tests, full CI, live on
 Vercel + Render.
 
 Why it generalises: any specification → vendor submittal → acceptance-test

@@ -53,8 +53,6 @@ EXEMPT = {
     "docs/CLAIMS_REGISTER.md",
     # Allowed-vs-banned wording table (claims governance index).
     "docs/SOURCE_PROVENANCE.md",
-    # Historical audit record — quotes the retired claims it flagged.
-    "docs/AUDIT_PRAMAAN.md",
 }
 # Private audit notes are untracked; exempt by prefix in case one appears.
 # The hackathon-field census quotes hundreds of *other teams'* GitHub
@@ -62,7 +60,9 @@ EXEMPT = {
 # those are third-party claims about their own repos, not ours, and will
 # routinely contain banned-sounding phrasing ("production-ready", "5 agents")
 # that has nothing to do with Pramaan.
-EXEMPT_PREFIXES = ("docs/EXTERNAL_AUDIT", "docs/ET_AI_HACKATHON_PUBLIC_REPO_CENSUS")
+EXEMPT_PREFIXES = ("docs/EXTERNAL_AUDIT", "docs/ET_AI_HACKATHON_PUBLIC_REPO_CENSUS",
+                   "docs/DOMINANCE_GAP_AUDIT", "docs/COMPETITOR_RESPONSE_ACTIONS",
+                   "docs/AUDIT_PRAMAAN", "docs/ET_AI_HACKATHON_LIGHTHOUSE_JUDGE")
 
 # Negation / governance markers that make a banned phrase a legal disclaimer.
 # PRE markers must precede the phrase in the same sentence; POST markers

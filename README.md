@@ -61,7 +61,7 @@
 
 ## ⚡ Judges: start here (2 minutes)
 
-Fastest repo path: [`docs/JUDGE_BRIEF.md`](docs/JUDGE_BRIEF.md). Target service path: [`docs/PRODUCTION_BLUEPRINT.md`](docs/PRODUCTION_BLUEPRINT.md). Competitor-response fixes: [`docs/COMPETITOR_RESPONSE_ACTIONS_2026-07-10.md`](docs/COMPETITOR_RESPONSE_ACTIONS_2026-07-10.md).
+Fastest repo path: [`docs/JUDGE_BRIEF.md`](docs/JUDGE_BRIEF.md). Target service path: [`docs/PRODUCTION_BLUEPRINT.md`](docs/PRODUCTION_BLUEPRINT.md).
 
 1. **See it catch a real deviation** → [Judge Mode](https://parth-tan.vercel.app/judge): click **Load deviation demo ★**, hit **Analyze**, watch it catch a hidden 2N→N+1 redundancy drop and a battery-autonomy shortfall (10→8 min) in a realistic vendor submittal — each cited to the standard and mapped to the commissioning test it fails.
 2. **Don't take our word for any number** → `git clone … && make verify` — the unit-test suite, the deterministic eval harnesses, and the frontend type-check reproduce offline with no API key. The **live-model** team-authored cited-value findings (23 of the 27 hard claims) vary run-to-run and are reported as such, not as a fixed score. No-key deterministic harness: `python eval/real_pairs_offline.py`.
@@ -383,7 +383,7 @@ python3 data/generate_corpus.py                    # Project Meghdoot (primary)
 python3 data/generate_projects.py                  # 11 additional projects
 
 # 2. Run the test suite (644 tests, no API key needed)
-python3 -m pytest tests/ -q                       # → 635 passed (local; count varies slightly by Python version)
+python3 -m pytest tests/ -q                       # → 644 passed (local; count varies slightly by Python version)
 
 # 3. Prove the pipeline + eval harness (3 independent paths — all synthetic, by construction)
 python3 eval/run_eval.py --detector baseline      # → recovers all seeded deviations (synthetic integrity check)

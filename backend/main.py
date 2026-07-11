@@ -857,6 +857,38 @@ def metrics():
         }
 
 
+def _benchmark_headline() -> dict:
+    """The frozen ps4_external_v1 (v1.2) result — the real accuracy signal.
+    Surfaced on /metrics so a caller hitting the raw endpoint sees the headline
+    benchmark numbers, not just the structured-baseline 1.000s below (which are
+    1.000 by construction — see each block's `basis` field — not a capability
+    score). Numbers come from the frozen benchmark card, never hardcoded here."""
+    card = (CORPUS.parent.parent / "benchmarks" / "ps4_external_v1"
+            / "reports" / "benchmark_card.json")
+    try:
+        data = json.loads(card.read_text(encoding="utf-8"))
+        pr = data.get("primary_result", {})
+        comp = data.get("composition", {})
+        return {
+            "benchmark": data.get("benchmark", "ps4_external_v1"),
+            "version": data.get("benchmark_version"),
+            "featured_model": data.get("featured_model"),
+            "recall_mean": pr.get("recall_mean"),
+            "precision_mean": pr.get("precision_mean"),
+            "f1_mean": pr.get("f1_mean"),
+            "clean_negative_false_alert_rate": pr.get("clean_negative_false_alert_rate_mean"),
+            "pairs": comp.get("pairs"),
+            "labels": comp.get("labels"),
+            "note": "Real accuracy signal: frozen, team-authored benchmark — a "
+                    "benchmark result, not field-validated. The detection and "
+                    "text_eval blocks below are structured-baseline metrics "
+                    "(1.000 by construction; see their `basis` fields), not a "
+                    "capability measurement.",
+        }
+    except Exception:
+        return {"note": "benchmark card unavailable"}
+
+
 def _compute_metrics():
     from eval.baseline_reconciler import reconcile
     from eval.run_eval import load_ground_truth, score
@@ -915,6 +947,9 @@ def _compute_metrics():
         # Baseline findings are not citation-checked, so this is the by-construction
         # structured value — not a capability measurement (see real-datasheet eval).
         "citation_faithfulness_basis": "structured baseline — not citation-checked (by construction)",
+        # The real accuracy signal, foregrounded so /metrics can't be misread as
+        # a headline 1.000 (the blocks above are structured-baseline, by construction).
+        "benchmark_headline": _benchmark_headline(),
     }
 
 

@@ -1,0 +1,47 @@
+{
+  "api": "https://parth-1-ma30.onrender.com",
+  "app": "https://parth-tan.vercel.app",
+  "measured_at_utc": "2026-07-11T07:39:56Z",
+  "cold": {
+    "health_ms": 23526.6,
+    "health_ok": true,
+    "analyze_first_call_ms": 15695.3,
+    "analyze_first_call_ok": true
+  },
+  "health": {
+    "label": "health",
+    "n": 10,
+    "n_ok": 10,
+    "p50_ms": 247.1,
+    "p95_ms": 370.8,
+    "min_ms": 204.7,
+    "max_ms": 370.8
+  },
+  "judge_page_load": {
+    "label": "judge-page HTML load",
+    "n": 10,
+    "n_ok": 10,
+    "p50_ms": 165.3,
+    "p95_ms": 206.5,
+    "min_ms": 126.1,
+    "max_ms": 206.5
+  },
+  "analyze": {
+    "label": "analyze (distinct payload)",
+    "n": 3,
+    "n_ok": 3,
+    "p50_ms": 6512.4,
+    "p95_ms": 6734.9,
+    "min_ms": 4893.0,
+    "max_ms": 6734.9
+  },
+  "stream_first_token": {
+    "label": "stream time-to-first-token",
+    "n": 3,
+    "n_ok": 3,
+    "p50_ms": 1847.6,
+    "p95_ms": 12470.7,
+    "min_ms": 1649.1,
+    "max_ms": 12470.7
+  }
+}

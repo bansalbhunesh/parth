@@ -453,6 +453,9 @@ make run            # Start backend API
 
 ---
 
+<details>
+<summary><strong>Architecture &amp; reference</strong> — frontend dashboard, standards corpus, API reference, project layout <em>(click to expand; the essentials for judging are above)</em></summary>
+
 ## Frontend — 22-Section Dashboard
 
 The dashboard is a single-page application designed for a **60-second demo narrative**, built with **28 React components** (including `ErrorBoundary` for graceful failure recovery):
@@ -653,6 +656,8 @@ pramaan/
 
 **60+ source files · 16,800+ lines of code · 644 tests · 12 projects · 30+ endpoints**
 
+</details>
+
 ---
 
 ## Scale Story
@@ -802,6 +807,9 @@ All four verified against the publisher (title/volume/year as published, resolva
 
 ---
 
+<details>
+<summary><strong>Tech stack</strong> <em>(click to expand)</em></summary>
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -815,6 +823,8 @@ All four verified against the publisher (title/volume/year as published, resolva
 | Eval | Dual harness: structured + text-based; P/R/F1 + Cx accuracy + citation faithfulness |
 | Scraping | Firecrawl → Crawl4ai → Playwright (3-tier fallback) |
 | Design | Dark theme, JetBrains Mono + Sora, CSS custom properties |
+
+</details>
 
 ---
 

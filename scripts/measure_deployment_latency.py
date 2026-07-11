@@ -67,7 +67,11 @@ def _timed_get(url, timeout):
     t0 = time.monotonic()
     req = urllib.request.Request(url, headers={"User-Agent": "pramaan-latency-probe"})
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
+        # B310 accepted risk: url is built from --api/--app, which default to
+        # the fixed, hardcoded production endpoints (see argparse defaults
+        # below); this is a maintainer-run measurement script, not code
+        # reachable from untrusted input.
+        with urllib.request.urlopen(req, timeout=timeout) as r:  # nosec B310
             r.read()
             ok = 200 <= r.status < 300
     except Exception:
@@ -83,7 +87,11 @@ def _timed_post_json(url, body, timeout):
         headers={"Content-Type": "application/json", "User-Agent": "pramaan-latency-probe"},
     )
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
+        # B310 accepted risk: url is built from --api, which defaults to the
+        # fixed, hardcoded production endpoint (see argparse default below);
+        # this is a maintainer-run measurement script, not code reachable
+        # from untrusted input.
+        with urllib.request.urlopen(req, timeout=timeout) as r:  # nosec B310
             r.read()
             ok = 200 <= r.status < 300
     except Exception:
@@ -104,7 +112,11 @@ def _time_to_first_sse_token(url, body, timeout):
                  "Accept": "text/event-stream"},
     )
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
+        # B310 accepted risk: url is built from --api, which defaults to the
+        # fixed, hardcoded production endpoint (see argparse default below);
+        # this is a maintainer-run measurement script, not code reachable
+        # from untrusted input.
+        with urllib.request.urlopen(req, timeout=timeout) as r:  # nosec B310
             saw_event_line = False
             for raw_line in r:
                 line = raw_line.decode("utf-8", "replace").strip()

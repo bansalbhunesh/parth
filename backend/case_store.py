@@ -166,16 +166,24 @@ _FINDING_FIELDS = (
 )
 
 
+# Static literal, not built from _FINDING_FIELDS at call time — an f-string
+# INSERT (even over a fixed, non-user-controlled tuple) is exactly the shape
+# Bandit's B608 rule flags, and this repo's own CI now gates on it. Spelling
+# the column list out here instead is the actual fix, not a bypass comment.
+_INSERT_FINDING_SQL = (
+    "INSERT INTO findings (finding_id, case_id, component, parameter, "
+    "required_value, provided_value, unit, severity, standard_ref, "
+    "spec_clause, predicted_cx_test, lead_time_weeks, rationale, created_at) "
+    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+)
+
+
 def add_finding(case_id: str, finding: dict) -> str:
     finding_id = uuid.uuid4().hex
     values = [finding.get(f) for f in _FINDING_FIELDS]
     with _lock:
         conn = _get_conn()
-        conn.execute(
-            f"INSERT INTO findings (finding_id, case_id, {', '.join(_FINDING_FIELDS)}, created_at) "
-            f"VALUES (?, ?, {', '.join(['?'] * len(_FINDING_FIELDS))}, ?)",
-            [finding_id, case_id, *values, time.time()],
-        )
+        conn.execute(_INSERT_FINDING_SQL, [finding_id, case_id, *values, time.time()])
         conn.commit()
     return finding_id
 
@@ -274,11 +282,15 @@ def get_audit_log(case_id: str) -> list[dict]:
 
 def reset() -> None:
     """Clear all persisted state — used by the test suite between cases, the
-    same role jobs.reset() and security.reset_rate_limits() play."""
+    same role jobs.reset() and security.reset_rate_limits() play. Four
+    static DELETE statements, not a loop building an f-string — same B608
+    reasoning as _INSERT_FINDING_SQL above."""
     with _lock:
         conn = _get_conn()
-        for table in ("audit_log", "rfis", "findings", "cases"):
-            conn.execute(f"DELETE FROM {table}")
+        conn.execute("DELETE FROM audit_log")
+        conn.execute("DELETE FROM rfis")
+        conn.execute("DELETE FROM findings")
+        conn.execute("DELETE FROM cases")
         conn.commit()
 
 

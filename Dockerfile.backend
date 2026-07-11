@@ -13,6 +13,9 @@ RUN pip install --no-cache-dir -r backend/requirements.txt
 COPY backend/ backend/
 COPY eval/ eval/
 COPY data/ data/
+# Frozen benchmark reports only (52K) — /metrics reads benchmark_card.json to
+# surface the headline result. The bulk of benchmarks/ (pairs/runs) is not shipped.
+COPY benchmarks/ps4_external_v1/reports/ benchmarks/ps4_external_v1/reports/
 
 EXPOSE 8000
 # Shell form so ${PORT} (injected by Render on Docker services) is honored;

@@ -244,6 +244,28 @@ class TestAnalyzeEndpoint:
         assert "deviations" in data
         assert "elapsed_ms" in data
 
+    def test_analyze_timing_breakdown(self):
+        """Stage-level latency breakdown on the response itself (not just an
+        external measurement script) — standards_load_ms + postprocess_ms are
+        always ints; llm_call_ms/provider are only set on an actual LLM call
+        (None on a deterministic-fallback response), never fabricated."""
+        spec = """# Design Basis
+- **TEST-01** — voltage: shall be **400 V** (ref: DESIGN-BASIS; clause DB-1.1)"""
+        submittal = """# Vendor Submittal
+- **TEST-01** — voltage: **380 V** (vendor)"""
+        r = client.post("/analyze", json={"spec_text": spec, "submittal_text": submittal})
+        assert r.status_code == 200
+        timing = r.json()["timing"]
+        assert isinstance(timing["standards_load_ms"], int)
+        assert isinstance(timing["postprocess_ms"], int)
+        assert "llm_call_ms" in timing
+        assert "provider" in timing
+        if r.json()["mode"] == "llm":
+            assert timing["llm_call_ms"] is not None
+            assert timing["provider"] is not None
+        else:
+            assert timing["llm_call_ms"] is None
+
     def test_analyze_validation(self):
         r = client.post("/analyze", json={"spec_text": "short", "submittal_text": "short"})
         assert r.status_code == 422

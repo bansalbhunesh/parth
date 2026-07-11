@@ -56,6 +56,10 @@ def test_analyze_is_idempotent(monkeypatch):
     assert r1["cached"] is False and r2["cached"] is True
     assert r1["deviations"] == r2["deviations"]      # reused, identical result
     assert r1["request_id"] != r2["request_id"]      # but distinct request ids
+    # A cache hit reports the ORIGINAL computation's timing breakdown, not a
+    # near-zero cache-lookup time — the whole point is telling a judge how
+    # long the underlying analysis actually took, even on a fast replay.
+    assert r1["timing"] == r2["timing"]
 
 
 def test_different_input_different_hash(monkeypatch):

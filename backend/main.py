@@ -260,6 +260,7 @@ def analyze(req: AnalyzeRequest):
         "count": view["count"],
         "elapsed_ms": view["elapsed_ms"],
         "mode": view["mode"],
+        "timing": view["timing"],
     }
 
 

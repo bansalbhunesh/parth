@@ -136,6 +136,16 @@ def _view(h: str, entry: dict, cached: bool) -> dict:
         "count": entry["count"],
         "mode": entry["mode"],
         "elapsed_ms": entry["elapsed_ms"],
+        # Stage-level breakdown of elapsed_ms + which failover-chain provider
+        # actually answered — cached alongside the result, so a cache hit
+        # still reports how long the underlying analysis originally took
+        # rather than the near-zero cache-lookup time.
+        "timing": {
+            "standards_load_ms": entry.get("standards_load_ms", 0),
+            "llm_call_ms": entry.get("llm_call_ms"),
+            "postprocess_ms": entry.get("postprocess_ms", 0),
+            "provider": entry.get("provider"),
+        },
     }
 
 
@@ -157,6 +167,10 @@ def analyze_cached(spec: str, submittal: str, system_id: str = "CUSTOM") -> dict
             "count": len(res.deviations),
             "mode": res.mode,
             "elapsed_ms": res.elapsed_ms,
+            "standards_load_ms": res.standards_load_ms,
+            "llm_call_ms": res.llm_call_ms,
+            "postprocess_ms": res.postprocess_ms,
+            "provider": res.provider,
             "computed_at": time.time(),
             # LLM-backed results keep the full TTL; a degraded (rule-floor /
             # vision-unavailable) result expires fast so it can never pin an

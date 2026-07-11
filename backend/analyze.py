@@ -35,6 +35,10 @@ class AnalysisResult(NamedTuple):
     deviations: list[dict]
     mode: str
     elapsed_ms: int
+    standards_load_ms: int = 0
+    llm_call_ms: int | None = None
+    postprocess_ms: int = 0
+    provider: str | None = None
 
 
 def _deterministic_compare(spec_text: str, submittal_text: str) -> list[dict]:
@@ -245,30 +249,45 @@ def run_analysis(
     prompt = PROMPT_TEMPLATE.format(
         spec=spec_text, submittal=submittal_text, standards=standards,
     )
+    standards_load_ms = round((time.time() - t0) * 1000)
+    llm_call_ms = None
+    provider = None
+    t_llm = time.time()
     try:
+        from backend import llm as llm_module
         from backend.llm import complete_json
         # Bound the wait: a free-tier model that 503-retries for 40s+ would
         # otherwise hang the demo. A timed-out call is abandoned (left running)
         # and we degrade to the instant rule-based detector.
         raw = _LLM_POOL.submit(complete_json, prompt, SYSTEM_PROMPT).result(
             timeout=_LLM_TIMEOUT_S)
+        llm_call_ms = round((time.time() - t_llm) * 1000)
+        provider = llm_module.FAILOVER_STATUS.get("last_successful_provider")
+        t_post = time.time()
         devs = _validate_deviations(raw)
         devs = _check_citation_faithfulness(devs, spec_text, submittal_text, standards)
         devs = _ground_findings(devs, spec_text)  # drop hallucinated requirements
         for d in devs:
             _enrich_cx(d, system_id)  # rule-table only — no extra LLM calls
         mode = "llm"
+        postprocess_ms = round((time.time() - t_post) * 1000)
     except concurrent.futures.TimeoutError:
         log.warning("LLM analysis exceeded %.0fs, using rule-based fallback",
                     _LLM_TIMEOUT_S)
         devs = _resilient_fallback(spec_text, submittal_text, system_id)
         mode = "deterministic"
+        postprocess_ms = 0
     except Exception as exc:
         log.warning("LLM analysis failed, running rule-based fallback: %s", exc)
         devs = _resilient_fallback(spec_text, submittal_text, system_id)
         mode = "deterministic"
+        postprocess_ms = 0
     elapsed = round((time.time() - t0) * 1000)
-    return AnalysisResult(deviations=devs, mode=mode, elapsed_ms=elapsed)
+    return AnalysisResult(
+        deviations=devs, mode=mode, elapsed_ms=elapsed,
+        standards_load_ms=standards_load_ms, llm_call_ms=llm_call_ms,
+        postprocess_ms=postprocess_ms, provider=provider,
+    )
 
 
 _VISION_PROMPT = """You are given a design specification (text) and a vendor

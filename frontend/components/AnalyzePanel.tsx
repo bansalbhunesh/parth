@@ -108,6 +108,12 @@ interface AnalyzeResult {
   count: number;
   elapsed_ms: number;
   mode: string;
+  timing?: {
+    standards_load_ms: number;
+    llm_call_ms: number | null;
+    postprocess_ms: number;
+    provider: string | null;
+  };
 }
 
 const API = process.env.NEXT_PUBLIC_API ?? "http://127.0.0.1:8000";
@@ -117,6 +123,20 @@ const API = process.env.NEXT_PUBLIC_API ?? "http://127.0.0.1:8000";
 function formatElapsed(ms: number | undefined | null): string {
   if (ms == null || Number.isNaN(ms)) return "—";
   return ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${Math.round(ms)} ms`;
+}
+
+// Stage-level breakdown for the elapsed-time tooltip — standards-load and
+// post-processing are always real numbers; llm_call_ms/provider are omitted
+// on a deterministic-fallback response rather than shown as a fabricated 0.
+function timingTitle(timing: AnalyzeResult["timing"]): string {
+  if (!timing) return "Total analysis time.";
+  const parts = [`Standards load: ${formatElapsed(timing.standards_load_ms)}`];
+  if (timing.llm_call_ms != null) {
+    parts.push(`LLM call: ${formatElapsed(timing.llm_call_ms)}`);
+  }
+  parts.push(`Post-processing: ${formatElapsed(timing.postprocess_ms)}`);
+  if (timing.provider) parts.push(`Provider: ${timing.provider}`);
+  return parts.join(" · ");
 }
 
 // Where did this result actually come from? Report it honestly so a judge can
@@ -603,7 +623,7 @@ export default function AnalyzePanel() {
                   OCR text extraction
                 </span>
               )}
-              <span className="analyze-results-time">{formatElapsed(result.elapsed_ms)}</span>
+              <span className="analyze-results-time" title={timingTitle(result.timing)}>{formatElapsed(result.elapsed_ms)}</span>
             </span>
           </div>
 

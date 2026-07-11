@@ -33,6 +33,7 @@ benchmarks/ps4_external_v1/sources/raw/*
 # never publish the attack surface alongside the submission.
 docs/EXTERNAL_AUDIT_*.md
 docs/*_PUBLIC_REPO_CENSUS_*.json
+docs/*_PUBLIC_REPO_CENSUS_*.md
 
 # Local agent/runtime hooks. Keep submission repo portable and judge-facing.
 .codex/

@@ -45,7 +45,7 @@ commissioning authority signs against evidence, not against our UI.
 
 | Evaluation-focus metric | Pramaan evidence | Status |
 |---|---|---|
-| Specification compliance detection accuracy on test cases | 19/19 recall + 0 FP on 11 real third-party datasheet pairs; dual semantic/strict scoring | ✅ Strong |
+| Specification compliance detection accuracy on test cases | Frozen external benchmark `ps4_external_v1`: recall 0.862 (0.841–0.873), precision 0.953, F1 0.905, 0 false alerts on 64 clean negatives, across 53 team-authored spec–submittal pairs / 129 labels — vs. a deterministic rule baseline of 0.111 | ✅ Strong |
 | Schedule-risk prediction lead time vs actual delays | Monte-Carlo CPM P50/P80/P90 + deviation→milestone slip (e.g. on-time 63% → 0%, RFS +16 wk if uncaught) | ✅ Strong |
 | Supply-chain visibility depth and alerting timeliness | Per-shipment `P(late)`, delivery-risk banding, supplier-risk decomposition, at-risk flagging on the critical path | ✅ Strong |
 | Commissioning-test automation coverage | Deviation→Cx-test mapping across 17 tests / 5 levels | ✅ Strong |

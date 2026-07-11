@@ -57,7 +57,12 @@ EXEMPT = {
     "docs/AUDIT_PRAMAAN.md",
 }
 # Private audit notes are untracked; exempt by prefix in case one appears.
-EXEMPT_PREFIXES = ("docs/EXTERNAL_AUDIT",)
+# The hackathon-field census quotes hundreds of *other teams'* GitHub
+# descriptions/READMEs verbatim (via scripts/audit_et_hackathon_field.py) -
+# those are third-party claims about their own repos, not ours, and will
+# routinely contain banned-sounding phrasing ("production-ready", "5 agents")
+# that has nothing to do with Pramaan.
+EXEMPT_PREFIXES = ("docs/EXTERNAL_AUDIT", "docs/ET_AI_HACKATHON_PUBLIC_REPO_CENSUS")
 
 # Negation / governance markers that make a banned phrase a legal disclaimer.
 # PRE markers must precede the phrase in the same sentence; POST markers

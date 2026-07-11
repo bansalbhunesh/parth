@@ -49,6 +49,7 @@ FULL_HEADLINE_SURFACES = [
     "PITCH.md",
     "docs/DECK.md",
     "docs/CLAIMS_REGISTER.md",
+    "docs/PS4_ALIGNMENT.md",
 ]
 
 # States recall only (no precision/F1) - still worth pinning so a re-run
@@ -63,10 +64,20 @@ RULE_BASELINE_SURFACES = [
     "README.md",
     "PITCH.md",
     "docs/CLAIMS_REGISTER.md",
+    "docs/PS4_ALIGNMENT.md",
 ]
 
 PAIRS_LABELS_SURFACES = [
     "README.md",
+]
+
+# Surfaces whose pair/label phrasing varies (e.g. "53 team-authored
+# spec-submittal pairs" rather than the literal "53 pairs" PAIRS_LABELS_SURFACES
+# checks for) - same regex-based check as the CLAIMS_REGISTER-specific test
+# below, just parametrized so a second file doesn't need a near-duplicate test.
+PAIRS_LABELS_REGEX_SURFACES = [
+    "docs/CLAIMS_REGISTER.md",
+    "docs/PS4_ALIGNMENT.md",
 ]
 
 
@@ -114,21 +125,22 @@ def test_pair_and_label_counts_match_benchmark_card(rel_path):
     )
 
 
-def test_claims_register_pair_and_label_counts_match_benchmark_card():
-    # CLAIMS_REGISTER.md phrases these as "53 team-authored spec-submittal
+@pytest.mark.parametrize("rel_path", PAIRS_LABELS_REGEX_SURFACES)
+def test_pair_and_label_counts_match_benchmark_card_regex(rel_path):
+    # These files phrase counts as e.g. "53 team-authored spec-submittal
     # pairs" / "129 single-author-frozen labels" - the exact adjective
     # between the number and the noun varies by file, so this checks the
     # numbers are present at all (a regex on "\bNN\b" near "pair"/"label"),
     # not one fixed phrase, while still failing if the benchmark's actual
-    # composition counts change and this file isn't updated to match.
+    # composition counts change and the file isn't updated to match.
     import re
 
-    text = _text("docs/CLAIMS_REGISTER.md")
+    text = _text(rel_path)
     assert re.search(rf"\b{PAIRS}\b[^.]{{0,40}}pairs?\b", text), (
-        f"docs/CLAIMS_REGISTER.md does not state the current pair count ({PAIRS})"
+        f"{rel_path} does not state the current pair count ({PAIRS})"
     )
     assert re.search(rf"\b{LABELS}\b[^.]{{0,40}}labels?\b", text), (
-        f"docs/CLAIMS_REGISTER.md does not state the current label count ({LABELS})"
+        f"{rel_path} does not state the current label count ({LABELS})"
     )
 
 

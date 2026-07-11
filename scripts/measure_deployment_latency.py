@@ -13,7 +13,7 @@ Quota-conscious by design, same posture as load_test_demo.py:
   buckets by IP+token, so this script's own traffic never competes with a
   judge's browser for THAT budget) but DO spend from the shared upstream LLM
   provider quota / spend guard — kept to a small, explicitly-disclosed n
-  (default 5) rather than hammered for a tighter interval.
+  (default 3) rather than hammered for a tighter interval.
 - Judge-page HTML load is a Vercel ISR route (10-minute revalidate per
   frontend/app/judge/page.tsx) — "cold" isn't the same phenomenon there as a
   Render free-tier backend spin-up, so this script does not claim a frontend
@@ -45,6 +45,14 @@ DEFAULT_APP = "https://parth-tan.vercel.app"
 _RUN_TAG = os.urandom(4).hex()
 _SPEC_TMPL = "**UPS-{tag}-{n:02d}** - battery runtime: shall be **10 min** at full load."
 _SUB_TMPL = "**UPS-{tag}-{n:02d}** - battery runtime: **7 min**."
+
+
+def _payload(n):
+    return {
+        "spec_text": _SPEC_TMPL.format(tag=_RUN_TAG, n=n),
+        "submittal_text": _SUB_TMPL.format(tag=_RUN_TAG, n=n),
+        "system_id": "UPS",
+    }
 
 
 def _percentile(values, p):
@@ -153,9 +161,7 @@ def main():
         cold_health_ms, cold_health_ok = _timed_get(f"{args.api}/health", timeout=90)
         print(f"{'health (cold)':<28} {cold_health_ms:7.0f}ms  ok={cold_health_ok}")
         cold_analyze_ms, cold_analyze_ok = _timed_post_json(
-            f"{args.api}/analyze",
-            {"spec_text": _SPEC_TMPL.format(tag=_RUN_TAG, n=0), "submittal_text": _SUB_TMPL.format(tag=_RUN_TAG, n=0), "system_id": "UPS"},
-            timeout=90,
+            f"{args.api}/analyze", _payload(0), timeout=90,
         )
         print(f"{'analyze (cold, 1st call)':<28} {cold_analyze_ms:7.0f}ms  ok={cold_analyze_ok}")
         report["cold"] = {
@@ -184,9 +190,7 @@ def main():
     analyze_samples, analyze_oks = [], []
     for i in range(args.analysis_requests):
         ms, ok = _timed_post_json(
-            f"{args.api}/analyze",
-            {"spec_text": _SPEC_TMPL.format(tag=_RUN_TAG, n=i + 1), "submittal_text": _SUB_TMPL.format(tag=_RUN_TAG, n=i + 1), "system_id": "UPS"},
-            timeout=90,
+            f"{args.api}/analyze", _payload(i + 1), timeout=90,
         )
         analyze_samples.append(ms)
         analyze_oks.append(ok)
@@ -196,9 +200,7 @@ def main():
     stream_samples, stream_oks = [], []
     for i in range(args.analysis_requests):
         ms, ok = _time_to_first_sse_token(
-            f"{args.api}/analyze/stream",
-            {"spec_text": _SPEC_TMPL.format(tag=_RUN_TAG, n=i + 101), "submittal_text": _SUB_TMPL.format(tag=_RUN_TAG, n=i + 101), "system_id": "UPS"},
-            timeout=90,
+            f"{args.api}/analyze/stream", _payload(i + 101), timeout=90,
         )
         stream_samples.append(ms)
         stream_oks.append(ok)

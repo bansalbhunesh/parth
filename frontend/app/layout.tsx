@@ -26,7 +26,7 @@ const OG_IMAGE = {
   url: "/og.png",
   width: 1200,
   height: 630,
-  alt: "Pramaan — catches the vendor deviation the day the submittal lands, and names the commissioning test it would have failed. Benchmark v1.2: recall 0.862, 0/64 false alerts, rule baseline 0.111, 635 tests.",
+  alt: "Pramaan — catches the vendor deviation the day the submittal lands, and names the commissioning test it would have failed. Benchmark v1.2: recall 0.862, 0/64 false alerts, rule baseline 0.111, 644 tests.",
 };
 
 export const metadata: Metadata = {

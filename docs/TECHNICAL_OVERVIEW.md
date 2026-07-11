@@ -86,6 +86,7 @@ token-weighted quotas), `GET /llm-check?probe_all=1` (per-provider).
 | `POST /jobs/analyze` · `GET /jobs/{id}` | Async job flow + input-hash cache (scale path) |
 | `GET /projects/{id}/schedule` · `/supply-chain` · `/graph` | Deterministic services |
 | `GET /export/audit/html` | Standalone evidence pack (HTML) |
+| `POST /cases` · `/cases/{id}/findings` · `/cases/{id}/export/itp.pdf` | Persisted, tenant-isolated case workflow — finding → drafted RFI → printable HTML/PDF export → audit log |
 
 Full list: `backend/main.py`.
 

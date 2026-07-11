@@ -15,7 +15,7 @@ PRAMAAN — EPC Deviation Intelligence (PS4)
 See it work (90 seconds):  https://parth-tan.vercel.app/judge
   → click "Load deviation demo ★", hit Analyze, watch it reason live.
 Every number + its limitation:  https://parth-tan.vercel.app/evidence
-Full source, benchmark, 635 tests, CI:  https://github.com/bansalbhunesh/parth
+Full source, benchmark, 644 tests, CI:  https://github.com/bansalbhunesh/parth
 Pitch video (3 min):  <VIDEO_LINK_HERE>
 ```
 

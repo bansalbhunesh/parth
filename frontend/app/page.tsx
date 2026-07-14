@@ -183,20 +183,7 @@ function SystemHealthGrid({ rows }: { rows: Deviation[] }) {
   );
 }
 
-function TotalSavingsHero() {
-  return (
-    <div className="savings-hero">
-      <div className="savings-glow" />
-      <div className="savings-number">267</div>
-      <div className="savings-unit">weeks of lead-time window · synthetic demo portfolio</div>
-      <div className="savings-sub">
-        Summed lead time across 14 findings in the synthetic demo portfolio — the window
-        between catching each deviation at submittal review (Week 11) and the commissioning
-        test it would otherwise fail. An illustrative scenario, not a measured saving.
-      </div>
-    </div>
-  );
-}
+
 
 // Demo data changes rarely; serve the page from Vercel's edge cache and
 // revalidate in the background every 10 min. Reloads are instant instead of
@@ -249,7 +236,6 @@ export default async function Page() {
       </div>
 
       <StatsBar
-        totalLeadWeeks={rows.reduce((a, r) => a + (r.lead_time_weeks ?? 0), 0)}
         totalFindings={rows.length}
         critical={critical}
         major={major}
@@ -259,9 +245,7 @@ export default async function Page() {
 
       {hero && <Sentinel d={hero} />}
 
-      <ScrollReveal>
-        <TotalSavingsHero />
-      </ScrollReveal>
+
 
       <h2 className="section" id="workflow">
         Before vs after &middot; manual review vs Pramaan
@@ -364,7 +348,7 @@ export default async function Page() {
       </ScrollReveal>
 
       <h2 className="section" id="multiproject">
-        Multi-project eval &middot; 12 projects &middot; 11 countries &middot; synthetic breadth (by construction)
+        Multi-project eval &middot; 12 projects &middot; synthetic breadth (by construction)
       </h2>
       <ScrollReveal>
         <MultiProjectDashboard />
@@ -418,7 +402,7 @@ export default async function Page() {
           EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4
         </div>
         <div className="footer-meta">
-          12 Projects &middot; 11 Countries &middot; 50 Synthetic Deviations &middot; 1,024 Lead-time-weeks (synthetic sum) &middot; 15 Team-authored Pairs &middot; Offline 0 FP &middot; Synthetic F1 1.000 by construction
+          12 Projects (Synthetic Portfolio) &middot; 50 Synthetic Deviations &middot; 15 Real/Synthetic Evaluation Pairs &middot; Offline 0 FP &middot; F1 1.000 (synthetic dataset limit)
         </div>
       </div>
     </main>

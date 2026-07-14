@@ -32,7 +32,6 @@ function AnimatedNumber({ target, suffix = "", duration = 1200 }: { target: numb
 }
 
 export default function StatsBar({
-  totalLeadWeeks,
   totalFindings,
   critical,
   major,
@@ -44,7 +43,6 @@ export default function StatsBar({
   major: number;
   maxLeadWeeks: number;
   meanLeadWeeks: number;
-  totalLeadWeeks: number;
 }) {
 
   return (
@@ -78,12 +76,6 @@ export default function StatsBar({
           <AnimatedNumber target={meanLeadWeeks} suffix="w" />
         </div>
         <div className="stat-label">Mean lead time</div>
-      </div>
-      <div className="stat stat-hero">
-        <div className="stat-val stat-lead">
-          <AnimatedNumber target={totalLeadWeeks} suffix="w" duration={1800} />
-        </div>
-        <div className="stat-label">Lead-time window (scenario)</div>
       </div>
     </div>
   );

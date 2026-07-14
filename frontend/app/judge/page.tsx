@@ -1,6 +1,7 @@
 import Link from "next/link";
 import AnalyzePanel from "../../components/AnalyzePanel";
 import MultiProjectDashboard from "../../components/MultiProjectDashboard";
+import SystemStatusStrip from "../../components/SystemStatusStrip";
 import { getRegister, getSchedule } from "../../lib/api";
 
 // Same ISR treatment as the main page — instant reloads from the edge cache.
@@ -110,7 +111,7 @@ export default async function JudgePage() {
       <section className="jm-metrics">
         <div className="jm-metric">
           <div className="jm-metric-val lead">0.862</div>
-          <div className="jm-metric-label">mean recall · benchmark v1.2 (3-pass)</div>
+          <div className="jm-metric-label">mean recall · benchmark v1.2 · mean of 3 repeat runs</div>
         </div>
         <div className="jm-metric">
           <div className="jm-metric-val ok">0</div>
@@ -154,6 +155,7 @@ export default async function JudgePage() {
             </a>.
           </p>
         </div>
+        <SystemStatusStrip apiBase={apiBase} />
         <AnalyzePanel />
       </section>
 

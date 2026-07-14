@@ -578,11 +578,17 @@ def llm_check(request: Request, deep: bool = False, probe_all: bool = False):
         from backend.llm import complete
         out = complete("Reply with the single word: ok", json_mode=False)
         report = failover_report()  # regenerate so last_successful is this call
+        answering = report["last_successful_provider"] or status["provider"]
+        # Report the ANSWERING leg's configured model — when a failover leg
+        # serves the probe, pairing its provider with the primary's model
+        # reads as a contradiction to anyone auditing this JSON.
+        answering_model = (report.get("providers", {}).get(answering) or {}).get(
+            "model") or status.get("model")
         return {
             "ok": True,
             "probe": "tiny",
-            "provider": report["last_successful_provider"] or status["provider"],
-            "model": status.get("model"),
+            "provider": answering,
+            "model": answering_model,
             "sample_response": (out or "").strip()[:80],
             "failover": report,
             "hint": "A tiny probe can pass while demo-sized calls fail on "

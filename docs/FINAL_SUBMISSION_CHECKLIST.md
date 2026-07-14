@@ -47,6 +47,21 @@
 - Render backend Manual-Deployed with fresh `GEMINI_API_KEY`: ⬜
 - `make verify-live` → **`GREEN -- demo away.`**: ⬜
 
+### Judging-day environment (set in the Render dashboard, revert after)
+
+- ⬜ **Raise the per-IP rate limits** — a venue's shared Wi-Fi NAT puts every
+  judge behind ONE public IP, so the defaults (20 analyses / 3 deep probes
+  per hour) become a *shared* budget. Set `PRAMAAN_ANALYSIS_LIMIT_PER_HOUR=120`
+  and `PRAMAAN_DEEP_PROBE_LIMIT_PER_HOUR=12` before the session; restore the
+  defaults afterwards.
+- ⬜ **Gateway balance** — the featured-model leg spends real credit
+  (aicredits.in); check the balance covers the session, or the leg 402s and
+  the chain silently serves the Groq model instead
+  (`/llm-check?probe_all=1` must show all three legs `ok: true`).
+- ⬜ **Morning-of probe** — Gemini free-tier quota resets daily and has
+  failed probes before (2026-07-14); run `make verify-live` the morning of,
+  not just the night before.
+
 ## 4. Truth gates (all must pass — commands are copy-paste)
 
 Run from repo root.

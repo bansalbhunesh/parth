@@ -594,6 +594,31 @@ class TestLLMCheck:
         assert data["probe"] == "tiny"
         assert "deep=1" in data["hint"]
 
+    def test_llm_check_tiny_reports_answering_legs_model(self, monkeypatch):
+        """When a failover leg answers the probe, `model` must be that leg's
+        model — not the primary's (2026-07-14 audit: provider=groq was shown
+        next to model=gemini-2.5-flash)."""
+        import backend.llm as llm_mod
+        monkeypatch.setenv("GEMINI_API_KEY", "test-key-not-real")
+        monkeypatch.setattr(llm_mod, "complete",
+                            lambda prompt, system="", json_mode=True: "ok")
+        monkeypatch.setattr(llm_mod, "failover_report", lambda: {
+            "primary": "gemini",
+            "order": ["gemini", "groq"],
+            "chain": ["gemini", "groq"],
+            "providers": {
+                "gemini": {"configured": True, "model": "gemini-2.5-flash"},
+                "groq": {"configured": True, "model": "llama-3.3-70b-versatile"},
+            },
+            "last_successful_provider": "groq",
+            "last_failover": None,
+        })
+        r = client.get("/llm-check")
+        data = r.json()
+        assert data["ok"] is True
+        assert data["provider"] == "groq"
+        assert data["model"] == "llama-3.3-70b-versatile"
+
 
 class TestVisionEndpoint:
     """Vision path: Gemini reads the submittal from an image. Mocked so CI has

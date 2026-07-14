@@ -17,9 +17,13 @@ function tierColor(tier: string) {
 export default function MultiProjectDashboard() {
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [evalData, setEvalData] = useState<MultiProjectEval | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    getProjects().then(setProjects);
+    getProjects().then((p) => {
+      setProjects(p);
+      setLoaded(true);
+    });
     getMultiProjectEval().then(setEvalData);
   }, []);
 
@@ -171,10 +175,17 @@ export default function MultiProjectDashboard() {
         textAlign: "center",
         fontStyle: "italic",
       }}>
-        Multi-project eval proves generalisation across {projects.length} projects,{" "}
-        {projects.reduce((s, p) => s + p.deviations, 0)} deviations,{" "}
-        {new Set(projects.map(p => p.tier)).size} tier standards,{" "}
-        {new Set(projects.map(p => p.location.split(",").pop()?.trim())).size} countries
+        {loaded && projects.length > 0 ? (
+          <>
+            Breadth check: {projects.length} projects,{" "}
+            {projects.reduce((s, p) => s + p.deviations, 0)} seeded deviations,{" "}
+            {new Set(projects.map(p => p.tier)).size} tier standards,{" "}
+            {new Set(projects.map(p => p.location.split(",").pop()?.trim())).size} countries
+            {" "}— pipeline scaling and reproduction, not an accuracy claim
+          </>
+        ) : (
+          <>Loading the multi-project portfolio&hellip;</>
+        )}
       </div>
     </div>
   );

@@ -32,3 +32,4 @@ less shall be recorded as a non-conformance and resolved before release.
   smoke-development per **ASTM E84**.
 - **Understructure.** Bolted-stringer grid, seismically braced per the project
   structural criteria (ASCE 7 / IBC).
+- **Seismic design.** Seismically qualified for **Zone IV per IS 1893 (Part 1): 2016** with an Importance Factor (I) of **1.5** (critical infrastructure post-disaster functionality).

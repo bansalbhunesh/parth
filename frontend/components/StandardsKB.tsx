@@ -55,6 +55,14 @@ const STANDARDS = [
     color: "#8a96a8",
     deviations: 2,
   },
+  {
+    id: "CEA-2010",
+    name: "CEA Regulations 2010",
+    scope: "Indian electrical safety clearances",
+    detail: "Measures relating to safety & electricity supply, 2.5m vertical clearances, safety clearances",
+    color: "#fb7185",
+    deviations: 1,
+  },
 ];
 
 export default function StandardsKB() {

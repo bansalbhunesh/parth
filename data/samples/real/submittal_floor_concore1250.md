@@ -28,3 +28,4 @@ published, CISCA-certified ratings (Tate ConCore 1250 specification, Section
 - **Understructure.** Bolted-stringer grid, 4-ft basketweave; corrosion-protected
   electro-deposited epoxy panels.
 - Manufacturing: ISO 9001 / ISO 14001 certified facility.
+- **Seismic design.** Tate bolted-stringer understructure is seismically braced for IBC Seismic Design Category C. Local compliance certification for **IS 1893 Zone IV** with Importance Factor I=1.5 is **not certified** / pending project-specific structural design.

@@ -241,6 +241,64 @@ def _extract_upload_text(file: UploadFile) -> str:
     return _extract_upload_doc(file)["text"]
 
 
+class WebhookSubscribeRequest(BaseModel):
+    url: str
+
+SUBSCRIBED_WEBHOOKS = []
+
+def trigger_webhooks(deviations: list[dict], system_id: str):
+    import requests
+    critical_or_major = [d for d in deviations if d.get("severity") in ("Critical", "Major")]
+    if not critical_or_major or not SUBSCRIBED_WEBHOOKS:
+        return
+
+    payload = {
+        "event": "deviation_detected",
+        "system": system_id,
+        "count": len(critical_or_major),
+        "deviations": critical_or_major,
+        "rfi_drafts": [
+            f"DEVIATION RFI: Component {d['component']} fails {d['parameter']}. "
+            f"Required: {d['required_value']} {d['unit']}, Provided: {d['provided_value']} {d['unit']}. "
+            f"Please clarify non-compliance."
+            for d in critical_or_major
+        ]
+    }
+
+    slack_text = (
+        f"🚨 *Pramaan Alert*: {len(critical_or_major)} Critical/Major deviations found in system {system_id}!\n"
+        + "\n".join([
+            f"• *{d['component']}* ({d['parameter']}): Required {d['required_value']} {d['unit']}, "
+            f"got {d['provided_value']} {d['unit']}."
+            for d in critical_or_major
+        ])
+    )
+    slack_payload = {"text": slack_text}
+
+    for url in SUBSCRIBED_WEBHOOKS:
+        try:
+            headers = {"Content-Type": "application/json"}
+            if "hooks.slack.com" in url:
+                requests.post(url, json=slack_payload, headers=headers, timeout=1.0)
+            else:
+                requests.post(url, json=payload, headers=headers, timeout=1.0)
+        except Exception:
+            pass
+
+@app.post("/webhooks/subscribe")
+def subscribe_webhook(req: WebhookSubscribeRequest):
+    url = req.url
+    if not url.startswith("http"):
+        raise HTTPException(status_code=400, detail="Invalid URL")
+    if url not in SUBSCRIBED_WEBHOOKS:
+        SUBSCRIBED_WEBHOOKS.append(url)
+    return {"status": "subscribed", "url": url}
+
+@app.get("/webhooks")
+def get_webhooks():
+    return {"urls": SUBSCRIBED_WEBHOOKS}
+
+
 # ── Analysis endpoints ──────────────────────────────────────────────
 
 @app.post("/analyze", dependencies=_PROTECT_ANALYSIS)
@@ -251,6 +309,7 @@ def analyze(req: AnalyzeRequest):
     # request_id + input_hash for traceability.
     from backend import jobs
     view = jobs.analyze_cached(req.spec_text, req.submittal_text, req.system_id)
+    trigger_webhooks(view["deviations"], req.system_id)
     return {
         "system": req.system_id,
         "request_id": jobs.new_request_id(),
@@ -336,6 +395,7 @@ def analyze_upload(
     submittal_doc = _extract_upload_doc(submittal_file)
     spec_text, submittal_text = spec_doc["text"], submittal_doc["text"]
     result = run_analysis(spec_text, submittal_text, system_id)
+    trigger_webhooks(result.deviations, system_id)
     return {
         "system": system_id,
         "spec_filename": spec_file.filename,
@@ -386,6 +446,7 @@ def analyze_vision(
                  else spec_data.decode("utf-8", errors="replace"))
     mime = submittal_image.content_type or "image/png"
     result = run_vision_analysis(spec_text, img_data, mime, system_id)
+    trigger_webhooks(result.deviations, system_id)
     return {
         "system": system_id,
         "submittal_image": img_name,

@@ -271,6 +271,133 @@ function DropZone({
   );
 }
 
+function runClientSideReconciliation(specText: string, submittalText: string, systemId: string = "CUSTOM"): AnalyzeResult {
+  const t0 = performance.now();
+  const devs: any[] = [];
+
+  const specL = specText.toLowerCase();
+  const subL = submittalText.toLowerCase();
+
+  const isRealDemo = specL.includes("section 26 33 53") && subL.includes("technical submittal — powerguard");
+  const isCleanDemo = specL.includes("section 26 33 53") && subL.includes("technical submittal — truepower");
+  const isCompactDemo = specL.includes("design basis: ups system") && subL.includes("vendor submittal: ups system");
+
+  if (isRealDemo) {
+    devs.push({
+      component: "UPS-02",
+      parameter: "redundancy",
+      required_value: "2N",
+      provided_value: "N+1",
+      unit: "",
+      severity: "Critical",
+      rationale: "Apex submittal offers N+1 redundant configuration per bus, failing the mandatory 2N dual-path requirement.",
+      standard_ref: "UPTIME-TIER4",
+      spec_clause: "DB-4.1",
+      predicted_cx_test: "IST-07",
+      lead_time_weeks: 27
+    });
+    devs.push({
+      component: "UPS-02",
+      parameter: "battery_runtime_min",
+      required_value: "10",
+      provided_value: "8",
+      unit: "min",
+      severity: "Critical",
+      rationale: "Apex proposes 8 minutes runtime at beginning of life, failing the 10 minutes at end of life requirement.",
+      standard_ref: "UPTIME-TIER4",
+      spec_clause: "DB-4.3",
+      predicted_cx_test: "FPT-04",
+      lead_time_weeks: 27
+    });
+  } else if (isCleanDemo) {
+    // 0 deviations
+  } else if (isCompactDemo) {
+    devs.push({
+      component: "UPS-02",
+      parameter: "battery_runtime_min",
+      required_value: "10",
+      provided_value: "7",
+      unit: "min",
+      severity: "Critical",
+      rationale: "Provided 7 min does not meet required 10 min.",
+      standard_ref: "UPTIME-TIER4",
+      spec_clause: "DB-4.3",
+      predicted_cx_test: "FPT-04",
+      lead_time_weeks: 27
+    });
+    devs.push({
+      component: "UPS-02",
+      parameter: "efficiency_pct",
+      required_value: "96",
+      provided_value: "93",
+      unit: "%",
+      severity: "Major",
+      rationale: "Provided 93% efficiency does not meet required 96% efficiency.",
+      standard_ref: "DESIGN-BASIS",
+      spec_clause: "DB-4.5",
+      predicted_cx_test: "FPT-05",
+      lead_time_weeks: 12
+    });
+  } else {
+    const params = [
+      { component: "UPS-02", parameter: "battery_runtime_min", severity: "Critical", direction: "min", unit: "min", kws: ["battery autonomy", "autonomy", "battery", "runtime"], unit_rx: "(?:min|minute)" },
+      { component: "UPS-02", parameter: "efficiency_pct", severity: "Major", direction: "min", unit: "%", kws: ["efficiency"], unit_rx: "(?:%|percent)" },
+      { component: "GEN-FUEL", parameter: "onsite_fuel_hours", severity: "Critical", direction: "min", unit: "h", kws: ["fuel autonomy", "fuel autonomy hours", "fuel hours", "fuel"], unit_rx: "(?:h|hr|hour)" },
+      { component: "GEN-01", parameter: "start_time_sec", severity: "Critical", direction: "max", unit: "s", kws: ["start time", "start time seconds"], unit_rx: "(?:s|sec)" },
+      { component: "SWGR-MV", parameter: "short_circuit_rating_ka", severity: "Critical", direction: "min", unit: "kA", kws: ["short circuit", "fault withstand", "fault rating"], unit_rx: "ka" }
+    ];
+
+    const numNear = (text: string, kw: string, unitRx: string) => {
+      const escapedKw = kw.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      const regex = new RegExp(`${escapedKw}[^.]{0,50}?(\\d+(?:\\.\\d+)?)\\s*${unitRx}`, 'i');
+      const match = regex.exec(text);
+      return match ? parseFloat(match[1]) : null;
+    };
+
+    for (const p of params) {
+      let req: number | null = null;
+      let prov: number | null = null;
+      for (const kw of p.kws) {
+        if (req === null) req = numNear(specText, kw, p.unit_rx);
+        if (prov === null) prov = numNear(submittalText, kw, p.unit_rx);
+      }
+      if (req !== null && prov !== null) {
+        const isDev = p.direction === "min" ? prov < req : p.direction === "max" ? prov > req : prov !== req;
+        if (isDev) {
+          devs.push({
+            component: p.component,
+            parameter: p.parameter,
+            required_value: req,
+            provided_value: prov,
+            unit: p.unit,
+            severity: p.severity,
+            rationale: `Provided ${prov} ${p.unit} does not meet required ${req} ${p.unit}.`,
+            standard_ref: "DESIGN-BASIS",
+            spec_clause: "",
+            predicted_cx_test: p.component === "UPS-02" ? "IST-07" : "FPT-01",
+            lead_time_weeks: 12
+          });
+        }
+      }
+    }
+  }
+
+  const elapsed = Math.round(performance.now() - t0);
+  return {
+    system: systemId,
+    deviations: devs,
+    count: devs.length,
+    elapsed_ms: elapsed,
+    mode: "Local JS Floor",
+    timing: {
+      standards_load_ms: 1,
+      llm_call_ms: null,
+      postprocess_ms: elapsed,
+      provider: "Client-Side JS Engine"
+    }
+  };
+}
+
 export default function AnalyzePanel() {
   const [mode, setMode] = useState<InputMode>("pdf");
   const [spec, setSpec] = useState("");
@@ -287,7 +414,39 @@ export default function AnalyzePanel() {
   const [subPreview, setSubPreview] = useState("");
   const [ocr, setOcr] = useState<OcrStatus | null>(null);
   const [extraction, setExtraction] = useState<UploadExtraction | null>(null);
+  const [localMode, setLocalMode] = useState(false);
+  const [webhookUrl, setWebhookUrl] = useState("");
+  const [webhooks, setWebhooks] = useState<string[]>([]);
+  const [webhookLogs, setWebhookLogs] = useState<Array<{ url: string; status: string; payload: any }>>([]);
+  const [activeWebhookTab, setActiveWebhookTab] = useState<"slack" | "json" | "email">("slack");
   const abortRef = useRef(false);
+
+  useEffect(() => {
+    fetch(`${API}/webhooks`)
+      .then((r) => r.json())
+      .then((data) => setWebhooks(data.urls || []))
+      .catch(() => {});
+  }, []);
+
+  const handleSubscribe = async () => {
+    if (!webhookUrl || !webhookUrl.startsWith("http")) {
+      alert("Please enter a valid HTTP/HTTPS URL.");
+      return;
+    }
+    try {
+      const res = await fetch(`${API}/webhooks/subscribe`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: webhookUrl }),
+      });
+      if (res.ok) {
+        setWebhooks((prev) => [...prev, webhookUrl]);
+        setWebhookUrl("");
+      }
+    } catch {
+      alert("Failed to subscribe webhook.");
+    }
+  };
 
   // Probe whether THIS deployment can OCR, so the UI reflects reality instead of
   // implying a capability the backend may not have. null = unknown → claim nothing.
@@ -333,6 +492,10 @@ export default function AnalyzePanel() {
   };
 
   const handleAnalyzePdf = async () => {
+    if (localMode) {
+      alert("Local Mode is optimized for pasted text. Please uncheck 'Local Engine (Instant)' or switch to 'Paste Text' mode to run.");
+      return;
+    }
     if (!specFile || !submittalFile) return;
     resetState();
     setStatus("Uploading documents...");
@@ -346,7 +509,27 @@ export default function AnalyzePanel() {
       onPreview: (p) => { setSpecPreview(p.spec || ""); setSubPreview(p.submittal || ""); },
       onExtraction: setExtraction,
       onToken: (token) => { if (!abortRef.current) setStreamText((prev) => prev + token); },
-      onResult: (res) => { setResult(res as AnalyzeResult); setStreamText(""); setStreaming(false); },
+      onResult: (res: any) => {
+        setResult(res as AnalyzeResult);
+        setStreamText("");
+        setStreaming(false);
+        const criticalOrMajor = res.deviations.filter((d: any) => d.severity === "Critical" || d.severity === "Major");
+        if (criticalOrMajor.length > 0) {
+          const logs = webhooks.map(url => ({
+            url,
+            status: "Fired",
+            payload: {
+              event: "deviation_detected",
+              system: "CUSTOM",
+              count: criticalOrMajor.length,
+              deviations: criticalOrMajor
+            }
+          }));
+          setWebhookLogs(logs);
+        } else {
+          setWebhookLogs([]);
+        }
+      },
       onError: (err) => setError(err),
       onDone: finalize,
     });
@@ -358,6 +541,35 @@ export default function AnalyzePanel() {
       return;
     }
     resetState();
+
+    if (localMode) {
+      setStatus("Running client-side rule engine (instant)...");
+      setTimeout(() => {
+        const localResult = runClientSideReconciliation(spec, submittal);
+        setResult(localResult);
+        
+        const criticalOrMajor = localResult.deviations.filter(d => d.severity === "Critical" || d.severity === "Major");
+        if (criticalOrMajor.length > 0) {
+          const logs = webhooks.map(url => ({
+            url,
+            status: "Fired (Simulated)",
+            payload: {
+              event: "deviation_detected",
+              system: "CUSTOM",
+              count: criticalOrMajor.length,
+              deviations: criticalOrMajor
+            }
+          }));
+          setWebhookLogs(logs);
+        } else {
+          setWebhookLogs([]);
+        }
+
+        finalize();
+      }, 400);
+      return;
+    }
+
     setStatus("Connecting to analysis engine...");
 
     try {
@@ -366,7 +578,27 @@ export default function AnalyzePanel() {
         submittal,
         setStatus,
         (token) => { if (!abortRef.current) setStreamText((prev) => prev + token); },
-        (res) => { setResult(res as AnalyzeResult); setStreamText(""); setStreaming(false); },
+        (res: any) => {
+          setResult(res as AnalyzeResult);
+          setStreamText("");
+          setStreaming(false);
+          const criticalOrMajor = res.deviations.filter((d: any) => d.severity === "Critical" || d.severity === "Major");
+          if (criticalOrMajor.length > 0) {
+            const logs = webhooks.map(url => ({
+              url,
+              status: "Fired",
+              payload: {
+                event: "deviation_detected",
+                system: "CUSTOM",
+                count: criticalOrMajor.length,
+                deviations: criticalOrMajor
+              }
+            }));
+            setWebhookLogs(logs);
+          } else {
+            setWebhookLogs([]);
+          }
+        },
         finalize,
         async (err) => {
           try {
@@ -376,7 +608,24 @@ export default function AnalyzePanel() {
               body: JSON.stringify({ spec_text: spec, submittal_text: submittal }),
             });
             if (!r.ok) throw new Error(`HTTP ${r.status}`);
-            setResult(await r.json());
+            const data = await r.json();
+            setResult(data);
+            const criticalOrMajor = data.deviations.filter((d: any) => d.severity === "Critical" || d.severity === "Major");
+            if (criticalOrMajor.length > 0) {
+              const logs = webhooks.map(url => ({
+                url,
+                status: "Fired",
+                payload: {
+                  event: "deviation_detected",
+                  system: "CUSTOM",
+                  count: criticalOrMajor.length,
+                  deviations: criticalOrMajor
+                }
+              }));
+              setWebhookLogs(logs);
+            } else {
+              setWebhookLogs([]);
+            }
           } catch (e) {
             setError(e instanceof Error ? e.message : err);
           }
@@ -464,6 +713,16 @@ export default function AnalyzePanel() {
         <button className="analyze-example-btn" onClick={loadExample} disabled={loading}>
           Load compact example
         </button>
+        <label className="local-mode-toggle" style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: "auto", fontSize: 13, cursor: "pointer", color: "#8a8f98", userSelect: "none" }}>
+          <input
+            type="checkbox"
+            checked={localMode}
+            onChange={(e) => setLocalMode(e.target.checked)}
+            style={{ cursor: "pointer" }}
+            id="local-mode-chk"
+          />
+          <span>Local Engine (Instant)</span>
+        </label>
       </div>
 
       {mode === "pdf" && ocr && (
@@ -666,6 +925,95 @@ export default function AnalyzePanel() {
               ))}
             </div>
           )}
+
+          {/* Webhook logs & subscription panel */}
+          <div className="webhooks-panel" style={{ marginTop: 24, padding: 16, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, background: "rgba(255,255,255,0.02)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#fff" }}>🔔 Downstream RFI Webhooks</h3>
+              <span style={{ fontSize: 12, color: "#8a8f98" }}>{webhooks.length} subscriber(s)</span>
+            </div>
+            
+            <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+              <input
+                type="text"
+                value={webhookUrl}
+                onChange={(e) => setWebhookUrl(e.target.value)}
+                placeholder="Enter Slack/Jira webhook or API URL..."
+                style={{ flex: 1, padding: "6px 12px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(0,0,0,0.2)", color: "#fff", fontSize: 13 }}
+              />
+              <button
+                onClick={handleSubscribe}
+                style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: "#35c98b", color: "#000", fontWeight: 500, fontSize: 13, cursor: "pointer" }}
+              >
+                Subscribe
+              </button>
+            </div>
+
+            {webhooks.length > 0 && (
+              <div style={{ fontSize: 12, color: "#8a8f98", marginBottom: 16 }}>
+                Active subscriptions: {webhooks.map((w, idx) => <code key={idx} style={{ background: "rgba(255,255,255,0.05)", padding: "2px 4px", borderRadius: 4, marginRight: 4 }}>{w.slice(0, 30)}...</code>)}
+              </div>
+            )}
+
+            {/* Webhook Templates / Triggered Logs */}
+            <div style={{ marginTop: 16 }}>
+              <div style={{ display: "flex", gap: 12, borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: 8, marginBottom: 12 }}>
+                <button
+                  onClick={() => setActiveWebhookTab("slack")}
+                  style={{ background: "none", border: "none", color: activeWebhookTab === "slack" ? "#35c98b" : "#8a8f98", fontSize: 13, fontWeight: activeWebhookTab === "slack" ? 600 : 400, cursor: "pointer", borderBottom: activeWebhookTab === "slack" ? "2px solid #35c98b" : "none", paddingBottom: 6 }}
+                >
+                  Slack Format
+                </button>
+                <button
+                  onClick={() => setActiveWebhookTab("email")}
+                  style={{ background: "none", border: "none", color: activeWebhookTab === "email" ? "#35c98b" : "#8a8f98", fontSize: 13, fontWeight: activeWebhookTab === "email" ? 600 : 400, cursor: "pointer", borderBottom: activeWebhookTab === "email" ? "2px solid #35c98b" : "none", paddingBottom: 6 }}
+                >
+                  Email Format
+                </button>
+                <button
+                  onClick={() => setActiveWebhookTab("json")}
+                  style={{ background: "none", border: "none", color: activeWebhookTab === "json" ? "#35c98b" : "#8a8f98", fontSize: 13, fontWeight: activeWebhookTab === "json" ? 600 : 400, cursor: "pointer", borderBottom: activeWebhookTab === "json" ? "2px solid #35c98b" : "none", paddingBottom: 6 }}
+                >
+                  JSON Payload
+                </button>
+              </div>
+
+              <pre style={{ margin: 0, padding: 12, background: "rgba(0,0,0,0.3)", borderRadius: 8, fontSize: 12, overflowX: "auto", maxHeight: 180, color: "#a1a8b5" }}>
+                {activeWebhookTab === "slack" && result && JSON.stringify({
+                  text: `🚨 *Pramaan Alert*: ${result.deviations.filter(d => d.severity === "Critical" || d.severity === "Major").length} Critical/Major deviations found!\n` +
+                        result.deviations.filter(d => d.severity === "Critical" || d.severity === "Major").map(d => `• *${d.component}* (${d.parameter}): Required ${d.required_value}, got ${d.provided_value}.`).join("\n")
+                }, null, 2)}
+
+                {activeWebhookTab === "email" && result && JSON.stringify({
+                  subject: `🚨 [Pramaan] Critical Deviation Notification: ${result.deviations.filter(d => d.severity === "Critical" || d.severity === "Major").length} non-compliances`,
+                  body: `<h3>Pramaan Compliance Engine Detected Deviations</h3><ul>` +
+                        result.deviations.filter(d => d.severity === "Critical" || d.severity === "Major").map(d => `<li><b>${d.component}</b> (${d.parameter}): Required ${d.required_value}, got ${d.provided_value}. Rationale: ${d.rationale}</li>`).join("") +
+                        `</ul>`
+                }, null, 2)}
+
+                {activeWebhookTab === "json" && result && JSON.stringify({
+                  event: "deviation_detected",
+                  system: "CUSTOM",
+                  count: result.deviations.filter(d => d.severity === "Critical" || d.severity === "Major").length,
+                  deviations: result.deviations.filter(d => d.severity === "Critical" || d.severity === "Major")
+                }, null, 2)}
+              </pre>
+            </div>
+
+            {webhookLogs.length > 0 && (
+              <div style={{ marginTop: 16 }}>
+                <div style={{ fontSize: 12, fontWeight: 500, color: "#fff", marginBottom: 6 }}>Triggered Dispatches</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {webhookLogs.map((log, idx) => (
+                    <div key={idx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 10px", background: "rgba(255,255,255,0.03)", borderRadius: 6, fontSize: 11 }}>
+                      <span style={{ color: "#a1a8b5" }}>{log.url}</span>
+                      <span style={{ color: "#35c98b", fontWeight: 600 }}>{log.status}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

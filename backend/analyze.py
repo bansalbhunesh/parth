@@ -382,6 +382,12 @@ def run_streaming_analysis(
         mode = "deterministic"
 
     elapsed = round((time.time() - t0) * 1000)
+    try:
+        from backend.main import trigger_webhooks
+        trigger_webhooks(devs, system_id)
+    except Exception:
+        pass
+
     result = {
         "system": system_id,
         "deviations": devs,

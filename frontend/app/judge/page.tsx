@@ -2,6 +2,7 @@ import Link from "next/link";
 import AnalyzePanel from "../../components/AnalyzePanel";
 import MultiProjectDashboard from "../../components/MultiProjectDashboard";
 import SystemStatusStrip from "../../components/SystemStatusStrip";
+import RemediationSimulator from "../../components/RemediationSimulator";
 import { getRegister, getSchedule } from "../../lib/api";
 
 // Same ISR treatment as the main page — instant reloads from the edge cache.
@@ -198,6 +199,7 @@ export default async function JudgePage() {
             </div>
           </div>
         </div>
+        <RemediationSimulator />
       </section>
 
       <section className="jm-section">

@@ -1,112 +1,115 @@
 "use client";
+import { useEffect, useState, useMemo } from "react";
+import { getRemediation, RemediationSim } from "../lib/api";
 
-import { useMemo, useState } from "react";
-import { RemediationSim } from "../lib/api";
+interface Props {
+  sim?: RemediationSim;
+}
 
-// What-if remediation: a slider for the week the deviation is CAUGHT, driving
-// the schedule slip and its cost. Deterministic — the curve comes straight from
-// the engine. The story it tells: catch early, slip shrinks; the gap between
-// "Pramaan (upload day)" and "commissioning (too late)" is the lead-time metric,
-// made causal. Hand-rolled SVG, no deps.
+export default function RemediationSimulator({ sim: propSim }: Props) {
+  const [remediation, setRemediation] = useState<RemediationSim | null>(null);
+  const [catchWeek, setCatchWeek] = useState(11);
+  const [loading, setLoading] = useState(!propSim);
 
-const W = 640;
-const H = 180;
-const PAD_L = 44;
-const PAD_B = 26;
-const PAD_T = 12;
+  useEffect(() => {
+    if (propSim) {
+      setRemediation(propSim);
+      setCatchWeek(propSim.scenarios.pramaan.catch_week || 11);
+      setLoading(false);
+      return;
+    }
+    getRemediation("DEV-001", "meghdoot")
+      .then((data) => {
+        setRemediation(data);
+        setCatchWeek(data.scenarios.pramaan.catch_week || 11);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  }, [propSim]);
 
-export default function RemediationSimulator({ sim }: { sim: RemediationSim }) {
-  // Guard degenerate data (a deviation with no Cx test → cx_planned 0): never
-  // divide by zero in the chart or hand the range a max of 0.
-  const maxWeek = Math.max(1, sim.cx_planned_week);
-  const [catchWeek, setCatchWeek] = useState(Math.round(sim.scenarios.pramaan.catch_week));
+  const selectedPoint = useMemo(() => {
+    if (!remediation) return null;
+    const curve = remediation.curve || [];
+    const closest = curve.reduce((prev, curr) => 
+      Math.abs(curr.catch_week - catchWeek) < Math.abs(prev.catch_week - catchWeek) ? curr : prev
+    , curve[0] || { catch_week: catchWeek, slip_weeks: 0, cost_lakh: 0 });
+    return closest;
+  }, [remediation, catchWeek]);
 
-  const maxSlip = useMemo(
-    () => Math.max(1, ...sim.curve.map((p) => p.slip_weeks)),
-    [sim.curve],
-  );
-  const point = useMemo(() => {
-    const exact = sim.curve.find((p) => p.catch_week === catchWeek);
-    if (exact) return exact;
-    const slip = Math.max(0, catchWeek + sim.fix_lead_weeks - sim.cx_planned_week);
-    return { catch_week: catchWeek, slip_weeks: Math.round(slip * 10) / 10, cost_lakh: Math.round(slip * sim.cost_per_week_lakh * 10) / 10 };
-  }, [catchWeek, sim]);
+  if (loading) {
+    return <div style={{ color: "#8a8f98", fontSize: 13, padding: 20 }}>Loading simulator data...</div>;
+  }
 
-  const x = (w: number) => PAD_L + (w / maxWeek) * (W - PAD_L - 8);
-  const y = (s: number) => PAD_T + (1 - s / maxSlip) * (H - PAD_T - PAD_B);
+  if (!remediation) {
+    return <div style={{ color: "#ff4d4d", fontSize: 13, padding: 20 }}>Simulator data unavailable.</div>;
+  }
 
-  const path = sim.curve.map((p, i) => `${i ? "L" : "M"}${x(p.catch_week).toFixed(1)},${y(p.slip_weeks).toFixed(1)}`).join(" ");
-  const areaPath = `${path} L${x(sim.curve[sim.curve.length - 1].catch_week).toFixed(1)},${y(0).toFixed(1)} L${x(0).toFixed(1)},${y(0).toFixed(1)} Z`;
-  const cliff = sim.zero_slip_deadline_week;
-
-  const crore = (lakh: number) => (lakh / 100).toFixed(1);
-
+  const costLakh = selectedPoint ? selectedPoint.cost_lakh : 0;
+  const slipWeeks = selectedPoint ? selectedPoint.slip_weeks : 0;
+  const isTrap = remediation.zero_slip_deadline_week <= catchWeek;
+  
   return (
-    <div className="remsim">
-      <div className="remsim-head">
-        <span className="remsim-tag">WHAT-IF · REMEDIATION SIMULATOR</span>
-        <span className="remsim-dev">{sim.component} · {sim.deviation}</span>
+    <div className="remediation-simulator-card" style={{ padding: 20, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, background: "rgba(255,255,255,0.02)", marginTop: 20 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+        <div>
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: "#fff" }}>🛠️ What-if Remediation Simulator</h3>
+          <p style={{ margin: "4px 0 0", fontSize: 12.5, color: "#8a8f98" }}>
+            Slide to adjust the <strong>catch week</strong> for the hero UPS-02 deviation (requires 10-week fix lead).
+          </p>
+        </div>
+        <span style={{ fontSize: 12, padding: "2px 8px", borderRadius: 4, background: isTrap ? "rgba(239,68,68,0.15)" : "rgba(34,197,94,0.15)", color: isTrap ? "#ef4444" : "#22c55e" }}>
+          {isTrap ? "🚨 Cost of Delay Active" : "✓ On Schedule"}
+        </span>
       </div>
-      <p className="remsim-lead">
-        Catch this deviation <strong>{sim.slip_avoided_weeks} weeks earlier</strong> and you
-        avoid <strong>₹{crore(sim.cost_avoided_lakh)} crore</strong> of schedule slip —
-        the lead-time number, made causal. Drag to see the cost of catching it late.
-      </p>
 
-      <svg viewBox={`0 0 ${W} ${H}`} className="remsim-chart" role="img"
-           aria-label={`Schedule slip vs the week the deviation is caught. Catching at week ${catchWeek} yields ${point.slip_weeks} weeks of slip.`}>
-        {/* zero-slip cliff (only meaningful for short-lead items) */}
-        {cliff > 0 && (
-          <g>
-            <line x1={x(cliff)} y1={PAD_T} x2={x(cliff)} y2={H - PAD_B} className="remsim-cliff" />
-            <text x={x(cliff) + 4} y={PAD_T + 10} className="remsim-cliff-lbl">zero-slip deadline · wk {cliff}</text>
-          </g>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 20 }}>
+        <div style={{ background: "rgba(0,0,0,0.2)", padding: 12, borderRadius: 8, textAlign: "center" }}>
+          <span style={{ display: "block", fontSize: 11, color: "#8a8f98", textTransform: "uppercase" }}>Triage Week</span>
+          <strong style={{ display: "block", fontSize: 20, color: "#fff", marginTop: 4 }}>Week {catchWeek}</strong>
+        </div>
+        <div style={{ background: "rgba(0,0,0,0.2)", padding: 12, borderRadius: 8, textAlign: "center" }}>
+          <span style={{ display: "block", fontSize: 11, color: "#8a8f98", textTransform: "uppercase" }}>Project Delay</span>
+          <strong style={{ display: "block", fontSize: 20, color: slipWeeks > 0 ? "#ff4d4d" : "#22c55e", marginTop: 4 }}>
+            {slipWeeks > 0 ? `+${slipWeeks} weeks` : "None"}
+          </strong>
+        </div>
+        <div style={{ background: "rgba(0,0,0,0.2)", padding: 12, borderRadius: 8, textAlign: "center" }}>
+          <span style={{ display: "block", fontSize: 11, color: "#8a8f98", textTransform: "uppercase" }}>Cost Impact</span>
+          <strong style={{ display: "block", fontSize: 20, color: costLakh > 0 ? "#ff4d4d" : "#22c55e", marginTop: 4 }}>
+            {costLakh > 0 ? `₹${costLakh} lakh` : "₹0"}
+          </strong>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: 20 }}>
+        <input
+          type="range"
+          min={0}
+          max={38}
+          value={catchWeek}
+          onChange={(e) => setCatchWeek(Number(e.target.value))}
+          style={{ width: "100%", height: 6, borderRadius: 3, outline: "none", cursor: "pointer" }}
+        />
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#8a8f98", marginTop: 8 }}>
+          <span>Week 0 (Design Review)</span>
+          <span style={{ color: "#35c98b" }}>Week 11 (Pramaan Upload)</span>
+          <span>Week 38 (Commissioning Test)</span>
+        </div>
+      </div>
+
+      <div style={{ fontSize: 12.5, color: "#a1a8b5", lineHeight: 1.5, borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 12 }}>
+        {catchWeek <= 11 ? (
+          <span style={{ color: "#22c55e" }}>
+            💡 <strong>Safe Window:</strong> Catching this deviation before the <strong>Week {remediation.zero_slip_deadline_week}</strong> deadline avoids all project schedule slip. Total savings vs commissioning catch: <strong>₹{remediation.cost_avoided_lakh} lakh</strong>.
+          </span>
+        ) : (
+          <span style={{ color: "#ffb020" }}>
+            ⚠️ <strong>Slippage:</strong> Finding this after Week {remediation.zero_slip_deadline_week} leads to a <strong>{slipWeeks}-week</strong> delay in ready-for-service date because of the 10-week vendor replacement lead time.
+          </span>
         )}
-        {/* the slip curve */}
-        <path d={areaPath} className="remsim-area" />
-        <path d={path} className="remsim-line" />
-        {/* scenario markers */}
-        {([["commissioning", "var(--fault)"], ["pramaan", "var(--ok)"]] as const).map(([name, c]) => {
-          const s = sim.scenarios[name];
-          return (
-            <g key={name}>
-              <circle cx={x(s.catch_week)} cy={y(s.slip_weeks)} r={3.5} fill={c} />
-              <text x={Math.min(x(s.catch_week), W - 12)} y={y(s.slip_weeks) - 7} className="remsim-marker" fill={c}
-                    textAnchor={name === "commissioning" ? "end" : "start"}>
-                {name === "pramaan" ? "Pramaan (upload)" : "Commissioning"}
-              </text>
-            </g>
-          );
-        })}
-        {/* live cursor */}
-        <line x1={x(catchWeek)} y1={PAD_T} x2={x(catchWeek)} y2={H - PAD_B} className="remsim-cursor" />
-        <circle cx={x(catchWeek)} cy={y(point.slip_weeks)} r={4.5} className="remsim-dot" />
-        {/* axes labels */}
-        <text x={PAD_L} y={H - 8} className="remsim-axis">wk 0</text>
-        <text x={W - 8} y={H - 8} className="remsim-axis" textAnchor="end">commissioning · wk {maxWeek}</text>
-        <text x={4} y={y(maxSlip) + 4} className="remsim-axis">{maxSlip}w slip</text>
-      </svg>
-
-      <input
-        type="range" min={0} max={maxWeek} step={1} value={catchWeek}
-        onChange={(e) => setCatchWeek(Number(e.target.value))}
-        className="remsim-range" aria-label="Week the deviation is caught"
-      />
-      <div className="remsim-readout">
-        <div><span className="remsim-k">Caught at</span><span className="remsim-v">week {catchWeek}</span></div>
-        <div><span className="remsim-k">Schedule slip</span><span className={`remsim-v ${point.slip_weeks > 0 ? "bad" : "good"}`}>{point.slip_weeks} wk</span></div>
-        <div><span className="remsim-k">Cost of delay</span><span className={`remsim-v ${point.slip_weeks > 0 ? "bad" : "good"}`}>₹{crore(point.cost_lakh)} cr</span></div>
       </div>
-      {sim.long_lead_trap && (
-        <p className="remsim-note">
-          <strong>Long-lead trap:</strong>{" "}
-          the {sim.fix_lead_weeks}-week re-procurement exceeds the gap to the
-          week-{sim.cx_planned_week} test, so slip can&apos;t reach zero — but catching on
-          upload day still cuts it from {sim.scenarios.commissioning.slip_weeks} weeks
-          to {sim.scenarios.pramaan.slip_weeks}.
-        </p>
-      )}
-      <p className="remsim-assumption">{sim.assumption}</p>
     </div>
   );
 }

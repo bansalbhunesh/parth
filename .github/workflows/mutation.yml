@@ -24,13 +24,15 @@ jobs:
           python -m pip install --disable-pip-version-check --no-deps .
       - name: Run configured critical-path mutations
         run: |
-          mutmut run
-          mutmut results | tee mutation-results.txt
+          mutmut run --max-children 4
+          mutmut results --all | tee mutation-results.txt
+          python scripts/check_mutation_score.py mutation-results.txt --minimum 85 --json-output mutation-summary.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
           name: mutation-results
           path: |
             mutation-results.txt
+            mutation-summary.json
             mutants/
           retention-days: 30

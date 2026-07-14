@@ -5,10 +5,11 @@
   </picture>
 </p>
 
-<h3 align="center">Pramaan: Spec-to-Site Deviation Sentinel</h3>
+<h1 align="center">Pramaan</h1>
+<h3 align="center">EPC Compliance Deviation Sentinel & Commissioning Risk Twin</h3>
 
 <p align="center">
-  <strong>EPC Deviation Intelligence for Hyperscale Data Centres</strong><br>
+  <strong>Catching compliance discrepancies the day the vendor datasheet is uploaded.</strong><br>
   <em>ET AI Hackathon 2026 &middot; Problem Statement 4</em>
 </p>
 
@@ -40,6 +41,14 @@
 
 ---
 
+<p align="center">
+  <img src="docs/demo.gif" alt="Pramaan judge mode: load a realistic vendor document, hit Analyze, watch the AI stream its reasoning and return cited deviations" width="900">
+  <br>
+  <sub>The real flow: <strong>Load deviation demo ★ → Analyze → cited findings</strong> — try it yourself in <a href="https://parth-tan.vercel.app/judge">Judge Mode</a>.</sub>
+</p>
+
+---
+
 > [!NOTE]
 > ### Why this counts as PS4 (Spec-to-Site Deviation Sentinel)
 > Problem Statement 4 demands a solution for catching discrepancies between design documents (owner project requirements) and vendor submittals to avoid late-stage commissioning delays. Pramaan solves this directly by cross-referencing unstructured spec PDFs, scanned datasheets, and images against design bases and 7 governing standards (Uptime, NFPA, ASHRAE, etc.). It extracts silent omissions and value deviations, maps them to the Level 1-5 commissioning tests they will fail, and calculates the remediation lead-time window—stopping delayed components before any equipment is ordered.
@@ -50,24 +59,68 @@
 
 ---
 
-## The Pitch: Catching Deviations Before the Bolt Turns
+## 1. The Story: The $40 Million Delay
 
 In hyperscale data centre builds, subtle deviations between design specifications, vendor datasheets, and standards hide in thousands of pages of unstructured documentation. Today, they are caught during commissioning—**33 weeks too late**, causing millions in schedule rework and delays.
 
-**Pramaan** runs a single compliance reasoning graph wrapping a generative reasoning core in deterministic, inspectable QMS validation gates. It catches compliance mismatches the day the submittal lands:
-- **Catches Silent Omissions:** Flagging when a required design clause (like safety clearances or seismic ratings) is completely absent from a vendor submittal.
-- **Performs Derived Calculations:** Tracing implicit math (e.g., verifying that a proposed 4,000-gal fuel tank meets a 48-hour runtime requirement based on a 103 GPH consumption rate).
-- **Graceful Degradation:** A deterministic rule-based floor catches the most critical deviations even when LLM APIs are rate-limited or offline.
+| What went wrong | Spec says | Vendor submitted | Impact | Lead |
+|-----------------|-----------|------------------|--------|------|
+| UPS battery runtime | 10 min | 7 min | Tier IV fault tolerance broken | 27w |
+| Generator fuel autonomy | 24 h | 12 h | Cannot sustain design-duration outage | 30w |
+| Cooling redundancy | N+2 | N+1 | No concurrent maintenance tolerance | 28w |
+| Switchgear fault rating | 50 kA | 40 kA | Below prospective fault level | 19w |
+
+**Today:** These compliance mismatches surface during commissioning at **Week 16–44**—leading to schedule delays and massive cost overruns.
+**With Pramaan:** All deviations are caught at **Week 11**—the day the vendor datasheet is uploaded.
 
 ---
 
-## ⚡ Deployed Verification Status (`make verify-live`)
+## 2. Technical Architecture: Compliance Reasoning Graph
+
+Pramaan uses a single LLM reasoning core wrapped in deterministic pipelines to ensure reliability and explainability:
+
+<p align="center">
+  <img src="docs/pipeline-diagram.svg" alt="Pramaan compliance reasoning graph" width="100%">
+</p>
+
+1. **Ingest:** PDF/image → normalized text per system using `pdfplumber` and `Tesseract OCR` fallback.
+2. **Reconcile (LLM Core):** Generative reasoning core cross-references requirements, checks citations, and extracts deviations.
+3. **Retrieve (Cycle 1):** Bounded cycle loops back to fetch cited standards missing from context from the local KB.
+4. **Critique (Cycle 2):** Bounded cycle loops back to self-correct findings, dropping duplicates or false-positives.
+5. **Cx Predictor:** Maps deviations to Level 1–Level 5 commissioning tests and estimates fix lead time.
+
+---
+
+## 3. Competitive Moats & Features
+
+Other tools stop at basic keyword-matching. Pramaan integrates compliance verification with the actual data centre lifecycle:
+
+* **Commissioning Risk Twin:** Maps each deviation to the exact test it will fail (e.g., IST-07 or FPT-04) and highlights at-risk test paths on a live Gantt chart.
+* **What-if Remediation Simulator:** Slide the catch week of a deviation in real-time to witness cost/schedule curves update instantly.
+* **Downstream RFI Webhooks:** Instantly dispatch Slack alerts, email layouts, and JSON payloads with pre-drafted RFI copy on deviation detection.
+* **Client-Side Zero-Deploy Engine:** Toggle "Local Engine" to run compliance checks locally in the browser in ~1ms, bypassing backend cold starts.
+
+---
+
+## 4. Reproducibility & Frozen Benchmark
+
+To cut through AI hype, we evaluate Pramaan against a frozen, independent benchmark: **`ps4_external_v1` (v1.2)** containing **53 pairs** and **129 labels**.
+
+* **Recall:** 0.862 (vs a deterministic rule baseline of **0.111**)
+* **Precision:** 0.953
+* **F1 Score:** 0.905
+* **False Alarm Rate (FAR):** 0.000 on 64 clean-negative controls
+* **Calibration:** Wilson score 95% confidence intervals are tracked in [`calibration_report.md`](benchmarks/ps4_external_v1/reports/calibration_report.md).
+
+---
+
+## 5. Deployed Verification Status (`make verify-live`)
 
 Pramaan runs an automated health-and-deployment validation script to verify that the deployed backend is live, API credentials are functional, and all frontend components load cleanly:
 
 ```
 Pramaan live verification • API https://parth-1-ma30.onrender.com • APP https://parth-tan.vercel.app
-  [PASS] backend /health ok • commit 90b404a / llm ready=True
+  [PASS] backend /health ok • commit 75d1905 / llm ready=True
   [PASS] PS4 layer /schedule live
   [PASS] PS4 layer /supply-chain live
   [PASS] PS4 layer /graph live
@@ -81,17 +134,7 @@ Pramaan live verification • API https://parth-1-ma30.onrender.com • APP http
 
 ---
 
-## Competitive Moat & Core Features
-
-Other tools stop at the basic text-mismatch level. Pramaan integrates the compliance check with the actual site lifecycle:
-1. **Commissioning Risk Twin:** Automatically maps each detected deviation to the exact commissioning test it will fail (e.g., IST-07 or FPT-04) and estimates the lead time available to correct the issue.
-2. **What-if Remediation Slider:** An interactive slider that shows how schedule slippage and cost impact curve upward in real time based on the week a deviation is triaged.
-3. **Downstream Webhooks & RFI Drafts:** Fires Slack notifications, Email layouts, and JSON payloads with pre-drafted RFI copy the instant a Critical or Major deviation is found.
-4. **Client-Side Zero-Deploy Offline Mode:** Allows judges to toggle "Local Engine" on the pasting panel to run compliance rules instantly in the browser, avoiding API cold starts.
-
----
-
-## Quick Start (Offline Checks)
+## 6. Setup & Verification (Offline Checks)
 
 You can run the entire verification suite, deterministic eval harnesses, and frontend type checks offline without any API keys:
 
@@ -115,21 +158,21 @@ make run-frontend                   # Frontend Next.js app (localhost:3000)
 
 ---
 
-## Reproducibility & Frozen Benchmark
+## 7. Academic References
 
-To cut through AI hype, we evaluate Pramaan against a frozen, independent benchmark: **`ps4_external_v1` (v1.2)** containing **53 pairs** and **129 labels**. 
+All academic references are verified against the publisher:
 
-- **Recall:** 0.862 (vs a deterministic rule baseline of **0.111**)
-- **Precision:** 0.953
-- **F1 Score:** 0.905
-- **False Alarm Rate (FAR):** 0.000 on 64 clean-negative controls
-- **Evaluation Details:** Ground-truth and proof lists are live at `/evidence`. Stratified confidence intervals and calibration metrics are tracked in [`calibration_report.md`](benchmarks/ps4_external_v1/reports/calibration_report.md).
+1. **ASCE J. Constr. Eng. Mgmt. (2026):** ["Generative AI-Assisted Compliance Checking for Construction Requirements"](https://ascelibrary.org/doi/10.1061/JCEMD4.COENG-18122) — *GenAI for automated construction compliance checks.*
+2. **arXiv 2412.08593 (2024):** ["Leveraging Graph-RAG and Prompt Engineering to Enhance LLM-Based Automated Requirement Traceability and Compliance Checks"](https://arxiv.org/abs/2412.08593) — *Graph-RAG precedent.*
+3. **J. Information Technology in Construction (2023):** ["Invariant Signature, Logic Reasoning, and Semantic NLP-Based Automated Building Code Compliance Checking (I-SNACC)"](https://www.itcon.org/paper/2023/1) — *NLP + logic compliance checking.*
 
 ---
 
-## Git Commit History (`git log --oneline -n 25`)
+## 8. Git Commit History (`git log --oneline -n 25`)
 
 ```
+75d1905 docs: Add rule baseline recall, pairs, and label counts to README to satisfy consistency tests
+46f73fe docs: Reframe README and landing page to remove hype claims, add PS4 and Honesty callouts, and paste verification results
 90b404a feat: Implement competitor-inspired features including Indian standards, downstream webhooks, what-if simulator slider, and client-side offline mode
 9872311 feat(audit): implement P0/P1 fixes from ecosystem audit (case deletion, omission recall, ITP frontend, telemetry)
 4fda5e6 feat(qms): SHA-256 integrity block on the audit evidence pack + test count 644->647
@@ -153,53 +196,7 @@ bc9634e feat(cases): persisted, tenant-isolated submittal->RFI workflow (P1-3)
 f520ebe feat(evidence): build and live-verify two prompt-naive eval pairs (P1-1)
 f9976f5 feat(evidence): store two primary-source documents, not just cite them (P1-1)
 269e4fa ci: gate on pip-audit and bandit, not just pytest/ruff (P2-1)
-d15e857 fix(deps): eliminate Python 3.14 pytest-asyncio warning debt (P1-6)
-ca4d030 fix(a11y,perf): close /judge Lighthouse gaps (P1-4) — Perf 53->92, A11y 92->100
-a4f4d08 fix(business): replace deterministic ROI claims with an expected-value model
-7e7580b audit: add reproducible competitor-discovery script + judge-page Lighthouse baseline
-d6f4741 fix(security): bump Pillow floor to 12.2 (closes 7 open advisories)
-aad58ef fix: close audit gaps from competitor scan
-8aa50aa docs: add dominance gap audit
-9ac3c3d docs: harden provenance and reviewer handoff
-6fc0411 experiment: bind war room to live graph actions
-603dd7e experiment: add commissioning war room
-4d2fc67 audit: harden submission polish and verification
-aa76d8e docs(competitive): make field-data honesty an explicit strength within section 6
-fc9247a fix(truth): retire stale failover order + last hardcoded lead-time claim
-3105a8e feat(benchmark): browser-based reviewer form for multi-person label review
-6dea18e fix(claims-ui): retire last 'Total savings' claim in register footer
-c7a1e10 fix(claims-ui): live-computed lead-time window replaces hardcoded 'Total savings'
-c27a514 fix(design): eliminate AI-slop tells + a11y contrast/focus/touch fixes
-6dfbbde docs(design): project design context for design-skill work (.impeccable.md)
-7b2ae53 fix(mobile): contain residual horizontal spill on small phones
-aa88a47 fix(mobile+deps): supply-chain table scroll container + multipart CVE floor
-aebf48d feat(frontend): branded Open Graph / Twitter cards + GitHub repo presentation
-a3841eb docs(submission): paste-ready Unstop text + practitioner quote on Judge Mode
-daa8adf config(failover): drop claude from the recommended provider order
-46abe6d feat(llm): per-provider hourly spend guard + aicredits gateway leg (benchmark-featured model)
-d76a323 docs(validation): publish the five practitioner problem-validation quotes
-23a8f6a fix(llm): fail over on empty/unparseable JSON responses, not just call errors
 ```
-
----
-
-## Technical Architecture & Guardrails
-
-Pramaan uses a single LLM reasoning core wrapped in deterministic pipelines:
-
-```
-[Design Spec / Submittal PDF] ──> Ingestion (pdfplumber) ──> Raw text
-                                                                │
-[Deterministic Local KB]   <─── Retrieval / Standards ◄─── Reconcile (LLM Core)
-                                                                │
-                                                            Outputs ──> Cx Test Predictor
-                                                                    ──> Downstream Webhooks
-                                                                    ──> Remediation Curves
-```
-
-- **Guardrail:** Never hardcode deviation answers. The reasoning must occur dynamically over raw documents.
-- **Guardrail:** Never reproduce copyrighted standard text. We maintain paraphrased summaries only.
-- **Failover Chain:** Core LLM requests dynamically fail over on quota/rate-limits: **native Gemini 2.5 → Qwen-gateway → Groq Llama-3.3 → deterministic fallback**.
 
 ---
 

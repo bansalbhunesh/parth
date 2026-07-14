@@ -244,7 +244,10 @@ def _gateway_base_url():
 
 
 def _gateway_model():
-    return _env_first("QWEN_GATEWAY_MODEL", "OPENAI_MODEL", default="gemini-2.0-flash")
+    # Default matches the documented .env.example gateway model — the same
+    # model the frozen ps4_external_v1 benchmark was measured on.
+    return _env_first("QWEN_GATEWAY_MODEL", "OPENAI_MODEL",
+                      default="google/gemini-3.1-flash-lite")
 
 
 def _ollama_base() -> str:
@@ -483,7 +486,8 @@ def complete_vision(prompt: str, image_bytes: bytes, mime_type: str,
             prompt, image_bytes, mime_type, system, label="OpenAI-compat",
             api_key=os.environ.get("OPENAI_API_KEY"),
             base_url=os.getenv("OPENAI_BASE_URL"),
-            model=os.getenv("OPENAI_VISION_MODEL", os.getenv("OPENAI_MODEL", "gemini-2.0-flash")),
+            model=os.getenv("OPENAI_VISION_MODEL",
+                            os.getenv("OPENAI_MODEL", "google/gemini-3.1-flash-lite")),
             max_tokens=int(os.getenv("OPENAI_MAX_TOKENS", "4000")))
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:

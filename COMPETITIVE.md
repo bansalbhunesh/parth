@@ -12,7 +12,7 @@ for different reasons:
 
 | Threat | Why it can beat us in a judge room | Pramaan's answer |
 |---|---|---|
-| `sanskar9999/prahari` | Public-safety/fraud story is emotionally immediate; GitHub Pages demo runs in-browser; README leads with real audio/STT/CV modules and a tight 3-4 min demo flow. | We cannot out-drama digital-arrest scams. We out-verify: backend + frontend deploys, 666 tests, frozen benchmark, claims register, live health/LLM/OCR probes, no hidden eval. |
+| `sanskar9999/prahari` | Public-safety/fraud story is emotionally immediate; GitHub Pages demo runs in-browser; README leads with real audio/STT/CV modules and a tight 3-4 min demo flow. | We cannot out-drama digital-arrest scams. We out-verify: backend + frontend deploys, 672 tests, frozen benchmark, claims register, live health/LLM/OCR probes, no hidden eval. |
 | `Agent-A345/PlantIQ` | Industrial domain is close to ours; README claims a multi-module specialist architecture, real regulatory PDFs, knowledge graph, predictive maintenance, 22+ features. | We avoid "feature fog": one LLM reasoning core, deterministic services, benchmark card, CI, and a judge path that proves the core claim in 90 seconds. |
 | `Exyons/ET-GenAI-Hackathon` | Agriculture has broad social impact, live frontend, multilingual web/SMS/WhatsApp/drone story. | We make the business consequence concrete: a vendor deviation becomes a dated commissioning failure and schedule-risk event, with citations and reproducible checks. |
 
@@ -30,7 +30,7 @@ across all tracks**. Scored on hard, checkable signals, the visible field has:
 | Signal | Visible field (~70 repos, all tracks) | Pramaan |
 |---|---|---|
 | CI pipeline | **0** | ✅ green (tests + 3 evals + tsc + build + E2E + Docker smoke + ruff + pip-audit + bandit) |
-| Test suite | **1** (minimal) | ✅ 666 tests + 28 Playwright E2E |
+| Test suite | **1** (minimal) | ✅ 672 tests + 28 Playwright E2E |
 | Eval harness with ground truth | **0** | ✅ 4 paths + no-key real-pairs harness |
 | Quantified impact model | **0** | ✅ `docs/BUSINESS.md`, every figure cited |
 | Live deployment | 3 | ✅ 2 (Vercel + Render) |
@@ -79,6 +79,15 @@ That a $15B contractor-software vendor paid to own *exactly* the
 deviation-vs-standards-with-citations capability is the strongest possible
 external signal that Pramaan is building in the right place. It also sets the bar:
 these are funded, production, field-data products. We do **not** out-scale them.
+
+The bar moved again on **9 June 2026**: Document Crunch (now a Trimble company)
+launched a project-level risk-intelligence platform that answers questions
+across all source documents, surfaces scope gaps, and auto-generates
+deliverables — redlines, notices, submittals, and **RFIs**. Two consequences we
+state plainly: (1) pre-drafted RFI copy is now commercial table stakes — our
+downstream RFI webhooks are a workflow convenience, not a moat; (2) the moat
+claim below therefore rests entirely on the commissioning-risk join, which
+their public feature set still does not include.
 
 Where we are *not* a follower: none of the public agentic-risk or submittal tools
 (Document Crunch, BuildSync, Trunk Tools, Part3, InspectMind) publicly unify a

@@ -5,6 +5,7 @@ basis, vendor submittal, and governing standards.
 
 import json
 import logging
+import os
 import re
 
 from backend.agents.commissioning import predict_cx_impact
@@ -121,6 +122,42 @@ Return a JSON array of deviations found. Each element:
 If there are ZERO deviations for this system, return an empty array [].
 Do NOT include items that meet or exceed their requirements.
 """
+
+# ── Coverage-matrix mode (prompt-pass v1.3 CANDIDATE — opt-in, unmeasured) ──
+# The frozen ps4_external_v1 error analysis shows omissions are the top real
+# false-negative cause: a single pass is asked to "notice absence", which LLMs
+# do poorly. Schema-guided two-phase output (build the full requirement
+# checklist FIRST, then verify each row against the submittal) turns absence
+# detection into a per-item lookup. Opt-in via PRAMAAN_COVERAGE_MATRIX=1 and
+# OFF by default: the default prompt must stay byte-identical to the one the
+# published benchmark numbers were measured with. Do not flip the default
+# until a full benchmark pass has been run and reported with this suffix.
+COVERAGE_MATRIX_ENV = "PRAMAAN_COVERAGE_MATRIX"
+
+COVERAGE_MATRIX_SUFFIX = """
+=== COVERAGE MATRIX (build this FIRST) ===
+Instead of a bare array, return ONE JSON object with two keys, in this order:
+
+1. "checklist": one row for EVERY requirement in the design basis — walk every
+   table row and every clause; do not skip any. Each row:
+   {"component": "<exact id>", "parameter": "<exact snake_case machine_name>",
+    "required_value": <value from design basis>,
+    "addressed_in_submittal": true|false}
+   A requirement is addressed ONLY if the submittal states a corresponding
+   value for it somewhere. Judge every row independently — never assume a
+   section is complete because neighbouring rows were.
+
+2. "deviations": the array specified above. For EVERY checklist row with
+   "addressed_in_submittal": false you MUST emit an omission deviation
+   (provided_value "Not stated", severity at least "Major"). Then add the
+   value/derived deviations for addressed rows that fail their requirement.
+"""
+
+
+def _prompt_suffix() -> str:
+    """Read the env at call time (not import time) so tests and the eval
+    harness can toggle the mode per-run."""
+    return COVERAGE_MATRIX_SUFFIX if os.getenv(COVERAGE_MATRIX_ENV, "0") == "1" else ""
 
 
 def _read(p):
@@ -246,7 +283,7 @@ def reconcile_system_at(base, sys_id: str, standards_text: str, with_cx: bool = 
     submittal = sub_path.read_text(encoding="utf-8")
     prompt = PROMPT_TEMPLATE.format(
         spec=spec, submittal=submittal, standards=standards_text
-    )
+    ) + _prompt_suffix()
     if feedback:
         prompt += (
             "\n\n=== SELF-REVIEW FEEDBACK (revise your previous answer) ===\n"

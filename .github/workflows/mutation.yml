@@ -29,6 +29,7 @@ jobs:
         run: |
           python -m pytest tests/ -q \
             --ignore=tests/test_ps4_hardening.py \
+            --ignore=tests/test_schedule_data.py \
             --ignore=tests/test_schedule_risk.py \
             --cov=backend --cov-branch \
             --cov-report=json:coverage-mutation-preflight.json

@@ -114,6 +114,16 @@ also_copy = [
     "COMPETITIVE.md",
     "presentation.html",
 ]
+# Mutmut 3 replays pytest inside one process while collecting per-test call
+# maps.  NumPy's compiled core intentionally refuses that reload pattern.  The
+# only collection-time NumPy imports are schedule-engine tests; neither touches
+# the six mutation targets below.  The workflow independently proves those
+# targets retain 100% line/branch coverage with this exact selection before it
+# accepts a mutation score.
+pytest_add_cli_args_test_selection = [
+    "--ignore=tests/test_ps4_hardening.py",
+    "--ignore=tests/test_schedule_risk.py",
+]
 only_mutate = [
     "backend/security.py",
     "backend/jobs.py",

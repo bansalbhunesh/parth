@@ -27,6 +27,19 @@ jobs:
           python -m pip install --disable-pip-version-check --no-deps .
       - name: Run configured critical-path mutations
         run: |
+          python -m pytest tests/ -q \
+            --ignore=tests/test_ps4_hardening.py \
+            --ignore=tests/test_schedule_risk.py \
+            --cov=backend --cov-branch \
+            --cov-report=json:coverage-mutation-preflight.json
+          python scripts/check_coverage_thresholds.py coverage-mutation-preflight.json \
+            --lines 0 --branches 0 \
+            --critical backend/security.py \
+            --critical backend/jobs.py \
+            --critical backend/agents/reconciliation.py \
+            --critical backend/platform/redis_cache.py \
+            --critical backend/platform/durable_worker.py \
+            --critical backend/platform/webhook_delivery.py
           mutmut run --max-children 4
           mutmut results --all | tee mutation-results.txt
           python scripts/check_mutation_score.py mutation-results.txt --minimum 85 --json-output mutation-summary.json
@@ -37,5 +50,6 @@ jobs:
           path: |
             mutation-results.txt
             mutation-summary.json
+            coverage-mutation-preflight.json
             mutants/
           retention-days: 30

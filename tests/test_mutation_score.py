@@ -67,3 +67,7 @@ def test_mutmut_isolated_tree_contains_repository_wide_test_inputs() -> None:
         "COMPETITIVE.md",
         "presentation.html",
     } <= copied
+    assert set(config["pytest_add_cli_args_test_selection"]) == {
+        "--ignore=tests/test_ps4_hardening.py",
+        "--ignore=tests/test_schedule_risk.py",
+    }

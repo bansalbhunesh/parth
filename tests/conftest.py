@@ -28,16 +28,28 @@ def _reset_process_state():
     per-provider LLM budget counters, AND the persisted case store around
     every test so none leaks between cases (all share one process-local or
     on-disk store)."""
-    from backend import case_store, jobs, llm, main, security
+    from backend import case_store, jobs, llm, security
     from backend.platform.config import reset_platform_settings
     from backend.platform.identity import reset_identity_provider
+
+    # Do not import the complete FastAPI application just to reset one legacy
+    # collection.  Pulling every router into otherwise-isolated unit tests also
+    # loads NumPy/PyMuPDF C extensions, slows collection, and prevents tools
+    # such as Mutmut from safely replaying the suite in-process.  App-level
+    # tests import ``backend.main`` during collection; tests that import it
+    # later are covered by the post-test lookup below.
+    def clear_webhooks_if_loaded():
+        main_module = sys.modules.get("backend.main")
+        if main_module is not None:
+            main_module.SUBSCRIBED_WEBHOOKS.clear()
+
     reset_platform_settings()
     reset_identity_provider()
     security.reset_rate_limits()
     jobs.reset()
     llm.reset_budgets()
     case_store.reset()
-    main.SUBSCRIBED_WEBHOOKS.clear()
+    clear_webhooks_if_loaded()
     yield
     reset_platform_settings()
     reset_identity_provider()
@@ -45,4 +57,4 @@ def _reset_process_state():
     jobs.reset()
     llm.reset_budgets()
     case_store.reset()
-    main.SUBSCRIBED_WEBHOOKS.clear()
+    clear_webhooks_if_loaded()

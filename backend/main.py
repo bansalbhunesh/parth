@@ -351,6 +351,13 @@ def analyze_upload(
         "count": len(result.deviations),
         "elapsed_ms": result.elapsed_ms,
         "mode": result.mode,
+        "telemetry": {
+            "total_ms": result.elapsed_ms,
+            "llm_call_ms": result.llm_call_ms,
+            "standards_load_ms": result.standards_load_ms,
+            "postprocess_ms": result.postprocess_ms,
+            "provider": result.provider,
+        },
     }
 
 
@@ -386,6 +393,13 @@ def analyze_vision(
         "deviations": result.deviations,
         "count": len(result.deviations),
         "elapsed_ms": result.elapsed_ms,
+        "telemetry": {
+            "total_ms": result.elapsed_ms,
+            "llm_call_ms": result.llm_call_ms,
+            "standards_load_ms": result.standards_load_ms,
+            "postprocess_ms": result.postprocess_ms,
+            "provider": result.provider,
+        },
     }
 
 
@@ -1334,6 +1348,18 @@ def export_case_itp_pdf(case_id: str, request: Request):
 def get_case_audit_log(case_id: str, request: Request):
     _require_case(case_id, request)
     return {"audit_log": case_store.get_audit_log(case_id)}
+
+
+@app.delete("/cases/{case_id}", status_code=200)
+def delete_case_endpoint(case_id: str, request: Request):
+    """Permanently delete a case and all its findings, RFIs, and audit log.
+
+    Requires the X-Case-Secret header. Returns 404 for wrong/missing secret
+    (indistinguishable from a nonexistent case).
+    """
+    _require_case(case_id, request)
+    case_store.delete_case(case_id)
+    return {"deleted": True, "case_id": case_id}
 
 
 # ── Pipeline info endpoint ───────────────────────────────────────────

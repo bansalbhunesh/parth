@@ -388,6 +388,13 @@ def run_streaming_analysis(
         "count": len(devs),
         "mode": mode,
         "elapsed_ms": elapsed,
+        "telemetry": {
+            "total_ms": elapsed,
+            "llm_call_ms": elapsed,  # Stream doesn't currently time segments separately
+            "standards_load_ms": 0,
+            "postprocess_ms": 0,
+            "provider": None,
+        }
     }
     yield f"event: result\ndata: {json.dumps(result)}\n\n"
     yield "event: done\ndata: {}\n\n"

@@ -14,6 +14,7 @@ import ScrollReveal from "../components/ScrollReveal";
 import EvalDashboard from "../components/EvalDashboard";
 import StandardsKB from "../components/StandardsKB";
 import ExportButton from "../components/ExportButton";
+import ItpExportButton from "../components/ItpExportButton";
 import AcademicRefs from "../components/AcademicRefs";
 import ScaleStory from "../components/ScaleStory";
 import HeroIntro from "../components/HeroIntro";
@@ -239,6 +240,7 @@ export default async function Page() {
         <div className="spacer" />
         <a className="top-link" href="/war-room">War room</a>
         <ExportButton />
+        <ItpExportButton />
         <div className="live-badge">
           <span className="live-dot" />
           LIVE

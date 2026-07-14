@@ -239,3 +239,42 @@ def test_case_store_actor_key_is_deterministic_and_non_reversible():
     assert key1 != key3
     assert "some-secret-value" not in key1
     assert len(key1) == 12
+
+
+def test_delete_case_removes_all_data():
+    case_id, secret = _create_case()
+    hdr = {"X-Case-Secret": secret}
+    finding_id = client.post(f"/cases/{case_id}/findings", json=_FINDING, headers=hdr).json()["finding_id"]
+    client.post(f"/cases/{case_id}/findings/{finding_id}/rfi", headers=hdr)
+
+    r = client.delete(f"/cases/{case_id}", headers=hdr)
+    assert r.status_code == 200
+    assert r.json() == {"deleted": True, "case_id": case_id}
+
+    assert client.get(f"/cases/{case_id}", headers=hdr).status_code == 404
+
+
+def test_delete_case_wrong_secret_404s():
+    case_id, secret = _create_case()
+    r = client.delete(f"/cases/{case_id}", headers={"X-Case-Secret": "wrong"})
+    assert r.status_code == 404
+    assert client.get(f"/cases/{case_id}", headers={"X-Case-Secret": secret}).status_code == 200
+
+
+def test_delete_case_nonexistent_404s():
+    r = client.delete("/cases/ffffffffffffffffffffffffffffffff", headers={"X-Case-Secret": "irrelevant"})
+    assert r.status_code == 404
+
+
+def test_delete_case_is_tenant_isolated():
+    case_a, secret_a = _create_case("A")
+    case_b, secret_b = _create_case("B")
+    client.delete(f"/cases/{case_a}", headers={"X-Case-Secret": secret_a})
+    assert client.get(f"/cases/{case_b}", headers={"X-Case-Secret": secret_b}).status_code == 200
+
+
+def test_delete_case_idempotent_after_deletion():
+    case_id, secret = _create_case()
+    hdr = {"X-Case-Secret": secret}
+    client.delete(f"/cases/{case_id}", headers=hdr)
+    assert client.delete(f"/cases/{case_id}", headers=hdr).status_code == 404

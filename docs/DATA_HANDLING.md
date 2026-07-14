@@ -170,16 +170,17 @@ boundary jobs.py already draws. On the hosted Render deployment this
 persists across requests **within the same running instance only**; Render's
 free-tier filesystem is not a mounted persistent volume, so a redeploy or
 scale event wipes it, identical in spirit to jobs.py's own restart caveat.
-There is no automatic deletion or TTL on case data — it persists until the
-underlying file is wiped by a platform event, which is a real gap: a caller
-who wants their case data gone before then has no delete endpoint to call.
+There is no automatic deletion or TTL on case data. It persists until the
+underlying file is wiped by a platform event, OR until the caller explicitly
+deletes it via `DELETE /cases/{case_id}` (which permanently destroys all
+findings, RFIs, and audit logs for that case).
 
 **Net answer:** raw uploaded document content never persists beyond the
 single request that analyzes it, in either the in-memory or the disk-backed
 path. Derived findings persist in server memory for up to 1 hour (or process
 restart) unless explicitly persisted into a case, in which case they persist
-until a platform-level restart/redeploy wipes the SQLite file — there is
-currently no user-triggered deletion.
+until a platform-level restart/redeploy wipes the SQLite file, or the user
+explicitly deletes the case via the DELETE endpoint.
 
 ---
 
@@ -209,10 +210,9 @@ every result vanishing at the TTL like the rest of this backend.
   access, the same shared-secret model `DEMO_AUTH_TOKEN` uses for the whole
   demo, just scoped per-case instead of per-deployment. There are still no
   user accounts anywhere in this codebase.
-- **No deletion endpoint.** A case cannot currently be deleted by its
-  owner — the only way its data goes away is a platform-level restart or
-  redeploy wiping the SQLite file (see §3). That's a real gap for anyone
-  who wants "delete my data" as an actual guarantee, not an implicit one.
+- **Explicit deletion.** A case can be permanently deleted by calling
+  `DELETE /cases/{case_id}` with the correct secret. This wipes all
+  records for the case from all tables.
 
 ---
 

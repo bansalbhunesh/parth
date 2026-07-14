@@ -280,6 +280,21 @@ def get_audit_log(case_id: str) -> list[dict]:
 
 # ── test / lifecycle support ─────────────────────────────────────────
 
+def delete_case(case_id: str) -> bool:
+    """Delete a case and ALL its children (findings, RFIs, audit log).
+
+    Returns True if the case existed, False otherwise.
+    """
+    with _lock:
+        conn = _get_conn()
+        conn.execute("DELETE FROM audit_log WHERE case_id = ?", (case_id,))
+        conn.execute("DELETE FROM rfis WHERE case_id = ?", (case_id,))
+        conn.execute("DELETE FROM findings WHERE case_id = ?", (case_id,))
+        cursor = conn.execute("DELETE FROM cases WHERE case_id = ?", (case_id,))
+        conn.commit()
+        return cursor.rowcount > 0
+
+
 def reset() -> None:
     """Clear all persisted state — used by the test suite between cases, the
     same role jobs.reset() and security.reset_rate_limits() play. Four

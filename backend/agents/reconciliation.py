@@ -38,9 +38,17 @@ SYSTEM_PROMPT = (
     "   submittal provides N+1, that is a deviation — N+1 does not satisfy N+2.\n"
     "4. FIRE RATINGS: CMP (plenum) > CMR (riser) > CM (general). If the spec "
     "   requires CMP and the submittal provides CMR, that is a deviation.\n"
-    "5. OMISSIONS: if the spec requires 'complete' coverage of something and the "
-    "   submittal explicitly states something is missing/pending/not included, "
-    "   that is a deviation.\n"
+    "5. OMISSIONS — two kinds, both are deviations:\n"
+    "   a) EXPLICIT omission: the submittal says something is 'pending', 'TBD',\n"
+    "      'not included', 'available on request', or similar — flag it.\n"
+    "   b) SILENT omission: the design basis lists a requirement (a parameter,\n"
+    "      rating, certification, or test result) and the submittal DOES NOT\n"
+    "      MENTION IT AT ALL — no corresponding value, row, or section exists.\n"
+    "      This is ALSO a deviation. Set provided_value to 'Not stated' and\n"
+    "      severity to at least 'Major'.\n"
+    "   In step 2 below, for EVERY requirement you extract from the design basis,\n"
+    "   actively search the submittal for a corresponding value. If you cannot\n"
+    "   find one after a thorough search, report it as an omission deviation.\n"
     "6. Values that are EQUIVALENT or EXCEED the requirement are NOT deviations.\n"
     "7. Format or style differences (e.g. '2N' vs 'two-N') are NOT deviations.\n"
     "8. Never invent clauses — cite exact spec_clause and standard_ref from "
@@ -74,6 +82,10 @@ IMPORTANT — pay attention to:
 - Redundancy topology shortfalls (e.g. N+1 when N+2 is required)
 - Material/rating downgrades (e.g. CMR when CMP is required)
 - Missing/omitted items when completeness is required
+- SILENT OMISSIONS: for each requirement from the design basis, confirm the
+  submittal provides a corresponding value. If a required parameter has NO
+  match anywhere in the submittal text, that is an omission deviation —
+  set provided_value to "Not stated".
 - Values that are "close but not quite" — these are the ones humans miss
 
 === DESIGN BASIS (spec) ===

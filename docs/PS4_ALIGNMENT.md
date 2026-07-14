@@ -37,7 +37,10 @@ record — deviation, severity, spec clause, governing-standard citation, the
 commissioning test it would fail, lead time, detection timestamp, and the
 agent's rationale — one click from the dashboard. It is the same record an
 ISO 9001-style NCR register needs, already cited and dated, and it round-trips
-into any QMS that imports JSON. We deliberately ship the audit trail as an
+into any QMS that imports JSON. The pack also carries an `integrity` block —
+a SHA-256 over its canonical JSON, echoed in the printable HTML footer — so
+any post-export edit to the register is detectable by re-hashing (detection,
+not prevention: the hash travels with the document). We deliberately ship the audit trail as an
 open, exportable document rather than a walled-in NCR CRUD screen: the
 commissioning authority signs against evidence, not against our UI.
 

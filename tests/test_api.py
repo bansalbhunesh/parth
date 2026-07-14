@@ -228,6 +228,25 @@ class TestExportEndpoints:
         assert "Pramaan" in r.text
         assert "<table>" in r.text
 
+    def test_export_audit_integrity_hash_verifies(self):
+        """The evidence pack must carry a recomputable SHA-256: strip the
+        integrity block, canonical-JSON the rest, and the digest must match —
+        that recomputation IS the tamper check a QMS auditor runs."""
+        import hashlib as _hashlib
+        import json as _json
+        data = client.get("/export/audit").json()
+        integrity = data.pop("integrity")
+        assert integrity["algo"] == "sha256"
+        canonical = _json.dumps(data, sort_keys=True,
+                                separators=(",", ":"), default=str)
+        digest = _hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+        assert digest == integrity["content_hash"]
+
+    def test_export_audit_html_shows_integrity_hash(self):
+        pack_hash = client.get("/export/audit").json()["integrity"]["content_hash"]
+        r = client.get("/export/audit/html")
+        assert pack_hash in r.text
+
 
 class TestAnalyzeEndpoint:
     def test_analyze_deterministic(self):

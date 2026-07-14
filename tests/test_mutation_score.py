@@ -71,4 +71,7 @@ def test_mutmut_isolated_tree_contains_repository_wide_test_inputs() -> None:
         "--ignore=tests/test_ps4_hardening.py",
         "--ignore=tests/test_schedule_data.py",
         "--ignore=tests/test_schedule_risk.py",
+        "--deselect=tests/test_api.py::TestStreamingEndpoints::test_copilot_stream_returns_sse",
+        "--deselect=tests/test_api.py::TestStreamingEndpoints::test_analyze_stream_returns_sse",
+        "--deselect=tests/test_api.py::TestPdfUploadEndpoints::test_upload_stream_text_files",
     }

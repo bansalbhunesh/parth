@@ -62,6 +62,9 @@ dev = [
     "mutmut>=3.5,<4.0",
 ]
 
+[tool.setuptools.packages.find]
+include = ["backend", "backend.*"]
+
 [tool.mypy]
 python_version = "3.11"
 strict = true

@@ -440,8 +440,13 @@ export default function AnalyzePanel() {
         body: JSON.stringify({ url: webhookUrl }),
       });
       if (res.ok) {
-        setWebhooks((prev) => [...prev, webhookUrl]);
+        setWebhooks((prev) => (prev.includes(webhookUrl) ? prev : [...prev, webhookUrl]));
         setWebhookUrl("");
+      } else {
+        // The backend rejects private/internal targets (SSRF guard) and caps
+        // the list — surface its reason instead of failing silently.
+        const detail = await res.json().then((b) => b.detail).catch(() => null);
+        alert(detail || `Subscription rejected (HTTP ${res.status}).`);
       }
     } catch {
       alert("Failed to subscribe webhook.");

@@ -1,10 +1,14 @@
 """Pramaan API — uvicorn backend.main:app --reload"""
 
 import html
+import ipaddress
 import json
 import logging
 import os
+import socket
+import threading
 import time
+from urllib.parse import urlparse
 
 from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -244,59 +248,128 @@ def _extract_upload_text(file: UploadFile) -> str:
 class WebhookSubscribeRequest(BaseModel):
     url: str
 
-SUBSCRIBED_WEBHOOKS = []
 
-def trigger_webhooks(deviations: list[dict], system_id: str):
-    import requests
-    critical_or_major = [d for d in deviations if d.get("severity") in ("Critical", "Major")]
-    if not critical_or_major or not SUBSCRIBED_WEBHOOKS:
-        return
+# Process-local subscriber list — same lifetime/scope as the in-memory job
+# cache. Capped so an unauthenticated caller can't grow it without bound.
+SUBSCRIBED_WEBHOOKS: list[str] = []
+MAX_WEBHOOKS = 10
 
-    payload = {
-        "event": "deviation_detected",
-        "system": system_id,
-        "count": len(critical_or_major),
-        "deviations": critical_or_major,
-        "rfi_drafts": [
-            f"DEVIATION RFI: Component {d['component']} fails {d['parameter']}. "
-            f"Required: {d['required_value']} {d['unit']}, Provided: {d['provided_value']} {d['unit']}. "
-            f"Please clarify non-compliance."
-            for d in critical_or_major
-        ]
-    }
 
-    slack_text = (
-        f"🚨 *Pramaan Alert*: {len(critical_or_major)} Critical/Major deviations found in system {system_id}!\n"
-        + "\n".join([
-            f"• *{d['component']}* ({d['parameter']}): Required {d['required_value']} {d['unit']}, "
-            f"got {d['provided_value']} {d['unit']}."
-            for d in critical_or_major
-        ])
-    )
-    slack_payload = {"text": slack_text}
+def _webhook_url_error(url: str) -> str | None:
+    """Validate a subscriber URL; return an error message or None if OK.
 
-    for url in SUBSCRIBED_WEBHOOKS:
+    Blocks non-HTTP schemes and hosts that resolve to private/loopback/
+    link-local addresses so the public demo can't be driven as an SSRF proxy
+    into the backend's network (cloud metadata endpoints, localhost services).
+    Set PRAMAAN_WEBHOOK_ALLOW_PRIVATE=1 to demo against a local receiver.
+    """
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https") or not parsed.hostname:
+        return "URL must be http(s) with a hostname"
+    if os.getenv("PRAMAAN_WEBHOOK_ALLOW_PRIVATE", "0") == "1":
+        return None
+    host = parsed.hostname
+    if host == "localhost" or host.endswith((".local", ".internal")):
+        return "Private/internal hosts are not allowed"
+    try:
+        infos = socket.getaddrinfo(host, parsed.port or 443, proto=socket.IPPROTO_TCP)
+        addrs = [ipaddress.ip_address(info[4][0]) for info in infos]
+    except (OSError, ValueError):
+        return "Hostname does not resolve"
+    if any(a.is_private or a.is_loopback or a.is_link_local or a.is_unspecified for a in addrs):
+        return "Private/internal addresses are not allowed"
+    return None
+
+
+def _redact_webhook(url: str) -> str:
+    """Subscriber URLs can embed secrets (Slack webhook tokens): show enough
+    to recognize the subscription, never enough to replay it."""
+    return url if len(url) <= 40 else url[:40] + "…"
+
+
+def _deliver_webhooks(urls: list[str], payload: dict, slack_payload: dict) -> None:
+    """POST to every subscriber (runs on a worker thread). One dead subscriber
+    must never block delivery to the rest."""
+    import httpx
+    for url in urls:
+        body = slack_payload if "hooks.slack.com" in url else payload
         try:
-            headers = {"Content-Type": "application/json"}
-            if "hooks.slack.com" in url:
-                requests.post(url, json=slack_payload, headers=headers, timeout=1.0)
-            else:
-                requests.post(url, json=payload, headers=headers, timeout=1.0)
+            httpx.post(url, json=body, timeout=2.0)
         except Exception:
             pass
 
+
+def trigger_webhooks(deviations: list[dict], system_id: str) -> None:
+    """Fan out Critical/Major findings to subscribers. Fire-and-forget: the
+    payload is built defensively (LLM-produced dicts may miss keys) and
+    delivery happens on a daemon thread, so a malformed deviation or a slow
+    subscriber can never fail or delay an analysis response."""
+    try:
+        critical_or_major = [d for d in deviations if d.get("severity") in ("Critical", "Major")]
+        if not critical_or_major or not SUBSCRIBED_WEBHOOKS:
+            return
+
+        payload = {
+            "event": "deviation_detected",
+            "system": system_id,
+            "count": len(critical_or_major),
+            "deviations": critical_or_major,
+            "rfi_drafts": [
+                f"DEVIATION RFI: Component {d.get('component', '?')} fails {d.get('parameter', '?')}. "
+                f"Required: {d.get('required_value', '?')} {d.get('unit', '')}, "
+                f"Provided: {d.get('provided_value', '?')} {d.get('unit', '')}. "
+                f"Please clarify non-compliance."
+                for d in critical_or_major
+            ],
+        }
+
+        slack_text = (
+            f"🚨 *Pramaan Alert*: {len(critical_or_major)} Critical/Major deviations "
+            f"found in system {system_id}!\n"
+            + "\n".join([
+                f"• *{d.get('component', '?')}* ({d.get('parameter', '?')}): "
+                f"Required {d.get('required_value', '?')} {d.get('unit', '')}, "
+                f"got {d.get('provided_value', '?')} {d.get('unit', '')}."
+                for d in critical_or_major
+            ])
+        )
+        slack_payload = {"text": slack_text}
+
+        threading.Thread(
+            target=_deliver_webhooks,
+            args=(list(SUBSCRIBED_WEBHOOKS), payload, slack_payload),
+            daemon=True,
+        ).start()
+    except Exception:
+        pass
+
+
 @app.post("/webhooks/subscribe")
 def subscribe_webhook(req: WebhookSubscribeRequest):
-    url = req.url
-    if not url.startswith("http"):
-        raise HTTPException(status_code=400, detail="Invalid URL")
+    url = req.url.strip()
+    err = _webhook_url_error(url)
+    if err:
+        raise HTTPException(status_code=400, detail=err)
     if url not in SUBSCRIBED_WEBHOOKS:
+        if len(SUBSCRIBED_WEBHOOKS) >= MAX_WEBHOOKS:
+            raise HTTPException(status_code=429, detail=f"Subscriber limit ({MAX_WEBHOOKS}) reached")
         SUBSCRIBED_WEBHOOKS.append(url)
-    return {"status": "subscribed", "url": url}
+    return {"status": "subscribed", "url": _redact_webhook(url)}
+
 
 @app.get("/webhooks")
 def get_webhooks():
-    return {"urls": SUBSCRIBED_WEBHOOKS}
+    return {"count": len(SUBSCRIBED_WEBHOOKS),
+            "urls": [_redact_webhook(u) for u in SUBSCRIBED_WEBHOOKS]}
+
+
+@app.delete("/webhooks")
+def clear_webhooks():
+    """Remove every subscriber — the demo's escape hatch if a bad URL was
+    registered (subscriptions are process-local, so this is always safe)."""
+    n = len(SUBSCRIBED_WEBHOOKS)
+    SUBSCRIBED_WEBHOOKS.clear()
+    return {"cleared": n}
 
 
 # ── Analysis endpoints ──────────────────────────────────────────────

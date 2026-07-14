@@ -28,13 +28,15 @@ def _reset_process_state():
     per-provider LLM budget counters, AND the persisted case store around
     every test so none leaks between cases (all share one process-local or
     on-disk store)."""
-    from backend import case_store, jobs, llm, security
+    from backend import case_store, jobs, llm, main, security
     security.reset_rate_limits()
     jobs.reset()
     llm.reset_budgets()
     case_store.reset()
+    main.SUBSCRIBED_WEBHOOKS.clear()
     yield
     security.reset_rate_limits()
     jobs.reset()
     llm.reset_budgets()
     case_store.reset()
+    main.SUBSCRIBED_WEBHOOKS.clear()

@@ -39,6 +39,16 @@ def _create_case(name="Test Case"):
     return body["case_id"], body["secret"]
 
 
+def _assign_finding(case_id, finding_id, headers, owner="Priya Menon"):
+    r = client.patch(
+        f"/cases/{case_id}/findings/{finding_id}",
+        json={"status": "accepted", "owner": owner},
+        headers=headers,
+    )
+    assert r.status_code == 200
+    return r.json()["finding"]
+
+
 def test_create_case_returns_id_and_secret():
     case_id, secret = _create_case()
     assert len(case_id) == 32
@@ -108,6 +118,7 @@ def test_draft_rfi_offline_fallback_with_no_llm_configured(monkeypatch):
     hdr = {"X-Case-Secret": secret}
     finding_id = client.post(f"/cases/{case_id}/findings", json=_FINDING,
                              headers=hdr).json()["finding_id"]
+    _assign_finding(case_id, finding_id, hdr)
 
     r = client.post(f"/cases/{case_id}/findings/{finding_id}/rfi", headers=hdr)
     assert r.status_code == 200
@@ -127,6 +138,7 @@ def test_export_rfi_renders_html(monkeypatch):
     hdr = {"X-Case-Secret": secret}
     finding_id = client.post(f"/cases/{case_id}/findings", json=_FINDING,
                              headers=hdr).json()["finding_id"]
+    _assign_finding(case_id, finding_id, hdr)
     rfi_id = client.post(f"/cases/{case_id}/findings/{finding_id}/rfi",
                          headers=hdr).json()["rfi_id"]
 
@@ -207,11 +219,17 @@ def test_audit_log_records_actions_without_storing_the_raw_secret(monkeypatch):
     hdr = {"X-Case-Secret": secret}
     finding_id = client.post(f"/cases/{case_id}/findings", json=_FINDING,
                              headers=hdr).json()["finding_id"]
+    _assign_finding(case_id, finding_id, hdr)
     client.post(f"/cases/{case_id}/findings/{finding_id}/rfi", headers=hdr)
 
     log = client.get(f"/cases/{case_id}/audit-log", headers=hdr).json()["audit_log"]
     actions = [entry["action"] for entry in log]
-    assert actions == ["case_created", "finding_added", "rfi_drafted"]
+    assert actions == [
+        "case_created",
+        "finding_added",
+        "finding_workflow_updated",
+        "rfi_drafted",
+    ]
     for entry in log:
         assert secret not in entry["actor_key"]
         assert entry["actor_key"] != secret
@@ -231,6 +249,146 @@ def test_audit_log_is_tenant_isolated():
     assert log_a != log_b
 
 
+def test_finding_workflow_requires_owner_and_resolution_evidence():
+    case_id, secret = _create_case("Workflow guards")
+    hdr = {"X-Case-Secret": secret}
+    finding_id = client.post(
+        f"/cases/{case_id}/findings", json=_FINDING, headers=hdr
+    ).json()["finding_id"]
+
+    unowned = client.patch(
+        f"/cases/{case_id}/findings/{finding_id}",
+        json={"status": "accepted"},
+        headers=hdr,
+    )
+    assert unowned.status_code == 422
+    assert "owner" in unowned.json()["detail"].lower()
+
+    accepted = _assign_finding(case_id, finding_id, hdr)
+    assert accepted["status"] == "accepted"
+    assert accepted["owner"] == "Priya Menon"
+
+    no_evidence = client.patch(
+        f"/cases/{case_id}/findings/{finding_id}",
+        json={"status": "resolved"},
+        headers=hdr,
+    )
+    assert no_evidence.status_code == 422
+    assert "evidence" in no_evidence.json()["detail"].lower()
+
+
+def test_end_to_end_finding_rfi_resolution_workflow(monkeypatch):
+    _no_llm(monkeypatch)
+    case_id, secret = _create_case("Resolution proof")
+    hdr = {"X-Case-Secret": secret}
+    finding_id = client.post(
+        f"/cases/{case_id}/findings", json=_FINDING, headers=hdr
+    ).json()["finding_id"]
+    _assign_finding(case_id, finding_id, hdr, owner="Arjun Rao")
+
+    drafted = client.post(
+        f"/cases/{case_id}/findings/{finding_id}/rfi", headers=hdr
+    )
+    assert drafted.status_code == 200
+    rfi_id = drafted.json()["rfi_id"]
+    finding = client.get(
+        f"/cases/{case_id}/findings", headers=hdr
+    ).json()["findings"][0]
+    assert finding["status"] == "rfi_drafted"
+
+    premature = client.patch(
+        f"/cases/{case_id}/findings/{finding_id}",
+        json={"status": "resolved", "resolution_note": "Vendor confirmed replacement."},
+        headers=hdr,
+    )
+    assert premature.status_code == 409
+    assert "response" in premature.json()["detail"].lower()
+
+    issued = client.patch(
+        f"/cases/{case_id}/rfis/{rfi_id}",
+        json={"status": "issued"},
+        headers=hdr,
+    )
+    assert issued.status_code == 200
+    assert issued.json()["rfi"]["status"] == "issued"
+
+    answered = client.patch(
+        f"/cases/{case_id}/rfis/{rfi_id}",
+        json={
+            "status": "answered",
+            "response_text": "Approved 10-minute battery string ships in week 17.",
+        },
+        headers=hdr,
+    )
+    assert answered.status_code == 200
+    assert answered.json()["rfi"]["response_text"].startswith("Approved")
+
+    resolved = client.patch(
+        f"/cases/{case_id}/findings/{finding_id}",
+        json={
+            "status": "resolved",
+            "resolution_note": "Approved submittal revision replaces the 7-minute string.",
+        },
+        headers=hdr,
+    )
+    assert resolved.status_code == 200
+    row = resolved.json()["finding"]
+    assert row["status"] == "resolved"
+    assert row["resolved_at"] is not None
+
+    audit = client.get(
+        f"/cases/{case_id}/audit-log", headers=hdr
+    ).json()["audit_log"]
+    assert [entry["action"] for entry in audit].count("rfi_workflow_updated") == 2
+    assert audit[-1]["action"] == "finding_workflow_updated"
+
+
+def test_workflow_rejects_skipped_transitions_and_cross_case_updates():
+    case_a, secret_a = _create_case("A")
+    _case_b, secret_b = _create_case("B")
+    hdr_a = {"X-Case-Secret": secret_a}
+    finding_id = client.post(
+        f"/cases/{case_a}/findings", json=_FINDING, headers=hdr_a
+    ).json()["finding_id"]
+
+    skipped = client.patch(
+        f"/cases/{case_a}/findings/{finding_id}",
+        json={
+            "status": "resolved",
+            "owner": "Priya Menon",
+            "resolution_note": "Not enough workflow evidence.",
+        },
+        headers=hdr_a,
+    )
+    assert skipped.status_code == 409
+
+    cross_case = client.patch(
+        f"/cases/{case_a}/findings/{finding_id}",
+        json={"status": "accepted", "owner": "Intruder"},
+        headers={"X-Case-Secret": secret_b},
+    )
+    assert cross_case.status_code == 404
+
+
+def test_duplicate_active_rfi_is_rejected(monkeypatch):
+    _no_llm(monkeypatch)
+    case_id, secret = _create_case("No duplicate RFI")
+    hdr = {"X-Case-Secret": secret}
+    finding_id = client.post(
+        f"/cases/{case_id}/findings", json=_FINDING, headers=hdr
+    ).json()["finding_id"]
+    _assign_finding(case_id, finding_id, hdr)
+    first = client.post(
+        f"/cases/{case_id}/findings/{finding_id}/rfi", headers=hdr
+    )
+    assert first.status_code == 200
+    second = client.post(
+        f"/cases/{case_id}/findings/{finding_id}/rfi", headers=hdr
+    )
+    assert second.status_code == 409
+    assert "active RFI" in second.json()["detail"]
+
+
 def test_case_store_actor_key_is_deterministic_and_non_reversible():
     key1 = case_store.actor_key_for("some-secret-value")
     key2 = case_store.actor_key_for("some-secret-value")
@@ -245,6 +403,7 @@ def test_delete_case_removes_all_data():
     case_id, secret = _create_case()
     hdr = {"X-Case-Secret": secret}
     finding_id = client.post(f"/cases/{case_id}/findings", json=_FINDING, headers=hdr).json()["finding_id"]
+    _assign_finding(case_id, finding_id, hdr)
     client.post(f"/cases/{case_id}/findings/{finding_id}/rfi", headers=hdr)
 
     r = client.delete(f"/cases/{case_id}", headers=hdr)

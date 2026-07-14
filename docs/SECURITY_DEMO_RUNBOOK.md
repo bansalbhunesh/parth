@@ -50,11 +50,10 @@ DEMO_AUTH_TOKEN=<a long random string>       # e.g. `openssl rand -hex 24`
 Callers then present the token as **any** of:
 - `X-Demo-Token: <token>` header
 - `Authorization: Bearer <token>`
-- `?token=<token>` query param
 
 Behaviour: `401` (no token), `403` (wrong token), constant-time compare, token
 **never** logged/echoed/returned. If the flag is on but the token is empty, auth
-is **inert** (fail-open) so a misconfig can't brick the demo.
+fails closed with `503`; a misconfiguration never reopens protected analysis.
 
 > ⚠️ Do NOT bake the token into the frontend bundle (it would be public). With
 > auth on, the hosted frontend's interactive panels need the token supplied at
@@ -76,9 +75,10 @@ the per-IP limiter below). `/llm-check` reports `budget_per_hour` and
 
 ## 3. Rate limiting
 
-Process-local sliding window, 1 hour, keyed by client IP (first hop of
-`X-Forwarded-For`, else socket peer; a presented token is folded in). Clean
-`429` + `Retry-After`.
+Process-local sliding window, 1 hour, keyed by the socket peer by default. Set
+`PRAMAAN_TRUST_PROXY_HEADERS=true` only behind a trusted proxy (as the Render
+deployment does) to use the first `X-Forwarded-For` hop. A presented token is
+folded into the bucket. Clean `429` + `Retry-After`.
 
 ```
 PRAMAAN_RATE_LIMIT_ENABLED=true
@@ -89,8 +89,8 @@ PRAMAAN_DEEP_PROBE_LIMIT_PER_HOUR=3    # /llm-check?deep=1 / ?probe_all=1
 
 **Limitation (documented, not hidden):** this is single-instance and in-memory —
 it does not share state across replicas or survive a restart, and
-`X-Forwarded-For` is client-settable so it slows abuse rather than proving
-identity. A production deployment would key limits off a shared store (Redis)
+proxy headers are unsafe unless the deployment strips client-supplied values.
+A production deployment would key limits off a shared store (Redis)
 behind a trusted proxy that sets a trustworthy client IP. Disable for load
 tests: `PRAMAAN_RATE_LIMIT_ENABLED=0`.
 

@@ -19,6 +19,27 @@ export interface Deviation {
   cx_source?: string;
 }
 
+export type RegisterProvenanceKind =
+  | "live"
+  | "deterministic"
+  | "cached"
+  | "bundled_reference"
+  | "unavailable";
+
+export interface RegisterProvenance {
+  kind: RegisterProvenanceKind;
+  label: string;
+  description: string;
+  live: boolean;
+  sourceDocuments?: number;
+}
+
+export interface RegisterSnapshot {
+  rows: Deviation[];
+  analysisMode: string;
+  provenance: RegisterProvenance;
+}
+
 export interface CxTest {
   id: string;
   level: number;
@@ -126,17 +147,56 @@ async function consumeSSE(
 }
 
 
-export async function getRegister(): Promise<Deviation[]> {
+export async function getRegisterSnapshot(): Promise<RegisterSnapshot> {
   try {
     // Cacheable so the page can be ISR-rendered (instant reloads); refreshed
     // in the background every 10 min. Timeout still guards the background fetch.
     const r = await fetch(`${API}/deviations`, fetchOpts({ next: { revalidate: 600 } }));
     if (!r.ok) throw new Error(String(r.status));
     const data = await r.json();
-    return data.register as Deviation[];
+    if (!Array.isArray(data.register)) throw new Error("invalid register payload");
+    const rawProvenance = data.provenance ?? {};
+    const kind: RegisterProvenanceKind = rawProvenance.kind === "deterministic"
+      ? "deterministic"
+      : data.analysis_mode === "pipeline" || data.analysis_mode === "llm"
+        ? "live"
+        : data.analysis_mode === "unavailable"
+          ? "unavailable"
+          : "cached";
+    return {
+      rows: data.register as Deviation[],
+      analysisMode: String(data.analysis_mode ?? "unknown"),
+      provenance: {
+        kind,
+        label: String(rawProvenance.label ?? "Project register"),
+        description: String(
+          rawProvenance.description
+            ?? "Loaded from the configured Pramaan analysis API.",
+        ),
+        live: rawProvenance.live === true,
+        sourceDocuments: typeof rawProvenance.source_documents === "number"
+          ? rawProvenance.source_documents
+          : undefined,
+      },
+    };
   } catch {
-    return FALLBACK;
+    return {
+      rows: FALLBACK,
+      analysisMode: "bundled_reference",
+      provenance: {
+        kind: "bundled_reference",
+        label: "Bundled reference snapshot",
+        description:
+          "The analysis API did not respond within 2.5 seconds. These labelled reference findings keep the walkthrough available; they are not live inference.",
+        live: false,
+        sourceDocuments: 20,
+      },
+    };
   }
+}
+
+export async function getRegister(): Promise<Deviation[]> {
+  return (await getRegisterSnapshot()).rows;
 }
 
 export async function getCxPlan(): Promise<CxPlan | null> {

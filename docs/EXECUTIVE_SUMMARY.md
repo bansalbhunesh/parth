@@ -22,9 +22,11 @@ each issue it says *which test it will fail and how many weeks early you caught 
 
 ## Why it's believable (not a slide)
 We pointed it at **spec sheets whose values are cited from real vendors** — Vertiv, Cummins, STULZ,
-ABB and others — against the real industry standards. Across 15 team-authored pairs it targets **27 hard
-deviation claims — 4 checked deterministically offline, the rest by the live model — with results
-reported honestly.** It even did engineering on its own: it divided
+ABB and others — against real industry standards. The frozen benchmark contains
+**53 document pairs, 129 labels, 17 equipment systems, and clean negative controls**;
+its v1.2 result is **0.862 recall, 0.953 precision, and 0/64 false alarms**. These
+are benchmark results on team-authored fixtures, not field validation. It also did
+engineering on its own: it divided
 a fuel tank by a burn rate to prove a generator couldn't last the required time, and
 it knew the environmental rating of a refrigerant the spec sheet never printed. Try
 it live: **parth-tan.vercel.app/judge**.
@@ -42,8 +44,8 @@ it live: **parth-tan.vercel.app/judge**.
 
 ## What's proven vs what's next
 - **Benchmarked (not field-validated):** an open, reproducible evaluation suite —
-  the independent ps4_external_v1 benchmark (53 team-authored pairs, 129 frozen
-  labels) reports mean semantic recall **0.862** / precision **0.953** across a
+  the frozen ps4_external_v1 benchmark (53 team-authored pairs, 129 frozen
+  labels across 17 systems) reports mean semantic recall **0.862** / precision **0.953** across a
   3-pass run, versus a **0.111** rule baseline. It also keeps working when the AI
   is rate-limited — it never returns a blank. *(Benchmark result on team-authored
   fixtures — not a real-world or field-validation claim; see

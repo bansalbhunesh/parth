@@ -6,19 +6,12 @@ import { useState } from "react";
 // /screenshots/<id>.png). These replace the earlier CSS mockups — judges in the
 // Screenshots section now see the actual app, not stylised placeholders.
 const SCREENS = [
-  { id: "hero-full", label: "Full Dashboard", desc: "22-section deep-dive dashboard, dark theme, ISR-cached" },
-  { id: "schedule", label: "Predictive Schedule Risk", desc: "Monte-Carlo CPM — P80 finish, deviation slip to RFS, sensitivity tornado" },
-  { id: "supply", label: "Supply-Chain Risk", desc: "Long-lead equipment ETA, P(late), delivery-risk + world-map view" },
-  { id: "graph", label: "Living Project Graph", desc: "Deviation → commissioning test → schedule slip → long-lead supplier blast radius" },
-  { id: "register", label: "Deviation Register", desc: "Every finding with severity, lead time and the Cx test it will fail" },
-  { id: "risk", label: "Commissioning Risk Matrix", desc: "Deviations plotted by severity × weeks-to-failure" },
-  { id: "pipeline", label: "Reasoning Pipeline", desc: "One LLM reasoning core wrapped in deterministic ingest, retrieval, Cx-mapping and critique stages" },
-  { id: "architecture", label: "System Architecture", desc: "LangGraph orchestrator + standards-cited commissioning graph" },
-  { id: "eval", label: "Eval Dashboard", desc: "Benchmark recall + precision (v1.2); no-key offline harness" },
-  { id: "copilot", label: "RFI Copilot", desc: "Streaming RAG over specs, submittals, standards & RFIs" },
-  { id: "roi", label: "ROI / Cost-of-Delay", desc: "Weeks-early × cost-per-week model — the asymmetry story" },
-  { id: "scale", label: "Multi-Project Portfolio", desc: "12 projects, 11 countries — the breadth (by-construction) test" },
-  { id: "refs", label: "Academic References", desc: "Peer-reviewed precedents for cross-document compliance reasoning" },
+  { id: "overview", label: "Overview", desc: "The 90-second evidence-to-resolution journey" },
+  { id: "trace", label: "Evidence trace", desc: "Requirement, variance, commissioning consequence, and decision window" },
+  { id: "resolution", label: "Resolution", desc: "Protected case workflow with ownership and audit history" },
+  { id: "analysis", label: "Document analysis", desc: "Upload or paste documents with explicit analysis provenance" },
+  { id: "evidence", label: "Evidence", desc: "Frozen benchmark, current status, sources, and limitations" },
+  { id: "interventions", label: "Interventions", desc: "Prioritized action with schedule and supply assumptions" },
 ];
 
 export default function ScreenshotShowcase() {
@@ -37,13 +30,13 @@ export default function ScreenshotShowcase() {
             </div>
             <div className="ss-frame-url">parth-tan.vercel.app/#{s.id}</div>
           </div>
-          <figure className="ss-shot" style={{ margin: 0 }}>
+          <figure className="ss-shot">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`/screenshots/${s.id}.png`}
               alt={`${s.label} — ${s.desc}`}
               loading="lazy"
-              style={{ width: "100%", height: "auto", display: "block", borderRadius: "0 0 10px 10px" }}
+              className="ss-shot-image"
             />
             <figcaption className="ss-mockup-desc">{s.desc}</figcaption>
           </figure>

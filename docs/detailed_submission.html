@@ -160,7 +160,7 @@
   <tr><th>Criterion</th><th>How Pramaan addresses it</th><th>Honest status</th></tr>
   <tr><td>Innovation (25%)</td><td>Spec &rarr; deviation &rarr; commissioning test &rarr; lead-time chain; a distinctive wedge beyond submittal review</td><td>Strong &mdash; the moat is the Cx-test / lead-time link, not module count</td></tr>
   <tr><td>Business impact (25%)</td><td>Cost-of-late-nonconformance thesis; expected-value impact model (docs/BUSINESS.md) with low/base/high assumption bands, not a single deterministic number</td><td><span class="lab scen">scenario</span> base case ~3.2x on modeled assumptions, honestly negative in the low case; no paid-pilot validation yet</td></tr>
-  <tr><td>Technical excellence (20%)</td><td>LangGraph reasoning graph + one LLM core, deterministic services, 672 tests, CI, frozen benchmark</td><td><span class="lab bench">benchmarked</span> 0.862/0.953/0.905; reviewer-2 pending</td></tr>
+  <tr><td>Technical excellence (20%)</td><td>LangGraph reasoning graph + one LLM core, deterministic services, 678 tests, CI, frozen benchmark</td><td><span class="lab bench">benchmarked</span> 0.862/0.953/0.905; reviewer-2 pending</td></tr>
   <tr><td>Scalability (15%)</td><td>Modular, containerized; deterministic services run at high throughput; async job flow + input-hash cache; persisted case workflow (SQLite, tenant-isolated) for submittal&rarr;RFI&rarr;audit-log</td><td>Prototype: single-instance auth/rate-limit; LLM path is the scale constraint</td></tr>
   <tr><td>User experience (15%)</td><td>Focused Judge Mode + streaming reasoning + evidence page; provenance chips</td><td>Lighthouse (/judge): Performance 53&rarr;92, Accessibility 92&rarr;100 this phase</td></tr>
 </table>

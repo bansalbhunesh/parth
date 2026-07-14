@@ -55,29 +55,28 @@ def _demo_token() -> str:
 
 
 def auth_required() -> bool:
-    """Auth is active only when explicitly enabled AND a token is configured.
-    A missing token with the flag on is treated as OFF (with a warning) so a
-    misconfiguration can never silently brick the whole demo (fail-open for
-    availability — this is a demo lever, not a production gate)."""
-    if not _truthy(os.getenv("DEMO_AUTH_ENABLED", "false")):
-        return False
-    if not _demo_token():
-        log.warning("DEMO_AUTH_ENABLED is set but DEMO_AUTH_TOKEN is empty — "
-                    "auth is INERT until a token is configured.")
-        return False
-    return True
+    """Return whether protected endpoints require authentication.
+
+    Enabling the gate is authoritative. A missing token is handled as a
+    configuration error by ``require_demo_auth``; it never turns a protected
+    deployment back into an open one.
+    """
+    return _truthy(os.getenv("DEMO_AUTH_ENABLED", "false"))
 
 
 def _presented_token(request: Request) -> str:
-    """Pull the caller's token from (in order) the X-Demo-Token header, an
-    Authorization: Bearer header, or a ?token= query param. Never logged."""
+    """Read a token from a header only.
+
+    Query-string tokens are intentionally rejected because URLs leak into
+    browser history, referrers, analytics, and access logs.
+    """
     hdr = request.headers.get("x-demo-token")
     if hdr:
         return hdr.strip()
     auth = request.headers.get("authorization", "")
     if auth[:7].lower() == "bearer ":
         return auth[7:].strip()
-    return (request.query_params.get("token") or "").strip()
+    return ""
 
 
 def require_demo_auth(request: Request) -> None:
@@ -86,14 +85,21 @@ def require_demo_auth(request: Request) -> None:
     The token value is never included in the error or logged."""
     if not auth_required():
         return
+    configured = _demo_token()
+    if not configured:
+        log.error("DEMO_AUTH_ENABLED is true but DEMO_AUTH_TOKEN is empty")
+        raise HTTPException(
+            status_code=503,
+            detail="Protected analysis is temporarily unavailable because access control is not configured.",
+        )
     presented = _presented_token(request)
     if not presented:
         raise HTTPException(
             status_code=401,
             detail="This demo endpoint requires an access token "
-                   "(send it as the 'X-Demo-Token' header or a '?token=' query param).",
+                   "(send it in the 'X-Demo-Token' or Authorization header).",
         )
-    if not secrets.compare_digest(presented, _demo_token()):
+    if not secrets.compare_digest(presented, configured):
         raise HTTPException(status_code=403, detail="Invalid demo access token.")
 
 
@@ -132,11 +138,15 @@ def reset_rate_limits() -> None:
 
 def _client_key(request: Request) -> str:
     """Best-effort client identity for bucketing. Prefers the first hop of
-    X-Forwarded-For (Render/most proxies set it); falls back to the socket peer.
+    X-Forwarded-For only when PRAMAAN_TRUST_PROXY_HEADERS is explicitly enabled;
+    otherwise it falls back to the socket peer.
     If a demo token is presented it is folded in so distinct tokens get distinct
-    buckets. NOTE: X-Forwarded-For is client-settable, so this is abuse-slowing,
-    not abuse-proof — a shared store + trusted proxy is the production answer."""
-    xff = request.headers.get("x-forwarded-for", "")
+    buckets. A shared store behind a trusted proxy remains the production answer."""
+    xff = (
+        request.headers.get("x-forwarded-for", "")
+        if _truthy(os.getenv("PRAMAAN_TRUST_PROXY_HEADERS", "false"))
+        else ""
+    )
     ip = xff.split(",")[0].strip() if xff else (
         request.client.host if request.client else "unknown")
     tok = _presented_token(request)

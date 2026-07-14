@@ -238,8 +238,8 @@ repository.**
   401/403 auth-failure bodies and the failover-error path.
 - **Demo token:** compared with `secrets.compare_digest` (constant-time);
   never echoed in an error message. If `DEMO_AUTH_ENABLED=true` but no token
-  is set, auth is treated as **inert** (fails open) rather than silently
-  locking the demo — an availability choice, not a security one.
+  is set, protected analysis returns `503` (fails closed) rather than silently
+  reopening the deployment.
 
 ---
 
@@ -253,7 +253,7 @@ deserves the same bluntness:
   on the hosted deploy (`render.yaml`). Anyone with the URL can upload a
   document and run analysis. There are no user accounts.
 - **Even with auth on, it is one shared token, not identity.** `DEMO_AUTH_TOKEN`
-  is a single bearer/header/query-param secret checked the same way for every
+  is a single bearer/header secret checked the same way for every
   caller — not per-user credentials, not an access-control system. Anyone
   holding that one token can hit every token-protected endpoint.
 - **No tenant isolation on the result cache.** `analyze_cached()`
@@ -287,11 +287,12 @@ deserves the same bluntness:
   audit.
 - **Rate limiting is single-instance, in-memory, and IP-based
   (`backend/security.py`).** It does not survive a restart, does not share
-  state across replicas, and keys off `X-Forwarded-For`, which a client can
-  spoof. This slows abuse; it does not prove or protect identity, and it is
-  not a substitute for network-layer protection.
-- **CORS is wildcard (`*`) by default**, with `allow_credentials=False`. This
-  is an intentionally open public-demo API surface, not a restricted one.
+  state across replicas, and trusts `X-Forwarded-For` only when
+  `PRAMAAN_TRUST_PROXY_HEADERS=true` behind the configured hosting proxy. This
+  slows abuse; it does not prove or protect identity, and it is not a
+  substitute for network-layer protection.
+- **CORS is allowlisted by default** to the hosted frontend and local
+  development origins, with restricted methods/headers and credentials off.
 - **No audit trail of who uploaded what, on `/analyze` and `/jobs/*`.** No
   per-request user identity is captured or logged anywhere on those routes —
   only an IP-derived rate-limit bucket that is never persisted beyond the

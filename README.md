@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/PRA-MAAN-00d4ff?style=for-the-badge&labelColor=0a0d11&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzAwZDRmZiI+PHBhdGggZD0iTTEyIDJMMyA3djEwbDkgNSA5LTVWN2wtOS01eiIvPjwvc3ZnPg==">
-    <img alt="Pramaan" src="https://img.shields.io/badge/PRA-MAAN-00d4ff?style=for-the-badge&labelColor=0a0d11">
+    <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/PRA-MAAN-d27357?style=for-the-badge&labelColor=171815">
+    <img alt="Pramaan" src="https://img.shields.io/badge/PRA-MAAN-b54a31?style=for-the-badge&labelColor=f2efe7">
   </picture>
 </p>
 
@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/reproducible_tests-672-5b8cff?style=flat-square&labelColor=111820" alt="672 tests">
+  <img src="https://img.shields.io/badge/reproducible_tests-678-b54a31?style=flat-square&labelColor=20221e" alt="678 tests">
   <img src="https://img.shields.io/badge/benchmark_recall-0.862-ffb020?style=flat-square&labelColor=1a1508" alt="Benchmark recall 0.862">
   <img src="https://img.shields.io/badge/clean--negative_false_alerts-0-35c98b?style=flat-square&labelColor=0d1a14" alt="0 false alerts on 64 controls">
   <img src="https://img.shields.io/badge/license-MIT-5b8cff?style=flat-square&labelColor=111820" alt="MIT License">
@@ -23,7 +23,7 @@
 
 <p align="center">
   <a href="https://parth-tan.vercel.app/judge"><img src="https://img.shields.io/badge/★_JUDGE_MODE-90--second_proof-ffb020?style=for-the-badge&labelColor=1a1508" alt="Judge Mode"></a>
-  <a href="https://parth-tan.vercel.app"><img src="https://img.shields.io/badge/▶_LIVE_DEMO-parth--tan.vercel.app-00d4ff?style=for-the-badge&labelColor=0a0d11" alt="Live Demo"></a>
+  <a href="https://parth-tan.vercel.app"><img src="https://img.shields.io/badge/▶_LIVE_DEMO-parth--tan.vercel.app-b54a31?style=for-the-badge&labelColor=20221e" alt="Live Demo"></a>
   <a href="https://parth-1-ma30.onrender.com/health"><img src="https://img.shields.io/badge/API-parth--1--ma30.onrender.com-35c98b?style=for-the-badge&labelColor=0d1a14" alt="API"></a>
 </p>
 
@@ -65,7 +65,7 @@
 
 > [!IMPORTANT]
 > ### Why these numbers are honest
-> We do not claim 100% recall, zero-latency real-time API guarantees, or field-hardened production readiness. The aggregate "1,024 lead-time-weeks" and the 12-project portfolio are synthetic breadth benchmarks built by construction to verify generalisation. The actual engine is measured against fifteen team-authored real-datasheet evaluation pairs (Vertiv, STULZ, Cummins, ABB, Tate, Schneider, etc.) targeting 27 hard deviation claims: 4 are checked deterministically offline (yielding 0 false positives), and 23 require live-model evaluation (F1 1.000 limit). If the live API is rate-limited or suspended, the system gracefully degrades to a deterministic local rule floor.
+> We do not claim 100% recall, zero-latency real-time API guarantees, or field-hardened production readiness. The frozen `ps4_external_v1` v1.2 benchmark contains 53 spec–submittal pairs and 129 labels across 17 systems. The featured three-run configuration reports semantic recall 0.862, precision 0.953, F1 0.905, and 0 false alerts on 64 clean-negative controls, versus rule-baseline recall 0.111. Fixtures are mostly team-authored, reviewer-2 adjudication is pending, and this is not field or customer validation. If the live API is unavailable, the interface labels the deterministic rule floor explicitly rather than presenting it as live inference.
 
 ---
 
@@ -174,7 +174,7 @@ You can run the entire verification suite, deterministic eval harnesses, and fro
 make setup
 make corpus
 
-# 2. Run the full test suite (672 tests, no API key needed)
+# 2. Run the full test suite (678 tests, no API key needed)
 make test
 
 # 3. Run deterministic evals (no-key offline harnesses)
@@ -249,5 +249,5 @@ f9976f5 feat(evidence): store two primary-source documents, not just cite them (
 <p align="center">
   <strong>Pramaan Compliance Engine</strong><br>
   <em>EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4</em><br>
-  <sub>672 tests passed &middot; CI Green &middot; Verified Live</sub>
+  <sub>678 tests collected &middot; CI gated &middot; provenance labelled</sub>
 </p>

@@ -56,6 +56,7 @@ export default defineConfig({
         CLAUDE_API_KEY: "",
         LOCAL_LLM_ENABLED: "",
         PRAMAAN_RATE_LIMIT_ENABLED: "0",
+        PRAMAAN_CORS_ORIGINS: "http://127.0.0.1:3100",
       },
     },
     {

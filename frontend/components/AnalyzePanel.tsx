@@ -239,7 +239,7 @@ function DropZone({
         ref={inputRef}
         type="file"
         accept={accept}
-        style={{ display: "none", caretColor: "transparent" }}
+        className="dropzone-input"
         onChange={(e) => {
           const f = e.target.files?.[0];
           if (f) onFile(f);
@@ -415,43 +415,7 @@ export default function AnalyzePanel() {
   const [ocr, setOcr] = useState<OcrStatus | null>(null);
   const [extraction, setExtraction] = useState<UploadExtraction | null>(null);
   const [localMode, setLocalMode] = useState(false);
-  const [webhookUrl, setWebhookUrl] = useState("");
-  const [webhooks, setWebhooks] = useState<string[]>([]);
-  const [webhookLogs, setWebhookLogs] = useState<Array<{ url: string; status: string; payload: any }>>([]);
-  const [activeWebhookTab, setActiveWebhookTab] = useState<"slack" | "json" | "email">("slack");
   const abortRef = useRef(false);
-
-  useEffect(() => {
-    fetch(`${API}/webhooks`)
-      .then((r) => r.json())
-      .then((data) => setWebhooks(data.urls || []))
-      .catch(() => {});
-  }, []);
-
-  const handleSubscribe = async () => {
-    if (!webhookUrl || !webhookUrl.startsWith("http")) {
-      alert("Please enter a valid HTTP/HTTPS URL.");
-      return;
-    }
-    try {
-      const res = await fetch(`${API}/webhooks/subscribe`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: webhookUrl }),
-      });
-      if (res.ok) {
-        setWebhooks((prev) => (prev.includes(webhookUrl) ? prev : [...prev, webhookUrl]));
-        setWebhookUrl("");
-      } else {
-        // The backend rejects private/internal targets (SSRF guard) and caps
-        // the list — surface its reason instead of failing silently.
-        const detail = await res.json().then((b) => b.detail).catch(() => null);
-        alert(detail || `Subscription rejected (HTTP ${res.status}).`);
-      }
-    } catch {
-      alert("Failed to subscribe webhook.");
-    }
-  };
 
   // Probe whether THIS deployment can OCR, so the UI reflects reality instead of
   // implying a capability the backend may not have. null = unknown → claim nothing.
@@ -518,22 +482,6 @@ export default function AnalyzePanel() {
         setResult(res as AnalyzeResult);
         setStreamText("");
         setStreaming(false);
-        const criticalOrMajor = res.deviations.filter((d: any) => d.severity === "Critical" || d.severity === "Major");
-        if (criticalOrMajor.length > 0) {
-          const logs = webhooks.map(url => ({
-            url,
-            status: "Fired",
-            payload: {
-              event: "deviation_detected",
-              system: "CUSTOM",
-              count: criticalOrMajor.length,
-              deviations: criticalOrMajor
-            }
-          }));
-          setWebhookLogs(logs);
-        } else {
-          setWebhookLogs([]);
-        }
       },
       onError: (err) => setError(err),
       onDone: finalize,
@@ -552,24 +500,6 @@ export default function AnalyzePanel() {
       setTimeout(() => {
         const localResult = runClientSideReconciliation(spec, submittal);
         setResult(localResult);
-        
-        const criticalOrMajor = localResult.deviations.filter(d => d.severity === "Critical" || d.severity === "Major");
-        if (criticalOrMajor.length > 0) {
-          const logs = webhooks.map(url => ({
-            url,
-            status: "Fired (Simulated)",
-            payload: {
-              event: "deviation_detected",
-              system: "CUSTOM",
-              count: criticalOrMajor.length,
-              deviations: criticalOrMajor
-            }
-          }));
-          setWebhookLogs(logs);
-        } else {
-          setWebhookLogs([]);
-        }
-
         finalize();
       }, 400);
       return;
@@ -587,22 +517,6 @@ export default function AnalyzePanel() {
           setResult(res as AnalyzeResult);
           setStreamText("");
           setStreaming(false);
-          const criticalOrMajor = res.deviations.filter((d: any) => d.severity === "Critical" || d.severity === "Major");
-          if (criticalOrMajor.length > 0) {
-            const logs = webhooks.map(url => ({
-              url,
-              status: "Fired",
-              payload: {
-                event: "deviation_detected",
-                system: "CUSTOM",
-                count: criticalOrMajor.length,
-                deviations: criticalOrMajor
-              }
-            }));
-            setWebhookLogs(logs);
-          } else {
-            setWebhookLogs([]);
-          }
         },
         finalize,
         async (err) => {
@@ -615,22 +529,6 @@ export default function AnalyzePanel() {
             if (!r.ok) throw new Error(`HTTP ${r.status}`);
             const data = await r.json();
             setResult(data);
-            const criticalOrMajor = data.deviations.filter((d: any) => d.severity === "Critical" || d.severity === "Major");
-            if (criticalOrMajor.length > 0) {
-              const logs = webhooks.map(url => ({
-                url,
-                status: "Fired",
-                payload: {
-                  event: "deviation_detected",
-                  system: "CUSTOM",
-                  count: criticalOrMajor.length,
-                  deviations: criticalOrMajor
-                }
-              }));
-              setWebhookLogs(logs);
-            } else {
-              setWebhookLogs([]);
-            }
           } catch (e) {
             setError(e instanceof Error ? e.message : err);
           }
@@ -718,12 +616,11 @@ export default function AnalyzePanel() {
         <button className="analyze-example-btn" onClick={loadExample} disabled={loading}>
           Load compact example
         </button>
-        <label className="local-mode-toggle" style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: "auto", fontSize: 13, cursor: "pointer", color: "#8a8f98", userSelect: "none" }}>
+        <label className="local-mode-toggle">
           <input
             type="checkbox"
             checked={localMode}
             onChange={(e) => setLocalMode(e.target.checked)}
-            style={{ cursor: "pointer" }}
             id="local-mode-chk"
           />
           <span>Local Engine (Instant)</span>
@@ -731,20 +628,9 @@ export default function AnalyzePanel() {
       </div>
 
       {mode === "pdf" && ocr && (
-        <div
-          style={{
-            display: "flex", alignItems: "center", gap: 7,
-            fontSize: 12, margin: "0 0 12px", lineHeight: 1.4,
-          }}
-        >
-          <span
-            aria-hidden="true"
-            style={{
-              width: 8, height: 8, borderRadius: "50%", flexShrink: 0,
-              background: ocr.ocr_available ? "#22c55e" : "#9ca3af",
-            }}
-          />
-          <span style={{ color: ocr.ocr_available ? "#16a34a" : "#8a8f98" }}>
+        <div className={`ocr-status ${ocr.ocr_available ? "is-ready" : "is-unavailable"}`}>
+          <span className="ocr-status-dot" aria-hidden="true" />
+          <span>
             {ocr.ocr_available
               ? `OCR ready — scanned PDFs & images supported${ocr.tesseract_version ? ` (Tesseract ${ocr.tesseract_version})` : ""}`
               : ocr.status === "disabled"
@@ -817,17 +703,8 @@ export default function AnalyzePanel() {
       {error && <div className="analyze-error" role="alert">{friendlyError(error)}</div>}
 
       {ocrWarning && (
-        <div
-          role="status"
-          style={{
-            display: "flex", alignItems: "flex-start", gap: 8,
-            fontSize: 12.5, lineHeight: 1.45, margin: "12px 0 0",
-            padding: "9px 12px", borderRadius: 8,
-            border: "1px solid rgba(245,158,11,0.4)",
-            background: "rgba(245,158,11,0.10)", color: "#b45309",
-          }}
-        >
-          <span aria-hidden="true" style={{ flexShrink: 0 }}>⚠️</span>
+        <div className="ocr-warning" role="status">
+          <span aria-hidden="true">⚠</span>
           <span>{ocrWarning}</span>
         </div>
       )}
@@ -931,94 +808,6 @@ export default function AnalyzePanel() {
             </div>
           )}
 
-          {/* Webhook logs & subscription panel */}
-          <div className="webhooks-panel" style={{ marginTop: 24, padding: 16, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, background: "rgba(255,255,255,0.02)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#fff" }}>🔔 Downstream RFI Webhooks</h3>
-              <span style={{ fontSize: 12, color: "#8a8f98" }}>{webhooks.length} subscriber(s)</span>
-            </div>
-            
-            <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-              <input
-                type="text"
-                value={webhookUrl}
-                onChange={(e) => setWebhookUrl(e.target.value)}
-                placeholder="Enter Slack/Jira webhook or API URL..."
-                style={{ flex: 1, padding: "6px 12px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(0,0,0,0.2)", color: "#fff", fontSize: 13 }}
-              />
-              <button
-                onClick={handleSubscribe}
-                style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: "#35c98b", color: "#000", fontWeight: 500, fontSize: 13, cursor: "pointer" }}
-              >
-                Subscribe
-              </button>
-            </div>
-
-            {webhooks.length > 0 && (
-              <div style={{ fontSize: 12, color: "#8a8f98", marginBottom: 16 }}>
-                Active subscriptions: {webhooks.map((w, idx) => <code key={idx} style={{ background: "rgba(255,255,255,0.05)", padding: "2px 4px", borderRadius: 4, marginRight: 4 }}>{w.slice(0, 30)}...</code>)}
-              </div>
-            )}
-
-            {/* Webhook Templates / Triggered Logs */}
-            <div style={{ marginTop: 16 }}>
-              <div style={{ display: "flex", gap: 12, borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: 8, marginBottom: 12 }}>
-                <button
-                  onClick={() => setActiveWebhookTab("slack")}
-                  style={{ background: "none", border: "none", color: activeWebhookTab === "slack" ? "#35c98b" : "#8a8f98", fontSize: 13, fontWeight: activeWebhookTab === "slack" ? 600 : 400, cursor: "pointer", borderBottom: activeWebhookTab === "slack" ? "2px solid #35c98b" : "none", paddingBottom: 6 }}
-                >
-                  Slack Format
-                </button>
-                <button
-                  onClick={() => setActiveWebhookTab("email")}
-                  style={{ background: "none", border: "none", color: activeWebhookTab === "email" ? "#35c98b" : "#8a8f98", fontSize: 13, fontWeight: activeWebhookTab === "email" ? 600 : 400, cursor: "pointer", borderBottom: activeWebhookTab === "email" ? "2px solid #35c98b" : "none", paddingBottom: 6 }}
-                >
-                  Email Format
-                </button>
-                <button
-                  onClick={() => setActiveWebhookTab("json")}
-                  style={{ background: "none", border: "none", color: activeWebhookTab === "json" ? "#35c98b" : "#8a8f98", fontSize: 13, fontWeight: activeWebhookTab === "json" ? 600 : 400, cursor: "pointer", borderBottom: activeWebhookTab === "json" ? "2px solid #35c98b" : "none", paddingBottom: 6 }}
-                >
-                  JSON Payload
-                </button>
-              </div>
-
-              <pre style={{ margin: 0, padding: 12, background: "rgba(0,0,0,0.3)", borderRadius: 8, fontSize: 12, overflowX: "auto", maxHeight: 180, color: "#a1a8b5" }}>
-                {activeWebhookTab === "slack" && result && JSON.stringify({
-                  text: `🚨 *Pramaan Alert*: ${result.deviations.filter(d => d.severity === "Critical" || d.severity === "Major").length} Critical/Major deviations found!\n` +
-                        result.deviations.filter(d => d.severity === "Critical" || d.severity === "Major").map(d => `• *${d.component}* (${d.parameter}): Required ${d.required_value}, got ${d.provided_value}.`).join("\n")
-                }, null, 2)}
-
-                {activeWebhookTab === "email" && result && JSON.stringify({
-                  subject: `🚨 [Pramaan] Critical Deviation Notification: ${result.deviations.filter(d => d.severity === "Critical" || d.severity === "Major").length} non-compliances`,
-                  body: `<h3>Pramaan Compliance Engine Detected Deviations</h3><ul>` +
-                        result.deviations.filter(d => d.severity === "Critical" || d.severity === "Major").map(d => `<li><b>${d.component}</b> (${d.parameter}): Required ${d.required_value}, got ${d.provided_value}. Rationale: ${d.rationale}</li>`).join("") +
-                        `</ul>`
-                }, null, 2)}
-
-                {activeWebhookTab === "json" && result && JSON.stringify({
-                  event: "deviation_detected",
-                  system: "CUSTOM",
-                  count: result.deviations.filter(d => d.severity === "Critical" || d.severity === "Major").length,
-                  deviations: result.deviations.filter(d => d.severity === "Critical" || d.severity === "Major")
-                }, null, 2)}
-              </pre>
-            </div>
-
-            {webhookLogs.length > 0 && (
-              <div style={{ marginTop: 16 }}>
-                <div style={{ fontSize: 12, fontWeight: 500, color: "#fff", marginBottom: 6 }}>Triggered Dispatches</div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  {webhookLogs.map((log, idx) => (
-                    <div key={idx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 10px", background: "rgba(255,255,255,0.03)", borderRadius: 6, fontSize: 11 }}>
-                      <span style={{ color: "#a1a8b5" }}>{log.url}</span>
-                      <span style={{ color: "#35c98b", fontWeight: 600 }}>{log.status}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
         </div>
       )}
     </div>

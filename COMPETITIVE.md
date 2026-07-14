@@ -3,7 +3,7 @@
 > Honest landscape analysis. We don't claim to be the only system that reads
 > submittals; we claim a specific, defensible edge and back every number.
 
-## 1. The visible hackathon field (updated 2026-07-09)
+## 1. The visible hackathon field (refreshed 2026-07-14)
 
 The all-track public scan is now broader than the original PS4-only sweep.
 Pramaan should be positioned as **dominant on verifiable engineering**, not as an
@@ -12,47 +12,52 @@ for different reasons:
 
 | Threat | Why it can beat us in a judge room | Pramaan's answer |
 |---|---|---|
-| `sanskar9999/prahari` | Public-safety/fraud story is emotionally immediate; GitHub Pages demo runs in-browser; README leads with real audio/STT/CV modules and a tight 3-4 min demo flow. | We cannot out-drama digital-arrest scams. We out-verify: backend + frontend deploys, 672 tests, frozen benchmark, claims register, live health/LLM/OCR probes, no hidden eval. |
-| `Agent-A345/PlantIQ` | Industrial domain is close to ours; README claims a multi-module specialist architecture, real regulatory PDFs, knowledge graph, predictive maintenance, 22+ features. | We avoid "feature fog": one LLM reasoning core, deterministic services, benchmark card, CI, and a judge path that proves the core claim in 90 seconds. |
-| `Exyons/ET-GenAI-Hackathon` | Agriculture has broad social impact, live frontend, multilingual web/SMS/WhatsApp/drone story. | We make the business consequence concrete: a vendor deviation becomes a dated commissioning failure and schedule-risk event, with citations and reproducible checks. |
+| [`sanskar9999/prahari`](https://github.com/sanskar9999/prahari) | Public-safety/fraud story is emotionally immediate; its current README links a phone-capable GitHub Pages demo, documents a 3–4 minute guided flow, and the repository now includes a GitHub Pages deployment workflow. It does not currently document a test suite. | We cannot out-drama digital-arrest scams. We out-verify: backend + frontend deploys, 678 tests, frozen benchmark, claims register, explicit provenance, and no hidden eval. |
+| [`Agent-A345/PlantIQ`](https://github.com/Agent-A345/PlantIQ) | Industrial domain is close to ours; the current public repository documents 5 specialist agents, 22+ implemented features, 6 real government PDFs, a knowledge graph, Docker, and a useful honest disclosure that operating telemetry is simulated. It does not currently document a public deployment or test suite. | We avoid feature fog: one LLM reasoning core, deterministic services, a benchmark card, CI, and a judge path that proves one consequential workflow end to end. |
+| [`Exyons/ET-GenAI-Hackathon`](https://github.com/Exyons/ET-GenAI-Hackathon) | Agriculture has broad social impact; the current repository links a live Vercel frontend and documents multilingual web/SMS/WhatsApp access plus a drone simulation. It does not currently document a test suite. | We make the business consequence concrete: a vendor deviation becomes a dated commissioning failure and an owned resolution, with citations and reproducible checks. |
 
 Do **not** claim "best overall all-track project." The defensible claim is:
 **among visible public submissions, Pramaan is the strongest evidence and
 reproducibility package I found, and the strongest visible PS4 project.** That is
 more persuasive than pretending emotional/social-impact tracks do not exist.
 
-## 1a. Earlier visible-field snapshot (surveyed 2026-07-03)
+## 1a. What changed since the earlier snapshot
 
-A GitHub sweep (repo + code search on "ET AI Hackathon" and every
-problem-statement keyword) catalogued **~70 public participant repositories
-across all tracks**. Scored on hard, checkable signals, the visible field has:
+The earlier 2026-07-03 sweep is retained in git history, but its aggregate
+counts are no longer used as current evidence. Public repositories changed:
+Prahari now visibly contains a GitHub Actions deployment workflow, and commit
+counts, deployment availability, and documentation continue to move. A one-time
+"0 CI pipelines" or "3 deployments" count ages too quickly to support a durable
+claim.
 
-| Signal | Visible field (~70 repos, all tracks) | Pramaan |
-|---|---|---|
-| CI pipeline | **0** | ✅ green (tests + 3 evals + tsc + build + E2E + Docker smoke + ruff + pip-audit + bandit) |
-| Test suite | **1** (minimal) | ✅ 672 tests + 28 Playwright E2E |
-| Eval harness with ground truth | **0** | ✅ 4 paths + no-key real-pairs harness |
-| Quantified impact model | **0** | ✅ `docs/BUSINESS.md`, every figure cited |
-| Live deployment | 3 | ✅ 2 (Vercel + Render) |
-| Public-source-cited document pairs in the loop | ~2 | ✅ 15 team-authored pairs (values cited from public datasheets) + a frozen 53-pair benchmark |
+The current comparison therefore uses only checkable, repository-level facts and
+states the visibility limit plainly: private submissions are not observable, and
+"not documented" is not the same as "does not exist." The defensible position is
+that Pramaan's public package is unusually deep on reproducibility and claim
+boundaries; it is not proof of overall competition rank.
 
-In our own track (PS4), the strongest visible rival is a FastAPI+Claude+ChromaDB
-platform with an NCR workflow — real code, but no tests, no eval, no CI, no
-deployment. The caveat cuts both ways: serious teams keep repos private until
-submission (we did), so the visible field is a floor, not the field. The honest
-claim is not "we beat everyone"; it is that **no publicly visible entry in any
-track ships verifiable rigor** — reproducible numbers, an open eval, a test
-suite a judge can run — which is precisely the axis Pramaan is built on.
-Everything below benchmarks against the harder target: the **commercial state
-of the art** and the **judging rubric**.
+### Patterns worth adopting from the fresh scan
+
+1. **A guided story beats a feature index.** Prahari documents one timed demo
+   sequence. Pramaan now uses a 90-second evidence → consequence → owner → RFI →
+   closure journey instead of a 22-section dashboard.
+2. **Honest data labels create trust.** PlantIQ explicitly separates real
+   regulatory documents from simulated telemetry. Pramaan now keeps live,
+   deterministic, bundled-reference, benchmark, and scenario states visually
+   distinct.
+3. **Reach matters, but only where it serves the user.** Kisan AI's multi-channel
+   story is compelling because it matches low-connectivity users. Pramaan should
+   not imitate channel breadth; its equivalent is a printable/exportable evidence
+   record and an API-backed case workflow for CxAs and owner's engineers.
 
 ## 2. The commercial landscape (and where we differ)
 
-AI submittal-review tools already exist — **BuildSync, Spec-ID, InspectMind,
-SubmittalLink**. They extract product data from submittals and check it against
-the spec. BuildSync publicly cites catching an air-handling unit that "would
-have failed commissioning." So "AI reads a submittal vs a spec" is **not**
-novel, and we no longer claim it is.
+AI submittal-review tools already exist — **BuildSync, Part3, Spec-ID,
+InspectMind, and Document Crunch**. BuildSync and Part3 now publicly document
+requirement-by-requirement review, direct source navigation, and a human final
+decision; Document Crunch reasons across whole project document sets and can
+generate RFIs. So "AI reads a submittal vs a spec," "shows citations," and
+"drafts an RFI" are **not** novel, and we do not claim they are.
 
 | Capability | Commercial submittal-review tools | **Pramaan** |
 |---|---|---|
@@ -71,23 +76,44 @@ IST-07 at Week 44; you have 27 weeks to act."
 
 ### 2a. Market validation + the agentic tier (2026)
 
-The thesis is no longer speculative: in **April 2026 Trimble acquired Document
-Crunch** — a construction "AI risk-intelligence" platform that compares documents
+The thesis is no longer speculative: in **April 2026 Trimble completed its
+acquisition of Document Crunch** — a construction "AI risk-intelligence" platform that compares documents
 to standards, flags deviations, and cites sources — to fold it into its project-
 delivery ecosystem. Trunk Tools (CNBC, Aug 2025) raised on adjacent document-QA.
 That a $15B contractor-software vendor paid to own *exactly* the
 deviation-vs-standards-with-citations capability is the strongest possible
 external signal that Pramaan is building in the right place. It also sets the bar:
-these are funded, production, field-data products. We do **not** out-scale them.
+these are funded, production, field-data products. Trimble reports Document
+Crunch has been deployed on 10,000+ projects. We do **not** out-scale them.
 
 The bar moved again on **9 June 2026**: Document Crunch (now a Trimble company)
 launched a project-level risk-intelligence platform that answers questions
 across all source documents, surfaces scope gaps, and auto-generates
 deliverables — redlines, notices, submittals, and **RFIs**. Two consequences we
 state plainly: (1) pre-drafted RFI copy is now commercial table stakes — our
-downstream RFI webhooks are a workflow convenience, not a moat; (2) the moat
+case-scoped webhooks are a secured integration boundary, not a moat; (2) the moat
 claim below therefore rests entirely on the commissioning-risk join, which
 their public feature set still does not include.
+
+### 2b. Commercial patterns adopted in this redesign
+
+- **Part3:** its April 2026 Submittal Assistant presents the spec requirement,
+  submitted evidence, exact gap, notes, and direct page links; it then recommends
+  a status while explicitly leaving the professional in control. Pramaan's active
+  workflow now mirrors that decision shape: evidence is immutable, ownership and
+  status changes are separate, and closure requires recorded resolution evidence.
+- **BuildSync:** its current product surface emphasizes side-by-side verification,
+  pass/fail/unknown-style outcomes, and a complete audit trail. Pramaan now keeps
+  the evidence chain adjacent to the finding and refuses to label a fallback as
+  live. BuildSync's public 95%+ figure remains a vendor claim, not a directly
+  comparable open benchmark.
+- **Document Crunch:** project-level context and generated deliverables have moved
+  the baseline beyond single-document Q&A. Pramaan's defensible response is not
+  more chat; it is the commissioning-test/schedule/supply join plus a case state
+  machine that carries an RFI response through closure.
+- **What we deliberately did not copy:** broad agent counts, dense dashboard
+  grids, and channel proliferation. They add surface area without strengthening
+  Pramaan's one buyer-critical workflow.
 
 Where we are *not* a follower: none of the public agentic-risk or submittal tools
 (Document Crunch, BuildSync, Trunk Tools, Part3, InspectMind) publicly unify a
@@ -144,11 +170,11 @@ of the following is in their public feature set — and together they are the mo
 2. **Lead-time-to-failure.** A quantified "you caught this N weeks before the test
    fails" — the number that converts a finding into a dated, prioritised action
    and a board-level schedule-risk metric.
-3. **Open, reproducible eval + real-world result.** A public test harness, a
-   test suite, and a **cited-value evaluation on 15 team-authored third-party pairs**
-   (4 checked deterministically offline, 23 live-model)
-   ([`eval/REAL_PAIRS_EVAL.md`](eval/REAL_PAIRS_EVAL.md)). Closed SaaS asks you to
-   trust the marketing; we ship the harness.
+3. **Open, reproducible eval + real-world result.** A public test harness, 678
+   backend tests, and a frozen **53-pair / 129-label / 17-system** benchmark with
+   repeat-run model results, clean-negative controls, and a rule baseline
+   ([`benchmarks/ps4_external_v1/METHODOLOGY.md`](benchmarks/ps4_external_v1/METHODOLOGY.md)).
+   Closed SaaS asks you to trust the marketing; we ship the harness and its limits.
 4. **No-silent-zero resilience.** A deterministic detector that still returns the
    headline deviations when the LLM is rate-limited or absent — a property a
    cloud-only black box cannot offer on-prem or air-gapped sites.

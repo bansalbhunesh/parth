@@ -19,12 +19,12 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="error-boundary" style={{ margin: "10vh auto", maxWidth: 520 }}>
+    <div className="error-boundary">
       <div className="error-boundary-icon">!</div>
       <div className="error-boundary-title">Something went wrong</div>
       <div className="error-boundary-msg">
         This page failed to render. The API may be unavailable or returned an
-        unexpected response. The dashboard normally falls back to bundled data —
+        unexpected response. The product normally falls back to bundled data —
         try again.
       </div>
       <button className="error-boundary-retry" onClick={() => reset()}>

@@ -4,6 +4,7 @@ import concurrent.futures
 import logging
 import os
 import re
+import threading
 import time
 from typing import NamedTuple
 
@@ -25,10 +26,64 @@ log = logging.getLogger("pramaan.analyze")
 # for 40s+; a judge will not wait. Tune with PRAMAAN_LLM_TIMEOUT (seconds).
 _LLM_TIMEOUT_S = float(os.getenv("PRAMAAN_LLM_TIMEOUT", "60"))
 
+_LLM_MAX_WORKERS = max(1, int(os.getenv("PRAMAAN_LLM_MAX_WORKERS", "4")))
+_LLM_MAX_PENDING = max(0, int(os.getenv("PRAMAAN_LLM_MAX_PENDING", "2")))
+
 # Module-level pool so a timed-out call is abandoned (left to finish in the
 # background) rather than blocking the response — a `with` executor would wait
 # for the worker on exit and defeat the timeout.
-_LLM_POOL = concurrent.futures.ThreadPoolExecutor(max_workers=4)
+_LLM_POOL = concurrent.futures.ThreadPoolExecutor(max_workers=_LLM_MAX_WORKERS)
+_LLM_CAPACITY = threading.BoundedSemaphore(_LLM_MAX_WORKERS + _LLM_MAX_PENDING)
+_LLM_STATE_LOCK = threading.Lock()
+_LLM_INFLIGHT = 0
+
+
+class LLMCapacityError(RuntimeError):
+    """The bounded LLM queue is full; callers should degrade immediately."""
+
+
+def _run_with_capacity(fn, args, kwargs):
+    global _LLM_INFLIGHT
+    try:
+        return fn(*args, **kwargs)
+    finally:
+        with _LLM_STATE_LOCK:
+            _LLM_INFLIGHT -= 1
+        _LLM_CAPACITY.release()
+
+
+def _submit_llm(fn, *args, **kwargs):
+    """Submit LLM work only when a bounded worker/queue slot is available.
+
+    A timed-out provider call may still be running inside its HTTP client. The
+    capacity permit is therefore released by the worker, not by the waiting
+    request. Repeated timeouts can no longer create an unbounded executor queue
+    or silently multiply provider spend.
+    """
+    global _LLM_INFLIGHT
+    if not _LLM_CAPACITY.acquire(blocking=False):
+        raise LLMCapacityError("LLM analysis capacity is currently full")
+    with _LLM_STATE_LOCK:
+        _LLM_INFLIGHT += 1
+    try:
+        return _LLM_POOL.submit(_run_with_capacity, fn, args, kwargs)
+    except Exception:
+        with _LLM_STATE_LOCK:
+            _LLM_INFLIGHT -= 1
+        _LLM_CAPACITY.release()
+        raise
+
+
+def llm_capacity_status() -> dict:
+    with _LLM_STATE_LOCK:
+        inflight = _LLM_INFLIGHT
+    capacity = _LLM_MAX_WORKERS + _LLM_MAX_PENDING
+    return {
+        "workers": _LLM_MAX_WORKERS,
+        "max_pending": _LLM_MAX_PENDING,
+        "inflight": inflight,
+        "available": max(0, capacity - inflight),
+    }
 
 
 class AnalysisResult(NamedTuple):
@@ -253,14 +308,15 @@ def run_analysis(
     llm_call_ms = None
     provider = None
     t_llm = time.time()
+    future = None
     try:
         from backend import llm as llm_module
         from backend.llm import complete_json
         # Bound the wait: a free-tier model that 503-retries for 40s+ would
         # otherwise hang the demo. A timed-out call is abandoned (left running)
         # and we degrade to the instant rule-based detector.
-        raw = _LLM_POOL.submit(complete_json, prompt, SYSTEM_PROMPT).result(
-            timeout=_LLM_TIMEOUT_S)
+        future = _submit_llm(complete_json, prompt, SYSTEM_PROMPT)
+        raw = future.result(timeout=_LLM_TIMEOUT_S)
         llm_call_ms = round((time.time() - t_llm) * 1000)
         provider = llm_module.FAILOVER_STATUS.get("last_successful_provider")
         t_post = time.time()
@@ -272,6 +328,8 @@ def run_analysis(
         mode = "llm"
         postprocess_ms = round((time.time() - t_post) * 1000)
     except concurrent.futures.TimeoutError:
+        if future is not None:
+            future.cancel()
         log.warning("LLM analysis exceeded %.0fs, using rule-based fallback",
                     _LLM_TIMEOUT_S)
         devs = _resilient_fallback(spec_text, submittal_text, system_id)
@@ -324,17 +382,21 @@ def run_vision_analysis(
     t0 = time.time()
     standards = _all_standards_text(max_chars_per=1800)
     prompt = _VISION_PROMPT.format(spec=spec_text, standards=standards)
+    future = None
     try:
         from backend.llm import _extract_json, complete_vision
-        raw = _LLM_POOL.submit(
+        future = _submit_llm(
             lambda: _extract_json(complete_vision(prompt, image_bytes, mime_type, SYSTEM_PROMPT))
-        ).result(timeout=_LLM_TIMEOUT_S)
+        )
+        raw = future.result(timeout=_LLM_TIMEOUT_S)
         devs = _validate_deviations(raw)
         devs = _ground_findings(devs, spec_text)  # drop hallucinated requirements
         for d in devs:
             _enrich_cx(d, system_id)
         mode = "vision"
     except concurrent.futures.TimeoutError:
+        if future is not None:
+            future.cancel()
         log.warning("Vision analysis exceeded %.0fs", _LLM_TIMEOUT_S)
         devs, mode = [], "vision-unavailable"
     except Exception as exc:
@@ -382,12 +444,6 @@ def run_streaming_analysis(
         mode = "deterministic"
 
     elapsed = round((time.time() - t0) * 1000)
-    try:
-        from backend.main import trigger_webhooks
-        trigger_webhooks(devs, system_id)
-    except Exception:
-        pass
-
     result = {
         "system": system_id,
         "deviations": devs,

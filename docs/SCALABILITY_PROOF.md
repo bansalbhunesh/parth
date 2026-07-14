@@ -112,8 +112,9 @@ pressure — those need the production pieces below.
 - **No tenant isolation.** There is no per-tenant auth, quota, or data
   separation — the optional demo token is a single shared secret, not
   access control.
-- **Rate limiting is best-effort.** Keyed by `X-Forwarded-For` (client-settable);
-  it slows abuse, it is not DDoS protection.
+- **Rate limiting is best-effort.** The socket peer is used by default;
+  `X-Forwarded-For` is trusted only when explicitly enabled behind the hosting
+  proxy. It slows abuse; it is not DDoS protection.
 - **Jobs are ephemeral.** Job/cache entries are bounded and lost on restart;
   there is no durable result store.
 

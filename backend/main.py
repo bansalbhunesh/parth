@@ -53,18 +53,27 @@ app = FastAPI(
     description="Spec-to-Site Deviation Sentinel for hyperscale data-centre EPC delivery",
     version="2.0.0",
 )
-# CORS: permissive by default so the public judge demo never breaks, but
-# lockable in production by setting PRAMAAN_CORS_ORIGINS to a comma-separated
-# allowlist (e.g. "https://pramaan.vercel.app"). No cookies/credentials are
-# used, so the wildcard default carries no credential-leak risk.
+# CORS is allowlisted by default. The public frontend and local development
+# origins are explicit; deployments can replace them with
+# PRAMAAN_CORS_ORIGINS. Credentials remain disabled.
 _cors_env = os.getenv("PRAMAAN_CORS_ORIGINS", "").strip()
-_cors_origins = [o.strip() for o in _cors_env.split(",") if o.strip()] or ["*"]
+_cors_origins = [o.strip() for o in _cors_env.split(",") if o.strip()] or [
+    "https://parth-tan.vercel.app",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_cors_origins,
     allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=[
+        "Accept",
+        "Authorization",
+        "Content-Type",
+        "X-Case-Secret",
+        "X-Demo-Token",
+    ],
 )
 
 
@@ -174,8 +183,8 @@ def _count_requirements() -> int:
         try:
             data = json.loads(f.read_text(encoding="utf-8"))
             return len(data) if isinstance(data, list) else len(data.get("requirements", []))
-        except Exception:
-            pass
+        except (OSError, json.JSONDecodeError, AttributeError, TypeError) as exc:
+            log.warning("Requirements index unavailable at %s: %s", f, exc)
     return 0
 
 
@@ -249,10 +258,22 @@ class WebhookSubscribeRequest(BaseModel):
     url: str
 
 
-# Process-local subscriber list — same lifetime/scope as the in-memory job
-# cache. Capped so an unauthenticated caller can't grow it without bound.
-SUBSCRIBED_WEBHOOKS: list[str] = []
+# Process-local, case-scoped integrations. Every mutation requires the owning
+# case secret; public analysis cannot subscribe a receiver for another case.
+SUBSCRIBED_WEBHOOKS: dict[str, list[dict]] = {}
 MAX_WEBHOOKS = 10
+
+
+def _resolved_webhook_addresses(url: str) -> tuple[str, ...]:
+    parsed = urlparse(url)
+    if not parsed.hostname:
+        return ()
+    infos = socket.getaddrinfo(
+        parsed.hostname,
+        parsed.port or (443 if parsed.scheme == "https" else 80),
+        proto=socket.IPPROTO_TCP,
+    )
+    return tuple(sorted({str(ipaddress.ip_address(info[4][0])) for info in infos}))
 
 
 def _webhook_url_error(url: str) -> str | None:
@@ -272,8 +293,7 @@ def _webhook_url_error(url: str) -> str | None:
     if host == "localhost" or host.endswith((".local", ".internal")):
         return "Private/internal hosts are not allowed"
     try:
-        infos = socket.getaddrinfo(host, parsed.port or 443, proto=socket.IPPROTO_TCP)
-        addrs = [ipaddress.ip_address(info[4][0]) for info in infos]
+        addrs = [ipaddress.ip_address(value) for value in _resolved_webhook_addresses(url)]
     except (OSError, ValueError):
         return "Hostname does not resolve"
     if any(a.is_private or a.is_loopback or a.is_link_local or a.is_unspecified for a in addrs):
@@ -287,30 +307,47 @@ def _redact_webhook(url: str) -> str:
     return url if len(url) <= 40 else url[:40] + "…"
 
 
-def _deliver_webhooks(urls: list[str], payload: dict, slack_payload: dict) -> None:
+def _deliver_webhooks(subscriptions: list[dict], payload: dict, slack_payload: dict) -> None:
     """POST to every subscriber (runs on a worker thread). One dead subscriber
     must never block delivery to the rest."""
     import httpx
-    for url in urls:
+    for subscription in subscriptions:
+        url = str(subscription.get("url", ""))
         body = slack_payload if "hooks.slack.com" in url else payload
         try:
-            httpx.post(url, json=body, timeout=2.0)
-        except Exception:
-            pass
+            if _webhook_url_error(url):
+                continue
+            pinned = tuple(subscription.get("resolved_ips", ()))
+            if not pinned or _resolved_webhook_addresses(url) != pinned:
+                log.warning("Webhook destination DNS changed; delivery dropped")
+                continue
+            httpx.post(url, json=body, timeout=2.0, follow_redirects=False)
+        except Exception as exc:
+            log.warning(
+                "Webhook delivery failed for %s: %s",
+                _redact_webhook(url),
+                exc,
+            )
 
 
-def trigger_webhooks(deviations: list[dict], system_id: str) -> None:
-    """Fan out Critical/Major findings to subscribers. Fire-and-forget: the
+def trigger_webhooks(
+    deviations: list[dict], system_id: str, case_id: str | None = None,
+) -> None:
+    """Fan out Critical/Major findings to one owned case. Fire-and-forget: the
     payload is built defensively (LLM-produced dicts may miss keys) and
     delivery happens on a daemon thread, so a malformed deviation or a slow
     subscriber can never fail or delay an analysis response."""
+    if not case_id:
+        return
     try:
+        subscriptions = SUBSCRIBED_WEBHOOKS.get(case_id, [])
         critical_or_major = [d for d in deviations if d.get("severity") in ("Critical", "Major")]
-        if not critical_or_major or not SUBSCRIBED_WEBHOOKS:
+        if not critical_or_major or not subscriptions:
             return
 
         payload = {
             "event": "deviation_detected",
+            "case_id": case_id,
             "system": system_id,
             "count": len(critical_or_major),
             "deviations": critical_or_major,
@@ -337,39 +374,91 @@ def trigger_webhooks(deviations: list[dict], system_id: str) -> None:
 
         threading.Thread(
             target=_deliver_webhooks,
-            args=(list(SUBSCRIBED_WEBHOOKS), payload, slack_payload),
+            args=(list(subscriptions), payload, slack_payload),
             daemon=True,
         ).start()
-    except Exception:
-        pass
+    except Exception as exc:
+        log.warning("Case webhook dispatch could not start for %s: %s", case_id, exc)
 
 
 @app.post("/webhooks/subscribe")
 def subscribe_webhook(req: WebhookSubscribeRequest):
-    url = req.url.strip()
-    err = _webhook_url_error(url)
-    if err:
-        raise HTTPException(status_code=400, detail=err)
-    if url not in SUBSCRIBED_WEBHOOKS:
-        if len(SUBSCRIBED_WEBHOOKS) >= MAX_WEBHOOKS:
-            raise HTTPException(status_code=429, detail=f"Subscriber limit ({MAX_WEBHOOKS}) reached")
-        SUBSCRIBED_WEBHOOKS.append(url)
-    return {"status": "subscribed", "url": _redact_webhook(url)}
+    del req
+    raise HTTPException(
+        status_code=410,
+        detail="Global webhooks were retired. Configure integrations inside an owned case.",
+    )
 
 
 @app.get("/webhooks")
 def get_webhooks():
-    return {"count": len(SUBSCRIBED_WEBHOOKS),
-            "urls": [_redact_webhook(u) for u in SUBSCRIBED_WEBHOOKS]}
+    raise HTTPException(
+        status_code=410,
+        detail="Global webhooks were retired. Use /cases/{case_id}/webhooks.",
+    )
 
 
 @app.delete("/webhooks")
 def clear_webhooks():
-    """Remove every subscriber — the demo's escape hatch if a bad URL was
-    registered (subscriptions are process-local, so this is always safe)."""
-    n = len(SUBSCRIBED_WEBHOOKS)
-    SUBSCRIBED_WEBHOOKS.clear()
-    return {"cleared": n}
+    """Retired global mutation endpoint retained as an explicit 410."""
+    raise HTTPException(
+        status_code=410,
+        detail="Global webhooks were retired. Use /cases/{case_id}/webhooks.",
+    )
+
+
+@app.post("/cases/{case_id}/webhooks")
+def subscribe_case_webhook(
+    case_id: str, req: WebhookSubscribeRequest, request: Request,
+):
+    secret = _require_case(case_id, request)
+    url = req.url.strip()
+    err = _webhook_url_error(url)
+    if err:
+        raise HTTPException(status_code=400, detail=err)
+    try:
+        resolved_ips = _resolved_webhook_addresses(url)
+    except (OSError, ValueError):
+        raise HTTPException(status_code=400, detail="Hostname does not resolve") from None
+
+    subscriptions = SUBSCRIBED_WEBHOOKS.setdefault(case_id, [])
+    if not any(item["url"] == url for item in subscriptions):
+        if len(subscriptions) >= MAX_WEBHOOKS:
+            raise HTTPException(
+                status_code=429,
+                detail=f"Integration limit ({MAX_WEBHOOKS}) reached for this case",
+            )
+        subscriptions.append({"url": url, "resolved_ips": resolved_ips})
+        case_store.append_audit(
+            case_id,
+            case_store.actor_key_for(secret),
+            "webhook_subscribed",
+            detail=urlparse(url).hostname or "",
+        )
+    return {"status": "subscribed", "url": _redact_webhook(url)}
+
+
+@app.get("/cases/{case_id}/webhooks")
+def get_case_webhooks(case_id: str, request: Request):
+    _require_case(case_id, request)
+    subscriptions = SUBSCRIBED_WEBHOOKS.get(case_id, [])
+    return {
+        "count": len(subscriptions),
+        "urls": [_redact_webhook(str(item["url"])) for item in subscriptions],
+    }
+
+
+@app.delete("/cases/{case_id}/webhooks")
+def clear_case_webhooks(case_id: str, request: Request):
+    secret = _require_case(case_id, request)
+    cleared = len(SUBSCRIBED_WEBHOOKS.pop(case_id, []))
+    case_store.append_audit(
+        case_id,
+        case_store.actor_key_for(secret),
+        "webhooks_cleared",
+        detail=str(cleared),
+    )
+    return {"cleared": cleared}
 
 
 # ── Analysis endpoints ──────────────────────────────────────────────
@@ -382,11 +471,6 @@ def analyze(req: AnalyzeRequest):
     # request_id + input_hash for traceability.
     from backend import jobs
     view = jobs.analyze_cached(req.spec_text, req.submittal_text, req.system_id)
-    # Fire only on fresh computations: a cache hit means these exact findings
-    # were already dispatched once — a double-click or page refresh must not
-    # spam subscribers with duplicate alerts.
-    if not view["cached"]:
-        trigger_webhooks(view["deviations"], req.system_id)
     return {
         "system": req.system_id,
         "request_id": jobs.new_request_id(),
@@ -472,7 +556,6 @@ def analyze_upload(
     submittal_doc = _extract_upload_doc(submittal_file)
     spec_text, submittal_text = spec_doc["text"], submittal_doc["text"]
     result = run_analysis(spec_text, submittal_text, system_id)
-    trigger_webhooks(result.deviations, system_id)
     return {
         "system": system_id,
         "spec_filename": spec_file.filename,
@@ -523,7 +606,6 @@ def analyze_vision(
                  else spec_data.decode("utf-8", errors="replace"))
     mime = submittal_image.content_type or "image/png"
     result = run_vision_analysis(spec_text, img_data, mime, system_id)
-    trigger_webhooks(result.deviations, system_id)
     return {
         "system": system_id,
         "submittal_image": img_name,
@@ -906,6 +988,61 @@ def _build_register(devs: list[dict]) -> dict:
     }
 
 
+def _deterministic_register() -> dict:
+    """Build the project overview without invoking the LLM pipeline.
+
+    The overview is a read model, not an analysis command. Keeping it
+    deterministic avoids launching one model call per corpus system during a
+    server-rendered page refresh, especially after the frontend has timed out.
+    Fresh inference remains available through /ingest and /analyze.
+    """
+    specs_dir = CORPUS / "specs"
+    if not specs_dir.exists():
+        return {
+            **_build_register([]),
+            "analysis_mode": "unavailable",
+            "provenance": {
+                "kind": "unavailable",
+                "label": "Project snapshot unavailable",
+                "description": "The project corpus is not present on this deployment.",
+                "live": False,
+                "source_documents": 0,
+            },
+        }
+
+    from backend.analyze import _resilient_fallback
+
+    out: list[dict] = []
+    source_documents = 0
+    for path in sorted(specs_dir.glob("*.md")):
+        spec_text, sub_text = _corpus_texts(path.stem)
+        if spec_text is None or sub_text is None:
+            continue
+        source_documents += 2
+        out.extend(_resilient_fallback(spec_text, sub_text, path.stem))
+
+    mode = "rule" if out else "unavailable"
+    return {
+        **_build_register(out),
+        "analysis_mode": mode,
+        "provenance": {
+            "kind": "deterministic" if out else "unavailable",
+            "label": (
+                "Deterministic project snapshot"
+                if out else "No deterministic findings available"
+            ),
+            "description": (
+                "Recomputed from the bundled Meghdoot specification and submittal "
+                "pairs without an LLM call. Run Live analysis for fresh inference."
+                if out else
+                "The available project documents produced no deterministic findings."
+            ),
+            "live": False,
+            "source_documents": source_documents,
+        },
+    }
+
+
 @app.get("/deviations")
 def deviations(seeded_demo: bool = False):
     # Opt-in, clearly-labelled demo fixture (answer key) — never returned by the
@@ -918,31 +1055,7 @@ def deviations(seeded_demo: bool = False):
             "disclaimer": "SEEDED DEMO FIXTURE — pre-authored ground-truth labels, "
                           "not live inference. Omit ?seeded_demo=true for real analysis.",
         }
-    specs_dir = CORPUS / "specs"
-    if not specs_dir.exists():
-        return {**_build_register([]), "analysis_mode": "unavailable"}
-    mode = "pipeline"
-    try:
-        out = []
-        for p in sorted(specs_dir.glob("*.md")):
-            out.extend(run_pipeline(p.stem))
-    except Exception as exc:
-        log.warning("Pipeline failed: %s", exc)
-        out = []
-    # An empty register means the LLM layer was unavailable/throttled (or the
-    # corpus is genuinely clean) — NOT a licence to emit the answer key. Degrade
-    # to the INDEPENDENT rule engine over each spec/submittal pair; label the
-    # findings analysis_mode="rule" so the UI can badge them honestly.
-    if not out:
-        rule_devs = []
-        for p in sorted(specs_dir.glob("*.md")):
-            spec_text, sub_text = _corpus_texts(p.stem)
-            if spec_text is not None and sub_text is not None:
-                from backend.analyze import _resilient_fallback
-                rule_devs.extend(_resilient_fallback(spec_text, sub_text, p.stem))
-        out = rule_devs
-        mode = "rule" if rule_devs else "unavailable"
-    return {**_build_register(out), "analysis_mode": mode}
+    return _deterministic_register()
 
 
 # ── Copilot endpoints ───────────────────────────────────────────────
@@ -1345,6 +1458,32 @@ class AddFindingRequest(BaseModel):
     rationale: str = Field(default="", max_length=2000)
 
 
+class UpdateFindingRequest(BaseModel):
+    status: str | None = Field(default=None, max_length=30)
+    owner: str | None = Field(default=None, max_length=120)
+    resolution_note: str | None = Field(default=None, max_length=2000)
+
+
+class UpdateRfiRequest(BaseModel):
+    status: str = Field(max_length=30)
+    response_text: str | None = Field(default=None, max_length=4000)
+
+
+_FINDING_TRANSITIONS = {
+    "open": {"accepted", "rfi_drafted", "dismissed"},
+    "accepted": {"open", "rfi_drafted", "resolved", "dismissed"},
+    "rfi_drafted": {"accepted", "resolved"},
+    "resolved": {"open"},
+    "dismissed": {"open"},
+}
+_RFI_TRANSITIONS = {
+    "draft": {"issued"},
+    "issued": {"answered"},
+    "answered": {"closed"},
+    "closed": set(),
+}
+
+
 def _require_case(case_id: str, request: Request) -> str:
     """Tenant-isolation gate for every /cases/{case_id}/* route. A wrong or
     missing X-Case-Secret returns 404, identical to a nonexistent case_id —
@@ -1383,9 +1522,15 @@ def get_case(case_id: str, request: Request):
 @app.post("/cases/{case_id}/findings")
 def add_case_finding(case_id: str, req: AddFindingRequest, request: Request):
     secret = _require_case(case_id, request)
-    finding_id = case_store.add_finding(case_id, req.model_dump())
+    finding = req.model_dump()
+    finding_id = case_store.add_finding(case_id, finding)
     case_store.append_audit(case_id, case_store.actor_key_for(secret),
                             "finding_added", detail=f"{req.component}.{req.parameter}")
+    trigger_webhooks(
+        [finding],
+        (req.component.split("-", 1)[0] or "CUSTOM"),
+        case_id=case_id,
+    )
     return {"finding_id": finding_id}
 
 
@@ -1395,17 +1540,116 @@ def list_case_findings(case_id: str, request: Request):
     return {"findings": case_store.list_findings(case_id)}
 
 
+@app.patch("/cases/{case_id}/findings/{finding_id}")
+def update_case_finding(case_id: str, finding_id: str,
+                        req: UpdateFindingRequest, request: Request):
+    secret = _require_case(case_id, request)
+    finding = case_store.get_finding(case_id, finding_id)
+    if finding is None:
+        raise HTTPException(status_code=404, detail="No such finding on this case.")
+    if req.status is None and req.owner is None and req.resolution_note is None:
+        raise HTTPException(status_code=422, detail="Provide a workflow field to update.")
+
+    next_status = req.status or finding["status"]
+    if next_status not in _FINDING_TRANSITIONS:
+        raise HTTPException(status_code=422, detail="Unknown finding status.")
+    current_status = finding["status"]
+    if (
+        next_status != current_status
+        and next_status not in _FINDING_TRANSITIONS[current_status]
+    ):
+        raise HTTPException(
+            status_code=409,
+            detail=f"Finding cannot move from {current_status} to {next_status}.",
+        )
+
+    next_owner = (req.owner if req.owner is not None else finding["owner"]).strip()
+    next_note = (
+        req.resolution_note
+        if req.resolution_note is not None
+        else finding["resolution_note"]
+    ).strip()
+    if next_status in {"accepted", "rfi_drafted", "resolved"} and not next_owner:
+        raise HTTPException(
+            status_code=422,
+            detail="Assign an owner before accepting or progressing a finding.",
+        )
+    if next_status in {"resolved", "dismissed"} and not next_note:
+        raise HTTPException(
+            status_code=422,
+            detail="Record resolution evidence before closing a finding.",
+        )
+    if next_status == "resolved" and current_status == "rfi_drafted":
+        related_rfis = [
+            rfi
+            for rfi in case_store.list_rfis(case_id)
+            if rfi["finding_id"] == finding_id
+        ]
+        if not related_rfis or related_rfis[-1]["status"] not in {"answered", "closed"}:
+            raise HTTPException(
+                status_code=409,
+                detail="Record the RFI response before resolving this finding.",
+            )
+
+    updated = case_store.update_finding(
+        case_id,
+        finding_id,
+        status=next_status,
+        owner=next_owner,
+        resolution_note=next_note,
+    )
+    changes = []
+    if next_status != current_status:
+        changes.append(f"status={current_status}->{next_status}")
+    if next_owner != finding["owner"]:
+        changes.append(f"owner={next_owner or 'unassigned'}")
+    if next_note != finding["resolution_note"]:
+        changes.append("resolution_evidence=updated")
+    case_store.append_audit(
+        case_id,
+        case_store.actor_key_for(secret),
+        "finding_workflow_updated",
+        detail=f"finding={finding_id} {' '.join(changes)}",
+    )
+    return {"finding": updated}
+
+
 @app.post("/cases/{case_id}/findings/{finding_id}/rfi", dependencies=[Depends(security.rl_analysis)])
 def draft_case_rfi(case_id: str, finding_id: str, request: Request):
     secret = _require_case(case_id, request)
     finding = case_store.get_finding(case_id, finding_id)
     if finding is None:
         raise HTTPException(status_code=404, detail="No such finding on this case.")
+    if finding["status"] in {"resolved", "dismissed"}:
+        raise HTTPException(
+            status_code=409,
+            detail="Reopen the finding before drafting an RFI.",
+        )
+    if not finding["owner"]:
+        raise HTTPException(
+            status_code=422,
+            detail="Assign an owner before drafting an RFI.",
+        )
+    active_rfi = next(
+        (
+            rfi
+            for rfi in case_store.list_rfis(case_id)
+            if rfi["finding_id"] == finding_id and rfi["status"] != "closed"
+        ),
+        None,
+    )
+    if active_rfi is not None:
+        raise HTTPException(
+            status_code=409,
+            detail="This finding already has an active RFI.",
+        )
     draft = draft_rfi(finding)
     rfi_id = case_store.add_rfi(case_id, finding_id, draft["question"],
                                 draft["drafted_text"], draft["sources"], draft["mode"])
     case_store.append_audit(case_id, case_store.actor_key_for(secret),
                             "rfi_drafted", detail=f"finding={finding_id} mode={draft['mode']}")
+    if finding["status"] != "rfi_drafted":
+        case_store.update_finding(case_id, finding_id, status="rfi_drafted")
     return {"rfi_id": rfi_id, **draft}
 
 
@@ -1413,6 +1657,45 @@ def draft_case_rfi(case_id: str, finding_id: str, request: Request):
 def list_case_rfis(case_id: str, request: Request):
     _require_case(case_id, request)
     return {"rfis": case_store.list_rfis(case_id)}
+
+
+@app.patch("/cases/{case_id}/rfis/{rfi_id}")
+def update_case_rfi(case_id: str, rfi_id: str, req: UpdateRfiRequest,
+                    request: Request):
+    secret = _require_case(case_id, request)
+    rfi = case_store.get_rfi(case_id, rfi_id)
+    if rfi is None:
+        raise HTTPException(status_code=404, detail="No such RFI on this case.")
+    next_status = req.status.strip().lower()
+    if next_status not in _RFI_TRANSITIONS:
+        raise HTTPException(status_code=422, detail="Unknown RFI status.")
+    current_status = rfi["status"]
+    if next_status != current_status and next_status not in _RFI_TRANSITIONS[current_status]:
+        raise HTTPException(
+            status_code=409,
+            detail=f"RFI cannot move from {current_status} to {next_status}.",
+        )
+    next_response = (
+        req.response_text
+        if req.response_text is not None
+        else rfi["response_text"]
+    ).strip()
+    if next_status in {"answered", "closed"} and not next_response:
+        raise HTTPException(
+            status_code=422,
+            detail="Record the formal response before answering or closing an RFI.",
+        )
+    updated = case_store.update_rfi(
+        case_id, rfi_id, status=next_status, response_text=next_response
+    )
+    if next_status != current_status or next_response != rfi["response_text"]:
+        case_store.append_audit(
+            case_id,
+            case_store.actor_key_for(secret),
+            "rfi_workflow_updated",
+            detail=f"rfi={rfi_id} status={current_status}->{next_status}",
+        )
+    return {"rfi": updated}
 
 
 @app.get("/cases/{case_id}/rfis/{rfi_id}/export", response_class=HTMLResponse)
@@ -1496,6 +1779,7 @@ def delete_case_endpoint(case_id: str, request: Request):
     (indistinguishable from a nonexistent case).
     """
     _require_case(case_id, request)
+    SUBSCRIBED_WEBHOOKS.pop(case_id, None)
     case_store.delete_case(case_id)
     return {"deleted": True, "case_id": case_id}
 

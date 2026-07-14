@@ -1,7 +1,7 @@
 """Demo-hardening: optional token auth + process-local rate limiting.
 
 Proves the reliability/abuse contract: expensive endpoints refuse without a
-token when auth is on, accept with the right token (header / bearer / query),
+token when auth is on, accept with the right token in a header,
 stay open when auth is off, and a caller that exceeds the per-hour cap gets a
 clean 429 with Retry-After — while the public/static data endpoints and the
 whole suite's default posture stay open. No secret ever appears in a response.
@@ -60,11 +60,12 @@ def test_protected_endpoint_wrong_token_403(monkeypatch):
 def test_protected_endpoint_correct_token_allowed(monkeypatch):
     _no_llm(monkeypatch)
     tok = _enable_auth(monkeypatch)
-    # header, bearer, and query param must all be accepted
+    # Header and bearer authentication are accepted; query-string tokens are
+    # rejected because URLs leak into history, referrers, and access logs.
     assert _analyze(headers={"X-Demo-Token": tok}).status_code == 200
     assert _analyze(headers={"Authorization": f"Bearer {tok}"}).status_code == 200
     assert client.post(f"/analyze?token={tok}",
-                       json={"spec_text": _SPEC, "submittal_text": _SUB}).status_code == 200
+                       json={"spec_text": _SPEC, "submittal_text": _SUB}).status_code == 401
 
 
 def test_auth_off_is_open(monkeypatch):
@@ -73,12 +74,14 @@ def test_auth_off_is_open(monkeypatch):
     assert _analyze().status_code == 200
 
 
-def test_auth_enabled_without_token_is_inert(monkeypatch):
-    """Flag on but no token configured must NOT brick the demo (fail-open)."""
+def test_auth_enabled_without_token_fails_closed(monkeypatch):
+    """A broken auth configuration must never reopen protected analysis."""
     _no_llm(monkeypatch)
     monkeypatch.setenv("DEMO_AUTH_ENABLED", "true")
     monkeypatch.delenv("DEMO_AUTH_TOKEN", raising=False)
-    assert _analyze().status_code == 200
+    response = _analyze()
+    assert response.status_code == 503
+    assert "access control" in response.json()["detail"].lower()
 
 
 def test_public_endpoints_open_even_when_auth_on(monkeypatch):
@@ -138,11 +141,22 @@ def test_rate_limit_buckets_by_forwarded_ip(monkeypatch):
     _no_llm(monkeypatch)
     monkeypatch.setenv("PRAMAAN_RATE_LIMIT_ENABLED", "1")
     monkeypatch.setenv("PRAMAAN_ANALYSIS_LIMIT_PER_HOUR", "1")
+    monkeypatch.setenv("PRAMAAN_TRUST_PROXY_HEADERS", "true")
     h1 = {"X-Forwarded-For": "1.1.1.1"}
     h2 = {"X-Forwarded-For": "2.2.2.2"}
     assert _analyze(headers=h1).status_code == 200
     assert _analyze(headers=h1).status_code == 429   # same IP, over cap
     assert _analyze(headers=h2).status_code == 200    # different IP, own bucket
+
+
+def test_untrusted_forwarded_ip_cannot_evade_rate_limit(monkeypatch):
+    _no_llm(monkeypatch)
+    monkeypatch.setenv("PRAMAAN_RATE_LIMIT_ENABLED", "1")
+    monkeypatch.setenv("PRAMAAN_ANALYSIS_LIMIT_PER_HOUR", "1")
+    monkeypatch.setenv("PRAMAAN_TRUST_PROXY_HEADERS", "false")
+
+    assert _analyze(headers={"X-Forwarded-For": "1.1.1.1"}).status_code == 200
+    assert _analyze(headers={"X-Forwarded-For": "2.2.2.2"}).status_code == 429
 
 
 def test_deep_probe_has_its_own_tight_limit(monkeypatch):

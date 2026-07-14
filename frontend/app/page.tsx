@@ -1,411 +1,254 @@
-import { getRegister, getCxPlan, getSchedule, getSupplyChain, getProjectGraph, getRemediation, Deviation } from "../lib/api";
-import DeviationRegister from "../components/DeviationRegister";
-import CommissioningTwin from "../components/CommissioningTwin";
-import ScheduleRisk from "../components/ScheduleRisk";
-import SupplyChainPanel from "../components/SupplyChainPanel";
-import ProjectGraphView from "../components/ProjectGraph";
-import RemediationSimulator from "../components/RemediationSimulator";
-import CopilotPanel from "../components/CopilotPanel";
-import StatsBar from "../components/StatsBar";
-import PipelineViz from "../components/PipelineViz";
-import RiskMatrix from "../components/RiskMatrix";
-import NavBar from "../components/NavBar";
-import ScrollReveal from "../components/ScrollReveal";
-import EvalDashboard from "../components/EvalDashboard";
-import StandardsKB from "../components/StandardsKB";
-import ExportButton from "../components/ExportButton";
-import ItpExportButton from "../components/ItpExportButton";
-import AcademicRefs from "../components/AcademicRefs";
-import ScaleStory from "../components/ScaleStory";
-import HeroIntro from "../components/HeroIntro";
-import ArchitectureDiagram from "../components/ArchitectureDiagram";
-import ROICalculator from "../components/ROICalculator";
-import BeforeAfter from "../components/BeforeAfter";
-import ScreenshotShowcase from "../components/ScreenshotShowcase";
-import SectionIndex from "../components/SectionIndex";
-import AnalyzePanel from "../components/AnalyzePanel";
-import ComplianceScore from "../components/ComplianceScore";
-import DocumentDiff from "../components/DocumentDiff";
-import MultiProjectDashboard from "../components/MultiProjectDashboard";
-import ErrorBoundary from "../components/ErrorBoundary";
+import Link from "next/link";
+import ResolutionWorkflow from "../components/ResolutionWorkflow";
+import ThemeToggle from "../components/ThemeToggle";
+import { BENCHMARK_LIMITATION, PRODUCT_CLAIMS } from "../lib/claims";
+import { Deviation, getRegisterSnapshot } from "../lib/api";
 
-function Sentinel({ d }: { d: Deviation }) {
-  const span = 52;
-  const caught = (d.week_caught / span) * 100;
-  const fail = ((d.week_fail ?? span) / span) * 100;
+export const revalidate = 600;
+
+function formatValue(value: string | number, unit: string) {
+  return `${String(value)}${unit ? ` ${unit}` : ""}`;
+}
+
+function EvidencePath({ finding }: { finding: Deviation }) {
+  const steps = [
+    {
+      key: "01",
+      label: "Requirement",
+      value: `${formatValue(finding.required_value, finding.unit)} minimum`,
+      note: finding.spec_clause,
+    },
+    {
+      key: "02",
+      label: "Submittal",
+      value: `${formatValue(finding.provided_value, finding.unit)} proposed`,
+      note: "Vendor revision B",
+    },
+    {
+      key: "03",
+      label: "Consequence",
+      value: `${finding.predicted_cx_test ?? "Cx test"} at week ${finding.week_fail ?? "—"}`,
+      note: finding.standard_ref,
+    },
+    {
+      key: "04",
+      label: "Decision window",
+      value: `${finding.lead_time_weeks ?? "—"} weeks to act`,
+      note: "Before commissioning",
+    },
+  ];
+
   return (
-    <section className="sentinel" id="sentinel">
-      <div className="sentinel-glow" />
-      <div className="sentinel-scan" />
-      <div className="eyebrow">
-        <span className="eyebrow-dot" />
-        DEVIATION SENTINEL — {d.severity.toUpperCase()}
-      </div>
-      <h2 className="sentinel-headline">
-        {d.component}: {d.parameter.replace(/_/g, " ")} — {d.provided_value}{" "}
-        {d.unit} vs {d.required_value} {d.unit} required
-      </h2>
-      <div className="sub">
-        Caught the day the submittal was uploaded — Week {d.week_caught}.
-        Without Pramaan this surfaces in commissioning at Week {d.week_fail}.
-      </div>
-
-      <div className="leadrow">
-        <div className="leadnum">
-          {d.lead_time_weeks}
-          <span>weeks early</span>
-        </div>
-        <div className="leadlabel">
-          Lead time between detection and the integrated systems test this would
-          have failed ({d.predicted_cx_test}). That window is the difference
-          between an email and a seven-figure schedule slip.
-        </div>
-      </div>
-
-      <div className="timeline">
-        <div className="track">
-          <div
-            className="fill"
-            style={{ left: `${caught}%`, width: `${fail - caught}%` }}
-          />
-          <div className="marker caught-marker" style={{ left: `${caught}%` }} />
-          <div className="marker fail-marker" style={{ left: `${fail}%` }} />
-        </div>
-        <div className="ticks">
-          <span className="tick">W0 Build start</span>
-          <span className="tick caught">
-            <b>W{d.week_caught} Caught here</b>
-          </span>
-          <span className="tick fail">
-            <b>W{d.week_fail} {d.predicted_cx_test} fails</b>
-          </span>
-          <span className="tick">W52</span>
-        </div>
-      </div>
-
-      <div className="chain">
-        <div className="cell">
-          <div className="k">Design basis</div>
-          <div className="v">
-            {d.required_value} {d.unit} minimum
-            <span className="ref">{d.spec_clause}</span>
+    <ol className="evidence-path" aria-label="Evidence to consequence trace">
+      {steps.map((step) => (
+        <li key={step.key}>
+          <span className="path-number">{step.key}</span>
+          <div>
+            <span className="path-label">{step.label}</span>
+            <strong>{step.value}</strong>
+            <small>{step.note}</small>
           </div>
-        </div>
-        <div className="cell">
-          <div className="k">Vendor submittal</div>
-          <div className="v">
-            <span style={{ color: "var(--fault)" }}>
-              {d.provided_value} {d.unit}
-            </span>{" "}
-            provided
-            <span className="ref">Submittal rev B</span>
-          </div>
-        </div>
-        <div className="cell">
-          <div className="k">Governing standard</div>
-          <div className="v">
-            {d.standard_ref === "UPTIME-TIER4"
-              ? "Tier IV fault tolerance + concurrent maintainability"
-              : d.standard_ref === "NFPA-75"
-                ? "NFPA 75 fire protection of IT equipment"
-                : d.standard_ref}
-            <span className="ref">{d.standard_ref}</span>
-          </div>
-        </div>
-        {d.rationale && (
-          <div className="cell cell-wide">
-            <div className="k">AI rationale</div>
-            <div className="v">{d.rationale}</div>
-          </div>
-        )}
-      </div>
-    </section>
+        </li>
+      ))}
+    </ol>
   );
 }
 
-function SystemHealthGrid({ rows }: { rows: Deviation[] }) {
-  const systems = [
-    { id: "UPS", label: "UPS & Battery", icon: "⚡" },
-    { id: "GEN", label: "Generators", icon: "🔋" },
-    { id: "COOL", label: "Cooling", icon: "❄️" },
-    { id: "SWGR", label: "Switchgear", icon: "🔌" },
-    { id: "CABLE", label: "Cabling", icon: "🔗" },
-    { id: "BMS", label: "BMS/EPMS", icon: "📡" },
-    { id: "FIRE", label: "Fire Suppression", icon: "🔥" },
-    { id: "BUSWAY", label: "Busway", icon: "⏚" },
-    { id: "PDU", label: "PDU", icon: "🔧" },
-    { id: "STRUCT", label: "Structural", icon: "🏗️" },
-  ];
-
-  const devsBySys: Record<string, Deviation[]> = {};
-  for (const d of rows) {
-    const sys =
-      systems.find((s) =>
-        d.component.startsWith(s.id) ||
-        d.component === "BMS" ||
-        d.component === "FLOOR"
-      )?.id || d.component.split("-")[0];
-    if (!devsBySys[sys]) devsBySys[sys] = [];
-    devsBySys[sys].push(d);
-  }
-
+function RegisterTable({ rows }: { rows: Deviation[] }) {
   return (
-    <div className="health-grid">
-      {systems.map((s, i) => {
-        const devs = devsBySys[s.id] || [];
-        const hasCritical = devs.some((d) => d.severity === "Critical");
-        const hasMajor = devs.some((d) => d.severity === "Major");
-        const status = hasCritical ? "critical" : hasMajor ? "major" : "ok";
-        return (
-          <ScrollReveal key={s.id} delay={i * 60}>
-            <div className={`health-card ${status}`}>
-              <div className="health-icon">{s.icon}</div>
-              <div className="health-label">{s.label}</div>
-              <div className="health-status">
-                {devs.length === 0 ? (
-                  <span className="health-ok">COMPLIANT</span>
-                ) : (
-                  <span className={`health-alert ${status}`}>
-                    {devs.length} {devs.length === 1 ? "finding" : "findings"}
-                  </span>
-                )}
-              </div>
-              {devs.length > 0 && (
-                <div className="health-lead">
-                  {Math.max(...devs.map((d) => d.lead_time_weeks ?? 0))}w lead
-                </div>
-              )}
-            </div>
-          </ScrollReveal>
-        );
-      })}
+    <div className="register-scroll" role="region" aria-label="Prioritized deviation register" tabIndex={0}>
+      <table className="register-table">
+        <thead>
+          <tr>
+            <th scope="col">Finding</th>
+            <th scope="col">Variance</th>
+            <th scope="col">Cx consequence</th>
+            <th scope="col">Window</th>
+            <th scope="col">Evidence</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.slice(0, 6).map((row) => (
+            <tr key={`${row.component}-${row.parameter}`}>
+              <td>
+                <span className={`severity severity-${row.severity.toLowerCase()}`}>{row.severity}</span>
+                <strong>{row.component}</strong>
+                <small>{row.parameter.replaceAll("_", " ")}</small>
+              </td>
+              <td>
+                <span className="value-pair">
+                  <del>{formatValue(row.provided_value, row.unit)}</del>
+                  <span aria-hidden="true">→</span>
+                  <ins>{formatValue(row.required_value, row.unit)}</ins>
+                </span>
+              </td>
+              <td>
+                <strong>{row.predicted_cx_test ?? "Review required"}</strong>
+                <small>{row.predicted_cx_name ?? "Commissioning acceptance check"}</small>
+              </td>
+              <td>
+                <strong>{row.lead_time_weeks ?? "—"} weeks</strong>
+                <small>Week {row.week_caught} → {row.week_fail ?? "—"}</small>
+              </td>
+              <td>
+                <strong>{row.spec_clause}</strong>
+                <small>{row.standard_ref}</small>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
 
-
-
-// Demo data changes rarely; serve the page from Vercel's edge cache and
-// revalidate in the background every 10 min. Reloads are instant instead of
-// re-rendering against a (possibly cold) backend on every request.
-export const revalidate = 600;
-
 export default async function Page() {
-  const [rows, cxPlan, schedule, supply, graph, remediation] = await Promise.all([
-    getRegister(), getCxPlan(), getSchedule(), getSupplyChain(), getProjectGraph(), getRemediation(),
-  ]);
-  const hero = rows.find((r) => r.component === "UPS-02") ?? rows[0];
-  const critical = rows.filter((r) => r.severity === "Critical").length;
-  const major = rows.filter((r) => r.severity === "Major").length;
-  const leadTimes = rows
-    .map((r) => r.lead_time_weeks)
-    .filter((l): l is number => l != null);
-  const maxLead = Math.max(...leadTimes, 0);
-  const meanLead =
-    leadTimes.length > 0
-      ? Math.round(leadTimes.reduce((a, b) => a + b, 0) / leadTimes.length)
-      : 0;
+  const snapshot = await getRegisterSnapshot();
+  const hero = snapshot.rows.find((row) => row.component === "UPS-02") ?? snapshot.rows[0];
+  const claims = PRODUCT_CLAIMS.benchmark;
 
   return (
-    <ErrorBoundary>
-    <main className="wrap">
-      <NavBar />
+    <>
+      <a className="skip-link" href="#main-content">Skip to main content</a>
+      <header className="site-header">
+        <Link href="/" className="wordmark" aria-label="Pramaan home">
+          Pramaan<span aria-hidden="true">/</span>
+        </Link>
+        <nav className="site-nav" aria-label="Primary navigation">
+          <a href="#proof">Trace</a>
+          <a href="#resolve">Resolve</a>
+          <a href="#register">Register</a>
+          <Link href="/evidence">Evidence</Link>
+        </nav>
+        <ThemeToggle />
+      </header>
 
-      <ScrollReveal>
-        <HeroIntro />
-      </ScrollReveal>
-
-      <ScrollReveal>
-        <SectionIndex />
-      </ScrollReveal>
-
-      <div className="topbar">
-        <div className="brand">
-          PRA<b>MAAN</b>
+      <main id="main-content">
+      <section className="hero shell" aria-labelledby="hero-title">
+        <div className="hero-copy">
+          <div className="provenance-line">
+            <span className={`provenance-dot provenance-${snapshot.provenance.kind}`} aria-hidden="true" />
+            {snapshot.provenance.label}
+          </div>
+          <h1 id="hero-title">Find the deviation. Prove the consequence. Close it before commissioning.</h1>
+          <p className="hero-lede">
+            Pramaan turns a specification mismatch into a cited, owned decision: the requirement, the vendor variance, the test at risk, and the record that closes it.
+          </p>
+          <div className="hero-actions">
+            <a className="button button-primary" href="#proof">Follow one finding</a>
+            <Link className="button button-secondary" href="/judge">Analyze documents</Link>
+          </div>
+          <p className="provenance-description">{snapshot.provenance.description}</p>
         </div>
-        <div className="project">Project Meghdoot &middot; 40 MW &middot; Navi Mumbai</div>
-        <div className="spacer" />
-        <a className="top-link" href="/war-room">War room</a>
-        <ExportButton />
-        <ItpExportButton />
-        <div className="live-badge">
-          <span className="live-dot" />
-          LIVE
+
+        {hero ? (
+          <aside className="hero-dossier" aria-label="Priority finding">
+            <div className="dossier-meta">
+              <span>Priority finding</span>
+              <span className={`severity severity-${hero.severity.toLowerCase()}`}>{hero.severity}</span>
+            </div>
+            <p className="dossier-id">{hero.component} · {hero.spec_clause}</p>
+            <h2>{hero.parameter.replaceAll("_", " ")}</h2>
+            <div className="dossier-values">
+              <div><span>Required</span><strong>{formatValue(hero.required_value, hero.unit)}</strong></div>
+              <div><span>Submitted</span><strong>{formatValue(hero.provided_value, hero.unit)}</strong></div>
+            </div>
+            <p>{hero.rationale}</p>
+            <div className="dossier-foot">
+              <strong>{hero.lead_time_weeks} weeks</strong>
+              <span>between review and {hero.predicted_cx_test}</span>
+            </div>
+          </aside>
+        ) : (
+          <aside className="hero-dossier dossier-unavailable" role="status">
+            <p className="section-kicker">Register unavailable</p>
+            <h2>No finding could be loaded.</h2>
+            <p>The page will not invent a live result. Open Evidence for the frozen benchmark record.</p>
+          </aside>
+        )}
+      </section>
+
+      {hero ? (
+        <section className="section-block section-rule shell" id="proof" aria-labelledby="proof-title">
+          <div className="section-intro">
+            <p className="section-number">01 / Trace</p>
+            <div>
+              <p className="section-kicker">One finding, end to end</p>
+              <h2 id="proof-title">The evidence chain stays attached to the consequence.</h2>
+            </div>
+            <p>Every step answers the next reviewer’s question without turning the interface into a wall of metrics.</p>
+          </div>
+          <EvidencePath finding={hero} />
+          <blockquote className="evidence-quote">
+            <span>Decision basis</span>
+            “{hero.rationale}”
+            <cite>{hero.standard_ref} · clause {hero.spec_clause}</cite>
+          </blockquote>
+        </section>
+      ) : null}
+
+      <section className="section-block section-ink" id="resolve" aria-labelledby="resolve-title">
+        <div className="shell">
+          <div className="section-intro section-intro-inverse">
+            <p className="section-number">02 / Resolve</p>
+            <div>
+              <p className="section-kicker">Finding to closure</p>
+              <h2 id="resolve-title">A finding only matters when someone owns the next action.</h2>
+            </div>
+            <p>Run the protected case workflow against the API. Failed steps remain visibly failed; successful steps are written to the case audit log.</p>
+          </div>
+          <ResolutionWorkflow />
         </div>
-        <div className="tier">UPTIME TIER IV</div>
-      </div>
+      </section>
 
-      <StatsBar
-        totalFindings={rows.length}
-        critical={critical}
-        major={major}
-        maxLeadWeeks={maxLead}
-        meanLeadWeeks={meanLead}
-      />
-
-      {hero && <Sentinel d={hero} />}
-
-
-
-      <h2 className="section" id="workflow">
-        Before vs after &middot; manual review vs Pramaan
-      </h2>
-      <ScrollReveal>
-        <BeforeAfter />
-      </ScrollReveal>
-
-      <h2 className="section" id="pipeline">
-        Reasoning pipeline &middot; one LLM core + deterministic services &middot; narratable in 60 seconds
-      </h2>
-      <ScrollReveal>
-        <PipelineViz />
-      </ScrollReveal>
-
-      <h2 className="section" id="architecture">
-        System architecture &middot; LangGraph compliance reasoning graph
-      </h2>
-      <ScrollReveal>
-        <ArchitectureDiagram />
-      </ScrollReveal>
-
-      <h2 className="section" id="screenshots">
-        Live screenshots &middot; interactive dashboard gallery
-      </h2>
-      <ScrollReveal>
-        <ScreenshotShowcase />
-      </ScrollReveal>
-
-      <h2 className="section" id="systems">
-        System health overview &middot; {10} systems
-      </h2>
-      <SystemHealthGrid rows={rows} />
-
-      <h2 className="section" id="compliance">
-        Compliance score &middot; per-system conformance tracking
-      </h2>
-      <ScrollReveal>
-        <ComplianceScore />
-      </ScrollReveal>
-
-      <h2 className="section" id="diff">
-        Document comparison &middot; spec vs submittal &middot; deviation highlights
-      </h2>
-      <ScrollReveal>
-        <DocumentDiff rows={rows} />
-      </ScrollReveal>
-
-      <h2 className="section" id="risk">
-        Risk matrix &middot; severity × lead time
-      </h2>
-      <ScrollReveal>
-        <RiskMatrix rows={rows} />
-      </ScrollReveal>
-
-      <h2 className="section" id="register">
-        Deviation register &middot; {rows.length} findings &middot; {critical}{" "}
-        critical
-      </h2>
-      <ScrollReveal>
-        <DeviationRegister rows={rows} />
-      </ScrollReveal>
-
-      <h2 className="section" id="twin">
-        Commissioning risk twin &middot; L1&ndash;L5 test schedule
-      </h2>
-      <ScrollReveal>
-        {cxPlan && <CommissioningTwin cxPlan={cxPlan} deviations={rows} />}
-      </ScrollReveal>
-
-      <h2 className="section" id="schedule">
-        Predictive schedule risk &middot; Monte-Carlo CPM &middot; P80 finish
-      </h2>
-      <ScrollReveal>
-        <ErrorBoundary><ScheduleRisk analysis={schedule} /></ErrorBoundary>
-      </ScrollReveal>
-
-      <h2 className="section" id="supply">
-        Supply-chain visibility &middot; long-lead equipment &middot; delivery risk
-      </h2>
-      <ScrollReveal>
-        <ErrorBoundary><SupplyChainPanel analysis={supply} /></ErrorBoundary>
-      </ScrollReveal>
-
-      <h2 className="section" id="graph">
-        Living project graph &middot; deviation &rarr; commissioning &rarr; schedule &rarr; supply
-      </h2>
-      <ScrollReveal>
-        <ErrorBoundary><ProjectGraphView graph={graph} /></ErrorBoundary>
-      </ScrollReveal>
-      <ScrollReveal>
-        <ErrorBoundary><RemediationSimulator sim={remediation} /></ErrorBoundary>
-      </ScrollReveal>
-
-      <h2 className="section" id="standards">
-        Standards knowledge base &middot; 7 governing standards
-      </h2>
-      <ScrollReveal>
-        <StandardsKB />
-      </ScrollReveal>
-
-      <h2 className="section" id="multiproject">
-        Multi-project eval &middot; 12 projects &middot; synthetic breadth (by construction)
-      </h2>
-      <ScrollReveal>
-        <MultiProjectDashboard />
-      </ScrollReveal>
-
-      <h2 className="section" id="eval">
-        Eval harness &middot; precision &middot; recall &middot; F1
-      </h2>
-      <ScrollReveal>
-        <EvalDashboard />
-      </ScrollReveal>
-
-      <h2 className="section" id="roi">
-        ROI calculator &middot; quantified business impact
-      </h2>
-      <ScrollReveal>
-        <ROICalculator />
-      </ScrollReveal>
-
-      <h2 className="section" id="scale">
-        Scale story &middot; 10 systems → 14,000 line items
-      </h2>
-      <ScrollReveal>
-        <ScaleStory />
-      </ScrollReveal>
-
-      <h2 className="section" id="analyze">
-        Live analysis &middot; upload PDFs or paste text
-      </h2>
-      <ScrollReveal>
-        <AnalyzePanel />
-      </ScrollReveal>
-
-      <h2 className="section" id="copilot">
-        Project copilot &middot; RAG over specs, submittals, standards &amp; RFIs
-      </h2>
-      <ScrollReveal>
-        <CopilotPanel />
-      </ScrollReveal>
-
-      <h2 className="section" id="refs">
-        Academic references &middot; peer-reviewed foundations
-      </h2>
-      <ScrollReveal>
-        <AcademicRefs />
-      </ScrollReveal>
-
-      <div className="footer">
-        <div className="footer-brand">PRA<b>MAAN</b></div>
-        <div className="footer-sub">
-          EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4
+      <section className="section-block shell" id="register" aria-labelledby="register-title">
+        <div className="section-intro">
+          <p className="section-number">03 / Prioritize</p>
+          <div>
+            <p className="section-kicker">Commissioning-aware register</p>
+            <h2 id="register-title">Review by consequence, not document order.</h2>
+          </div>
+          <p>{snapshot.rows.length} findings loaded from {snapshot.provenance.label.toLowerCase()}. The six highest-priority rows are shown here.</p>
         </div>
-        <div className="footer-meta">
-          12 Projects (Synthetic Portfolio) &middot; 50 Synthetic Deviations &middot; 15 Real/Synthetic Evaluation Pairs &middot; Offline 0 FP &middot; F1 1.000 (synthetic dataset limit)
+        <RegisterTable rows={snapshot.rows} />
+        <div className="register-actions">
+          <Link className="text-link" href="/judge">Run a new document comparison <span aria-hidden="true">→</span></Link>
+          <Link className="text-link" href="/war-room">Open intervention analysis <span aria-hidden="true">→</span></Link>
         </div>
-      </div>
-    </main>
-    </ErrorBoundary>
+      </section>
+
+      <section className="section-block proof-section shell" aria-labelledby="benchmark-title">
+        <div className="section-intro">
+          <p className="section-number">04 / Verify</p>
+          <div>
+            <p className="section-kicker">Frozen benchmark · v{claims.version}</p>
+            <h2 id="benchmark-title">The claim and its boundary travel together.</h2>
+          </div>
+          <p>{BENCHMARK_LIMITATION}</p>
+        </div>
+        <dl className="proof-ledger">
+          <div><dt>Semantic recall</dt><dd>{claims.recall.toFixed(3)}</dd><small>mean of three repeat runs</small></div>
+          <div><dt>Precision / F1</dt><dd>{claims.precision.toFixed(3)} / {claims.f1.toFixed(3)}</dd><small>{claims.labels} frozen labels</small></div>
+          <div><dt>False alerts</dt><dd>{claims.falseAlerts} / {claims.cleanNegatives}</dd><small>clean-negative controls</small></div>
+          <div><dt>Backend verification</dt><dd>{PRODUCT_CLAIMS.verification.backendTests}</dd><small>collected tests · current tree</small></div>
+        </dl>
+        <Link className="button button-secondary" href="/evidence">Inspect sources and limitations</Link>
+      </section>
+
+      </main>
+
+      <footer className="site-footer shell">
+        <div>
+          <Link href="/" className="wordmark">Pramaan<span aria-hidden="true">/</span></Link>
+          <p>Evidence to resolution for consequential infrastructure.</p>
+        </div>
+        <nav aria-label="Footer navigation">
+          <Link href="/judge">Analyze</Link>
+          <Link href="/evidence">Evidence</Link>
+          <Link href="/war-room">Interventions</Link>
+          <a href="https://github.com/bansalbhunesh/parth" target="_blank" rel="noreferrer">Source ↗</a>
+        </nav>
+      </footer>
+    </>
   );
 }

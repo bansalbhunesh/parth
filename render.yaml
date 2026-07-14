@@ -80,6 +80,10 @@ services:
       # only if the demo starts getting abused. See docs/SECURITY_DEMO_RUNBOOK.md.
       - key: PRAMAAN_RATE_LIMIT_ENABLED
         value: "true"
+      - key: PRAMAAN_TRUST_PROXY_HEADERS
+        value: "true"
+      - key: PRAMAAN_CORS_ORIGINS
+        value: "https://parth-tan.vercel.app"
       - key: PRAMAAN_ANALYSIS_LIMIT_PER_HOUR
         value: "20"
       - key: PRAMAAN_UPLOAD_LIMIT_PER_HOUR

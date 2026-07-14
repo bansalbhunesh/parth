@@ -70,7 +70,12 @@ CREATE TABLE IF NOT EXISTS findings (
     predicted_cx_test TEXT NOT NULL DEFAULT '',
     lead_time_weeks   REAL,
     rationale         TEXT NOT NULL DEFAULT '',
-    created_at        REAL NOT NULL
+    status            TEXT NOT NULL DEFAULT 'open',
+    owner             TEXT NOT NULL DEFAULT '',
+    resolution_note   TEXT NOT NULL DEFAULT '',
+    resolved_at       REAL,
+    created_at        REAL NOT NULL,
+    updated_at        REAL NOT NULL
 );
 CREATE TABLE IF NOT EXISTS rfis (
     rfi_id        TEXT PRIMARY KEY,
@@ -80,7 +85,10 @@ CREATE TABLE IF NOT EXISTS rfis (
     drafted_text  TEXT NOT NULL DEFAULT '',
     sources       TEXT NOT NULL DEFAULT '[]',
     mode          TEXT NOT NULL DEFAULT '',
-    created_at    REAL NOT NULL
+    status        TEXT NOT NULL DEFAULT 'draft',
+    response_text TEXT NOT NULL DEFAULT '',
+    created_at    REAL NOT NULL,
+    updated_at    REAL NOT NULL
 );
 CREATE TABLE IF NOT EXISTS audit_log (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -96,12 +104,51 @@ CREATE INDEX IF NOT EXISTS idx_audit_case ON audit_log(case_id);
 """
 
 
+# Existing demo databases predate the resolution workflow. Keep migrations
+# deliberately small and additive so an owner can upgrade without deleting a
+# case or losing its audit history.
+_FINDING_MIGRATIONS = (
+    ("status", "ALTER TABLE findings ADD COLUMN status TEXT NOT NULL DEFAULT 'open'"),
+    ("owner", "ALTER TABLE findings ADD COLUMN owner TEXT NOT NULL DEFAULT ''"),
+    ("resolution_note", "ALTER TABLE findings ADD COLUMN resolution_note TEXT NOT NULL DEFAULT ''"),
+    ("resolved_at", "ALTER TABLE findings ADD COLUMN resolved_at REAL"),
+    ("updated_at", "ALTER TABLE findings ADD COLUMN updated_at REAL NOT NULL DEFAULT 0"),
+)
+_RFI_MIGRATIONS = (
+    ("status", "ALTER TABLE rfis ADD COLUMN status TEXT NOT NULL DEFAULT 'draft'"),
+    ("response_text", "ALTER TABLE rfis ADD COLUMN response_text TEXT NOT NULL DEFAULT ''"),
+    ("updated_at", "ALTER TABLE rfis ADD COLUMN updated_at REAL NOT NULL DEFAULT 0"),
+)
+
+
+def _migrate(conn: sqlite3.Connection) -> None:
+    finding_columns = {
+        row["name"] for row in conn.execute("PRAGMA table_info(findings)").fetchall()
+    }
+    for column, statement in _FINDING_MIGRATIONS:
+        if column not in finding_columns:
+            conn.execute(statement)
+
+    rfi_columns = {
+        row["name"] for row in conn.execute("PRAGMA table_info(rfis)").fetchall()
+    }
+    for column, statement in _RFI_MIGRATIONS:
+        if column not in rfi_columns:
+            conn.execute(statement)
+
+    conn.execute("UPDATE findings SET updated_at = created_at WHERE updated_at = 0")
+    conn.execute("UPDATE rfis SET updated_at = created_at WHERE updated_at = 0")
+
+
 def _get_conn() -> sqlite3.Connection:
     global _conn
     if _conn is None:
         _conn = sqlite3.connect(_DB_PATH, check_same_thread=False)
         _conn.row_factory = sqlite3.Row
+        _conn.execute("PRAGMA busy_timeout = 5000")
+        _conn.execute("PRAGMA journal_mode = WAL")
         _conn.executescript(_SCHEMA)
+        _migrate(_conn)
         _conn.commit()
     return _conn
 
@@ -173,17 +220,22 @@ _FINDING_FIELDS = (
 _INSERT_FINDING_SQL = (
     "INSERT INTO findings (finding_id, case_id, component, parameter, "
     "required_value, provided_value, unit, severity, standard_ref, "
-    "spec_clause, predicted_cx_test, lead_time_weeks, rationale, created_at) "
-    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    "spec_clause, predicted_cx_test, lead_time_weeks, rationale, status, owner, "
+    "resolution_note, resolved_at, created_at, updated_at) "
+    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 )
 
 
 def add_finding(case_id: str, finding: dict) -> str:
     finding_id = uuid.uuid4().hex
     values = [finding.get(f) for f in _FINDING_FIELDS]
+    now = time.time()
     with _lock:
         conn = _get_conn()
-        conn.execute(_INSERT_FINDING_SQL, [finding_id, case_id, *values, time.time()])
+        conn.execute(
+            _INSERT_FINDING_SQL,
+            [finding_id, case_id, *values, "open", "", "", None, now, now],
+        )
         conn.commit()
     return finding_id
 
@@ -205,19 +257,60 @@ def get_finding(case_id: str, finding_id: str) -> dict | None:
     return dict(row) if row else None
 
 
+def update_finding(case_id: str, finding_id: str, *, status: str | None = None,
+                   owner: str | None = None,
+                   resolution_note: str | None = None) -> dict | None:
+    """Update workflow fields without allowing callers to mutate evidence.
+
+    The route owns transition validation; this store method keeps the write
+    case-scoped and atomic and returns the resulting row.
+    """
+    current = get_finding(case_id, finding_id)
+    if current is None:
+        return None
+    next_status = status if status is not None else current["status"]
+    next_owner = owner if owner is not None else current["owner"]
+    next_note = (
+        resolution_note
+        if resolution_note is not None
+        else current["resolution_note"]
+    )
+    resolved_at = current["resolved_at"]
+    if next_status in {"resolved", "dismissed"} and resolved_at is None:
+        resolved_at = time.time()
+    elif next_status not in {"resolved", "dismissed"}:
+        resolved_at = None
+    now = time.time()
+    with _lock:
+        conn = _get_conn()
+        conn.execute(
+            "UPDATE findings SET status = ?, owner = ?, resolution_note = ?, "
+            "resolved_at = ?, updated_at = ? WHERE case_id = ? AND finding_id = ?",
+            (next_status, next_owner, next_note, resolved_at, now, case_id, finding_id),
+        )
+        conn.commit()
+        row = conn.execute(
+            "SELECT * FROM findings WHERE case_id = ? AND finding_id = ?",
+            (case_id, finding_id),
+        ).fetchone()
+    return dict(row) if row else None
+
+
 # ── RFIs ──────────────────────────────────────────────────────────────
 
 def add_rfi(case_id: str, finding_id: str, question: str, drafted_text: str,
             sources: list[str], mode: str) -> str:
     import json as _json
     rfi_id = uuid.uuid4().hex
+    now = time.time()
     with _lock:
         conn = _get_conn()
         conn.execute(
             "INSERT INTO rfis (rfi_id, case_id, finding_id, question, drafted_text, "
-            "sources, mode, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            "sources, mode, status, response_text, created_at, updated_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (rfi_id, case_id, finding_id, question, drafted_text,
-             _json.dumps(sources), mode, time.time()),
+             _json.dumps(sources), mode, "draft", "", now, now),
         )
         conn.commit()
     return rfi_id
@@ -254,6 +347,25 @@ def get_rfi(case_id: str, rfi_id: str) -> dict | None:
     except (ValueError, TypeError):
         d["sources"] = []
     return d
+
+
+def update_rfi(case_id: str, rfi_id: str, *, status: str,
+               response_text: str | None = None) -> dict | None:
+    current = get_rfi(case_id, rfi_id)
+    if current is None:
+        return None
+    next_response = (
+        response_text if response_text is not None else current["response_text"]
+    )
+    with _lock:
+        conn = _get_conn()
+        conn.execute(
+            "UPDATE rfis SET status = ?, response_text = ?, updated_at = ? "
+            "WHERE case_id = ? AND rfi_id = ?",
+            (status, next_response, time.time(), case_id, rfi_id),
+        )
+        conn.commit()
+    return get_rfi(case_id, rfi_id)
 
 
 # ── audit log ─────────────────────────────────────────────────────────

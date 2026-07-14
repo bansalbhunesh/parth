@@ -1,44 +1,36 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
-import { Sora, JetBrains_Mono } from "next/font/google";
+import { Geologica, Hanken_Grotesk } from "next/font/google";
+import { PRODUCT_CLAIMS } from "../lib/claims";
 
-// next/font self-hosts these (no runtime request to fonts.gstatic.com) and
-// computes fallback-font metric overrides (ascent/descent/size-adjust) so the
-// page doesn't reflow when the webfont swaps in — this is what actually fixes
-// the layout shift a <link>-based Google Fonts import causes, not just speed.
-const sora = Sora({
+const geologica = Geologica({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-sora",
-  display: "swap",
-});
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-jetbrains-mono",
+  variable: "--font-display",
   display: "swap",
 });
 
-// metadataBase + Open Graph / Twitter cards: a pasted link (WhatsApp, LinkedIn,
-// Slack, the Unstop form) unfurls as a branded card instead of a bare URL —
-// the judge's first impression happens before the page is even opened.
+const hanken = Hanken_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-body",
+  display: "swap",
+});
+
 const OG_IMAGE = {
   url: "/og.png",
   width: 1200,
   height: 630,
-  alt: "Pramaan — catches the vendor deviation the day the submittal lands, and names the commissioning test it would have failed. Benchmark v1.2: recall 0.862, 0/64 false alerts, rule baseline 0.111, 672 tests.",
+  alt: `Pramaan traces a vendor deviation to its commissioning consequence and resolution. Benchmark v${PRODUCT_CLAIMS.benchmark.version}: recall ${PRODUCT_CLAIMS.benchmark.recall}, ${PRODUCT_CLAIMS.benchmark.falseAlerts}/${PRODUCT_CLAIMS.benchmark.cleanNegatives} false alerts, ${PRODUCT_CLAIMS.verification.backendTests} backend tests.`,
 };
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://parth-tan.vercel.app"),
-  title: "Pramaan — EPC Deviation Intelligence",
+  title: "Pramaan — Evidence to resolution for EPC delivery",
   description:
-    "Spec-to-Site Deviation Sentinel + Commissioning Risk Twin for hyperscale data-centre EPC delivery. Catches deviations 27 weeks before commissioning failure.",
+    "Compare specifications and submittals, trace each deviation to the commissioning test at risk, and close the finding through an auditable RFI workflow.",
   icons: { icon: "/icon.svg" },
   openGraph: {
-    title: "Pramaan — EPC Deviation Intelligence",
-    description:
-      "Catches the vendor deviation the day the submittal lands — and names the commissioning test it would have failed. Frozen benchmark v1.2: recall 0.862 · 0/64 false alerts.",
+    title: "Pramaan — Evidence to resolution for EPC delivery",
+    description: `From cited deviation to owned resolution. Frozen benchmark v${PRODUCT_CLAIMS.benchmark.version}: recall ${PRODUCT_CLAIMS.benchmark.recall}; ${PRODUCT_CLAIMS.benchmark.falseAlerts}/${PRODUCT_CLAIMS.benchmark.cleanNegatives} false alerts.`,
     url: "/",
     siteName: "Pramaan",
     type: "website",
@@ -46,19 +38,19 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pramaan — EPC Deviation Intelligence",
-    description:
-      "Catches the vendor deviation the day the submittal lands — and names the commissioning test it would have failed.",
+    title: "Pramaan — Evidence to resolution for EPC delivery",
+    description: "From cited deviation to owned resolution, before commissioning.",
     images: ["/og.png"],
   },
 };
 
-// Correct mobile scaling so the layout is honestly responsive down to ~360px
-// (no forced desktop width, no user-scaling lockout for accessibility).
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0a0d11",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f2efe7" },
+    { media: "(prefers-color-scheme: dark)", color: "#171815" },
+  ],
 };
 
 export default function RootLayout({
@@ -67,7 +59,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${sora.variable} ${jetbrainsMono.variable}`}>
+    <html
+      lang="en"
+      className={`${geologica.variable} ${hanken.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{const s=localStorage.getItem('pramaan-theme');const t=s||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch(e){}",
+          }}
+        />
+      </head>
       <body>{children}</body>
     </html>
   );

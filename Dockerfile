@@ -22,6 +22,12 @@ ENV NODE_ENV=production \
 COPY --chown=node:node --from=frontend-build /app/public ./public
 COPY --chown=node:node --from=frontend-build /app/.next/standalone ./
 COPY --chown=node:node --from=frontend-build /app/.next/static ./.next/static
+# The standalone runtime only needs the Node binary. Removing npm from the
+# production stage reduces image surface area and prevents build-tool-only
+# transitive packages from becoming production vulnerabilities.
+RUN rm -rf /usr/local/lib/node_modules/npm \
+    /usr/local/bin/npm \
+    /usr/local/bin/npx
 
 USER node
 EXPOSE 3000

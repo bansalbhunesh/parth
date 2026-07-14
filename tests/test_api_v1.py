@@ -41,7 +41,7 @@ def test_legacy_operations_are_marked_deprecated() -> None:
     legacy = [
         operation
         for path, methods in app.openapi()["paths"].items()
-        if not path.startswith(("/api/v1", "/health/", "/internal/")) and path != "/_boom_test"
+        if not path.startswith(("/api/v1", "/health/", "/internal/"))
         for method, operation in methods.items()
         if method in {"get", "post", "put", "patch", "delete"}
     ]

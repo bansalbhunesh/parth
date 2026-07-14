@@ -691,15 +691,25 @@ class TestGlobalErrorGuard:
 
         from backend.main import app
 
-        @app.get("/_boom_test")
-        def _boom():
-            raise RuntimeError("kaboom secret-ish")
-        c = _TC(app, raise_server_exceptions=False)
-        r = c.get("/_boom_test")
-        assert r.status_code == 500
-        body = r.json()
-        assert body["ok"] is False and body["error"] == "internal_error"
-        assert "kaboom" not in str(body)  # no leak of the raw message
+        original_routes = list(app.router.routes)
+        original_schema = app.openapi_schema
+        try:
+            @app.get("/_boom_test")
+            def _boom():
+                raise RuntimeError("kaboom secret-ish")
+
+            c = _TC(app, raise_server_exceptions=False)
+            r = c.get("/_boom_test")
+            assert r.status_code == 500
+            body = r.json()
+            assert body["ok"] is False and body["error"] == "internal_error"
+            assert "kaboom" not in str(body)  # no leak of the raw message
+        finally:
+            # This is a process-global FastAPI application. Leaving the
+            # synthetic route registered pollutes later OpenAPI tests and makes
+            # repeated/in-process runners report duplicate operation IDs.
+            app.router.routes[:] = original_routes
+            app.openapi_schema = original_schema
 
     def test_http_exception_still_404s(self):
         r = client.post("/ingest/NOPE_NOT_A_SYSTEM")

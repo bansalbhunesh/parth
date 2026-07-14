@@ -220,12 +220,19 @@ def provider_chain() -> list[str]:
 
 def _redact(text: str) -> str:
     """Strip any configured API key value out of a string before it can reach
-    a log line or an API response. Covers every provider's key aliases."""
+    a log line or an API response. Covers every provider's key aliases and
+    assignment-shaped secrets returned by SDKs or upstream gateways, including
+    values that differ from the currently configured environment."""
     for provider in _KEY_ENVS:
         secret = _key(provider)
         if secret and secret in text:
             text = text.replace(secret, "***")
-    return text
+    return re.sub(
+        r"(?i)(\b(?:api[\s_-]?key|access[\s_-]?token|authorization|password|secret|token|key)"
+        r"\b\s*[:=]\s*(?:bearer\s+)?)[^\s,;\"']+",
+        r"\1***",
+        text,
+    )
 
 
 def _is_google_gateway(base_url) -> bool:

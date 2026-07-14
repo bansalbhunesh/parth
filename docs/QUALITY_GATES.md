@@ -13,9 +13,9 @@ Passing a gate means the named artifact or command exists and passes. It does no
 - Dependency, source, secret, container, and CodeQL scans run with pinned actions and least-privilege workflow permissions.
 - Backend and frontend containers are digest-pinned, non-root, health-checked, and scanned for high/critical findings.
 - A CycloneDX SBOM is generated on every CI run.
-- The scheduled critical-path mutation run fails below an 85% conservative score and rejects incomplete runs.
+- The scheduled or explicitly `mutation-ready` PR run fails below an 85% conservative mutation score and rejects incomplete runs.
 
-The backend floor is currently ratcheted independently at 88% line and 78% branch coverage, not the final 95%/90% exit threshold. The threshold must only increase with tests that assert behavior, not exclusions or generated lines.
+Backend coverage is ratcheted at the final 95% line and 90% branch threshold. Security, job state/idempotency, citation provenance, Redis cache, durable worker, and webhook delivery modules must each retain 100% line and branch coverage. The threshold only increases through tests that assert behavior, never exclusions or generated lines.
 
 ## Implemented but environment-dependent
 

@@ -1,6 +1,8 @@
 name: Critical-path mutation testing
 
 on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
   workflow_dispatch:
   schedule:
     - cron: "41 2 * * 0"
@@ -10,6 +12,7 @@ permissions:
 
 jobs:
   mutmut:
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'mutation-ready')
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:

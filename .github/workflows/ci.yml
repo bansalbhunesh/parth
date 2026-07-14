@@ -43,12 +43,19 @@ jobs:
           python scripts/check_protected_scope.py
       - name: Dependency and code security scans
         run: |
-          python -m pip_audit --local
+          python -m pip_audit -r backend/requirements.lock --disable-pip --strict
+          python -m pip_audit -r backend/requirements-dev.lock --disable-pip --strict
           python -m bandit -r backend/ scripts/ --severity-level medium
       - name: Backend tests and ratcheted coverage
         run: |
           python -m pytest tests/ -q --tb=short --cov=backend --cov-branch --cov-report=term-missing --cov-report=xml:coverage-backend.xml --cov-report=json:coverage-backend.json
-          python scripts/check_coverage_thresholds.py coverage-backend.json --lines 88 --branches 78
+          python scripts/check_coverage_thresholds.py coverage-backend.json --lines 95 --branches 90 \
+            --critical backend/security.py \
+            --critical backend/jobs.py \
+            --critical backend/agents/reconciliation.py \
+            --critical backend/platform/redis_cache.py \
+            --critical backend/platform/durable_worker.py \
+            --critical backend/platform/webhook_delivery.py
       - name: Verify benchmark evidence
         run: |
           python scripts/benchmark_manifest_check.py

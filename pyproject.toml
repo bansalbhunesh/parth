@@ -100,7 +100,12 @@ only_mutate = [
     "backend/platform/webhook_delivery.py",
 ]
 mutate_only_covered_lines = true
-max_stack_depth = 8
+# Mutmut 3.6 resolves every traversed frame with strict=True while collecting
+# coverage stats. Finite filtering can reach Python's synthetic
+# ``<frozen importlib._bootstrap>`` frame and abort before any mutant runs.
+# -1 disables that fragile caller-depth filter while retaining covered-line
+# selection through mutate_only_covered_lines.
+max_stack_depth = -1
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

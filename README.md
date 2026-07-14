@@ -41,13 +41,23 @@
 
 ---
 
-<p align="center">
-  <img src="docs/demo.gif" alt="Pramaan judge mode: load a realistic vendor document, hit Analyze, watch the AI stream its reasoning and return cited deviations" width="900">
-  <br>
-  <sub>The real flow: <strong>Load deviation demo ★ → Analyze → cited findings</strong> — try it yourself in <a href="https://parth-tan.vercel.app/judge">Judge Mode</a>.</sub>
-</p>
+## Index (Table of Contents)
+
+1. [Why this counts as PS4 & Honesty Callout](#1-why-this-counts-as-ps4--honesty-callout)
+2. [The Problem: The $40 Million Delay](#2-the-problem-the-40-million-delay)
+3. [The Solution & Visual Walkthrough](#3-the-solution--visual-walkthrough)
+4. [Innovative Features & Competitive Moats](#4-innovative-features--competitive-moats)
+5. [Technical Architecture & LangGraph Design](#5-technical-architecture--langgraph-design)
+6. [Tech Stack & Resilient Failover Chain](#6-tech-stack--resilient-failover-chain)
+7. [The Proof: Deployed Verification & Benchmark](#7-the-proof-deployed-verification--benchmark)
+8. [Quick Start & Local Verification Guide](#8-quick-start--local-verification-guide)
+9. [Challenges & What We Learned](#9-challenges--what-we-learned)
+10. [Future Roadmap](#10-future-roadmap)
+11. [Academic Foundation & Commit History](#11-academic-foundation--commit-history)
 
 ---
+
+## 1. Why this counts as PS4 & Honesty Callout
 
 > [!NOTE]
 > ### Why this counts as PS4 (Spec-to-Site Deviation Sentinel)
@@ -59,7 +69,7 @@
 
 ---
 
-## 1. The Story: The $40 Million Delay
+## 2. The Problem: The $40 Million Delay
 
 In hyperscale data centre builds, subtle deviations between design specifications, vendor datasheets, and standards hide in thousands of pages of unstructured documentation. Today, they are caught during commissioning—**33 weeks too late**, causing millions in schedule rework and delays.
 
@@ -75,7 +85,34 @@ In hyperscale data centre builds, subtle deviations between design specification
 
 ---
 
-## 2. Technical Architecture: Compliance Reasoning Graph
+## 3. The Solution & Visual Walkthrough
+
+Pramaan runs a single compliance reasoning graph wrapping a generative reasoning core in deterministic, inspectable QMS validation gates. It catches compliance mismatches the day the document lands:
+
+<p align="center">
+  <img src="docs/demo.gif" alt="Pramaan judge mode: load a realistic vendor document, hit Analyze, watch the AI stream its reasoning and return cited deviations" width="900">
+  <br>
+  <sub>The real flow: <strong>Load deviation demo ★ → Analyze → cited findings</strong> — try it yourself in <a href="https://parth-tan.vercel.app/judge">Judge Mode</a>.</sub>
+</p>
+
+- **Catches Silent Omissions:** Flagging when a required design clause (like safety clearances or seismic ratings) is completely absent from a vendor submittal.
+- **Performs Derived Calculations:** Tracing implicit math (e.g., verifying that a proposed 4,000-gal fuel tank meets a 48-hour runtime requirement based on a 103 GPH consumption rate).
+- **Graceful Degradation:** A deterministic rule-based floor catches the most critical deviations even when LLM APIs are rate-limited or offline.
+
+---
+
+## 4. Innovative Features & Competitive Moats
+
+Other tools stop at basic keyword-matching. Pramaan integrates compliance verification with the actual data centre lifecycle:
+
+* **Commissioning Risk Twin:** Maps each deviation to the exact test it will fail (e.g., IST-07 or FPT-04) and highlights at-risk test paths on a live Gantt chart.
+* **What-if Remediation Simulator:** Slide the catch week of a deviation in real-time to witness cost/schedule curves update instantly.
+* **Downstream RFI Webhooks:** Instantly dispatch Slack alerts, email layouts, and JSON payloads with pre-drafted RFI copy on deviation detection.
+* **Client-Side Zero-Deploy Engine:** Toggle "Local Engine" to run compliance checks locally in the browser in ~1ms, bypassing backend cold starts.
+
+---
+
+## 5. Technical Architecture & LangGraph Design
 
 Pramaan uses a single LLM reasoning core wrapped in deterministic pipelines to ensure reliability and explainability:
 
@@ -91,30 +128,18 @@ Pramaan uses a single LLM reasoning core wrapped in deterministic pipelines to e
 
 ---
 
-## 3. Competitive Moats & Features
+## 6. Tech Stack & Resilient Failover Chain
 
-Other tools stop at basic keyword-matching. Pramaan integrates compliance verification with the actual data centre lifecycle:
+Pramaan is built to be resilient in high-traffic or rate-limited environments:
 
-* **Commissioning Risk Twin:** Maps each deviation to the exact test it will fail (e.g., IST-07 or FPT-04) and highlights at-risk test paths on a live Gantt chart.
-* **What-if Remediation Simulator:** Slide the catch week of a deviation in real-time to witness cost/schedule curves update instantly.
-* **Downstream RFI Webhooks:** Instantly dispatch Slack alerts, email layouts, and JSON payloads with pre-drafted RFI copy on deviation detection.
-* **Client-Side Zero-Deploy Engine:** Toggle "Local Engine" to run compliance checks locally in the browser in ~1ms, bypassing backend cold starts.
-
----
-
-## 4. Reproducibility & Frozen Benchmark
-
-To cut through AI hype, we evaluate Pramaan against a frozen, independent benchmark: **`ps4_external_v1` (v1.2)** containing **53 pairs** and **129 labels**.
-
-* **Recall:** 0.862 (vs a deterministic rule baseline of **0.111**)
-* **Precision:** 0.953
-* **F1 Score:** 0.905
-* **False Alarm Rate (FAR):** 0.000 on 64 clean-negative controls
-* **Calibration:** Wilson score 95% confidence intervals are tracked in [`calibration_report.md`](benchmarks/ps4_external_v1/reports/calibration_report.md).
+* **LLM Engine:** Multi-provider failover chain: **native Gemini 2.5-flash → Qwen-gateway → Groq Llama-3.3 → deterministic fallback**.
+* **FastAPI Backend:** Fully asynchronous backend (Python 3.11+) supporting Server-Sent Events (SSE) for token streaming.
+* **Next.js 15 Frontend:** Dark-themed responsive dashboard utilizing scroll-reveal animations and SVG charts.
+* **Resiliency Gate:** The system compiles cleanly and degrades gracefully without an API key, serving ground-truth cached responses for smooth judge reviews.
 
 ---
 
-## 5. Deployed Verification Status (`make verify-live`)
+## 7. The Proof: Deployed Verification & Benchmark
 
 Pramaan runs an automated health-and-deployment validation script to verify that the deployed backend is live, API credentials are functional, and all frontend components load cleanly:
 
@@ -132,9 +157,15 @@ Pramaan live verification • API https://parth-1-ma30.onrender.com • APP http
   [PASS] /evidence table is populated
 ```
 
+### Frozen Benchmark Performance (`ps4_external_v1` v1.2)
+* **Recall:** 0.862 (vs a deterministic rule baseline of **0.111**) on **53 pairs** and **129 labels**.
+* **Precision:** 0.953
+* **F1 Score:** 0.905
+* **False Alarm Rate (FAR):** 0.000 on 64 clean-negative controls.
+
 ---
 
-## 6. Setup & Verification (Offline Checks)
+## 8. Quick Start & Local Verification Guide
 
 You can run the entire verification suite, deterministic eval harnesses, and frontend type checks offline without any API keys:
 
@@ -158,17 +189,32 @@ make run-frontend                   # Frontend Next.js app (localhost:3000)
 
 ---
 
-## 7. Academic References
+## 9. Challenges & What We Learned
 
-All academic references are verified against the publisher:
+During the 3-day build, we faced and overcame critical design hurdles:
+1. **Handling LLM Rate Limits:** Deployed an automatic failover model gateway combined with a robust deterministic fallback rule floor. If the API returns a 429 or hangs, the local engine still flags the core mismatches.
+2. **Improving Omission Recall:** Initial prompt calibrations resulted in low recall (0.375) on silent omissions. We rewrote prompt rule #5 to mandate scanning the submittals for every spec parameter, defaulting the provided value to "Not stated" if missing. This lifted baseline recall significantly.
+3. **Circular Reference Gaps:** Avoided circular logic in evaluations by writing independent text-based and structured evals that run against distinct datasets.
 
+---
+
+## 10. Future Roadmap
+
+Our roadmap for scaling Pramaan to enterprise data centre portfolios:
+* **Drawing Sheet Parsing:** Implement Gemini multimodal vision models to read and cross-reference blueprints, schematic P&IDs, and single-line diagrams instead of text-based tables.
+* **Auto-generated Standard Templates:** Allow project managers to ingest raw standard PDFs and auto-generate compliance baseline corpora without manual summary editing.
+* **Enterprise Security Moats:** Implement full tenant data encryption and isolated workspaces (PostgreSQL row-level security) for sensitive proprietary vendor documentation.
+
+---
+
+## 11. Academic Foundation & Commit History
+
+### Peer-Reviewed Foundations
 1. **ASCE J. Constr. Eng. Mgmt. (2026):** ["Generative AI-Assisted Compliance Checking for Construction Requirements"](https://ascelibrary.org/doi/10.1061/JCEMD4.COENG-18122) — *GenAI for automated construction compliance checks.*
 2. **arXiv 2412.08593 (2024):** ["Leveraging Graph-RAG and Prompt Engineering to Enhance LLM-Based Automated Requirement Traceability and Compliance Checks"](https://arxiv.org/abs/2412.08593) — *Graph-RAG precedent.*
 3. **J. Information Technology in Construction (2023):** ["Invariant Signature, Logic Reasoning, and Semantic NLP-Based Automated Building Code Compliance Checking (I-SNACC)"](https://www.itcon.org/paper/2023/1) — *NLP + logic compliance checking.*
 
----
-
-## 8. Git Commit History (`git log --oneline -n 25`)
+### Git Commit History (`git log --oneline -n 25`)
 
 ```
 75d1905 docs: Add rule baseline recall, pairs, and label counts to README to satisfy consistency tests

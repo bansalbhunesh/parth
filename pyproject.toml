@@ -91,6 +91,29 @@ ignore_missing_imports = true
 
 [tool.mutmut]
 source_paths = ["backend/"]
+# Mutmut executes the suite from an isolated ``mutants/`` tree.  The tests are
+# deliberately repository-wide: they import our gate helpers and validate the
+# reviewed API contract, fixtures, migrations, benchmark evidence, and public
+# claims.  Copy every non-package surface those tests require so mutation stats
+# exercise the real suite instead of aborting (or, worse, running a weakened
+# subset) in the isolated tree.
+also_copy = [
+    "scripts/",
+    "eval/",
+    "data/",
+    "benchmarks/",
+    "contracts/",
+    "docs/",
+    "supabase/",
+    "frontend/app/",
+    "frontend/components/",
+    "frontend/lib/",
+    ".gitignore",
+    "README.md",
+    "PITCH.md",
+    "COMPETITIVE.md",
+    "presentation.html",
+]
 only_mutate = [
     "backend/security.py",
     "backend/jobs.py",

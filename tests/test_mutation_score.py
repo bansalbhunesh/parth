@@ -1,10 +1,15 @@
 from __future__ import annotations
 
+import tomllib
 from collections import Counter
+from pathlib import Path
 
 import pytest
 
 from scripts.check_mutation_score import mutation_summary, parse_results
+
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def _results(*statuses: str) -> str:
@@ -40,3 +45,26 @@ def test_unknown_and_empty_results_fail_closed() -> None:
         parse_results(_results("mystery"))
     with pytest.raises(ValueError, match="no mutation results"):
         parse_results("Mutmut did not emit any result lines")
+
+
+def test_mutmut_isolated_tree_contains_repository_wide_test_inputs() -> None:
+    """The mutation runner must execute the real suite, not a partial copy."""
+    config = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["tool"]["mutmut"]
+    copied = set(config["also_copy"])
+    assert {
+        "scripts/",
+        "eval/",
+        "data/",
+        "benchmarks/",
+        "contracts/",
+        "docs/",
+        "supabase/",
+        "frontend/app/",
+        "frontend/components/",
+        "frontend/lib/",
+        ".gitignore",
+        "README.md",
+        "PITCH.md",
+        "COMPETITIVE.md",
+        "presentation.html",
+    } <= copied

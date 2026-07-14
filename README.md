@@ -117,9 +117,9 @@ make run-frontend                   # Frontend Next.js app (localhost:3000)
 
 ## Reproducibility & Frozen Benchmark
 
-To cut through AI hype, we evaluate Pramaan against a frozen, independent benchmark: **`ps4_external_v1` (v1.2)**. 
+To cut through AI hype, we evaluate Pramaan against a frozen, independent benchmark: **`ps4_external_v1` (v1.2)** containing **53 pairs** and **129 labels**. 
 
-- **Recall:** 0.862
+- **Recall:** 0.862 (vs a deterministic rule baseline of **0.111**)
 - **Precision:** 0.953
 - **F1 Score:** 0.905
 - **False Alarm Rate (FAR):** 0.000 on 64 clean-negative controls

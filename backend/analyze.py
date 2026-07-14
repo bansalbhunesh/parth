@@ -2,6 +2,7 @@
 
 import concurrent.futures
 import logging
+import operator
 import os
 import re
 import threading
@@ -212,50 +213,71 @@ def _fmt_num(x: float) -> str:
     return str(int(x)) if x == int(x) else str(x)
 
 
+_DEVIATES = {"min": operator.lt, "max": operator.gt, "ne": operator.ne}
+
+
+def _parameter_value(text: str, parameter: dict) -> float | None:
+    for keyword in parameter["kw"]:
+        value = _num_near(text, keyword, parameter["unit_rx"])
+        if value is not None:
+            return value
+    return None
+
+
+def _omitted_value(parameter: dict, submittal_text: str) -> tuple[str, str] | None:
+    if not any(_omission_near(submittal_text, keyword) for keyword in parameter["kw"]):
+        return None
+    return "Not stated", f"Spec requires {parameter['parameter']} but the submittal omits it"
+
+
+def _freeform_deviation(parameter: dict, spec_text: str, submittal_text: str) -> dict | None:
+    required = _parameter_value(spec_text, parameter)
+    if required is None:
+        return None
+    provided = _parameter_value(submittal_text, parameter)
+    if provided is None:
+        omitted = _omitted_value(parameter, submittal_text)
+        if omitted is None:
+            return None
+        provided_label, rationale = omitted
+    else:
+        if not _DEVIATES[parameter["direction"]](provided, required):
+            return None
+        provided_label = _fmt_num(provided)
+        rationale = (
+            f"Provided {provided_label} {parameter['unit']} does not satisfy "
+            f"required {_fmt_num(required)} {parameter['unit']}"
+        )
+    return {
+        "component": parameter["component"],
+        "parameter": parameter["parameter"],
+        "required_value": _fmt_num(required),
+        "provided_value": provided_label,
+        "unit": parameter["unit"],
+        "standard_ref": "DESIGN-BASIS",
+        "spec_clause": "",
+        "severity": parameter["severity"],
+        "rationale": rationale,
+        "confidence": 0.65,
+        "cx_source": "rule-based",
+    }
+
+
 def _freeform_compare(spec_text: str, submittal_text: str) -> list[dict]:
     devs, seen, seen_sig = [], set(), set()
-    for p in _FREEFORM_PARAMS:
-        ckey = (p["component"], p["parameter"])
+    for parameter in _FREEFORM_PARAMS:
+        ckey = (parameter["component"], parameter["parameter"])
         if ckey in seen:
             continue
-        req = prov = None
-        for kw in p["kw"]:
-            if req is None:
-                req = _num_near(spec_text, kw, p["unit_rx"])
-            if prov is None:
-                prov = _num_near(submittal_text, kw, p["unit_rx"])
-        if req is None:
+        deviation = _freeform_deviation(parameter, spec_text, submittal_text)
+        if deviation is None:
             continue  # spec doesn't constrain this parameter — skip
-        if prov is None:
-            if not any(_omission_near(submittal_text, kw) for kw in p["kw"]):
-                continue
-            prov_label, is_dev = "Not stated", True
-            rationale = f"Spec requires {p['parameter']} but the submittal omits it"
-        else:
-            d = p["direction"]
-            is_dev = (prov < req if d == "min"
-                      else prov > req if d == "max" else prov != req)
-            prov_label = _fmt_num(prov)
-            rationale = (f"Provided {prov_label} {p['unit']} does not satisfy "
-                         f"required {_fmt_num(req)} {p['unit']}")
-        if not is_dev:
-            continue
-        # Value-signature dedup: if two overlapping rules report the SAME
-        # required->provided numeric transition (e.g. a busway Icw also matched
-        # by the switchgear rule), keep only the first so the fallback never
-        # double-counts one physical fact under two component labels.
-        sig = (_fmt_num(req), prov_label)
+        sig = (deviation["required_value"], deviation["provided_value"])
         if sig in seen_sig:
             continue
         seen_sig.add(sig)
         seen.add(ckey)
-        devs.append({
-            "component": p["component"], "parameter": p["parameter"],
-            "required_value": _fmt_num(req), "provided_value": prov_label,
-            "unit": p["unit"], "standard_ref": "DESIGN-BASIS", "spec_clause": "",
-            "severity": p["severity"], "rationale": rationale,
-            "confidence": 0.65, "cx_source": "rule-based",
-        })
+        devs.append(deviation)
     return devs
 
 
@@ -292,6 +314,22 @@ def _resilient_fallback(spec_text: str, submittal_text: str,
     for d in devs:
         _enrich_cx(d, system_id)
     return devs
+
+
+def run_deterministic_analysis(
+    spec_text: str,
+    submittal_text: str,
+    system_id: str = "CUSTOM",
+) -> AnalysisResult:
+    """Run the bounded rule engine without provider access or persistence."""
+    started = time.perf_counter()
+    deviations = _resilient_fallback(spec_text, submittal_text, system_id)
+    return AnalysisResult(
+        deviations=deviations,
+        mode="rule-based-deterministic",
+        elapsed_ms=round((time.perf_counter() - started) * 1000),
+        provider=None,
+    )
 
 
 def run_analysis(

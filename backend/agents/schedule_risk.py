@@ -67,6 +67,68 @@ def _build_dag(tasks: list[dict]) -> nx.DiGraph:
     return g
 
 
+def _cpm_forward(
+    graph: nx.DiGraph, order: list[str], tasks: dict[str, dict], durations: dict[str, float]
+) -> tuple[dict[str, float], dict[str, float]]:
+    starts: dict[str, float] = {}
+    finishes: dict[str, float] = {}
+    for task_id in order:
+        floor = float(tasks[task_id].get("delivery_constraint_week") or 0.0)
+        predecessors = list(graph.predecessors(task_id))
+        dependency_start = max(
+            [finishes[pred] + graph[pred][task_id]["lag"] for pred in predecessors],
+            default=0.0,
+        )
+        starts[task_id] = max(dependency_start, floor)
+        finishes[task_id] = starts[task_id] + durations[task_id]
+    return starts, finishes
+
+
+def _cpm_backward(
+    graph: nx.DiGraph, order: list[str], durations: dict[str, float], project: float
+) -> tuple[dict[str, float], dict[str, float]]:
+    late_finishes: dict[str, float] = {}
+    late_starts: dict[str, float] = {}
+    for task_id in reversed(order):
+        successors = list(graph.successors(task_id))
+        late_finishes[task_id] = min(
+            [late_starts[successor] - graph[task_id][successor]["lag"] for successor in successors],
+            default=project,
+        )
+        late_starts[task_id] = late_finishes[task_id] - durations[task_id]
+    return late_starts, late_finishes
+
+
+def _cpm_rows(
+    graph: nx.DiGraph,
+    order: list[str],
+    tasks: dict[str, dict],
+    starts: dict[str, float],
+    finishes: dict[str, float],
+    late_starts: dict[str, float],
+    late_finishes: dict[str, float],
+    project: float,
+) -> dict[str, dict]:
+    rows = {}
+    for task_id in order:
+        total_float = late_starts[task_id] - starts[task_id]
+        successors = list(graph.successors(task_id))
+        free_float = min([starts[successor] for successor in successors], default=project) - finishes[task_id]
+        rows[task_id] = {
+            "name": tasks[task_id].get("name", task_id),
+            "is_milestone": tasks[task_id].get("is_milestone", False),
+            "cx_level": tasks[task_id].get("cx_level"),
+            "es": round(starts[task_id], 3),
+            "ef": round(finishes[task_id], 3),
+            "ls": round(late_starts[task_id], 3),
+            "lf": round(late_finishes[task_id], 3),
+            "total_float": round(total_float, 3),
+            "free_float": round(free_float, 3),
+            "critical": abs(total_float) < _EPS,
+        }
+    return rows
+
+
 def cpm(tasks: list[dict]) -> dict:
     """Deterministic Critical Path Method on expected durations.
 
@@ -78,38 +140,10 @@ def cpm(tasks: list[dict]) -> dict:
     by_id = {t["id"]: t for t in tasks}
     dur = {tid: _te(by_id[tid]["duration"]) for tid in order}
 
-    es: dict[str, float] = {}
-    ef: dict[str, float] = {}
-    for v in order:
-        floor = float(by_id[v].get("delivery_constraint_week") or 0.0)
-        preds = list(g.predecessors(v))
-        start = max([ef[u] + g[u][v]["lag"] for u in preds], default=0.0)
-        es[v] = max(start, floor)
-        ef[v] = es[v] + dur[v]
-
+    es, ef = _cpm_forward(g, order, by_id, dur)
     project = max(ef.values(), default=0.0)
-
-    lf: dict[str, float] = {}
-    ls: dict[str, float] = {}
-    for v in reversed(order):
-        succs = list(g.successors(v))
-        lf[v] = min([ls[w] - g[v][w]["lag"] for w in succs], default=project)
-        ls[v] = lf[v] - dur[v]
-
-    out = {}
-    for v in order:
-        total_float = ls[v] - es[v]
-        succs = list(g.successors(v))
-        free_float = min([es[w] for w in succs], default=project) - ef[v]
-        out[v] = {
-            "name": by_id[v].get("name", v),
-            "is_milestone": by_id[v].get("is_milestone", False),
-            "cx_level": by_id[v].get("cx_level"),
-            "es": round(es[v], 3), "ef": round(ef[v], 3),
-            "ls": round(ls[v], 3), "lf": round(lf[v], 3),
-            "total_float": round(total_float, 3), "free_float": round(free_float, 3),
-            "critical": abs(total_float) < _EPS,
-        }
+    ls, lf = _cpm_backward(g, order, dur, project)
+    out = _cpm_rows(g, order, by_id, es, ef, ls, lf, project)
     return {
         "tasks": out,
         "project_duration": round(project, 3),
@@ -133,6 +167,137 @@ def _sample(dur: dict, n: int, rng: np.random.Generator, lam: float = CLASSIC_LA
     return o + (p - o) * rng.beta(a, b, size=n)
 
 
+def _initial_trials(
+    tasks: list[dict], n: int, rng: np.random.Generator
+) -> tuple[dict[str, np.ndarray], dict[str, np.ndarray]]:
+    durations = {
+        task["id"]: _sample(task["duration"], n, rng, float(task.get("lambda", CLASSIC_LAMBDA)))
+        for task in tasks
+    }
+    floors = {
+        task["id"]: np.full(n, float(task.get("delivery_constraint_week") or 0.0))
+        for task in tasks
+    }
+    return durations, floors
+
+
+def _apply_risks(
+    durations: dict[str, np.ndarray],
+    floors: dict[str, np.ndarray],
+    risks: list[dict],
+    n: int,
+    rng: np.random.Generator,
+) -> None:
+    for risk in risks:
+        occurs = rng.random(n) < float(risk.get("probability", 1.0))
+        targets = risk.get("applies_to", [])
+        if risk["type"] == "rework":
+            impact = _sample(risk["impact"], n, rng)
+            for task_id in targets:
+                if task_id in durations:
+                    durations[task_id] += np.where(occurs, impact, 0.0)
+        elif risk["type"] == "delivery_delay":
+            delay = _sample(risk["delay"], n, rng)
+            for task_id in targets:
+                if task_id in floors:
+                    floors[task_id] += np.where(occurs, delay, 0.0)
+
+
+def _trial_forward(
+    graph: nx.DiGraph,
+    order: list[str],
+    durations: dict[str, np.ndarray],
+    floors: dict[str, np.ndarray],
+    n: int,
+) -> tuple[dict[str, np.ndarray], dict[str, np.ndarray], np.ndarray]:
+    starts: dict[str, np.ndarray] = {}
+    finishes: dict[str, np.ndarray] = {}
+    for task_id in order:
+        predecessors = list(graph.predecessors(task_id))
+        start = (
+            np.maximum.reduce([finishes[pred] + graph[pred][task_id]["lag"] for pred in predecessors])
+            if predecessors
+            else np.zeros(n)
+        )
+        starts[task_id] = np.maximum(start, floors[task_id])
+        finishes[task_id] = starts[task_id] + durations[task_id]
+    finish = np.maximum.reduce([finishes[task_id] for task_id in order]) if order else np.zeros(n)
+    return starts, finishes, finish
+
+
+def _trial_backward(
+    graph: nx.DiGraph,
+    order: list[str],
+    durations: dict[str, np.ndarray],
+    finish: np.ndarray,
+) -> dict[str, np.ndarray]:
+    late_finishes: dict[str, np.ndarray] = {}
+    late_starts: dict[str, np.ndarray] = {}
+    for task_id in reversed(order):
+        successors = list(graph.successors(task_id))
+        late_finishes[task_id] = (
+            np.minimum.reduce(
+                [late_starts[successor] - graph[task_id][successor]["lag"] for successor in successors]
+            )
+            if successors
+            else finish
+        )
+        late_starts[task_id] = late_finishes[task_id] - durations[task_id]
+    return late_starts
+
+
+def _trial_histogram(finishes: np.ndarray) -> list[dict]:
+    counts, edges = np.histogram(finishes, bins=30)
+    return [
+        {"x0": round(float(edges[index]), 2), "x1": round(float(edges[index + 1]), 2), "count": int(count)}
+        for index, count in enumerate(counts)
+    ]
+
+
+def _trial_milestones(tasks: list[dict], finishes: dict[str, np.ndarray]) -> dict:
+    return {
+        task["id"]: {
+            "p50": round(float(np.percentile(finishes[task["id"]], 50)), 2),
+            "p80": round(float(np.percentile(finishes[task["id"]], 80)), 2),
+        }
+        for task in tasks
+        if task.get("is_milestone")
+    }
+
+
+def _finite_trials(finish: np.ndarray) -> np.ndarray:
+    finite = finish[np.isfinite(finish)]
+    return finite if finite.size else np.zeros(1)
+
+
+def _trial_diagnostics(
+    order: list[str],
+    durations: dict[str, np.ndarray],
+    finish: np.ndarray,
+    starts: dict[str, np.ndarray],
+    late_starts: dict[str, np.ndarray],
+) -> tuple[dict[str, float], dict[str, float]]:
+    criticality = {
+        task_id: float(np.mean((late_starts[task_id] - starts[task_id]) <= _EPS))
+        for task_id in order
+    }
+    sensitivity = {
+        task_id: (
+            _finite(np.corrcoef(durations[task_id], finish)[0, 1])
+            if float(np.std(durations[task_id])) > 0
+            else 0.0
+        )
+        for task_id in order
+    }
+    return criticality, sensitivity
+
+
+def _on_time_probability(finishes: np.ndarray, deadline_week: float | None) -> float | None:
+    if deadline_week is None:
+        return None
+    return float(np.mean(finishes <= deadline_week))
+
+
 def monte_carlo(
     tasks: list[dict],
     risks: list[dict] | None = None,
@@ -151,68 +316,22 @@ def monte_carlo(
     g = _build_dag(tasks)
     order = list(nx.topological_sort(g))
 
-    dur = {t["id"]: _sample(t["duration"], n, rng, float(t.get("lambda", CLASSIC_LAMBDA))) for t in tasks}
-    floor = {t["id"]: np.full(n, float(t.get("delivery_constraint_week") or 0.0)) for t in tasks}
+    dur, floor = _initial_trials(tasks, n, rng)
+    _apply_risks(dur, floor, risks or [], n, rng)
 
-    for r in risks or []:
-        occur = rng.random(n) < float(r.get("probability", 1.0))  # one shared draw per risk
-        targets = r.get("applies_to", [])
-        if r["type"] == "rework":
-            add = _sample(r["impact"], n, rng)
-            for tid in targets:
-                if tid in dur:
-                    dur[tid] = dur[tid] + np.where(occur, add, 0.0)
-        elif r["type"] == "delivery_delay":
-            delay = _sample(r["delay"], n, rng)
-            for tid in targets:
-                if tid in floor:
-                    floor[tid] = floor[tid] + np.where(occur, delay, 0.0)
-
-    es: dict[str, np.ndarray] = {}
-    ef: dict[str, np.ndarray] = {}
-    for v in order:
-        preds = list(g.predecessors(v))
-        start = (np.maximum.reduce([ef[u] + g[u][v]["lag"] for u in preds])
-                 if preds else np.zeros(n))
-        es[v] = np.maximum(start, floor[v])
-        ef[v] = es[v] + dur[v]
-
-    finish = np.maximum.reduce([ef[v] for v in order]) if order else np.zeros(n)
-    _f = finish[np.isfinite(finish)]
-    if _f.size == 0:
-        _f = np.zeros(1)
+    es, ef, finish = _trial_forward(g, order, dur, floor, n)
+    _f = _finite_trials(finish)
 
     # backward pass per trial -> criticality index
-    lf: dict[str, np.ndarray] = {}
-    ls: dict[str, np.ndarray] = {}
-    for v in reversed(order):
-        succs = list(g.successors(v))
-        lf[v] = (np.minimum.reduce([ls[w] - g[v][w]["lag"] for w in succs])
-                 if succs else finish)
-        ls[v] = lf[v] - dur[v]
+    ls = _trial_backward(g, order, dur, finish)
 
-    criticality = {v: float(np.mean((ls[v] - es[v]) <= _EPS)) for v in order}
-    sensitivity = {
-        v: (_finite(np.corrcoef(dur[v], finish)[0, 1]) if float(np.std(dur[v])) > 0 else 0.0)
-        for v in order
-    }
+    criticality, sensitivity = _trial_diagnostics(order, dur, finish, es, ls)
 
     p50, p80, p90 = (float(x) for x in np.percentile(_f, [50, 80, 90]))
-    on_time = float(np.mean(_f <= deadline_week)) if deadline_week is not None else None
+    on_time = _on_time_probability(_f, deadline_week)
 
-    counts, edges = np.histogram(_f, bins=30)
-    histogram = [
-        {"x0": round(float(edges[i]), 2), "x1": round(float(edges[i + 1]), 2), "count": int(counts[i])}
-        for i in range(len(counts))
-    ]
-
-    milestones = {
-        t["id"]: {
-            "p50": round(float(np.percentile(ef[t["id"]], 50)), 2),
-            "p80": round(float(np.percentile(ef[t["id"]], 80)), 2),
-        }
-        for t in tasks if t.get("is_milestone")
-    }
+    histogram = _trial_histogram(_f)
+    milestones = _trial_milestones(tasks, ef)
 
     return {
         "n_trials": n, "seed": seed,
@@ -234,27 +353,10 @@ def simulate_finish(tasks: list[dict], risks: list[dict] | None = None,
     rng = np.random.default_rng(seed)
     g = _build_dag(tasks)
     order = list(nx.topological_sort(g))
-    dur = {t["id"]: _sample(t["duration"], n, rng, float(t.get("lambda", CLASSIC_LAMBDA))) for t in tasks}
-    floor = {t["id"]: np.full(n, float(t.get("delivery_constraint_week") or 0.0)) for t in tasks}
-    for r in risks or []:
-        occur = rng.random(n) < float(r.get("probability", 1.0))
-        if r["type"] == "rework":
-            add = _sample(r["impact"], n, rng)
-            for tid in r.get("applies_to", []):
-                if tid in dur:
-                    dur[tid] = dur[tid] + np.where(occur, add, 0.0)
-        elif r["type"] == "delivery_delay":
-            delay = _sample(r["delay"], n, rng)
-            for tid in r.get("applies_to", []):
-                if tid in floor:
-                    floor[tid] = floor[tid] + np.where(occur, delay, 0.0)
-    ef: dict[str, np.ndarray] = {}
-    for v in order:
-        preds = list(g.predecessors(v))
-        start = (np.maximum.reduce([ef[u] + g[u][v]["lag"] for u in preds])
-                 if preds else np.zeros(n))
-        ef[v] = np.maximum(start, floor[v]) + dur[v]
-    return np.maximum.reduce([ef[v] for v in order]) if order else np.zeros(n)
+    durations, floors = _initial_trials(tasks, n, rng)
+    _apply_risks(durations, floors, risks or [], n, rng)
+    _, _, finish = _trial_forward(g, order, durations, floors, n)
+    return finish
 
 
 def analyze_schedule(schedule: dict, n: int = 10_000, seed: int = 42) -> dict:

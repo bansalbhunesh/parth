@@ -195,6 +195,30 @@ def _check_citation_faithfulness(devs, spec_text, submittal_text, standards_text
     return devs
 
 
+def _numbers_are_grounded(numbers: list[str], spec_lower: str) -> bool:
+    return bool(numbers) and all(
+        re.search(r"(?<!\d)" + re.escape(number) + r"(?!\d)", spec_lower) for number in numbers
+    )
+
+
+def _words_are_grounded(words: list[str], spec_lower: str) -> bool:
+    return bool(words) and all(word in spec_lower for word in words)
+
+
+def _value_is_grounded(required_value, spec_lower: str, spec_compact: str) -> bool:
+    if required_value is None or not str(required_value).strip():
+        return False
+    value = str(required_value).strip().lower()
+    compact = re.sub(r"[^a-z0-9+]", "", value)
+    numbers = re.findall(r"\d+\.?\d*", value)
+    words = [token for token in re.findall(r"[a-z]+", value) if len(token) > 2]
+    if compact and compact in spec_compact:
+        return True
+    if _numbers_are_grounded(numbers, spec_lower):
+        return True
+    return _words_are_grounded(words, spec_lower)
+
+
 def _ground_findings(devs, spec_text):
     """Drop findings whose required_value is not present in the design basis —
     the signature of a hallucinated requirement (the model confabulating a
@@ -212,17 +236,7 @@ def _ground_findings(devs, spec_text):
     kept = []
     for d in devs:
         rv = d.get("required_value")
-        if rv is None or str(rv).strip() == "":
-            d["grounded"] = False
-            continue
-        rv_s = str(rv).strip().lower()
-        compact = re.sub(r"[^a-z0-9+]", "", rv_s)
-        nums = re.findall(r"\d+\.?\d*", rv_s)
-        toks = [t for t in re.findall(r"[a-z]+", rv_s) if len(t) > 2]
-        ok = ((bool(compact) and compact in spec_compact)
-              or (bool(nums) and all(
-                  re.search(r"(?<!\d)" + re.escape(n) + r"(?!\d)", spec_l) for n in nums))
-              or (bool(toks) and all(t in spec_l for t in toks)))
+        ok = _value_is_grounded(rv, spec_l, spec_compact)
         d["grounded"] = ok
         if ok:
             kept.append(d)

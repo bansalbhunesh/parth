@@ -10,6 +10,8 @@ dependencies = [
     "google-genai>=1.0,<3.0",
     "anthropic>=0.40,<1.0",
     "langgraph>=0.2,<2.0",
+    "numpy>=1.26,<3.0",
+    "networkx>=3.0,<4.0",
     "pymupdf>=1.24,<2.0",
     "pdfplumber>=0.10,<1.0",
     "pytesseract>=0.3.10,<1.0",
@@ -28,6 +30,14 @@ dependencies = [
     # Pure-Python (no Pango/Cairo system deps, unlike WeasyPrint) - chosen
     # specifically so the ITP PDF export doesn't add a Docker/Render build risk.
     "fpdf2>=2.7,<3.0",
+    "PyJWT[crypto]>=2.10,<3.0",
+    "psycopg[binary,pool]>=3.2,<4.0",
+    "redis>=6.0,<7.0",
+    "openai>=1.0",
+    "opentelemetry-api>=1.36,<2.0",
+    "opentelemetry-sdk>=1.36,<2.0",
+    "opentelemetry-exporter-otlp-proto-http>=1.36,<2.0",
+    "opentelemetry-instrumentation-fastapi>=0.57b0,<1.0",
 ]
 
 [project.optional-dependencies]
@@ -36,7 +46,52 @@ dependencies = [
 # async ones), which floods -q output with DeprecationWarnings under 3.14's
 # stricter warning filters. >=1.4 is the current stable line and requires
 # pytest>=8.4 itself, hence the matching pytest floor bump.
-dev = ["pytest>=8.4,<9.0", "pytest-asyncio>=1.4,<2.0", "pytest-cov>=5.0", "ruff>=0.4"]
+dev = [
+    "pytest>=8.4,<9.0",
+    "pytest-asyncio>=1.4,<2.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.4",
+    # Starlette 1.2 uses httpx2 for TestClient; keeping this explicit removes
+    # its plain-httpx deprecation path so warnings can fail CI.
+    "httpx2>=2.0,<3.0",
+    "mypy>=1.18,<2.0",
+    "radon>=6.0,<7.0",
+    "import-linter>=2.9,<3.0",
+    "pip-audit>=2.9,<3.0",
+    "bandit>=1.8,<2.0",
+    "mutmut>=3.5,<4.0",
+]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["backend/platform", "backend/http.py", "backend/versioning.py"]
+
+[[tool.mypy.overrides]]
+module = [
+    "jwt",
+    "opentelemetry.exporter.*",
+    "opentelemetry.instrumentation.*",
+    "psycopg",
+    "psycopg.*",
+    "psycopg_pool",
+    "redis",
+    "redis.*",
+]
+ignore_missing_imports = true
+
+[tool.mutmut]
+source_paths = ["backend/"]
+only_mutate = [
+    "backend/security.py",
+    "backend/jobs.py",
+    "backend/agents/reconciliation.py",
+    "backend/platform/redis_cache.py",
+    "backend/platform/durable_worker.py",
+    "backend/platform/webhook_delivery.py",
+]
+mutate_only_covered_lines = true
+max_stack_depth = 8
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -47,6 +102,7 @@ pythonpath = ["."]
 # function-scoped, so function-scoped event loops per test is the correct,
 # already-implicit behavior — this just makes it explicit.
 asyncio_default_fixture_loop_scope = "function"
+filterwarnings = ["error"]
 
 [tool.ruff]
 target-version = "py311"

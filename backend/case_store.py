@@ -29,6 +29,7 @@ disclose their own limits:**
   storing the token.
 """
 
+import atexit
 import hashlib
 import logging
 import os
@@ -430,3 +431,6 @@ def close() -> None:
         if _conn is not None:
             _conn.close()
             _conn = None
+
+
+atexit.register(close)

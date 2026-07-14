@@ -1,372 +1,66 @@
-"""
-LLM wrapper with an automatic, self-healing provider failover chain.
+"""Provider-neutral LLM orchestration and failover policy."""
 
-Headline order: gemini → Qwen / OpenAI-compatible gateway → Groq → Claude →
-local Ollama → the deterministic rule engine (the always-present floor). `PRAMAAN_LLM`
-still selects the *primary* provider; on quota/429, timeout, rate-limit, or any
-provider failure the chain walks to the next *configured* provider. When every
-LLM leg fails (or none is configured) an LLMError is raised and the callers
-degrade to the deterministic rule engine. Failover is about **reliability and
-availability, not accuracy**: eval labels, narration guards, and numeric
-grounding are identical regardless of which model answers, and the rule floor
-computes deviations from the actual documents — never seeded labels.
+from __future__ import annotations
 
-Configured providers only are attempted, so a Gemini-only deployment behaves
-exactly as before (a one-element chain). The order is overridable with
-PRAMAAN_LLM_PROVIDER_ORDER (comma-separated).
-
-Env keys (canonical name first, older alias still honoured):
-  gemini  GEMINI_API_KEY                          GEMINI_MODEL
-  qwen    QWEN_GATEWAY_API_KEY  (or OPENAI_API_KEY)   QWEN_GATEWAY_BASE_URL /
-          _MODEL  (or OPENAI_BASE_URL / OPENAI_MODEL)
-  groq    GROQ_API_KEY                             GROQ_MODEL
-  claude  CLAUDE_API_KEY        (or ANTHROPIC_API_KEY)  CLAUDE_MODEL
-  ollama  (keyless) LOCAL_LLM_ENABLED=1            OLLAMA_BASE_URL / OLLAMA_MODEL
-
-The Qwen gateway must be a genuinely separate provider/quota (e.g. OpenRouter),
-NOT Google's OpenAI-compatible endpoint — pointing it at Google would make the
-"backup" share Gemini's quota. /llm-check surfaces this (separate_quota=false).
-No keys or secret-bearing base URLs are ever committed, logged, or exposed.
-"""
-
-import datetime
-import json
 import logging
 import os
 import re
-import threading
 import time
+
+from backend import llm_core as _core
+from backend.llm_core import (
+    FAILOVER_STATUS,
+    LLMError,
+    _budget_charge,
+    _budget_spent,
+    _chain_order,
+    _configured,
+    _extract_json,
+    _gateway_base_url,
+    _gateway_model,
+    _is_google_gateway,
+    _is_transient,
+    _ollama_base,
+    _record_failover,
+    _record_success,
+    _redact,
+    _resolve_alias,
+    provider_budget,
+    provider_chain,
+)
+from backend.llm_providers import (
+    _claude,
+    _claude_stream,
+    _gemini,
+    _gemini_stream,
+    _groq,
+    _groq_stream,
+    _ollama,
+    _ollama_stream,
+    _openai,
+    _openai_compatible_vision,
+    _openai_stream,
+)
 
 log = logging.getLogger("pramaan.llm")
 
-PROVIDER = os.getenv("PRAMAAN_LLM", "gemini")  # primary provider id
-
-# Canonical failover order. The primary (PRAMAAN_LLM) is tried first, then the
-# rest of this list, skipping any provider that is not configured. Headline
-# chain: gemini → Qwen/OpenAI-compatible gateway → Claude → local Ollama → the
-# deterministic rule engine (the always-present floor). Groq (its own free-tier
-# quota) sits between the gateway and Claude as an extra insurance leg the hosted
-# demo already uses; it is filtered out automatically when GROQ_API_KEY is unset,
-# so it never changes single-/dual-provider behaviour. Override the whole order
-# with PRAMAAN_LLM_PROVIDER_ORDER (comma-separated, unknown names dropped).
-_DEFAULT_ORDER = ["gemini", "openai", "groq", "claude", "ollama"]
-_CHAIN_ORDER = _DEFAULT_ORDER  # back-compat alias; runtime uses _chain_order()
-
-# Per-provider API-key env vars, in resolution order (first one set wins). The
-# canonical Phase-4 names come first; older names are kept as back-compat aliases
-# so a deployment already wired with OPENAI_*/ANTHROPIC_* keeps working unchanged.
-# Ollama is keyless (a local daemon) — gated by LOCAL_LLM_ENABLED, not a key.
-_KEY_ENVS = {
-    "gemini": ["GEMINI_API_KEY"],
-    "openai": ["QWEN_GATEWAY_API_KEY", "OPENAI_API_KEY"],
-    "groq": ["GROQ_API_KEY"],
-    "claude": ["CLAUDE_API_KEY", "ANTHROPIC_API_KEY"],
-    "ollama": [],
-}
-
-# Friendly aliases accepted in PRAMAAN_LLM / PRAMAAN_LLM_PROVIDER_ORDER for the
-# OpenAI-compatible gateway leg (its internal provider id is "openai").
-_PROVIDER_ALIASES = {"qwen": "openai", "gateway": "openai"}
-
-# Bounded retry for transient server-side failures (500/503/overloaded) on a
-# single provider before it fails over. 429/quota is NOT transient and is never
-# retried (see _is_transient). Env-configurable so tests can zero the backoff.
-_TRANSIENT_RETRIES = int(os.getenv("LLM_TRANSIENT_RETRIES", "2"))
-_RETRY_BACKOFF_S = float(os.getenv("LLM_RETRY_BACKOFF_S", "1.0"))
-
-# Observability for /llm-check — which provider last answered, and the last
-# failover with its (redacted) reason. Never stores secrets.
-FAILOVER_STATUS = {
-    "last_successful_provider": None,
-    "last_failover": None,  # {"from", "to", "reason", "at"}
-}
+# Compatibility surface for callers and tests that imported the original
+# single-module helpers. State remains owned by llm_core.
+PROVIDER = _core.PROVIDER
+reset_budgets = _core.reset_budgets
+_key = _core._key
+_key_env = _core._key_env
+_truthy = _core._truthy
+_RETRY_BACKOFF_S = _core._RETRY_BACKOFF_S
 
 
-class LLMError(Exception):
-    pass
-
-
-# ── Per-provider hourly call budget (spend guard for paid legs) ──────────────
-# A paid gateway leg (e.g. aicredits/OpenRouter) must not be drainable by demo
-# abuse or a failover storm. Each provider can carry an hourly ATTEMPT budget:
-# once exhausted, that leg raises LLMError and the chain walks on (next leg or
-# the free rule floor) — availability degrades gracefully, spend is capped.
-# Process-local sliding window (single-instance demo, same trade-off as the
-# per-IP rate limiter in backend/security.py). 0 / unset = unlimited, so free
-# legs and existing deployments behave exactly as before. Attempts (not just
-# successes) are counted, conservatively.
-_BUDGET_ENVS = {
-    "gemini": ["GEMINI_BUDGET_PER_HOUR"],
-    "openai": ["QWEN_GATEWAY_BUDGET_PER_HOUR", "OPENAI_BUDGET_PER_HOUR"],
-    "groq": ["GROQ_BUDGET_PER_HOUR"],
-    "claude": ["CLAUDE_BUDGET_PER_HOUR"],
-    "ollama": ["OLLAMA_BUDGET_PER_HOUR"],
-}
-_BUDGET_WINDOW_S = 3600
-_budget_calls: dict = {}   # provider -> [timestamps]
-_budget_lock = threading.Lock()
-
-
-def provider_budget(provider: str) -> int:
-    """The configured hourly call budget for a provider (0 = unlimited)."""
-    for name in _BUDGET_ENVS.get(provider, []):
-        v = os.getenv(name, "").strip()
-        if v.isdigit():
-            return int(v)
-    return 0
-
-
-def _budget_spent(provider: str) -> int:
-    now = time.time()
-    with _budget_lock:
-        hits = _budget_calls.setdefault(provider, [])
-        hits[:] = [t for t in hits if t > now - _BUDGET_WINDOW_S]
-        return len(hits)
-
-
-def _budget_charge(provider: str) -> None:
-    """Enforce + record one attempt against the provider's hourly budget.
-    Raises LLMError (treated as a provider failure → failover) when the budget
-    is exhausted. No-op for unlimited (0) budgets."""
-    cap = provider_budget(provider)
-    if cap <= 0:
-        return
-    now = time.time()
-    with _budget_lock:
-        hits = _budget_calls.setdefault(provider, [])
-        hits[:] = [t for t in hits if t > now - _BUDGET_WINDOW_S]
-        if len(hits) >= cap:
-            raise LLMError(
-                f"{provider} hourly call budget reached ({cap}/h) — spend guard; "
-                "failing over")
-        hits.append(now)
-
-
-def reset_budgets() -> None:
-    """Clear budget counters — used by the test suite between cases."""
-    with _budget_lock:
-        _budget_calls.clear()
-
-
-def _env_first(*names: str, default=None):
-    """First set (non-empty) value among env var `names`, else `default`."""
-    for n in names:
-        v = os.environ.get(n)
-        if v:
-            return v
-    return default
-
-
-def _truthy(v) -> bool:
-    return str(v).strip().lower() in {"1", "true", "yes", "on"} if v is not None else False
-
-
-def _key(provider: str):
-    """The configured API-key value for a provider (first alias that is set), or
-    None. Ollama is keyless, so this is always None for it."""
-    return _env_first(*_KEY_ENVS.get(provider, []))
-
-
-def _key_env(provider: str) -> str:
-    """Canonical (preferred) key env var NAME for a provider — used only in
-    human-readable messages, never to read a secret value."""
-    names = _KEY_ENVS.get(provider, [])
-    return names[0] if names else ""
-
-
-def _resolve_alias(p: str) -> str:
-    return _PROVIDER_ALIASES.get(p, p)
-
-
-def _configured(provider: str) -> bool:
-    """A provider is usable if its key is set — or, for keyless Ollama, if
-    LOCAL_LLM_ENABLED is truthy."""
-    if provider == "ollama":
-        return _truthy(os.environ.get("LOCAL_LLM_ENABLED"))
-    return bool(_key(provider))
-
-
-def _chain_order() -> list[str]:
-    """The failover order to attempt: PRAMAAN_LLM_PROVIDER_ORDER if set
-    (comma-separated, unknown names dropped, `qwen`/`gateway` → the gateway
-    leg), else the canonical default. Duplicates removed, first wins."""
-    raw = os.getenv("PRAMAAN_LLM_PROVIDER_ORDER", "")
-    wanted = ([p.strip().lower() for p in raw.split(",") if p.strip()]
-              if raw.strip() else list(_DEFAULT_ORDER))
-    seen, order = set(), []
-    for p in wanted:
-        p = _resolve_alias(p)
-        if p in _KEY_ENVS and p not in seen:
-            seen.add(p)
-            order.append(p)
-    return order
-
-
-def provider_chain() -> list[str]:
-    """Configured providers in priority order: the PRAMAAN_LLM primary first,
-    then the remaining order (env-overridable), skipping any provider that is not
-    configured. Single-key setups therefore behave exactly as before — a
-    one-element chain — because every other leg is filtered out."""
-    primary = _resolve_alias(os.getenv("PRAMAAN_LLM", "gemini").lower())
-    order = _chain_order()
-    ordered = ([primary] if primary in _KEY_ENVS else []) + [p for p in order if p != primary]
-    seen, chain = set(), []
-    for p in ordered:
-        if p not in seen and _configured(p):
-            seen.add(p)
-            chain.append(p)
-    return chain
-
-
-def _redact(text: str) -> str:
-    """Strip any configured API key value out of a string before it can reach
-    a log line or an API response. Covers every provider's key aliases."""
-    for provider in _KEY_ENVS:
-        secret = _key(provider)
-        if secret and secret in text:
-            text = text.replace(secret, "***")
-    return text
-
-
-def _is_google_gateway(base_url) -> bool:
-    """True if a gateway base URL points at Google's own endpoint — which would
-    make the 'Qwen backup' share Gemini's quota instead of being a genuinely
-    separate provider. Surfaced honestly in /llm-check rather than silently
-    accepted."""
-    if not base_url:
-        return False
-    b = str(base_url).lower()
-    return "googleapis.com" in b or "generativelanguage" in b or "google.com" in b
-
-
-def _gateway_base_url():
-    return _env_first("QWEN_GATEWAY_BASE_URL", "OPENAI_BASE_URL")
-
-
-def _gateway_model():
-    # Default matches the documented .env.example gateway model — the same
-    # model the frozen ps4_external_v1 benchmark was measured on.
-    return _env_first("QWEN_GATEWAY_MODEL", "OPENAI_MODEL",
-                      default="google/gemini-3.1-flash-lite")
-
-
-def _ollama_base() -> str:
-    return os.getenv("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
-
-
-def _is_transient(exc) -> bool:
-    """True for transient server-side errors worth a quick retry — free-tier
-    models routinely return 503 'high demand'. NOT 429 (quota): retrying an
-    exhausted daily cap just wastes time."""
-    s = str(exc).lower()
-    return "503" in s or "unavailable" in s or "overloaded" in s or "internal" in s
-
-
-def _with_transient_retry(call, label):
-    """Run `call`, retrying up to `_TRANSIENT_RETRIES` times on transient
-    server-side errors (500/503/overloaded) with exponential backoff. 429/quota
-    is not transient and is never retried — it fails straight through so the
-    chain can fail over to the next provider or the rule floor."""
-    for attempt in range(_TRANSIENT_RETRIES + 1):
-        try:
-            return call()
-        except Exception as exc:  # noqa: BLE001
-            if attempt < _TRANSIENT_RETRIES and _is_transient(exc):
-                delay = _RETRY_BACKOFF_S * (2 ** attempt)
-                log.warning("%s transient error (%s) — retry %d/%d in %.1fs",
-                            label, str(exc)[:80], attempt + 1, _TRANSIENT_RETRIES, delay)
-                time.sleep(delay)
-                continue
-            raise
-
-
-def _salvage_json_objects(text: str) -> list:
-    """Best-effort recovery of the complete top-level ``{...}`` objects from a
-    truncated or partially-malformed JSON array — e.g. a reasoning model that
-    exhausted its output budget mid-array. String-aware (braces inside string
-    values do not miscount), it returns the objects that parse and silently
-    drops a trailing truncated one. Called only after a strict parse fails, so
-    well-formed payloads are never affected."""
-    objs, depth, start = [], 0, None
-    in_str = esc = False
-    for k, c in enumerate(text):
-        if in_str:
-            if esc:
-                esc = False
-            elif c == "\\":
-                esc = True
-            elif c == '"':
-                in_str = False
-            continue
-        if c == '"':
-            in_str = True
-        elif c == "{":
-            if depth == 0:
-                start = k
-            depth += 1
-        elif c == "}":
-            if depth > 0:
-                depth -= 1
-                if depth == 0 and start is not None:
-                    try:
-                        objs.append(json.loads(text[start : k + 1]))
-                    except (ValueError, TypeError):
-                        pass
-                    start = None
-    return objs
-
-
-def _extract_json(text: str):
-    text = text.strip()
-    text = re.sub(r"^```(?:json)?", "", text).strip()
-    text = re.sub(r"```$", "", text).strip()
+def _with_transient_retry(call, label):  # noqa: ANN001, ANN201
+    previous = _core._RETRY_BACKOFF_S
+    _core._RETRY_BACKOFF_S = _RETRY_BACKOFF_S
     try:
-        for start, end in [("[", "]"), ("{", "}")]:
-            i = text.find(start)
-            if i == -1:
-                continue
-            depth, j = 0, i
-            while j < len(text):
-                if text[j] == start:
-                    depth += 1
-                elif text[j] == end:
-                    depth -= 1
-                    if depth == 0:
-                        return json.loads(text[i : j + 1])
-                j += 1
-            # An opening "[" that never closes is a truncated array: salvage the
-            # complete objects instead of letting the "{" branch return only the
-            # first one.
-            if start == "[":
-                salvaged = _salvage_json_objects(text[i:])
-                if salvaged:
-                    return salvaged
-        return json.loads(text)
-    except (ValueError, TypeError):
-        # Truncated/malformed payload (e.g. a reasoning model that ran out of
-        # output budget mid-array): salvage the complete objects rather than
-        # dropping the whole reconcile to the rule floor.
-        salvaged = _salvage_json_objects(text)
-        if salvaged:
-            return salvaged
-        raise
-
-
-_DISPATCH = {}  # populated after the per-provider functions are defined
-
-
-def _record_success(provider: str) -> None:
-    FAILOVER_STATUS["last_successful_provider"] = provider
-
-
-def _record_failover(frm: str, to: str, reason: str) -> None:
-    FAILOVER_STATUS["last_failover"] = {
-        "from": frm,
-        "to": to,
-        "reason": _redact(str(reason))[:200],
-        "at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-    }
-
+        return _core._with_transient_retry(call, label)
+    finally:
+        _core._RETRY_BACKOFF_S = previous
 
 def complete(prompt: str, system: str = "", json_mode: bool = True) -> str:
     """Complete against the first configured provider in the failover chain,
@@ -440,37 +134,6 @@ def complete_json(prompt: str, system: str = ""):
                         "back to %s", provider, last_exc, nxt)
     raise LLMError(f"All {len(chain)} configured provider(s) failed to return "
                    f"parseable JSON; last error: {last_exc}")
-
-
-def _openai_compatible_vision(prompt, image_bytes, mime_type, system, *, label,
-                              api_key, base_url, model, max_tokens):
-    """Multimodal reasoning over an OpenAI-compatible /v1 gateway (e.g. aicredits
-    or OpenRouter proxying a multimodal model such as gemini-2.5-flash). The
-    image is passed inline as a base64 data URI in an image_url content part."""
-    if not api_key:
-        raise LLMError(f"{label} vision API key not set")
-    import base64
-    data_uri = f"data:{mime_type};base64,{base64.b64encode(image_bytes).decode()}"
-    log.info("%s vision call: model=%s, image_bytes=%d, prompt_len=%d",
-             label, model, len(image_bytes), len(prompt))
-    try:
-        from openai import OpenAI
-        client = OpenAI(api_key=api_key, base_url=base_url or None)
-        messages = []
-        if system:
-            messages.append({"role": "system", "content": system})
-        messages.append({"role": "user", "content": [
-            {"type": "text", "text": prompt},
-            {"type": "image_url", "image_url": {"url": data_uri}},
-        ]})
-        return _with_transient_retry(
-            lambda: client.chat.completions.create(
-                model=model, messages=messages, temperature=0.1, max_tokens=max_tokens
-            ).choices[0].message.content, label)
-    except Exception as exc:
-        log.error("%s vision error: %s", label, exc)
-        raise LLMError(f"{label} vision call failed: {exc}") from exc
-
 
 def complete_vision(prompt: str, image_bytes: bytes, mime_type: str,
                     system: str = "") -> str:
@@ -551,141 +214,6 @@ def restate(template: str, instruction: str, system: str) -> dict:
         return {"narrative": prose, "mode": "llm"}
     return {"narrative": template, "mode": "rule-based-fallback"}
 
-
-def _gemini(prompt, system, json_mode):
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        raise LLMError("GEMINI_API_KEY not set")
-    model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-    log.info("Gemini call: model=%s, json_mode=%s, prompt_len=%d",
-             model_name, json_mode, len(prompt))
-    try:
-        from google import genai
-        client = genai.Client(api_key=api_key)
-        config = genai.types.GenerateContentConfig(
-            temperature=0.1,
-            system_instruction=system or None,
-            response_mime_type="application/json" if json_mode else "text/plain",
-        )
-        for attempt in range(3):  # 1 try + 2 retries on transient 503/overload
-            try:
-                resp = client.models.generate_content(
-                    model=model_name, contents=prompt, config=config,
-                )
-                return resp.text
-            except Exception as exc:
-                if _is_transient(exc) and attempt < 2:
-                    log.warning("Gemini transient error (attempt %d/3), retrying: %s",
-                                attempt + 1, str(exc)[:100])
-                    time.sleep(1.5 * (attempt + 1))
-                    continue
-                raise
-    except Exception as exc:
-        log.error("Gemini API error: %s", exc)
-        raise LLMError(f"Gemini API call failed: {exc}") from exc
-
-
-def _openai_compatible(prompt, system, json_mode, *, label, api_key, base_url,
-                       model, json_mode_on, max_tokens):
-    """Shared OpenAI-compatible chat call — used by both the generic gateway
-    (OpenRouter/Qwen) and Groq, which speak the same /v1 protocol. `label` is
-    only for logs; secrets are never logged."""
-    if not api_key:
-        raise LLMError(f"{label} API key not set")
-    log.info("%s call: model=%s, base=%s, json_mode=%s, prompt_len=%d",
-             label, model, base_url, json_mode, len(prompt))
-    try:
-        from openai import OpenAI
-        client = OpenAI(api_key=api_key, base_url=base_url or None)
-        messages = []
-        if system:
-            messages.append({"role": "system", "content": system})
-        messages.append({"role": "user", "content": prompt})
-        # Cap output generously: gateways often default to a small max_tokens,
-        # which silently truncates a multi-finding reconcile JSON mid-array and
-        # makes it unparseable. Match the Claude budget.
-        kwargs = {"model": model, "messages": messages, "temperature": 0.1,
-                  "max_tokens": max_tokens}
-        if json_mode and json_mode_on:
-            kwargs["response_format"] = {"type": "json_object"}
-        return _with_transient_retry(
-            lambda: client.chat.completions.create(**kwargs).choices[0].message.content,
-            label)
-    except Exception as exc:
-        log.error("%s API error: %s", label, exc)
-        raise LLMError(f"{label} API call failed: {exc}") from exc
-
-
-def _openai(prompt, system, json_mode):
-    """Qwen / OpenAI-compatible gateway — any /v1 endpoint (e.g. OpenRouter
-    proxying Qwen). Canonical env: QWEN_GATEWAY_API_KEY, QWEN_GATEWAY_BASE_URL
-    (the /v1 root), QWEN_GATEWAY_MODEL (older OPENAI_* names still honoured).
-    Must be a genuinely separate provider/quota — NOT Google's OpenAI endpoint."""
-    return _openai_compatible(
-        prompt, system, json_mode, label="Qwen-gateway",
-        api_key=_key("openai"),
-        base_url=_gateway_base_url(),
-        model=_gateway_model(),
-        json_mode_on=_env_first("QWEN_GATEWAY_JSON_MODE", "OPENAI_JSON_MODE",
-                                default="0") == "1",
-        max_tokens=int(_env_first("QWEN_GATEWAY_MAX_TOKENS", "OPENAI_MAX_TOKENS",
-                                  default="4000")))
-
-
-def _groq(prompt, system, json_mode):
-    """Groq — fast LPU inference on its own free-tier quota (full-insurance
-    second fallback). Uses Groq's OpenAI-compatible endpoint. Set GROQ_API_KEY;
-    GROQ_MODEL defaults to llama-3.3-70b-versatile."""
-    return _openai_compatible(
-        prompt, system, json_mode, label="Groq",
-        api_key=os.environ.get("GROQ_API_KEY"),
-        base_url=os.getenv("GROQ_BASE_URL", "https://api.groq.com/openai/v1"),
-        model=os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
-        json_mode_on=os.getenv("GROQ_JSON_MODE", "1") == "1",
-        max_tokens=int(os.getenv("GROQ_MAX_TOKENS", "4000")))
-
-
-def _ollama(prompt, system, json_mode):
-    """Local Ollama via its OpenAI-compatible /v1 endpoint. Keyless (a local
-    daemon), so it needs no network quota — the last LLM leg before the
-    deterministic rule floor, keeping the demo answering even fully offline.
-    Gated by LOCAL_LLM_ENABLED. Set OLLAMA_BASE_URL (default
-    http://localhost:11434) and OLLAMA_MODEL (must be pulled locally)."""
-    if not _truthy(os.environ.get("LOCAL_LLM_ENABLED")):
-        raise LLMError("Local LLM disabled (set LOCAL_LLM_ENABLED=1)")
-    return _openai_compatible(
-        prompt, system, json_mode, label="Ollama",
-        api_key="ollama",  # local endpoint ignores it, but the client needs one
-        base_url=f"{_ollama_base()}/v1",
-        model=os.getenv("OLLAMA_MODEL", "llama3.1"),
-        json_mode_on=os.getenv("OLLAMA_JSON_MODE", "1") == "1",
-        max_tokens=int(os.getenv("OLLAMA_MAX_TOKENS", "4000")))
-
-
-def _claude(prompt, system, json_mode):
-    api_key = _key("claude")
-    if not api_key:
-        raise LLMError("Claude API key not set (CLAUDE_API_KEY or ANTHROPIC_API_KEY)")
-    log.info("Claude call: prompt_len=%d", len(prompt))
-    try:
-        import anthropic
-        client = anthropic.Anthropic(api_key=api_key)
-        msg = client.messages.create(
-            model=os.getenv("CLAUDE_MODEL", "claude-opus-4-8"),
-            max_tokens=2000,
-            temperature=0.1,
-            system=system or None,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        return msg.content[0].text
-    except Exception as exc:
-        log.error("Claude API error: %s", exc)
-        raise LLMError(f"Claude API call failed: {exc}") from exc
-
-
-_STREAM_DISPATCH = {}  # populated after the per-provider stream functions
-
-
 def complete_stream(prompt: str, system: str = ""):
     """Stream from the failover chain. A provider that fails *before emitting
     any token* is skipped in favour of the next; once a provider has yielded
@@ -723,110 +251,6 @@ def complete_stream(prompt: str, system: str = ""):
     raise LLMError(f"All {len(chain)} configured provider(s) failed to stream; "
                    f"last error: {last_exc}")
 
-
-def _openai_compatible_stream(prompt, system, *, label, api_key, base_url,
-                              model, max_tokens):
-    if not api_key:
-        raise LLMError(f"{label} API key not set")
-    log.info("%s stream: model=%s, base=%s, prompt_len=%d",
-             label, model, base_url, len(prompt))
-    try:
-        from openai import OpenAI
-        client = OpenAI(api_key=api_key, base_url=base_url or None)
-        messages = []
-        if system:
-            messages.append({"role": "system", "content": system})
-        messages.append({"role": "user", "content": prompt})
-        stream = client.chat.completions.create(
-            model=model, messages=messages, temperature=0.1, stream=True,
-            max_tokens=max_tokens,
-        )
-        for chunk in stream:
-            delta = chunk.choices[0].delta.content
-            if delta:
-                yield delta
-    except Exception as exc:
-        log.error("%s stream error: %s", label, exc)
-        raise LLMError(f"{label} streaming failed: {exc}") from exc
-
-
-def _openai_stream(prompt, system):
-    yield from _openai_compatible_stream(
-        prompt, system, label="Qwen-gateway",
-        api_key=_key("openai"),
-        base_url=_gateway_base_url(),
-        model=_gateway_model(),
-        max_tokens=int(_env_first("QWEN_GATEWAY_MAX_TOKENS", "OPENAI_MAX_TOKENS",
-                                  default="4000")))
-
-
-def _ollama_stream(prompt, system):
-    if not _truthy(os.environ.get("LOCAL_LLM_ENABLED")):
-        raise LLMError("Local LLM disabled (set LOCAL_LLM_ENABLED=1)")
-    yield from _openai_compatible_stream(
-        prompt, system, label="Ollama",
-        api_key="ollama",  # local endpoint ignores it, but the client needs one
-        base_url=f"{_ollama_base()}/v1",
-        model=os.getenv("OLLAMA_MODEL", "llama3.1"),
-        max_tokens=int(os.getenv("OLLAMA_MAX_TOKENS", "4000")))
-
-
-def _groq_stream(prompt, system):
-    yield from _openai_compatible_stream(
-        prompt, system, label="Groq",
-        api_key=os.environ.get("GROQ_API_KEY"),
-        base_url=os.getenv("GROQ_BASE_URL", "https://api.groq.com/openai/v1"),
-        model=os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
-        max_tokens=int(os.getenv("GROQ_MAX_TOKENS", "4000")))
-
-
-def _gemini_stream(prompt, system):
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        raise LLMError("GEMINI_API_KEY not set")
-    model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-    log.info("Gemini stream: model=%s, prompt_len=%d", model_name, len(prompt))
-    try:
-        from google import genai
-        client = genai.Client(api_key=api_key)
-        config = genai.types.GenerateContentConfig(
-            temperature=0.1,
-            system_instruction=system or None,
-            response_mime_type="text/plain",
-        )
-        for chunk in client.models.generate_content_stream(
-            model=model_name, contents=prompt, config=config,
-        ):
-            if chunk.text:
-                yield chunk.text
-    except Exception as exc:
-        log.error("Gemini stream error: %s", exc)
-        raise LLMError(f"Gemini streaming failed: {exc}") from exc
-
-
-def _claude_stream(prompt, system):
-    api_key = _key("claude")
-    if not api_key:
-        raise LLMError("Claude API key not set (CLAUDE_API_KEY or ANTHROPIC_API_KEY)")
-    log.info("Claude stream: prompt_len=%d", len(prompt))
-    try:
-        import anthropic
-        client = anthropic.Anthropic(api_key=api_key)
-        with client.messages.stream(
-            model=os.getenv("CLAUDE_MODEL", "claude-opus-4-8"),
-            max_tokens=2000,
-            temperature=0.1,
-            system=system or None,
-            messages=[{"role": "user", "content": prompt}],
-        ) as stream:
-            for text in stream.text_stream:
-                yield text
-    except Exception as exc:
-        log.error("Claude stream error: %s", exc)
-        raise LLMError(f"Claude streaming failed: {exc}") from exc
-
-
-# --- Dispatch registration (after the provider functions exist) -------------
 _DISPATCH = {"gemini": _gemini, "openai": _openai, "groq": _groq,
              "claude": _claude, "ollama": _ollama}
 _STREAM_DISPATCH = {

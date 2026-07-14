@@ -208,6 +208,38 @@ def node_reconcile(state: PipelineState) -> PipelineState:
     return state
 
 
+def _retrieve_missing_standards(
+    deviations: list[dict], standards: str, already: set[str]
+) -> tuple[list[str], list[str]]:
+    additions: list[str] = []
+    fetched: list[str] = []
+    normalized_standards = _norm(standards)
+    for deviation in deviations:
+        reference = str(deviation.get("standard_ref") or "").strip()
+        ignored = not reference or reference.upper() == "DESIGN-BASIS" or reference in already
+        if ignored or _norm(reference) in normalized_standards:
+            continue
+        text = retrieve_standard(reference)
+        if text:
+            additions.append(f"\n\n=== RETRIEVED STANDARD: {reference} ===\n{text}")
+            fetched.append(reference)
+    return additions, fetched
+
+
+def _apply_retrieved_standards(
+    state: PipelineState,
+    standards: str,
+    already: set[str],
+    additions: list[str],
+    fetched: list[str],
+) -> None:
+    state["standards_text"] = standards + "".join(additions)
+    state["retrieved"] = sorted(already | set(fetched))
+    state["retrieval_count"] = state.get("retrieval_count", 0) + 1
+    state["retrieval_log"] = fetched
+    log.info("Retrieved %d standard(s) for %s %s; re-reconciling", len(fetched), state["system_id"], fetched)
+
+
 def node_retrieve(state: PipelineState) -> PipelineState:
     """Retrieval tool-call node. If a finding cites a governing standard that is
     not already in the loaded context, fetch it from the local KB, append it to
@@ -218,27 +250,11 @@ def node_retrieve(state: PipelineState) -> PipelineState:
         return state
     devs = state.get("deviations") or []
     standards = state.get("standards_text") or ""
-    snorm = _norm(standards)
     already = set(state.get("retrieved") or [])
-    additions, fetched = [], []
-    for d in devs:
-        ref = str(d.get("standard_ref") or "").strip()
-        if not ref or ref.upper() == "DESIGN-BASIS" or ref in already:
-            continue
-        if _norm(ref) in snorm:        # already in the loaded context
-            continue
-        text = retrieve_standard(ref)
-        if text:
-            additions.append(f"\n\n=== RETRIEVED STANDARD: {ref} ===\n{text}")
-            fetched.append(ref)
+    additions, fetched = _retrieve_missing_standards(devs, standards, already)
     can_loop = bool(fetched) and state.get("retrieval_count", 0) < _MAX_RETRIEVALS
     if can_loop:
-        state["standards_text"] = standards + "".join(additions)
-        state["retrieved"] = sorted(already | set(fetched))
-        state["retrieval_count"] = state.get("retrieval_count", 0) + 1
-        state["retrieval_log"] = fetched
-        log.info("Retrieved %d standard(s) for %s %s; re-reconciling",
-                 len(fetched), state["system_id"], fetched)
+        _apply_retrieved_standards(state, standards, already, additions, fetched)
     state["_retrieve_again"] = can_loop
     return state
 

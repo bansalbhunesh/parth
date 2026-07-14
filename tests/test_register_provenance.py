@@ -8,13 +8,14 @@ an abandoned server-render fetch cannot continue burning provider quota.
 from fastapi.testclient import TestClient
 
 from backend import main
+from backend.routers import data
 
 client = TestClient(main.app)
 
 
 def test_register_never_invokes_llm_pipeline(monkeypatch):
     monkeypatch.setattr(
-        main,
+        data,
         "run_pipeline",
         lambda _system: (_ for _ in ()).throw(
             AssertionError("overview must not invoke run_pipeline")

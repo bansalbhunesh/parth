@@ -1,0 +1,228 @@
+from __future__ import annotations
+
+import json
+import logging
+
+from fastapi import APIRouter
+from fastapi.responses import HTMLResponse
+
+from backend.api_context import _esc, _load_json
+from backend.routers.data import deviations
+
+router = APIRouter()
+log = logging.getLogger("pramaan.api")
+
+# ── Export endpoints ─────────────────────────────────────────────────
+
+@router.get("/export/audit")
+def export_audit():
+    reg_data = deviations()
+    reg = reg_data["register"]
+    gt = _load_json("ground_truth.json")
+    project_info = gt.get("project", {})
+
+    pack = {
+        "project": project_info.get("name", "Project Meghdoot"),
+        "client": project_info.get("client", ""),
+        "tier": project_info.get("tier", "Uptime Tier IV"),
+        "location": project_info.get("location", ""),
+        "generated_week": project_info.get("current_week", 11),
+        "standard_basis": [
+            "Uptime Tier IV (Fault Tolerance, 2N Redundancy)",
+            "TIA-942-C (Telecom Infrastructure, Rated 1-4)",
+            "BICSI-002-2024 (Data Centre Design, L1-L5 Commissioning)",
+            "NFPA 75 / 262 (Fire Protection, Plenum Cable Ratings)",
+            "ASHRAE TC 9.9 (Thermal Guidelines, Class A1-A4)",
+            "IS 1893:2016 (Indian Seismic Code, Zones II-V)",
+            "Design Basis / OPR (Owner Project Requirements)",
+        ],
+        "summary": {
+            "total_deviations": len(reg),
+            "critical": reg_data.get("critical", 0),
+            "major": reg_data.get("major", 0),
+            "mean_lead_time_weeks": reg_data.get("mean_lead_time_weeks", 0),
+            "max_lead_time_weeks": reg_data.get("max_lead_time_weeks", 0),
+        },
+        "evidence": [
+            {
+                **d,
+                "citation_chain": {
+                    "spec_clause": d.get("spec_clause"),
+                    "standard_ref": d.get("standard_ref"),
+                    "cx_test": d.get("predicted_cx_test"),
+                    "cx_level": d.get("predicted_cx_level"),
+                },
+            }
+            for d in reg
+        ],
+    }
+    # Integrity block: SHA-256 over the pack's canonical JSON (sorted keys,
+    # no whitespace), computed BEFORE this block is attached. Any edit to an
+    # exported record is detectable by re-hashing — the property an NCR
+    # register needs from an audit trail. Detectable-after-the-fact, not
+    # tamper-PROOF: the hash travels with the document.
+    import hashlib
+    canonical = json.dumps(pack, sort_keys=True, separators=(",", ":"),
+                           default=str)
+    pack["integrity"] = {
+        "algo": "sha256",
+        "content_hash": hashlib.sha256(canonical.encode("utf-8")).hexdigest(),
+        "how_to_verify": "remove the 'integrity' key, re-serialise with "
+                         "sort_keys=True and separators=(',',':'), sha256 the "
+                         "UTF-8 bytes, compare to content_hash",
+    }
+    return pack
+
+
+def _audit_rows_html(evidence: list[dict]) -> str:
+    rows_html = ""
+    for i, d in enumerate(evidence, 1):
+        sev_color = "#ff4d4d" if d.get("severity") == "Critical" else "#ffb020"
+        rationale = _esc(d.get("rationale", ""))
+        rows_html += f"""
+        <tr>
+            <td>{i}</td>
+            <td><b>{_esc(d.get('component',''))}</b></td>
+            <td>{_esc(d.get('parameter','').replace('_',' '))}</td>
+            <td>{_esc(d.get('required_value',''))} {_esc(d.get('unit',''))}</td>
+            <td style="color:{sev_color}"><b>{_esc(d.get('provided_value',''))} {_esc(d.get('unit',''))}</b></td>
+            <td>{_esc(d.get('spec_clause',''))}</td>
+            <td>{_esc(d.get('standard_ref',''))}</td>
+            <td>{_esc(d.get('predicted_cx_test','—'))}</td>
+            <td><b>{_esc(d.get('lead_time_weeks') or '—')}w</b></td>
+            <td style="color:{sev_color}"><b>{_esc(d.get('severity',''))}</b></td>
+        </tr>
+        <tr class="rationale-row"><td colspan="10">{rationale}</td></tr>"""
+    return rows_html
+
+
+def _audit_bars_html(evidence: list[dict], max_lead: float) -> str:
+    bar_html = ""
+    for d in evidence:
+        lt = d.get("lead_time_weeks") or 0
+        pct = (lt / max_lead * 100) if max_lead else 0
+        sev_color = "#ff4d4d" if d.get("severity") == "Critical" else "#ffb020"
+        bar_html += f"""<div class="bar-row">
+          <span class="bar-label">{_esc(d.get('component',''))}</span>
+          <div class="bar-track"><div class="bar-fill" style="width:{pct}%;background:{sev_color}"></div></div>
+          <span class="bar-val">{lt}w</span>
+        </div>"""
+    return bar_html
+
+
+@router.get("/export/audit/html", response_class=HTMLResponse)
+def export_audit_html():
+    data = export_audit()
+    rows_html = _audit_rows_html(data["evidence"])
+    lead_times = [d.get("lead_time_weeks") or 0 for d in data["evidence"]]
+    total_lead = sum(lead_times)
+    max_lead = max(lead_times, default=0)
+    bar_html = _audit_bars_html(data["evidence"], max_lead)
+
+    proj_e, tier_e = _esc(data['project']), _esc(data['tier'])
+    loc_e, week_e = _esc(data['location']), _esc(data['generated_week'])
+    return f"""<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<title>Pramaan Compliance Evidence Pack — {_esc(data['project'])}</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+body {{ font-family: 'Sora', -apple-system, system-ui, sans-serif; margin: 0; background: #fafbfc; color: #1a1a2e; }}
+.header {{ background: linear-gradient(135deg, #0c0f13 0%, #1a2233 100%); color: #e7ecf3;
+  padding: 40px; margin-bottom: 32px; }}
+.header h1 {{ font-family: 'JetBrains Mono', monospace; font-size: 28px; margin: 0 0 8px;
+  letter-spacing: 0.05em; }}
+.header h1 span {{ color: #36d6e7; }}
+.header p {{ color: #7a8899; font-size: 14px; margin: 0; }}
+.content {{ max-width: 1100px; margin: 0 auto; padding: 0 40px 60px; }}
+h2 {{ color: #333; margin-top: 36px; font-size: 16px; letter-spacing: 0.03em;
+  border-bottom: 2px solid #e0e0e0; padding-bottom: 8px; }}
+table {{ border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 12px; }}
+th {{ background: #0c0f13; color: #e7ecf3; padding: 10px 8px; text-align: left; font-size: 10px;
+     text-transform: uppercase; letter-spacing: 0.05em; font-family: 'JetBrains Mono', monospace; }}
+td {{ padding: 10px 8px; border-bottom: 1px solid #e0e0e0; vertical-align: top; }}
+tr:hover td {{ background: #f0f4ff; }}
+.rationale-row td {{ font-size: 11px; color: #666; font-style: italic;
+  padding: 4px 8px 12px 32px; border-bottom: 2px solid #e8e8e8; }}
+.meta {{ display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin: 24px 0; }}
+.meta-card {{ background: white; border: 1px solid #e0e0e0; border-radius: 8px;
+  padding: 16px; text-align: center; }}
+.meta-card h3 {{ margin: 0 0 6px; font-size: 10px; color: #888;
+  text-transform: uppercase; letter-spacing: 0.08em; font-family: 'JetBrains Mono', monospace; }}
+.meta-card .val {{ font-size: 32px; font-weight: 800; color: #0c0f13;
+  font-family: 'JetBrains Mono', monospace; }}
+.meta-card .val.critical {{ color: #ff4d4d; }}
+.meta-card .val.lead {{ color: #0891b2; }}
+.meta-card .val.total {{ color: #36d6e7; }}
+.bar-chart {{ margin: 20px 0; }}
+.bar-row {{ display: flex; align-items: center; gap: 8px; margin: 6px 0; }}
+.bar-label {{ width: 80px; font-size: 11px; font-weight: 600;
+  font-family: 'JetBrains Mono', monospace; text-align: right; }}
+.bar-track {{ flex: 1; height: 20px; background: #f0f0f0; border-radius: 4px; overflow: hidden; }}
+.bar-fill {{ height: 100%; border-radius: 4px; transition: width 0.3s; }}
+.bar-val {{ width: 40px; font-size: 12px; font-weight: 700;
+  font-family: 'JetBrains Mono', monospace; color: #0891b2; }}
+.standards {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }}
+.std {{ background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px;
+  padding: 10px; font-size: 12px; }}
+.footer {{ margin-top: 48px; padding: 24px 40px; border-top: 2px solid #e0e0e0;
+  font-size: 11px; color: #888; text-align: center; background: #f8f9fa; }}
+@media print {{
+  body {{ margin: 0; }}
+  .header {{ break-after: avoid; }}
+  table {{ font-size: 10px; }}
+  tr {{ break-inside: avoid; }}
+}}
+</style></head><body>
+<div class="header">
+  <h1>PRA<span>MAAN</span> Compliance Evidence Pack</h1>
+  <p>{proj_e} &middot; {tier_e} &middot; {loc_e} &middot; Week {week_e}</p>
+</div>
+<div class="content">
+<div class="meta">
+  <div class="meta-card">
+    <h3>Total Deviations</h3>
+    <div class="val critical">{data['summary']['total_deviations']}</div>
+  </div>
+  <div class="meta-card">
+    <h3>Critical</h3>
+    <div class="val critical">{data['summary']['critical']}</div>
+  </div>
+  <div class="meta-card">
+    <h3>Major</h3>
+    <div class="val" style="color:#ffb020">{data['summary']['major']}</div>
+  </div>
+  <div class="meta-card">
+    <h3>Max Lead Time</h3>
+    <div class="val lead">{data['summary']['max_lead_time_weeks']}w</div>
+  </div>
+  <div class="meta-card">
+    <h3>Lead-Time Window</h3>
+    <div class="val total">{total_lead}w</div>
+  </div>
+</div>
+
+<h2>Lead Time by Deviation</h2>
+<div class="bar-chart">{bar_html}</div>
+
+<h2>Standards Basis</h2>
+<div class="standards">{''.join(f'<div class="std">{_esc(s)}</div>' for s in data['standard_basis'])}</div>
+
+<h2>Deviation Register with AI Rationale</h2>
+<table>
+<thead><tr>
+  <th>#</th><th>Component</th><th>Parameter</th><th>Required</th><th>Provided</th>
+  <th>Clause</th><th>Standard</th><th>Cx Test</th><th>Lead</th><th>Severity</th>
+</tr></thead>
+<tbody>{rows_html}</tbody>
+</table>
+</div>
+
+<div class="footer">
+  Generated by <b>Pramaan</b> — EPC Deviation Intelligence<br>
+  All findings are traceable to source documents via the citation chain.
+  Combined lead-time window: <b>{total_lead} weeks</b> across all findings (scenario figure, not a measured saving).<br>
+  Evidence-pack integrity (SHA-256 of the JSON export at <code>/export/audit</code>):
+  <code>{_esc(data.get('integrity', {}).get('content_hash', ''))}</code>
+  — re-hash to detect any post-export edit.
+</div>
+</body></html>"""

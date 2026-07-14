@@ -293,6 +293,28 @@ def _doc_result(text: str, method: str, *, ocr_used: bool = False,
     }
 
 
+def _extract_pdf_document(data: bytes, name: str) -> dict:
+    text_layer = extract_text_from_pdf(data, name)
+    if len(text_layer.strip()) >= _OCR_MIN_CHARS:
+        return _doc_result(clean_text(text_layer), "text_layer")
+    ocr = ocr_pdf_bytes(data, name)
+    if len(ocr.strip()) <= len(text_layer.strip()):
+        cleaned = clean_text(text_layer)
+        return _doc_result(cleaned, "text_layer" if cleaned else "none")
+    truncated = _pdf_page_count(data) > max_pdf_pages()
+    warning = OCR_WARNING
+    if truncated:
+        warning += f" Only the first {max_pdf_pages()} pages were OCR'd."
+    return _doc_result(clean_text(ocr), "ocr_pdf", ocr_used=True, truncated=truncated, warning=warning)
+
+
+def _extract_image_document(data: bytes, content_type: str) -> dict:
+    image_text = clean_text(extract_text_from_image(data, content_type or "image/png"))
+    if image_text:
+        return _doc_result(image_text, "ocr_image", ocr_used=True, warning=OCR_WARNING)
+    return _doc_result("", "none")
+
+
 def extract_document(data: bytes, filename: str = "upload", content_type: str = "") -> dict:
     """Single entry point for upload extraction: routes PDFs, raster images, and
     plain text to the right path and returns the cleaned text PLUS metadata
@@ -306,24 +328,9 @@ def extract_document(data: bytes, filename: str = "upload", content_type: str = 
     ctype = content_type or ""
 
     if lower.endswith(".pdf") or ctype == "application/pdf":
-        text_layer = extract_text_from_pdf(data, name)
-        if len(text_layer.strip()) >= _OCR_MIN_CHARS:
-            return _doc_result(clean_text(text_layer), "text_layer")
-        ocr = ocr_pdf_bytes(data, name)
-        if len(ocr.strip()) > len(text_layer.strip()):
-            truncated = _pdf_page_count(data) > max_pdf_pages()
-            warning = OCR_WARNING
-            if truncated:
-                warning += f" Only the first {max_pdf_pages()} pages were OCR'd."
-            return _doc_result(clean_text(ocr), "ocr_pdf", ocr_used=True,
-                               truncated=truncated, warning=warning)
-        cleaned = clean_text(text_layer)
-        return _doc_result(cleaned, "text_layer" if cleaned else "none")
+        return _extract_pdf_document(data, name)
 
     if lower.endswith(IMAGE_EXTS) or ctype.startswith("image/"):
-        img = clean_text(extract_text_from_image(data, ctype or "image/png"))
-        if img:
-            return _doc_result(img, "ocr_image", ocr_used=True, warning=OCR_WARNING)
-        return _doc_result("", "none")
+        return _extract_image_document(data, ctype)
 
     return _doc_result(data.decode("utf-8", errors="replace"), "plain_text")

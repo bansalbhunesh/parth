@@ -21,12 +21,11 @@ export default defineConfig({
     trace: "on-first-retry",
   },
   projects: [
-    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
-    // "Pixel 5" (Chromium-based) rather than an iPhone preset — those
-    // default to WebKit, a second ~100MB browser download this suite
-    // doesn't otherwise need. This still gets genuine mobile-viewport +
-    // touch-emulation coverage; it isn't a Safari-rendering-quirk test.
-    { name: "mobile", use: { ...devices["Pixel 5"] } },
+    { name: "desktop-chromium", use: { ...devices["Desktop Chrome"] } },
+    { name: "desktop-firefox", use: { ...devices["Desktop Firefox"] } },
+    { name: "desktop-webkit", use: { ...devices["Desktop Safari"] } },
+    { name: "mobile-chromium", use: { ...devices["Pixel 5"] } },
+    { name: "mobile-webkit", use: { ...devices["iPhone 13"] } },
   ],
   webServer: [
     {

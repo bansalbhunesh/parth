@@ -1,0 +1,424 @@
+.dossier-meta,
+.dossier-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.dossier-meta > span:first-child,
+.dossier-id,
+.section-kicker,
+.path-label {
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+  font-weight: 760;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.severity {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 26px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 780;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.severity-critical {
+  background: var(--critical-wash);
+  color: var(--critical-ink);
+}
+
+.severity-major {
+  background: var(--major-wash);
+  color: var(--major-ink);
+}
+
+.severity-minor {
+  background: var(--minor-wash);
+  color: var(--minor-ink);
+}
+
+.dossier-id {
+  margin-top: 38px;
+}
+
+.hero-dossier h2 {
+  margin-top: 7px;
+  font-family: var(--display);
+  font-size: clamp(1.9rem, 3vw, 2.8rem);
+  font-weight: 590;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.dossier-values {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 30px;
+  border-block: 1px solid var(--hairline);
+}
+
+.dossier-values div {
+  padding: 18px 0;
+}
+
+.dossier-values div + div {
+  padding-left: 18px;
+  border-left: 1px solid var(--hairline);
+}
+
+.dossier-values span,
+.dossier-values strong {
+  display: block;
+}
+
+.dossier-values span {
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+}
+
+.dossier-values strong {
+  margin-top: 3px;
+  font-family: var(--display);
+  font-size: 1.6rem;
+}
+
+.hero-dossier > p:not(.dossier-id, .section-kicker) {
+  margin-top: 22px;
+  color: var(--ink-soft);
+  font-size: 0.94rem;
+}
+
+.dossier-foot {
+  align-items: baseline;
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid var(--hairline);
+}
+
+.dossier-foot strong {
+  color: var(--brand-mark);
+  font-family: var(--display);
+  font-size: 1.55rem;
+}
+
+.dossier-foot span {
+  max-width: 17ch;
+  color: var(--ink-soft);
+  font-size: 0.76rem;
+  text-align: right;
+}
+
+.section-block {
+  padding-block: clamp(84px, 10vw, 132px);
+}
+
+.section-rule {
+  border-top: 1px solid var(--hairline);
+}
+
+.section-intro {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr) minmax(240px, 0.48fr);
+  gap: 32px;
+  align-items: start;
+  margin-bottom: clamp(48px, 7vw, 82px);
+}
+
+.section-number {
+  color: var(--brand-mark);
+  font-size: 0.77rem;
+  font-weight: 760;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.section-intro h2 {
+  max-width: 15ch;
+  margin-top: 9px;
+  font-family: var(--display);
+  font-size: clamp(2.25rem, 4.7vw, 4.8rem);
+  font-weight: 570;
+  letter-spacing: -0.055em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+
+.section-intro > p:last-child {
+  color: var(--ink-soft);
+  font-size: 0.96rem;
+}
+
+.evidence-path {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  list-style: none;
+}
+
+.evidence-path::before,
+.evidence-path::after {
+  position: absolute;
+  top: 20px;
+  right: 12.5%;
+  left: 12.5%;
+  height: 2px;
+  content: "";
+}
+
+.evidence-path::before {
+  background: var(--hairline);
+}
+
+.evidence-path::after {
+  background: var(--brand-mark);
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: trace-line 1.2s 240ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes trace-line {
+  to { transform: scaleX(1); }
+}
+
+.evidence-path li {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: 42px 1fr;
+  justify-items: center;
+  min-width: 0;
+  text-align: center;
+}
+
+.path-number {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 2px solid var(--brand-mark);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--brand-mark);
+  font-size: 0.71rem;
+  font-weight: 800;
+}
+
+.evidence-path li > div {
+  display: grid;
+  gap: 5px;
+  max-width: 22ch;
+  padding: 20px 12px 0;
+}
+
+.evidence-path strong {
+  font-family: var(--display);
+  font-size: 1.12rem;
+  font-weight: 620;
+  line-height: 1.18;
+}
+
+.evidence-path small {
+  color: var(--ink-soft);
+  font-size: 0.76rem;
+}
+
+.evidence-quote {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr) auto;
+  gap: 28px;
+  align-items: start;
+  margin-top: 72px;
+  padding: 28px 0;
+  border-block: 1px solid var(--hairline);
+  font-family: var(--display);
+  font-size: clamp(1.15rem, 2vw, 1.55rem);
+  font-weight: 470;
+  line-height: 1.35;
+}
+
+.evidence-quote span,
+.evidence-quote cite {
+  color: var(--ink-soft);
+  font-family: var(--body);
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.evidence-quote cite {
+  max-width: 18ch;
+  text-align: right;
+}
+
+.section-ink {
+  background: var(--inverse-bg);
+  color: var(--inverse-ink);
+}
+
+html[data-theme="dark"] .section-ink {
+  background: var(--inverse-bg-deep);
+}
+
+.section-intro-inverse .section-kicker,
+.section-intro-inverse > p:last-child {
+  color: var(--inverse-soft);
+}
+
+.resolution-console {
+  width: min(920px, 100%);
+  margin-left: auto;
+  padding: clamp(24px, 4vw, 44px);
+  border: 1px solid var(--inverse-border);
+  background: var(--workflow-bg);
+  color: var(--workflow-ink);
+}
+
+.resolution-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.resolution-head h3 {
+  margin-top: 4px;
+  font-family: var(--display);
+  font-size: clamp(1.55rem, 3vw, 2.35rem);
+  font-weight: 580;
+  letter-spacing: -0.04em;
+}
+
+.workflow-state {
+  padding: 6px 9px;
+  border: 1px solid var(--workflow-border);
+  border-radius: 3px;
+  color: var(--workflow-soft);
+  font-size: 0.7rem;
+  font-weight: 780;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.workflow-state-resolved {
+  border-color: var(--workflow-complete-border);
+  background: var(--workflow-complete-bg);
+  color: var(--workflow-complete-ink);
+}
+
+.workflow-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin: 42px 0 34px;
+  list-style: none;
+}
+
+.workflow-steps li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  gap: 10px;
+  min-width: 0;
+  padding-right: 16px;
+  color: var(--workflow-muted);
+}
+
+.workflow-steps li::after {
+  position: absolute;
+  top: 15px;
+  right: 0;
+  left: 32px;
+  z-index: 0;
+  height: 1px;
+  background: var(--workflow-track);
+  content: "";
+}
+
+.workflow-steps li:last-child::after {
+  display: none;
+}
+
+.workflow-index {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--workflow-card-border);
+  border-radius: 50%;
+  background: var(--workflow-bg);
+  font-size: 0.7rem;
+  font-weight: 760;
+}
+
+.workflow-steps li > span:last-child {
+  position: relative;
+  z-index: 1;
+  padding: 5px 5px 0 0;
+  background: var(--workflow-bg);
+}
+
+.workflow-steps strong,
+.workflow-steps small {
+  display: block;
+}
+
+.workflow-steps strong {
+  color: inherit;
+  font-size: 0.8rem;
+}
+
+.workflow-steps small {
+  margin-top: 3px;
+  font-size: 0.7rem;
+  line-height: 1.35;
+}
+
+.workflow-steps li.is-complete {
+  color: var(--workflow-complete-ink);
+}
+
+.workflow-steps li.is-complete .workflow-index {
+  border-color: var(--workflow-audit-border);
+  background: var(--workflow-complete-bg);
+}
+
+.workflow-action {
+  min-width: 230px;
+}
+
+.button-loader {
+  width: 16px;
+  height: 16px;
+  border: 2px solid color-mix(in oklch, var(--on-brand) 38%, transparent);
+  border-top-color: var(--on-brand);
+  border-radius: 50%;
+  animation: button-spin 700ms linear infinite;
+}
+
+@keyframes button-spin {
+  to { transform: rotate(360deg); }
+}
+
+.inline-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--workflow-error-border);
+  background: var(--workflow-error-bg);
+  color: var(--workflow-error-ink);
+  font-size: 0.82rem;
+}

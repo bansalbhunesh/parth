@@ -48,6 +48,97 @@ def _rfs_planned_week(cx_plan: dict | None, deviations: list[dict]) -> float:
     return float(max(fails)) if fails else 0.0
 
 
+def _node(g: nx.MultiDiGraph, node_id: str, kind: str, label: str, **attrs) -> str:
+    if node_id not in g:
+        g.add_node(node_id, kind=kind, label=label, **attrs)
+    return node_id
+
+
+def _add_deviation(g: nx.MultiDiGraph, deviation: dict, cx_tests: dict, rfs_week: float) -> None:
+    dev = _node(
+        g,
+        f"DEV:{deviation['id']}",
+        "deviation",
+        deviation["id"],
+        component=deviation.get("component"),
+        parameter=deviation.get("parameter"),
+        severity=deviation.get("severity"),
+        week_caught=deviation.get("week_caught"),
+        week_fail=deviation.get("week_fail"),
+        lead_time_weeks=deviation.get("lead_time_weeks"),
+        predicted_cx_level=deviation.get("predicted_cx_level"),
+    )
+    component = deviation.get("component")
+    if component:
+        equipment = _node(g, f"EQ:{component}", "equipment", component)
+        g.add_edge(dev, equipment, rel="about")
+        system = component.split("-")[0]
+        if system and system != component:
+            g.add_edge(equipment, _node(g, f"EQ:{system}", "equipment", system), rel="part-of")
+    standard = deviation.get("standard_ref")
+    if standard:
+        g.add_edge(
+            dev,
+            _node(g, f"STD:{standard}", "standard", standard),
+            rel="violates",
+            basis=deviation.get("spec_clause"),
+        )
+    cx_id = deviation.get("predicted_cx_test")
+    if cx_id:
+        test = cx_tests.get(cx_id, {})
+        scheduled = test.get("scheduled_week")
+        if not isinstance(scheduled, (int, float)):
+            scheduled = deviation.get("week_fail")
+        cx_node = _node(
+            g,
+            f"CX:{cx_id}",
+            "cx_test",
+            test.get("name", cx_id),
+            level=deviation.get("predicted_cx_level") or test.get("level"),
+            scheduled_week=scheduled,
+        )
+        g.add_edge(dev, cx_node, rel="predicts-failure-of", basis=deviation.get("standard_ref"))
+        milestone = _node(g, _RFS, "milestone", "Ready-for-service (integrated systems test)", planned_week=rfs_week)
+        g.add_edge(cx_node, milestone, rel="verified-at")
+
+
+def _add_supply_item(g: nx.MultiDiGraph, item: dict) -> None:
+    component = item.get("component")
+    vendor = item.get("vendor") or item.get("supplier")
+    if not component or not vendor:
+        return
+    equipment = _node(g, f"EQ:{component}", "equipment", component)
+    supplier = _node(
+        g,
+        f"SUP:{vendor}",
+        "supplier",
+        vendor,
+        lead_time_weeks=item.get("lead_time_weeks"),
+        single_source=item.get("single_source", False),
+        country=item.get("country") or item.get("origin_country"),
+    )
+    g.add_edge(equipment, supplier, rel="supplied-by", lead_time_weeks=item.get("lead_time_weeks"))
+    if _RFS in g:
+        g.add_edge(supplier, _RFS, rel="blocks", lead_time_weeks=item.get("lead_time_weeks"))
+
+
+def _add_schedule_task(g: nx.MultiDiGraph, task: dict) -> None:
+    task_node = _node(
+        g,
+        f"TASK:{task['id']}",
+        "schedule_task",
+        task.get("name", task["id"]),
+        is_milestone=task.get("is_milestone", False),
+    )
+    cx_id = task.get("cx_test")
+    if cx_id and f"CX:{cx_id}" in g:
+        g.add_edge(f"CX:{cx_id}", task_node, rel="delays")
+    for predecessor in task.get("predecessors", []):
+        predecessor_id = predecessor["pred"] if isinstance(predecessor, dict) else predecessor
+        if f"TASK:{predecessor_id}" in g:
+            g.add_edge(task_node, f"TASK:{predecessor_id}", rel="depends-on")
+
+
 def assemble(
     deviations: list[dict],
     cx_plan: dict | None = None,
@@ -61,73 +152,19 @@ def assemble(
     cx_tests = {t["id"]: t for t in (cx_plan or {}).get("tests", [])}
     rfs_week = _rfs_planned_week(cx_plan, deviations)
 
-    def node(nid: str, kind: str, label: str, **attrs) -> str:
-        if nid not in g:
-            g.add_node(nid, kind=kind, label=label, **attrs)
-        return nid
-
     for d in deviations:
-        dev = node(
-            f"DEV:{d['id']}", "deviation", d["id"],
-            component=d.get("component"), parameter=d.get("parameter"),
-            severity=d.get("severity"), week_caught=d.get("week_caught"),
-            week_fail=d.get("week_fail"), lead_time_weeks=d.get("lead_time_weeks"),
-            predicted_cx_level=d.get("predicted_cx_level"),
-        )
-        comp = d.get("component")
-        if comp:
-            eq = node(f"EQ:{comp}", "equipment", comp)
-            g.add_edge(dev, eq, rel="about")
+        _add_deviation(g, d, cx_tests, rfs_week)
             # Link the specific component (UPS-02) to its system (UPS) so a
             # system-level supply item / supplier connects to component-level
             # deviations.
-            system = comp.split("-")[0]
-            if system and system != comp:
-                g.add_edge(eq, node(f"EQ:{system}", "equipment", system), rel="part-of")
-        std = d.get("standard_ref")
-        if std:
-            g.add_edge(dev, node(f"STD:{std}", "standard", std),
-                       rel="violates", basis=d.get("spec_clause"))
-        cxid = d.get("predicted_cx_test")
-        if cxid:
-            t = cx_tests.get(cxid, {})
-            cn = node(
-                f"CX:{cxid}", "cx_test", t.get("name", cxid),
-                level=d.get("predicted_cx_level") or t.get("level"),
-                scheduled_week=(t.get("scheduled_week") if isinstance(t.get("scheduled_week"), (int, float))
-                                else d.get("week_fail")),
-            )
-            g.add_edge(dev, cn, rel="predicts-failure-of", basis=d.get("standard_ref"))
-            ms = node(_RFS, "milestone", "Ready-for-service (integrated systems test)",
-                      planned_week=rfs_week)
-            g.add_edge(cn, ms, rel="verified-at")
 
     if supply_chain:
         for item in supply_chain.get("items", supply_chain.get("shipments", [])):
-            comp = item.get("component")
-            vendor = item.get("vendor") or item.get("supplier")
-            if not (comp and vendor):
-                continue
-            eq = node(f"EQ:{comp}", "equipment", comp)
-            sup = node(f"SUP:{vendor}", "supplier", vendor,
-                       lead_time_weeks=item.get("lead_time_weeks"),
-                       single_source=item.get("single_source", False),
-                       country=item.get("country") or item.get("origin_country"))
-            g.add_edge(eq, sup, rel="supplied-by", lead_time_weeks=item.get("lead_time_weeks"))
-            if _RFS in g:
-                g.add_edge(sup, _RFS, rel="blocks", lead_time_weeks=item.get("lead_time_weeks"))
+            _add_supply_item(g, item)
 
     if schedule:
         for task in schedule.get("tasks", []):
-            tn = node(f"TASK:{task['id']}", "schedule_task", task.get("name", task["id"]),
-                      is_milestone=task.get("is_milestone", False))
-            cxid = task.get("cx_test")
-            if cxid and f"CX:{cxid}" in g:
-                g.add_edge(f"CX:{cxid}", tn, rel="delays")
-            for pred in task.get("predecessors", []):
-                pid = pred["pred"] if isinstance(pred, dict) else pred
-                if f"TASK:{pid}" in g:
-                    g.add_edge(tn, f"TASK:{pid}", rel="depends-on")
+            _add_schedule_task(g, task)
 
     return g
 
@@ -146,6 +183,45 @@ def _typed_reach(g: nx.MultiDiGraph, start: str, rels: set[str]) -> set[str]:
     return seen
 
 
+def _nodes_of_kind(g: nx.MultiDiGraph, reachable: set[str], kind: str) -> list[str]:
+    return [node_id for node_id in reachable if g.nodes[node_id].get("kind") == kind]
+
+
+def _fix_lead_weeks(g: nx.MultiDiGraph, suppliers: list[str], deviation: dict) -> float:
+    supplier_leads = [
+        g.nodes[supplier].get("lead_time_weeks")
+        for supplier in suppliers
+        if isinstance(g.nodes[supplier].get("lead_time_weeks"), (int, float))
+    ]
+    if supplier_leads:
+        return float(max(supplier_leads))
+    level = deviation.get("predicted_cx_level")
+    if level in _LEVEL_TYPICAL_LEAD_WEEKS:
+        return float(_LEVEL_TYPICAL_LEAD_WEEKS[level])
+    return float(deviation.get("lead_time_weeks") or 0)
+
+
+def _planned_cx_week(g: nx.MultiDiGraph, cx_nodes: list[str], deviation: dict) -> float:
+    weeks = [
+        g.nodes[cx_node].get("scheduled_week")
+        for cx_node in cx_nodes
+        if isinstance(g.nodes[cx_node].get("scheduled_week"), (int, float))
+    ]
+    return float(min(weeks)) if weeks else float(deviation.get("week_fail") or 0)
+
+
+def _milestone_rows(g: nx.MultiDiGraph, milestones: list[str], slip: float) -> list[dict]:
+    return [
+        {
+            "id": milestone,
+            "label": g.nodes[milestone].get("label"),
+            "planned_week": g.nodes[milestone].get("planned_week"),
+            "slip_weeks": round(slip, 1),
+        }
+        for milestone in milestones
+    ]
+
+
 def blast_radius(g: nx.MultiDiGraph, dev_id: str) -> dict | None:
     """Compute everything a single deviation affects: the commissioning test it
     fails, the milestone(s) it slips and by how many weeks, the equipment, and the
@@ -155,45 +231,26 @@ def blast_radius(g: nx.MultiDiGraph, dev_id: str) -> dict | None:
         return None
     reach = _typed_reach(g, nid, IMPACT_RELS) - {nid}
 
-    def of_kind(kind: str) -> list[str]:
-        return [n for n in reach if g.nodes[n].get("kind") == kind]
-
-    cx = of_kind("cx_test")
-    equipment = of_kind("equipment")
-    suppliers = of_kind("supplier")
-    milestones = of_kind("milestone")
+    cx = _nodes_of_kind(g, reach, "cx_test")
+    equipment = _nodes_of_kind(g, reach, "equipment")
+    suppliers = _nodes_of_kind(g, reach, "supplier")
+    milestones = _nodes_of_kind(g, reach, "milestone")
 
     d = g.nodes[nid]
     week_caught = float(d.get("week_caught") or 0)
-    level = d.get("predicted_cx_level")
 
     # Fix lead = the long pole of remediation: the worst reachable supplier lead
     # time, else the typical lead for that Cx level, else the deviation's own
     # measured lead time. (Every value is data-sourced.)
-    sup_leads = [g.nodes[s].get("lead_time_weeks") for s in suppliers
-                 if isinstance(g.nodes[s].get("lead_time_weeks"), (int, float))]
-    if sup_leads:
-        fix_lead = float(max(sup_leads))
-    elif level in _LEVEL_TYPICAL_LEAD_WEEKS:
-        fix_lead = float(_LEVEL_TYPICAL_LEAD_WEEKS[level])
-    else:
-        fix_lead = float(d.get("lead_time_weeks") or 0)
+    fix_lead = _fix_lead_weeks(g, suppliers, d)
 
     # Planned week of the failing commissioning test (the earliest reachable one).
-    cx_weeks = [g.nodes[c].get("scheduled_week") for c in cx
-                if isinstance(g.nodes[c].get("scheduled_week"), (int, float))]
-    cx_planned = float(min(cx_weeks)) if cx_weeks else float(d.get("week_fail") or 0)
+    cx_planned = _planned_cx_week(g, cx, d)
 
     fix_complete = week_caught + fix_lead
     slip = max(0.0, fix_complete - cx_planned)
 
-    milestone_rows = []
-    for m in milestones:
-        planned = g.nodes[m].get("planned_week")
-        milestone_rows.append({
-            "id": m, "label": g.nodes[m].get("label"),
-            "planned_week": planned, "slip_weeks": round(slip, 1),
-        })
+    milestone_rows = _milestone_rows(g, milestones, slip)
 
     return {
         "deviation": d.get("label"),

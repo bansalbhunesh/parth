@@ -1,0 +1,345 @@
+import type {
+  CxPlan,
+  Deviation,
+  MultiProjectEval,
+  ProjectGraph,
+  ProjectSummary,
+  RemediationSim,
+  ScheduleAnalysis,
+  SupplyChainAnalysis,
+} from "./api-types";
+
+// Mirrors the live engine output for Meghdoot DEV-001 (the UPS-battery hero
+// deviation) so a cold, no-backend load renders the same simulator a warm one
+// serves. Long-lead trap: fix_lead 40wk > cx week 38.
+export const FALLBACK_REMEDIATION: RemediationSim = {
+  available: true, deviation: "DEV-001", component: "UPS-02",
+  fix_lead_weeks: 40, cx_planned_week: 38, zero_slip_deadline_week: 0,
+  long_lead_trap: true, cost_per_week_lakh: 200,
+  scenarios: {
+    design_review: { catch_week: 4, slip_weeks: 6, cost_lakh: 1200 },
+    pramaan: { catch_week: 11, slip_weeks: 13, cost_lakh: 2600 },
+    commissioning: { catch_week: 38, slip_weeks: 40, cost_lakh: 8000 },
+  },
+  slip_avoided_weeks: 27, cost_avoided_lakh: 5400,
+  curve: Array.from({ length: 39 }, (_, w) => {
+    const slip = Math.max(0, w + 40 - 38);
+    return { catch_week: w, slip_weeks: slip, cost_lakh: slip * 200 };
+  }),
+  assumption: "Slip is deterministic: catch_week + 40wk fix lead vs the week-38 commissioning test. Cost translates at 200 lakh/week (a stated project assumption); weeks are the defensible unit.",
+};
+
+export const FALLBACK_PROJECTS: ProjectSummary[] = [
+  { id: "meghdoot", name: "Project Meghdoot", tier: "Uptime Tier IV", location: "Navi Mumbai, India", capacity_mw: 40, deviations: 14, systems: 10 },
+  { id: "vajra", name: "Project Vajra", tier: "Uptime Tier III", location: "Pune, India", capacity_mw: 20, deviations: 4, systems: 8 },
+  { id: "nordic", name: "Project Nordic Edge", tier: "EN 50600 Class 3", location: "Oslo, Norway", capacity_mw: 10, deviations: 5, systems: 7 },
+  { id: "sahara", name: "Project Sahara", tier: "Uptime Tier II", location: "Dubai, UAE", capacity_mw: 5, deviations: 3, systems: 6 },
+  { id: "cascade", name: "Project Cascade", tier: "Uptime Tier IV", location: "Hillsboro, Oregon, USA", capacity_mw: 30, deviations: 4, systems: 8 },
+  { id: "yangtze", name: "Project Yangtze", tier: "GB 50174 Grade A", location: "Shanghai, China", capacity_mw: 50, deviations: 3, systems: 8 },
+  { id: "athena", name: "Project Athena", tier: "EN 50600 Class 4", location: "Frankfurt, Germany", capacity_mw: 15, deviations: 4, systems: 8 },
+  { id: "sakura", name: "Project Sakura", tier: "JEITA Class 4", location: "Tokyo, Japan", capacity_mw: 25, deviations: 3, systems: 8 },
+  { id: "outback", name: "Project Outback", tier: "Uptime Tier III", location: "Sydney, Australia", capacity_mw: 8, deviations: 3, systems: 7 },
+  { id: "maple", name: "Project Maple", tier: "Uptime Tier III", location: "Toronto, Canada", capacity_mw: 12, deviations: 3, systems: 7 },
+  { id: "pampas", name: "Project Pampas", tier: "Uptime Tier II", location: "São Paulo, Brazil", capacity_mw: 6, deviations: 2, systems: 6 },
+  { id: "thames", name: "Project Thames", tier: "Uptime Tier IV", location: "London, United Kingdom", capacity_mw: 35, deviations: 2, systems: 8 },
+];
+
+export const FALLBACK_MULTI_EVAL: MultiProjectEval = {
+  aggregate: {
+    projects: 12,
+    total_deviations: 50,
+    aggregate_precision: 1.0,
+    aggregate_recall: 1.0,
+    aggregate_f1: 1.0,
+    aggregate_cx_accuracy: 1.0,
+    total_lead_time_weeks: 1024,
+    max_lead_time_weeks: 36,
+  },
+  per_project: {
+    meghdoot: { name: "Project Meghdoot", tier: "Uptime Tier IV", location: "Navi Mumbai, India", capacity_mw: 40, deviations: 14, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 267 },
+    vajra: { name: "Project Vajra", tier: "Uptime Tier III", location: "Pune, India", capacity_mw: 20, deviations: 4, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 95 },
+    nordic: { name: "Project Nordic Edge", tier: "EN 50600 Class 3", location: "Oslo, Norway", capacity_mw: 10, deviations: 5, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 113 },
+    sahara: { name: "Project Sahara", tier: "Uptime Tier II", location: "Dubai, UAE", capacity_mw: 5, deviations: 3, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 38 },
+    cascade: { name: "Project Cascade", tier: "Uptime Tier IV", location: "Hillsboro, Oregon, USA", capacity_mw: 30, deviations: 4, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 80 },
+    yangtze: { name: "Project Yangtze", tier: "GB 50174 Grade A", location: "Shanghai, China", capacity_mw: 50, deviations: 3, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 98 },
+    athena: { name: "Project Athena", tier: "EN 50600 Class 4", location: "Frankfurt, Germany", capacity_mw: 15, deviations: 4, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 80 },
+    sakura: { name: "Project Sakura", tier: "JEITA Class 4", location: "Tokyo, Japan", capacity_mw: 25, deviations: 3, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 58 },
+    outback: { name: "Project Outback", tier: "Uptime Tier III", location: "Sydney, Australia", capacity_mw: 8, deviations: 3, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 53 },
+    maple: { name: "Project Maple", tier: "Uptime Tier III", location: "Toronto, Canada", capacity_mw: 12, deviations: 3, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 58 },
+    pampas: { name: "Project Pampas", tier: "Uptime Tier II", location: "São Paulo, Brazil", capacity_mw: 6, deviations: 2, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 34 },
+    thames: { name: "Project Thames", tier: "Uptime Tier IV", location: "London, United Kingdom", capacity_mw: 35, deviations: 2, precision: 1.0, recall: 1.0, f1: 1.0, cx_accuracy: 1.0, total_lead_weeks: 50 },
+  },
+};
+
+export const FALLBACK_CX_PLAN: CxPlan = {
+  project: "Project Meghdoot",
+  cx_authority: "DCx International (India)",
+  levels: {
+    "1": "Factory inspections & witness tests (ITP)",
+    "2": "Installation verification & inspection (ITP)",
+    "3": "Functional / factory acceptance test (FAT)",
+    "4": "Integrated systems test (IST)",
+    "5": "Owner acceptance & sustained operations",
+  },
+  tests: [
+    { id: "ITP-01", level: 1, name: "Equipment receipt inspection", scheduled_week: 16, acceptance: "Visual + documentation check" },
+    { id: "ITP-02", level: 2, name: "Cable fire-rating / plenum compliance inspection", scheduled_week: 22, acceptance: "Cable marking matches CMP" },
+    { id: "ITP-03", level: 2, name: "Arc flash labeling and PPE verification", scheduled_week: 20, acceptance: "Arc flash labels match incident energy calculations" },
+    { id: "ITP-04", level: 2, name: "Pathway fill and cable management inspection", scheduled_week: 18, acceptance: "Bundle sizes within BICSI-002 fill limits" },
+    { id: "ITP-05", level: 1, name: "Structural load test and floor deflection", scheduled_week: 19, acceptance: "Floor deflection within L/360 under design load" },
+    { id: "FAT-01", level: 3, name: "UPS module load-bank test", scheduled_week: 24, acceptance: "Full load sustained 4 hours" },
+    { id: "FAT-02", level: 3, name: "Generator load-bank test", scheduled_week: 26, acceptance: "110% load for 2 hours" },
+    { id: "FAT-03", level: 3, name: "Protection coordination / fault-withstand verification", scheduled_week: 30, acceptance: "Fault withstand >= prospective fault" },
+    { id: "IST-01", level: 4, name: "Utility failure simulation", scheduled_week: 34, acceptance: "Zero IT load impact" },
+    { id: "IST-05", level: 4, name: "Single-path maintenance simulation", scheduled_week: 36, acceptance: "Full load on single path" },
+    { id: "IST-07", level: 4, name: "Load transfer under maintenance (battery autonomy)", scheduled_week: 38, acceptance: "Battery sustains load during transfer" },
+    { id: "IST-09", level: 4, name: "Cooling failover under fault + maintenance", scheduled_week: 39, acceptance: "Temperature maintained within ASHRAE" },
+    { id: "IST-11", level: 4, name: "Sustained utility-outage run (fuel autonomy)", scheduled_week: 41, acceptance: "Full design-duration outage" },
+    { id: "IST-14", level: 4, name: "Monitoring & alarm verification", scheduled_week: 40, acceptance: "All critical alarms fire" },
+    { id: "IST-15", level: 4, name: "Full-facility failover drill", scheduled_week: 44, acceptance: "Zero downtime during drill" },
+    { id: "IST-16", level: 4, name: "Cooling performance and thermal verification", scheduled_week: 36, acceptance: "Delta-T and flow rates meet design criteria" },
+    { id: "SAT-01", level: 5, name: "72-hour sustained operations test", scheduled_week: 48, acceptance: "No critical alarms for 72 hours" },
+  ],
+};
+
+// Bundled fallbacks so the page renders fully even with the backend cold/off.
+// Numbers mirror Project Meghdoot's real analysis output.
+export const FALLBACK_SCHEDULE: ScheduleAnalysis = {
+  available: true,
+  project_id: "meghdoot",
+  deadline_week: 52,
+  cpm: {
+    tasks: {
+      "GATE-L5": { name: "Ready-for-service (L5 integrated systems test)", is_milestone: true,
+        cx_level: 5, es: 44, ef: 44, ls: 44, lf: 44, total_float: 0, free_float: 0, critical: true },
+    },
+    project_duration: 47.5,
+    critical_path: ["DESIGN", "CIVIL", "MEP", "INSTALL-UPS", "GATE-L5"],
+  },
+  monte_carlo: {
+    p50: 67.4, p80: 70.2, p90: 71.6, mean_finish: 67.5,
+    on_time_probability: 0.0, deadline_week: 52,
+    histogram: [
+      { x0: 56, x1: 60, count: 320 }, { x0: 60, x1: 64, count: 980 },
+      { x0: 64, x1: 68, count: 1850 }, { x0: 68, x1: 72, count: 1240 },
+      { x0: 72, x1: 76, count: 610 },
+    ],
+    criticality_index: { "GATE-L5": 1.0, "INSTALL-UPS": 0.62 },
+    sensitivity: { "INSTALL-UPS": 0.41, CIVIL: 0.33, MEP: 0.28 },
+    milestones: { "GATE-L5": { p50: 67.4, p80: 70.2 } },
+  },
+  baseline: { p50: 49.5, p80: 53.3, p90: 55.6, on_time_probability: 0.63 },
+  deviation_impact: {
+    milestone: "GATE-L5", baseline_p80: 53.3, at_risk_p80: 70.2, slip_weeks: 16.9,
+    baseline_on_time: 0.63, at_risk_on_time: 0.0,
+  },
+  n_risks: 14,
+  narrative: {
+    narrative: "Baseline P80 finish is week 53 (on-time probability 0.63). If the 14 detected "
+      + "deviations are left uncaught, the ready-for-service milestone slips ~16 weeks and on-time "
+      + "probability falls to 0; catching them at submittal review protects the date.",
+    mode: "rule-based-fallback",
+  },
+};
+
+// All 4 long-lead shipments, mirroring Project Meghdoot's (corpus) live engine
+// output so the cold-load panel matches the "4 long-lead / 2 at risk" header.
+export const FALLBACK_SUPPLY: SupplyChainAnalysis = {
+  available: true,
+  project_id: "Project Meghdoot",
+  current_week: 11,
+  shipments: [
+    { id: "SHP-COOL", equipment_type: "COOL", description: "Precision cooling / CRAH", supplier: "STULZ",
+      origin_country: "Germany", destination_site: "Navi Mumbai, India", current_stage: "MANUFACTURING",
+      required_on_site_week: 28, eta_p50: 26.1, eta_p80: 29.88, sigma: 4.496, p_late: 0.3363, slack_weeks: 1.9,
+      supplier_risk: { score: 9, band: "green",
+        contributions: { single_source: 0, concentration: 0, geo: 6, port_congestion: 0, subtier_shortage: 0, backlog: 3 } },
+      delivery_risk: { score: 12.2, band: "green", consequence: 0.5 },
+      on_critical_path: false, at_risk: true, linked_task_id: "INSTALL-COOL" },
+    { id: "SHP-GEN", equipment_type: "GEN", description: "Standby diesel genset", supplier: "Cummins",
+      origin_country: "US", destination_site: "Navi Mumbai, India", current_stage: "MANUFACTURING",
+      required_on_site_week: 28, eta_p50: 34, eta_p80: 41.1, sigma: 8.432, p_late: 0.7616, slack_weeks: -6,
+      supplier_risk: { score: 37.5, band: "amber",
+        contributions: { single_source: 30, concentration: 0, geo: 1.5, port_congestion: 0, subtier_shortage: 0, backlog: 6 } },
+      delivery_risk: { score: 61.9, band: "amber", consequence: 1 },
+      on_critical_path: true, at_risk: true, linked_task_id: "INSTALL-GEN" },
+    { id: "SHP-SWGR", equipment_type: "SWGR", description: "MV/LV switchgear lineup", supplier: "ABB",
+      origin_country: "Germany", destination_site: "Navi Mumbai, India", current_stage: "FAT",
+      required_on_site_week: 28, eta_p50: 25.9, eta_p80: 26.97, sigma: 1.276, p_late: 0.0499, slack_weeks: 2.1,
+      supplier_risk: { score: 57, band: "amber",
+        contributions: { single_source: 30, concentration: 0, geo: 6, port_congestion: 0, subtier_shortage: 15, backlog: 6 } },
+      delivery_risk: { score: 2.2, band: "green", consequence: 0.5 },
+      on_critical_path: false, at_risk: false, linked_task_id: "INSTALL-SWGR" },
+    { id: "SHP-UPS", equipment_type: "UPS", description: "Modular UPS system", supplier: "Vertiv",
+      origin_country: "US", destination_site: "Navi Mumbai, India", current_stage: "MANUFACTURING",
+      required_on_site_week: 28, eta_p50: 26, eta_p80: 30.73, sigma: 5.621, p_late: 0.361, slack_weeks: 2,
+      supplier_risk: { score: 19.5, band: "green",
+        contributions: { single_source: 0, concentration: 0, geo: 1.5, port_congestion: 0, subtier_shortage: 15, backlog: 3 } },
+      delivery_risk: { score: 27.4, band: "green", consequence: 1 },
+      on_critical_path: true, at_risk: false, linked_task_id: "INSTALL-UPS" },
+  ],
+  summary: { total: 4, at_risk: 2, by_band: { green: 3, amber: 1, red: 0 },
+    worst_item: "SHP-GEN", worst_score: 61.9 },
+  narrative: { narrative: "2 of 4 long-lead shipments are at risk of missing their required-on-site "
+    + "date (worst: SHP-GEN at delivery-risk 61.9/100).", mode: "rule-based-fallback" },
+};
+
+export const FALLBACK_GRAPH: ProjectGraph = {
+  available: true,
+  stats: { nodes: 80, edges: 143,
+    by_kind: { deviation: 14, equipment: 13, standard: 4, cx_test: 14, milestone: 1, supplier: 4, schedule_task: 30 },
+    relationship_types: ["about", "blocks", "delays", "depends-on", "part-of", "predicts-failure-of", "supplied-by", "verified-at", "violates"] },
+  graph: {
+    nodes: [
+      { id: "DEV:DEV-001", kind: "deviation", label: "DEV-001" },
+      { id: "EQ:UPS-02", kind: "equipment", label: "UPS-02" },
+      { id: "CX:IST-07", kind: "cx_test", label: "Load transfer under maintenance (battery autonomy)" },
+      { id: "MS:RFS", kind: "milestone", label: "Ready-for-service (integrated systems test)" },
+      { id: "SUP:Vertiv", kind: "supplier", label: "Vertiv" },
+    ],
+    edges: [
+      { from: "DEV:DEV-001", to: "EQ:UPS-02", rel: "about", basis: null },
+      { from: "DEV:DEV-001", to: "CX:IST-07", rel: "predicts-failure-of", basis: "UPTIME-TIER4" },
+      { from: "CX:IST-07", to: "MS:RFS", rel: "verified-at", basis: null },
+      { from: "EQ:UPS-02", to: "SUP:Vertiv", rel: "supplied-by", basis: null },
+    ],
+  },
+};
+
+export const FALLBACK: Deviation[] = [
+  {
+    component: "UPS-02", parameter: "battery_runtime_min",
+    required_value: 10, provided_value: 7, unit: "min",
+    standard_ref: "UPTIME-TIER4", spec_clause: "DB-4.3", severity: "Critical",
+    rationale: "Battery autonomy below Tier IV requirement; UPS cannot sustain load during concurrent maintenance of the alternate path.",
+    predicted_cx_test: "IST-07", predicted_cx_level: 4,
+    predicted_cx_name: "Load transfer under maintenance (battery autonomy)",
+    week_caught: 11, week_fail: 38, lead_time_weeks: 27,
+  },
+  {
+    component: "GEN-FUEL", parameter: "onsite_fuel_hours",
+    required_value: 24, provided_value: 12, unit: "h",
+    standard_ref: "UPTIME-TIER4", spec_clause: "DB-5.4", severity: "Critical",
+    rationale: "On-site fuel autonomy below Tier IV minimum; generators cannot sustain a full design-duration outage.",
+    predicted_cx_test: "IST-11", predicted_cx_level: 4,
+    predicted_cx_name: "Sustained utility-outage run (fuel autonomy)",
+    week_caught: 11, week_fail: 41, lead_time_weeks: 30,
+  },
+  {
+    component: "COOL-LOOP", parameter: "redundancy",
+    required_value: "N+2", provided_value: "N+1", unit: "topology",
+    standard_ref: "UPTIME-TIER4", spec_clause: "DB-6.1", severity: "Critical",
+    rationale: "N+1 cooling cannot maintain fault tolerance during concurrent maintenance as Tier IV demands.",
+    predicted_cx_test: "IST-09", predicted_cx_level: 4,
+    predicted_cx_name: "Cooling failover under fault + maintenance",
+    week_caught: 11, week_fail: 39, lead_time_weeks: 28,
+  },
+  {
+    component: "SWGR-MV", parameter: "short_circuit_rating_ka",
+    required_value: 50, provided_value: 40, unit: "kA",
+    standard_ref: "DESIGN-BASIS", spec_clause: "DB-7.2", severity: "Critical",
+    rationale: "Switchgear withstand rating below calculated prospective fault level.",
+    predicted_cx_test: "FAT-03", predicted_cx_level: 3,
+    predicted_cx_name: "Protection coordination / fault-withstand verification",
+    week_caught: 11, week_fail: 30, lead_time_weeks: 19,
+  },
+  {
+    component: "CABLE-DC", parameter: "fire_rating",
+    required_value: "CMP", provided_value: "CMR", unit: "plenum-class",
+    standard_ref: "NFPA-75", spec_clause: "DB-8.4", severity: "Major",
+    rationale: "Cable fire-rating below plenum class required per NFPA 75.",
+    predicted_cx_test: "ITP-02", predicted_cx_level: 2,
+    predicted_cx_name: "Cable fire-rating / plenum compliance inspection",
+    week_caught: 11, week_fail: 22, lead_time_weeks: 11,
+  },
+  {
+    component: "BMS", parameter: "critical_alarm_points",
+    required_value: "complete", provided_value: "missing:leak_detection",
+    unit: "set", standard_ref: "DESIGN-BASIS", spec_clause: "DB-9.5",
+    severity: "Major",
+    rationale: "Critical leak-detection alarm point absent; monitoring cannot confirm full alarm coverage.",
+    predicted_cx_test: "IST-14", predicted_cx_level: 4,
+    predicted_cx_name: "Monitoring & alarm verification",
+    week_caught: 11, week_fail: 40, lead_time_weeks: 29,
+  },
+  {
+    component: "FLOOR", parameter: "height_mm",
+    required_value: 900, provided_value: 600, unit: "mm",
+    standard_ref: "DESIGN-BASIS", spec_clause: "DB-13.3",
+    severity: "Major",
+    rationale: "Raised floor height 600 mm vs required 900 mm; insufficient clearance for under-floor chilled-air distribution, power cabling, and fire suppression piping.",
+    predicted_cx_test: "ITP-01", predicted_cx_level: 1,
+    predicted_cx_name: "Equipment receipt inspection",
+    week_caught: 11, week_fail: 16, lead_time_weeks: 5,
+  },
+  {
+    component: "GEN-01", parameter: "start_time_sec",
+    required_value: 10, provided_value: 15, unit: "s",
+    standard_ref: "UPTIME-TIER4", spec_clause: "DB-5.3",
+    severity: "Critical",
+    rationale: "Generator start time exceeds Tier IV 10-second requirement; during utility failure, the additional 5-second delay risks UPS battery depletion on the concurrent maintenance path.",
+    predicted_cx_test: "IST-01", predicted_cx_level: 4,
+    predicted_cx_name: "Utility failure simulation",
+    week_caught: 11, week_fail: 34, lead_time_weeks: 23,
+  },
+  {
+    component: "COOL-LOOP", parameter: "delta_t_c",
+    required_value: 10, provided_value: 7, unit: "C",
+    standard_ref: "ASHRAE-TC9.9", spec_clause: "DB-6.4",
+    severity: "Major",
+    rationale: "Chilled water delta-T of 7°C vs required 10°C indicates low delta-T syndrome; pumps must increase flow 43% to meet heat rejection.",
+    predicted_cx_test: "IST-16", predicted_cx_level: 4,
+    predicted_cx_name: "Cooling performance and thermal verification",
+    week_caught: 11, week_fail: 36, lead_time_weeks: 25,
+  },
+  {
+    component: "UPS-02", parameter: "efficiency_pct",
+    required_value: 96, provided_value: 93, unit: "%",
+    standard_ref: "DESIGN-BASIS", spec_clause: "DB-4.5",
+    severity: "Major",
+    rationale: "UPS efficiency 93% vs required 96% adds 36 kW heat load per module at rated load; cooling plant not sized for additional heat rejection.",
+    predicted_cx_test: "FAT-01", predicted_cx_level: 3,
+    predicted_cx_name: "UPS module load-bank test",
+    week_caught: 11, week_fail: 24, lead_time_weeks: 13,
+  },
+  {
+    component: "SWGR-MV", parameter: "arc_flash_rating",
+    required_value: "Type_2B", provided_value: "Type_2", unit: "class",
+    standard_ref: "DESIGN-BASIS", spec_clause: "DB-7.3",
+    severity: "Major",
+    rationale: "Switchgear Type 2 vs required Type 2B exposes operators to incident energy above 40 cal/cm²; PPE category exceeds safe working practice limits.",
+    predicted_cx_test: "ITP-03", predicted_cx_level: 2,
+    predicted_cx_name: "Arc flash labeling and PPE verification",
+    week_caught: 11, week_fail: 20, lead_time_weeks: 9,
+  },
+  {
+    component: "CABLE-DC", parameter: "max_bundle_size",
+    required_value: 48, provided_value: 72, unit: "cables",
+    standard_ref: "BICSI-002", spec_clause: "DB-8.5",
+    severity: "Minor",
+    rationale: "Bundle size of 72 exceeds BICSI-002 pathway fill limit of 48; thermal derating reduces current capacity.",
+    predicted_cx_test: "ITP-04", predicted_cx_level: 2,
+    predicted_cx_name: "Pathway fill and cable management inspection",
+    week_caught: 11, week_fail: 18, lead_time_weeks: 7,
+  },
+  {
+    component: "BMS", parameter: "monitoring_redundancy",
+    required_value: "dual", provided_value: "single", unit: "topology",
+    standard_ref: "UPTIME-TIER4", spec_clause: "DB-9.1",
+    severity: "Critical",
+    rationale: "Single monitoring path creates single point of failure; Tier IV requires concurrent maintainability of all monitoring systems.",
+    predicted_cx_test: "IST-15", predicted_cx_level: 4,
+    predicted_cx_name: "Full-facility failover drill",
+    week_caught: 11, week_fail: 44, lead_time_weeks: 33,
+  },
+  {
+    component: "FLOOR", parameter: "load_rating_kpa",
+    required_value: 12, provided_value: 8, unit: "kPa",
+    standard_ref: "IS-1893", spec_clause: "DB-13.1",
+    severity: "Critical",
+    rationale: "Floor load capacity 8 kPa vs required 12 kPa; high-density racks will exceed floor bearing capacity under seismic Zone IV conditions.",
+    predicted_cx_test: "ITP-05", predicted_cx_level: 1,
+    predicted_cx_name: "Structural load test and floor deflection",
+    week_caught: 11, week_fail: 19, lead_time_weeks: 8,
+  },
+];

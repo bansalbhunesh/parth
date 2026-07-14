@@ -94,6 +94,38 @@ def _image_too_large(data: bytes) -> bool:
         return False
 
 
+def _reject_dangerous_content(display_name: str, data: bytes) -> None:
+    head = data[:64]
+    for signature, label in _DANGEROUS_PREFIXES.items():
+        if head.startswith(signature):
+            raise HTTPException(
+                415,
+                f"'{display_name}' looks like {label}, which is not an accepted "
+                "document type. Upload a PDF, an image, or a text file.",
+            )
+    if len(data) >= 262 and data[257:262] == b"ustar":
+        raise HTTPException(
+            415,
+            f"'{display_name}' looks like a tar archive, which is not an accepted "
+            "document type. Upload a PDF, an image, or a text file.",
+        )
+
+
+def _validate_category(display_name: str, category: str, data: bytes) -> None:
+    if category == "pdf":
+        if not _looks_like_pdf(data):
+            raise HTTPException(400, f"'{display_name}' is named like a PDF but its contents are not a PDF.")
+        return
+    if category == "image":
+        if not _looks_like_image(data):
+            raise HTTPException(400, f"'{display_name}' is named like an image but is not a recognised image format.")
+        if _image_too_large(data):
+            raise HTTPException(413, f"'{display_name}' exceeds the image pixel limit. Downscale it and try again.")
+        return
+    if b"\x00" in data[:8192]:
+        raise HTTPException(415, f"'{display_name}' looks like a binary file, not text.")
+
+
 def validate_upload(filename: str, content_type: str, data: bytes) -> None:
     """Raise a clean HTTPException if an upload is empty, disguised, an archive/
     executable, an oversized-by-dimensions image, or an unsupported type. No-op
@@ -102,16 +134,7 @@ def validate_upload(filename: str, content_type: str, data: bytes) -> None:
     if not data:
         raise HTTPException(400, f"'{disp}' is empty — nothing to analyse.")
 
-    head = data[:64]
-    for sig, label in _DANGEROUS_PREFIXES.items():
-        if head.startswith(sig):
-            raise HTTPException(
-                415, f"'{disp}' looks like {label}, which is not an accepted "
-                     "document type. Upload a PDF, an image, or a text file.")
-    if len(data) >= 262 and data[257:262] == b"ustar":
-        raise HTTPException(
-            415, f"'{disp}' looks like a tar archive, which is not an accepted "
-                 "document type. Upload a PDF, an image, or a text file.")
+    _reject_dangerous_content(disp, data)
 
     name = (filename or "upload").lower()
     ext = os.path.splitext(name)[1]
@@ -121,21 +144,8 @@ def validate_upload(filename: str, content_type: str, data: bytes) -> None:
             415, f"'{disp}' is an unsupported file type. Accepted: PDF, images "
                  "(PNG/JPG/TIFF/WEBP/BMP/GIF), or text (.txt/.md).")
 
-    if category == "pdf":
-        if not _looks_like_pdf(data):
-            raise HTTPException(
-                400, f"'{disp}' is named like a PDF but its contents are not a "
-                     "PDF. Upload the real document or paste its text.")
-    elif category == "image":
-        if not _looks_like_image(data):
-            raise HTTPException(
-                400, f"'{disp}' is named like an image but its contents are not "
-                     "a recognised image format.")
-        if _image_too_large(data):
-            raise HTTPException(
-                413, f"'{disp}' is too large by dimensions (exceeds the image "
-                     "pixel limit). Downscale it and try again.")
-    else:  # text
+    _validate_category(disp, category, data)
+    if category == "text":
         # A NUL byte in the first block is a strong "this is binary, not text"
         # signal — reject a binary disguised with a .txt/.md name.
         if b"\x00" in data[:8192]:

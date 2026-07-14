@@ -1,10 +1,16 @@
-FROM python:3.11-slim
+FROM python:3.11.15-slim-bookworm@sha256:b18992999dbe963a45a8a4da40ac2b1975be1a776d939d098c647482bcad5cba
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
 
 # tesseract-ocr powers the scanned/image-only PDF fallback (backend/agents/ingestion.py).
 # Without it the app still runs and degrades to an honest "scanned PDF, OCR
 # unavailable" message; with it, scanned submittals are read via OCR.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends tesseract-ocr \
+    && groupadd --system --gid 10001 pramaan \
+    && useradd --system --uid 10001 --gid pramaan --home-dir /app --shell /usr/sbin/nologin pramaan \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -16,8 +22,12 @@ COPY data/ data/
 # Frozen benchmark reports only (52K) — /metrics reads benchmark_card.json to
 # surface the headline result. The bulk of benchmarks/ (pairs/runs) is not shipped.
 COPY benchmarks/ps4_external_v1/reports/ benchmarks/ps4_external_v1/reports/
+RUN chown -R pramaan:pramaan /app
 
+USER pramaan
 EXPOSE 8000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/live', timeout=3)"]
 # Shell form so ${PORT} (injected by Render on Docker services) is honored;
 # falls back to 8000 for local `docker run`/compose.
 CMD ["sh", "-c", "uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

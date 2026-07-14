@@ -127,13 +127,32 @@ def case_create_limit() -> int:
 
 _store: dict[str, list[float]] = {}
 _lock = threading.Lock()
+_redis_limiter = None
+_redis_limiter_url = ""
 
 
 def reset_rate_limits() -> None:
     """Clear all counters — used by the test suite between cases so limits do
     not leak across tests. Not wired to any endpoint."""
+    global _redis_limiter, _redis_limiter_url
     with _lock:
         _store.clear()
+        _redis_limiter = None
+        _redis_limiter_url = ""
+
+
+def _distributed_limiter():
+    global _redis_limiter, _redis_limiter_url
+    url = os.getenv("PRAMAAN_REDIS_URL", "").strip()
+    if not url:
+        return None
+    with _lock:
+        if _redis_limiter is None or _redis_limiter_url != url:
+            from backend.platform.redis_limits import RedisRateLimiter
+
+            _redis_limiter = RedisRateLimiter.from_url(url)
+            _redis_limiter_url = url
+        return _redis_limiter
 
 
 def _client_key(request: Request) -> str:
@@ -165,7 +184,35 @@ def enforce_rate_limit(request: Request, bucket: str, limit: int) -> None:
     when rate limiting is disabled. Never logs client identity or secrets."""
     if not rate_limit_enabled() or limit <= 0:
         return
-    key = f"{bucket}:{_client_key(request)}"
+    client_key = _client_key(request)
+    distributed = _distributed_limiter()
+    if distributed is not None:
+        from backend.platform.redis_limits import DistributedLimitUnavailable
+
+        try:
+            decision = distributed.check(
+                client_key,
+                bucket,
+                limit,
+                int(_WINDOW_S),
+                fail_closed=True,
+            )
+        except DistributedLimitUnavailable as exc:
+            raise HTTPException(
+                status_code=503,
+                detail="The distributed abuse-control service is unavailable; expensive work was not started.",
+                headers={"Retry-After": "5"},
+            ) from exc
+        if not decision.allowed:
+            retry = max(1, int((decision.reset_at_ms / 1000) - time.time()) + 1)
+            raise HTTPException(
+                status_code=429,
+                detail=f"Rate limit reached ({limit} {bucket} requests/hour).",
+                headers={"Retry-After": str(retry)},
+            )
+        return
+
+    key = f"{bucket}:{client_key}"
     now = time.time()
     cutoff = now - _WINDOW_S
     with _lock:
@@ -226,6 +273,7 @@ def security_status() -> dict:
     return {
         "auth_required": auth_required(),
         "rate_limit_enabled": rl_on,
+        "rate_limit_backend": "redis" if os.getenv("PRAMAAN_REDIS_URL", "").strip() else "process-local",
         "rate_limits_per_hour": {
             "analysis": analysis_limit(),
             "upload": upload_limit(),
@@ -243,3 +291,7 @@ def security_status() -> dict:
         "llm_failover_available": len(provider_chain()) > 1,
         "deterministic_fallback_available": True,
     }
+# Private operational metrics are deliberately separate from public product
+# benchmark metrics. An unset token keeps the route undiscoverable (404).
+def metrics_token() -> str:
+    return os.getenv("PRAMAAN_METRICS_TOKEN", "").strip()

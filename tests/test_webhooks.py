@@ -5,6 +5,7 @@ import threading
 from fastapi.testclient import TestClient
 
 from backend import main
+from backend.routers import webhooks
 
 client = TestClient(main.app)
 _PUBLIC_URL = "http://8.8.8.8/hook"
@@ -42,7 +43,7 @@ def _capture_delivery(monkeypatch):
         )
         done.set()
 
-    monkeypatch.setattr(main, "_deliver_webhooks", fake_deliver)
+    monkeypatch.setattr(webhooks, "_deliver_webhooks", fake_deliver)
     return captured, done
 
 
@@ -109,7 +110,7 @@ def test_subscribe_rejects_private_and_non_http_targets(monkeypatch):
 def test_integration_limit_applies_per_case(monkeypatch):
     monkeypatch.delenv("PRAMAAN_WEBHOOK_ALLOW_PRIVATE", raising=False)
     case_id, headers = _case()
-    for index in range(main.MAX_WEBHOOKS):
+    for index in range(webhooks.MAX_WEBHOOKS):
         response = client.post(
             f"/cases/{case_id}/webhooks",
             json={"url": f"http://8.8.8.8/hook-{index}"},
@@ -147,17 +148,17 @@ def test_delivery_routes_payload_and_refuses_redirects(monkeypatch):
     )
     slack = "https://hooks.slack.com/services/T/B/X"
     monkeypatch.setattr(
-        main,
+        webhooks,
         "_resolved_webhook_addresses",
         lambda url: ("8.8.8.8",),
     )
-    monkeypatch.setattr(main, "_webhook_url_error", lambda _url: None)
+    monkeypatch.setattr(webhooks, "_webhook_url_error", lambda _url: None)
     subscriptions = [
         {"url": slack, "resolved_ips": ("8.8.8.8",)},
         {"url": _PUBLIC_URL, "resolved_ips": ("8.8.8.8",)},
     ]
 
-    main._deliver_webhooks(
+    webhooks._deliver_webhooks(
         subscriptions,
         {"event": "deviation_detected"},
         {"text": "alert"},
@@ -171,14 +172,14 @@ def test_delivery_routes_payload_and_refuses_redirects(monkeypatch):
 def test_delivery_drops_dns_rebinding(monkeypatch):
     posts = []
     monkeypatch.setattr("httpx.post", lambda *args, **kwargs: posts.append(args))
-    monkeypatch.setattr(main, "_webhook_url_error", lambda _url: None)
+    monkeypatch.setattr(webhooks, "_webhook_url_error", lambda _url: None)
     monkeypatch.setattr(
-        main,
+        webhooks,
         "_resolved_webhook_addresses",
         lambda _url: ("10.0.0.8",),
     )
 
-    main._deliver_webhooks(
+    webhooks._deliver_webhooks(
         [{"url": "https://example.test/hook", "resolved_ips": ("8.8.8.8",)}],
         {},
         {},
@@ -190,15 +191,15 @@ def test_delivery_drops_dns_rebinding(monkeypatch):
 def test_trigger_requires_case_scope_and_filters_minor_findings(monkeypatch):
     captured, done = _capture_delivery(monkeypatch)
     case_id, _headers = _case()
-    main.SUBSCRIBED_WEBHOOKS[case_id] = [
+    webhooks.SUBSCRIBED_WEBHOOKS[case_id] = [
         {"url": _PUBLIC_URL, "resolved_ips": ("8.8.8.8",)}
     ]
 
-    main.trigger_webhooks([_DEV], "UPS")
+    webhooks.trigger_webhooks([_DEV], "UPS")
     assert not done.wait(timeout=0.1)
-    main.trigger_webhooks([dict(_DEV, severity="Minor")], "UPS", case_id=case_id)
+    webhooks.trigger_webhooks([dict(_DEV, severity="Minor")], "UPS", case_id=case_id)
     assert not done.wait(timeout=0.1)
-    main.trigger_webhooks([_DEV], "UPS", case_id=case_id)
+    webhooks.trigger_webhooks([_DEV], "UPS", case_id=case_id)
 
     assert done.wait(timeout=2)
     assert captured["payload"]["case_id"] == case_id
@@ -208,7 +209,7 @@ def test_trigger_requires_case_scope_and_filters_minor_findings(monkeypatch):
 def test_adding_case_finding_dispatches_only_to_that_case(monkeypatch):
     captured, done = _capture_delivery(monkeypatch)
     case_id, headers = _case()
-    main.SUBSCRIBED_WEBHOOKS[case_id] = [
+    webhooks.SUBSCRIBED_WEBHOOKS[case_id] = [
         {"url": _PUBLIC_URL, "resolved_ips": ("8.8.8.8",)}
     ]
 

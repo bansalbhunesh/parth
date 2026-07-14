@@ -29,12 +29,18 @@ def _reset_process_state():
     every test so none leaks between cases (all share one process-local or
     on-disk store)."""
     from backend import case_store, jobs, llm, main, security
+    from backend.platform.config import reset_platform_settings
+    from backend.platform.identity import reset_identity_provider
+    reset_platform_settings()
+    reset_identity_provider()
     security.reset_rate_limits()
     jobs.reset()
     llm.reset_budgets()
     case_store.reset()
     main.SUBSCRIBED_WEBHOOKS.clear()
     yield
+    reset_platform_settings()
+    reset_identity_provider()
     security.reset_rate_limits()
     jobs.reset()
     llm.reset_budgets()

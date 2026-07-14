@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/reproducible_tests-678-b54a31?style=flat-square&labelColor=20221e" alt="678 tests">
+  <img src="https://img.shields.io/badge/reproducible_tests-700%2B-b54a31?style=flat-square&labelColor=20221e" alt="More than 700 tests">
   <img src="https://img.shields.io/badge/benchmark_recall-0.862-ffb020?style=flat-square&labelColor=1a1508" alt="Benchmark recall 0.862">
   <img src="https://img.shields.io/badge/clean--negative_false_alerts-0-35c98b?style=flat-square&labelColor=0d1a14" alt="0 false alerts on 64 controls">
   <img src="https://img.shields.io/badge/license-MIT-5b8cff?style=flat-square&labelColor=111820" alt="MIT License">
@@ -68,6 +68,10 @@
 > We do not claim 100% recall, zero-latency real-time API guarantees, or field-hardened production readiness. The frozen `ps4_external_v1` v1.2 benchmark contains 53 spec–submittal pairs and 129 labels across 17 systems. The featured three-run configuration reports semantic recall 0.862, precision 0.953, F1 0.905, and 0 false alerts on 64 clean-negative controls, versus rule-baseline recall 0.111. Fixtures are mostly team-authored, reviewer-2 adjudication is pending, and this is not field or customer validation. If the live API is unavailable, the interface labels the deterministic rule floor explicitly rather than presenting it as live inference.
 
 ---
+
+### Quality contract
+
+The current quality contract is executable: versioned RFC 9457 APIs, a reviewed OpenAPI snapshot, strict active-frontend coverage, five browser/device projects, Axe checks, maximum backend complexity of 10, 500-line file limits, acyclic backend imports, strict typing on the managed platform boundary, pinned CI actions, CodeQL, secret/dependency/container scans, and SBOM generation. See [`docs/QUALITY_GATES.md`](docs/QUALITY_GATES.md) for the passing internal gates and the independent accessibility, security, restore, load, and pilot evidence still required before any final 10/10 claim.
 
 ## 2. The Problem: The $40 Million Delay
 
@@ -133,8 +137,8 @@ Pramaan uses a single LLM reasoning core wrapped in deterministic pipelines to e
 Pramaan is built to be resilient in high-traffic or rate-limited environments:
 
 * **LLM Engine:** Multi-provider failover chain: **native Gemini 2.5-flash → Qwen-gateway → Groq Llama-3.3 → deterministic fallback**.
-* **FastAPI Backend:** Fully asynchronous backend (Python 3.11+) supporting Server-Sent Events (SSE) for token streaming.
-* **Next.js 15 Frontend:** Dark-themed responsive dashboard utilizing scroll-reveal animations and SVG charts.
+* **FastAPI Backend:** Python 3.11+ API with bounded work queues, request correlation, versioned contracts, and Server-Sent Events (SSE) for token streaming.
+* **Next.js 16 Frontend:** Light/dark editorial-industrial interface with semantic OKLCH tokens, responsive reflow, and reduced-motion support.
 * **Resiliency Gate:** The system compiles cleanly and degrades gracefully without an API key, serving ground-truth cached responses for smooth judge reviews.
 
 ---
@@ -174,7 +178,7 @@ You can run the entire verification suite, deterministic eval harnesses, and fro
 make setup
 make corpus
 
-# 2. Run the full test suite (678 tests, no API key needed)
+# 2. Run the full test suite (700+ tests, no API key needed)
 make test
 
 # 3. Run deterministic evals (no-key offline harnesses)

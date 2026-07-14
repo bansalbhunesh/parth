@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 module.exports = {
   reactStrictMode: true,
+  output: "standalone",
   // Dev-server-only (no effect on `next build`/production): the Playwright
   // E2E suite (frontend/playwright.config.ts) drives the dev server via
   // 127.0.0.1 explicitly so it matches the backend's default bind address;

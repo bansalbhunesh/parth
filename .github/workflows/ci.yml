@@ -15,7 +15,6 @@ concurrency:
 
 env:
   PYTHONUNBUFFERED: "1"
-  PYTHONWARNINGS: error
 
 jobs:
   backend:
@@ -30,7 +29,9 @@ jobs:
           python-version: "3.11"
           cache: pip
       - name: Install application and quality toolchain
-        run: python -m pip install --disable-pip-version-check ".[dev]"
+        run: |
+          python -m pip install --disable-pip-version-check --require-hashes -r backend/requirements-dev.lock
+          python -m pip install --disable-pip-version-check --no-deps .
       - name: Lint and strict type boundaries
         run: |
           python -m ruff check .
@@ -47,7 +48,7 @@ jobs:
       - name: Backend tests and ratcheted coverage
         run: |
           python -m pytest tests/ -q --tb=short --cov=backend --cov-branch --cov-report=term-missing --cov-report=xml:coverage-backend.xml --cov-report=json:coverage-backend.json
-          python scripts/check_coverage_thresholds.py coverage-backend.json --lines 86 --branches 75
+          python scripts/check_coverage_thresholds.py coverage-backend.json --lines 88 --branches 78
       - name: Verify benchmark evidence
         run: |
           python scripts/benchmark_manifest_check.py
@@ -103,7 +104,10 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
-      - run: python -m pip install --disable-pip-version-check .
+      - name: Install locked backend runtime
+        run: |
+          python -m pip install --disable-pip-version-check --require-hashes -r backend/requirements.lock
+          python -m pip install --disable-pip-version-check --no-deps .
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "24.17.0"

@@ -214,6 +214,15 @@
   letter-spacing: -0.04em;
 }
 
+.evidence-ledger dd.ledger-note,
+.decision-ledger dd.ledger-note {
+  margin: 0;
+  font-family: var(--body);
+  font-size: inherit;
+  font-weight: 400;
+  letter-spacing: normal;
+}
+
 .verification-list,
 .limitations-list,
 .source-links,

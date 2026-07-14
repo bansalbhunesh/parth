@@ -85,7 +85,7 @@ async def _never_crash(request: Request, exc: Exception) -> JSONResponse:
     )
 
 
-for application_router in (
+APPLICATION_ROUTERS = (
     webhooks.router,
     analysis.router,
     data.router,
@@ -93,10 +93,12 @@ for application_router in (
     cases.router,
     projects.router,
     platform_router,
-):
+)
+
+for application_router in APPLICATION_ROUTERS:
     app.include_router(application_router)
 
-V1_COMPATIBILITY_ROUTE_COUNT = register_v1_compatibility(app)
+V1_COMPATIBILITY_ROUTE_COUNT = register_v1_compatibility(app, APPLICATION_ROUTERS)
 
 # Transitional internal exports used by the existing webhook verification suite.
 MAX_WEBHOOKS = webhooks.MAX_WEBHOOKS

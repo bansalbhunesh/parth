@@ -227,10 +227,10 @@ export default async function Page() {
           <p>{BENCHMARK_LIMITATION}</p>
         </div>
         <dl className="proof-ledger">
-          <div><dt>Semantic recall</dt><dd>{claims.recall.toFixed(3)}</dd><small>mean of three repeat runs</small></div>
-          <div><dt>Precision / F1</dt><dd>{claims.precision.toFixed(3)} / {claims.f1.toFixed(3)}</dd><small>{claims.labels} frozen labels</small></div>
-          <div><dt>False alerts</dt><dd>{claims.falseAlerts} / {claims.cleanNegatives}</dd><small>clean-negative controls</small></div>
-          <div><dt>Backend verification</dt><dd>{PRODUCT_CLAIMS.verification.backendTests}</dd><small>collected tests · current tree</small></div>
+          <div><dt>Semantic recall</dt><dd>{claims.recall.toFixed(3)}</dd><dd className="ledger-note"><small>mean of three repeat runs</small></dd></div>
+          <div><dt>Precision / F1</dt><dd>{claims.precision.toFixed(3)} / {claims.f1.toFixed(3)}</dd><dd className="ledger-note"><small>{claims.labels} frozen labels</small></dd></div>
+          <div><dt>False alerts</dt><dd>{claims.falseAlerts} / {claims.cleanNegatives}</dd><dd className="ledger-note"><small>clean-negative controls</small></dd></div>
+          <div><dt>Backend verification</dt><dd>{PRODUCT_CLAIMS.verification.backendTests}</dd><dd className="ledger-note"><small>collected tests · current tree</small></dd></div>
         </dl>
         <Link className="button button-secondary" href="/evidence">Inspect sources and limitations</Link>
       </section>

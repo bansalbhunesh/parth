@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import Any
 
 from fastapi import APIRouter, Depends, FastAPI, Request, Security
@@ -72,11 +73,12 @@ def _route_kwargs(route: APIRoute, dependency: DependsParam | None) -> dict[str,
     }
 
 
-def register_v1_compatibility(app: FastAPI) -> int:
+def register_v1_compatibility(app: FastAPI, source_routers: Iterable[APIRouter]) -> int:
     """Copy every public legacy operation once, preserving its behavior and schema."""
     legacy_routes = [
         route
-        for route in app.routes
+        for source_router in source_routers
+        for route in source_router.routes
         if isinstance(route, APIRoute) and not route.path.startswith(_EXCLUDED_PREFIXES)
     ]
     router = APIRouter()

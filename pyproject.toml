@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools==83.0.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "pramaan"
 version = "2.0.0"
@@ -44,10 +48,12 @@ dependencies = [
 # Floor covers Python 3.14: pytest-asyncio <0.25 calls the now-deprecated
 # asyncio.iscoroutinefunction() internally on every collected test (not just
 # async ones), which floods -q output with DeprecationWarnings under 3.14's
-# stricter warning filters. >=1.4 is the current stable line and requires
-# pytest>=8.4 itself, hence the matching pytest floor bump.
+# stricter warning filters. >=1.4 supports the current pytest major line.
 dev = [
-    "pytest>=8.4,<9.0",
+    # PYSEC-2026-1845 is fixed in 9.0.3. The test runner executes repository
+    # and plugin-controlled code in CI, so dev-only status is not an excuse
+    # to leave a known vulnerability in the locked toolchain.
+    "pytest>=9.0.3,<10.0",
     "pytest-asyncio>=1.4,<2.0",
     "pytest-cov>=5.0",
     "ruff>=0.4",

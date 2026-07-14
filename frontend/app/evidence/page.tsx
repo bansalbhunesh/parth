@@ -80,12 +80,12 @@ export default async function EvidencePage() {
           <span className="deployment-badge">Frozen record</span>
         </div>
         <dl className="evidence-ledger">
-          <div><dt>Semantic recall</dt><dd>{benchmark.recall.toFixed(3)}</dd><small>mean of three repeat runs</small></div>
-          <div><dt>Precision</dt><dd>{benchmark.precision.toFixed(3)}</dd><small>semantic match criterion</small></div>
-          <div><dt>F1</dt><dd>{benchmark.f1.toFixed(3)}</dd><small>precision/recall balance</small></div>
-          <div><dt>False-alert rate</dt><dd>{benchmark.falseAlerts} / {benchmark.cleanNegatives}</dd><small>clean-negative controls</small></div>
-          <div><dt>Rule baseline recall</dt><dd>{benchmark.ruleRecall.toFixed(3)}</dd><small>deterministic comparator</small></div>
-          <div><dt>Corpus</dt><dd>{benchmark.pairs} pairs</dd><small>{benchmark.labels} labels · {benchmark.systems} systems</small></div>
+          <div><dt>Semantic recall</dt><dd>{benchmark.recall.toFixed(3)}</dd><dd className="ledger-note"><small>mean of three repeat runs</small></dd></div>
+          <div><dt>Precision</dt><dd>{benchmark.precision.toFixed(3)}</dd><dd className="ledger-note"><small>semantic match criterion</small></dd></div>
+          <div><dt>F1</dt><dd>{benchmark.f1.toFixed(3)}</dd><dd className="ledger-note"><small>precision/recall balance</small></dd></div>
+          <div><dt>False-alert rate</dt><dd>{benchmark.falseAlerts} / {benchmark.cleanNegatives}</dd><dd className="ledger-note"><small>clean-negative controls</small></dd></div>
+          <div><dt>Rule baseline recall</dt><dd>{benchmark.ruleRecall.toFixed(3)}</dd><dd className="ledger-note"><small>deterministic comparator</small></dd></div>
+          <div><dt>Corpus</dt><dd>{benchmark.pairs} pairs</dd><dd className="ledger-note"><small>{benchmark.labels} labels · {benchmark.systems} systems</small></dd></div>
         </dl>
         <p className="evidence-callout"><strong>Boundary:</strong> {BENCHMARK_LIMITATION}</p>
       </section>

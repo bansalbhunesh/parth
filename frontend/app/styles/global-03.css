@@ -177,6 +177,14 @@
   line-height: 1.35;
 }
 
+.proof-ledger dd.ledger-note {
+  margin: 0;
+  font-family: var(--body);
+  font-size: inherit;
+  font-weight: 400;
+  letter-spacing: normal;
+}
+
 .site-footer {
   display: flex;
   align-items: end;

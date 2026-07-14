@@ -274,6 +274,10 @@ html[data-theme="dark"] .section-ink {
   color: var(--inverse-soft);
 }
 
+.section-intro-inverse .section-number {
+  color: var(--inverse-accent);
+}
+
 .resolution-console {
   width: min(920px, 100%);
   margin-left: auto;

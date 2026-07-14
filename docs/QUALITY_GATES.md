@@ -4,6 +4,7 @@ Passing a gate means the named artifact or command exists and passes. It does no
 
 ## Enforced in CI
 
+- Python production and CI dependencies are resolved for CPython 3.11/Linux in hash-checked lock files. Regenerate them only with the exact `uv pip compile` commands recorded in their headers and review the diff.
 - Python warnings fail tests; Ruff and strict mypy cover the new platform boundary.
 - Backend files are at most 500 lines, cyclomatic complexity is at most 10, and backend imports are acyclic.
 - The reviewed OpenAPI snapshot and protected scope must not drift.
@@ -13,7 +14,7 @@ Passing a gate means the named artifact or command exists and passes. It does no
 - Backend and frontend containers are digest-pinned, non-root, health-checked, and scanned for high/critical findings.
 - A CycloneDX SBOM is generated on every CI run.
 
-The backend floor is currently ratcheted independently at 86% line and 75% branch coverage, not the final 95%/90% exit threshold. The threshold must only increase with tests that assert behavior, not exclusions or generated lines.
+The backend floor is currently ratcheted independently at 88% line and 78% branch coverage, not the final 95%/90% exit threshold. The threshold must only increase with tests that assert behavior, not exclusions or generated lines.
 
 ## Implemented but environment-dependent
 

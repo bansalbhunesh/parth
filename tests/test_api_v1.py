@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from fastapi.routing import APIRoute
 from fastapi.testclient import TestClient
 
 from backend.main import V1_COMPATIBILITY_ROUTE_COUNT, app
@@ -12,49 +11,42 @@ client = TestClient(app)
 
 
 def _operations(prefix: str) -> set[tuple[str, str]]:
+    schema = app.openapi()
     return {
-        (method, route.path)
-        for route in app.routes
-        if isinstance(route, APIRoute) and route.path.startswith(prefix)
-        for method in route.methods
-        if method not in {"HEAD", "OPTIONS"}
+        (method.upper(), path)
+        for path, methods in schema["paths"].items()
+        if path.startswith(prefix)
+        for method in methods
+        if method in {"get", "post", "put", "patch", "delete"}
     }
 
 
 def test_every_legacy_operation_has_v1_compatibility_route() -> None:
     excluded = ("/api/v1", "/health/", "/internal/")
-    legacy_routes = [
-        route
-        for route in app.routes
-        if isinstance(route, APIRoute)
-        and not route.path.startswith(excluded)
-        and route.deprecated
-    ]
+    schema = app.openapi()
     legacy = {
-        (method, route.path)
-        for route in app.routes
-        if isinstance(route, APIRoute)
-        and not route.path.startswith(excluded)
-        and route.deprecated
-        for method in route.methods
-        if method not in {"HEAD", "OPTIONS"}
+        (method.upper(), path)
+        for path, methods in schema["paths"].items()
+        if not path.startswith(excluded)
+        for method, operation in methods.items()
+        if method in {"get", "post", "put", "patch", "delete"} and operation.get("deprecated")
     }
     v1 = _operations("/api/v1")
     expected = {(method, f"/api/v1{path}") for method, path in legacy}
     assert expected <= v1
-    assert V1_COMPATIBILITY_ROUTE_COUNT == len(legacy_routes)
+    assert V1_COMPATIBILITY_ROUTE_COUNT == len(legacy)
 
 
 def test_legacy_operations_are_marked_deprecated() -> None:
     legacy = [
-        route
-        for route in app.routes
-        if isinstance(route, APIRoute)
-        and not route.path.startswith(("/api/v1", "/health/", "/internal/"))
-        and route.path != "/_boom_test"
+        operation
+        for path, methods in app.openapi()["paths"].items()
+        if not path.startswith(("/api/v1", "/health/", "/internal/")) and path != "/_boom_test"
+        for method, operation in methods.items()
+        if method in {"get", "post", "put", "patch", "delete"}
     ]
     assert legacy
-    assert all(route.deprecated for route in legacy)
+    assert all(operation.get("deprecated") is True for operation in legacy)
 
 
 def test_request_id_is_preserved_when_valid() -> None:

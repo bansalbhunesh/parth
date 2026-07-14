@@ -50,10 +50,10 @@ export default async function WarRoomPage() {
             <p>{hero.rationale}</p>
           </div>
           <dl className="decision-ledger">
-            <div><dt>Caught</dt><dd>Week {hero.week_caught}</dd><small>submittal review</small></div>
-            <div><dt>Test at risk</dt><dd>{hero.predicted_cx_test}</dd><small>week {hero.week_fail}</small></div>
-            <div><dt>Action window</dt><dd>{hero.lead_time_weeks} weeks</dd><small>review to test</small></div>
-            <div><dt>Fix lead</dt><dd>{remediation.fix_lead_weeks} weeks</dd><small>scenario assumption</small></div>
+            <div><dt>Caught</dt><dd>Week {hero.week_caught}</dd><dd className="ledger-note"><small>submittal review</small></dd></div>
+            <div><dt>Test at risk</dt><dd>{hero.predicted_cx_test}</dd><dd className="ledger-note"><small>week {hero.week_fail}</small></dd></div>
+            <div><dt>Action window</dt><dd>{hero.lead_time_weeks} weeks</dd><dd className="ledger-note"><small>review to test</small></dd></div>
+            <div><dt>Fix lead</dt><dd>{remediation.fix_lead_weeks} weeks</dd><dd className="ledger-note"><small>scenario assumption</small></dd></div>
           </dl>
           <div className="decision-action">
             <div><p className="section-kicker">Recommended move</p><h3>Assign the CxA, issue the battery-autonomy RFI, and request a compliant revision with a dated delivery commitment.</h3></div>

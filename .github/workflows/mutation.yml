@@ -18,7 +18,10 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
-      - run: python -m pip install --disable-pip-version-check -e ".[dev]"
+      - name: Install locked application and mutation toolchain
+        run: |
+          python -m pip install --disable-pip-version-check --require-hashes -r backend/requirements-dev.lock
+          python -m pip install --disable-pip-version-check --no-deps .
       - name: Run configured critical-path mutations
         run: |
           mutmut run

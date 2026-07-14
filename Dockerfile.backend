@@ -14,8 +14,8 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY backend/requirements.txt backend/requirements.txt
-RUN pip install --no-cache-dir -r backend/requirements.txt
+COPY backend/requirements.lock backend/requirements.lock
+RUN pip install --no-cache-dir --require-hashes -r backend/requirements.lock
 COPY backend/ backend/
 COPY eval/ eval/
 COPY data/ data/

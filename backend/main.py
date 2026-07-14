@@ -382,7 +382,11 @@ def analyze(req: AnalyzeRequest):
     # request_id + input_hash for traceability.
     from backend import jobs
     view = jobs.analyze_cached(req.spec_text, req.submittal_text, req.system_id)
-    trigger_webhooks(view["deviations"], req.system_id)
+    # Fire only on fresh computations: a cache hit means these exact findings
+    # were already dispatched once — a double-click or page refresh must not
+    # spam subscribers with duplicate alerts.
+    if not view["cached"]:
+        trigger_webhooks(view["deviations"], req.system_id)
     return {
         "system": req.system_id,
         "request_id": jobs.new_request_id(),

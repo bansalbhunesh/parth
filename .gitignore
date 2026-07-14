@@ -31,6 +31,9 @@ benchmarks/ps4_external_v1/sources/raw/*
 
 # Internal audit notes (win-probability estimates, competitor scans, strategy)
 # stay private — never publish the attack surface alongside the submission.
+# The census SCRAPER stays private with its outputs: a judge browsing scripts/
+# should not find the tool that scores rival repos.
+scripts/audit_et_hackathon_field.py
 docs/EXTERNAL_AUDIT_*.md
 docs/*_PUBLIC_REPO_CENSUS_*.json
 docs/*_PUBLIC_REPO_CENSUS_*.md

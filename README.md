@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/reproducible_tests-665-5b8cff?style=flat-square&labelColor=111820" alt="665 tests">
+  <img src="https://img.shields.io/badge/reproducible_tests-666-5b8cff?style=flat-square&labelColor=111820" alt="666 tests">
   <img src="https://img.shields.io/badge/benchmark_recall-0.862-ffb020?style=flat-square&labelColor=1a1508" alt="Benchmark recall 0.862">
   <img src="https://img.shields.io/badge/clean--negative_false_alerts-0-35c98b?style=flat-square&labelColor=0d1a14" alt="0 false alerts on 64 controls">
   <img src="https://img.shields.io/badge/license-MIT-5b8cff?style=flat-square&labelColor=111820" alt="MIT License">
@@ -174,7 +174,7 @@ You can run the entire verification suite, deterministic eval harnesses, and fro
 make setup
 make corpus
 
-# 2. Run the full test suite (665 tests, no API key needed)
+# 2. Run the full test suite (666 tests, no API key needed)
 make test
 
 # 3. Run deterministic evals (no-key offline harnesses)
@@ -249,5 +249,5 @@ f9976f5 feat(evidence): store two primary-source documents, not just cite them (
 <p align="center">
   <strong>Pramaan Compliance Engine</strong><br>
   <em>EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4</em><br>
-  <sub>665 tests passed &middot; CI Green &middot; Verified Live</sub>
+  <sub>666 tests passed &middot; CI Green &middot; Verified Live</sub>
 </p>

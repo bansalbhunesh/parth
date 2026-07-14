@@ -62,7 +62,7 @@ const BENCH = {
   review_status: "single-author frozen · two-person adjudication pending",
 };
 
-const TEST_COUNT = 665; // `python -m pytest tests --collect-only` (measured, not estimated)
+const TEST_COUNT = 666; // `python -m pytest tests --collect-only` (measured, not estimated)
 
 // Verbatim limitation line required next to the benchmark card.
 const LIMITATION =

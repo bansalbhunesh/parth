@@ -209,3 +209,28 @@ def test_analyze_endpoint_fires_webhooks(monkeypatch):
         assert done.wait(timeout=5)
         assert captured["urls"] == [_PUBLIC_URL]
         assert captured["payload"]["system"] == "UPS"
+
+
+def test_analyze_cache_hit_does_not_refire_webhooks(monkeypatch):
+    """A double-click / page refresh replays the cached result — subscribers
+    must not receive duplicate alerts for findings already dispatched."""
+    calls = []
+    monkeypatch.setattr(main, "_deliver_webhooks",
+                        lambda urls, payload, slack_payload: calls.append(payload))
+    main.SUBSCRIBED_WEBHOOKS.append(_PUBLIC_URL)
+    spec = "Design Basis: UPS System\nBattery autonomy: 10 min minimum\n"
+    sub = "Vendor Submittal: UPS System\nBattery autonomy: 7 min\n"
+    body = {"spec_text": spec, "submittal_text": sub, "system_id": "UPS"}
+
+    r1 = client.post("/analyze", json=body)
+    r2 = client.post("/analyze", json=body)
+    assert r1.status_code == r2.status_code == 200
+    assert r1.json()["cached"] is False
+    assert r2.json()["cached"] is True
+
+    deadline = threading.Event()
+    deadline.wait(timeout=0.5)  # let any stray daemon thread spawn
+    fired = len(calls)
+    has_alertable = any(d.get("severity") in ("Critical", "Major")
+                        for d in r1.json()["deviations"])
+    assert fired == (1 if has_alertable else 0)

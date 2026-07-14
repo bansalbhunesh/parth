@@ -136,7 +136,7 @@ The pooled recall isn't the whole story — stratified 95% confidence intervals
 by system type, difficulty, modality, and construction batch:
 [`calibration_report.md`](../benchmarks/ps4_external_v1/reports/calibration_report.md).
 
-**665 tests + 28 Playwright E2E · GitHub Actions CI.** Deeper runtime detail:
+**666 tests + 28 Playwright E2E · GitHub Actions CI.** Deeper runtime detail:
 [`TECHNICAL_OVERVIEW.md`](TECHNICAL_OVERVIEW.md).
 
 ## Tech stack

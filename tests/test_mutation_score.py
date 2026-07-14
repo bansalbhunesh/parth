@@ -8,7 +8,6 @@ import pytest
 
 from scripts.check_mutation_score import mutation_summary, parse_results
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 

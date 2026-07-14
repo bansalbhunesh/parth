@@ -127,6 +127,7 @@ pytest_add_cli_args_test_selection = [
     "--deselect=tests/test_api.py::TestStreamingEndpoints::test_copilot_stream_returns_sse",
     "--deselect=tests/test_api.py::TestStreamingEndpoints::test_analyze_stream_returns_sse",
     "--deselect=tests/test_api.py::TestPdfUploadEndpoints::test_upload_stream_text_files",
+    "--deselect=tests/test_architecture.py::test_backend_architecture_gates_pass",
 ]
 only_mutate = [
     "backend/security.py",

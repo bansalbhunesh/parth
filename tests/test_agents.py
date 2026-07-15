@@ -138,6 +138,55 @@ class TestCommissioningAgent:
         assert name is not None
         assert "battery" in name.lower() or "maintenance" in name.lower()
 
+    def test_current_week_defaults_when_ground_truth_missing(self, tmp_path, monkeypatch):
+        from backend.agents import commissioning
+        monkeypatch.setattr(commissioning, "CORPUS", tmp_path)
+        assert commissioning._current_week() == 11
+
+    def test_cx_plan_falls_back_to_empty_when_absent(self, tmp_path, monkeypatch):
+        from backend.agents import commissioning
+        monkeypatch.setattr(commissioning, "CORPUS", tmp_path)
+        assert commissioning._load_cx_plan() == {"tests": []}
+
+    def test_cx_name_returns_none_for_unknown_test(self):
+        from backend.agents.commissioning import _cx_name
+        assert _cx_name("NOT-A-REAL-TEST-999") is None
+
+    def test_llm_predict_maps_scheduled_week_for_matching_test(self, monkeypatch):
+        # A deviation whose (component, parameter) is in neither the rule table
+        # nor the standards graph falls through to the LLM path; the returned
+        # test id is looked up in the plan for its scheduled week.
+        from backend.agents import commissioning
+        monkeypatch.setattr(
+            commissioning,
+            "complete_json",
+            lambda prompt, system=None: {
+                "test_id": "IST-07",
+                "test_level": 4,
+                "reason": "battery runtime shortfall fails the load test",
+            },
+        )
+        dev = {"component": "MYSTERY-X", "parameter": "unmapped_param", "severity": "Major"}
+        out = commissioning._llm_predict(dev)
+        assert out["predicted_cx_test"] == "IST-07"
+        assert out["cx_source"] == "llm"
+        assert out["week_fail"] is not None
+        assert out["lead_time_weeks"] == out["week_fail"] - commissioning._current_week()
+
+    def test_llm_predict_handles_test_id_absent_from_plan(self, monkeypatch):
+        from backend.agents import commissioning
+        monkeypatch.setattr(
+            commissioning,
+            "complete_json",
+            lambda prompt, system=None: {"test_id": "GHOST-000", "test_level": 2, "reason": "n/a"},
+        )
+        out = commissioning._llm_predict({"component": "X", "parameter": "y"})
+        assert out["predicted_cx_test"] == "GHOST-000"
+        assert out["week_fail"] is None
+        assert out["lead_time_weeks"] is None
+        assert out["predicted_cx_name"] == "LLM-estimated, needs Cx review"
+        assert out["cx_source"] == "llm"
+
 
 class TestReconciliationValidation:
     def test_validate_valid_deviation(self):

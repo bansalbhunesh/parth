@@ -18,6 +18,19 @@ def test_normalized_document_does_not_invent_layout() -> None:
     assert document.items[0].provenance.bounding_box is None
 
 
+def test_empty_extraction_yields_no_items_and_no_warnings() -> None:
+    document = from_extraction("doc-3", "empty.pdf", {"text": "", "method": "none"})
+    assert document.items == []
+    assert document.text == ""
+    assert document.warnings == []
+
+
+def test_warning_is_recorded_even_when_text_is_absent() -> None:
+    document = from_extraction("doc-4", "unreadable.pdf", {"warning": "no extractable text"})
+    assert document.items == []
+    assert document.warnings == ["no extractable text"]
+
+
 def test_bounding_box_and_confidence_are_validated() -> None:
     provenance = DocumentProvenance(
         source_name="scan.png",

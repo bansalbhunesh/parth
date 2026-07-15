@@ -20,6 +20,14 @@ from backend.llm_core import (
 
 log = logging.getLogger("pramaan.llm.providers")
 
+
+def _aicredits_extra_body(base_url: str | None) -> dict:
+    """Opt out of gateway semantic caching for independent benchmark calls."""
+    if os.getenv("AICREDITS_NO_CACHE") == "1" and "aicredits.in" in (base_url or ""):
+        return {"no_cache": True}
+    return {}
+
+
 def _openai_compatible_vision(prompt, image_bytes, mime_type, system, *, label,
                               api_key, base_url, model, max_tokens):
     """Multimodal reasoning over an OpenAI-compatible /v1 gateway (e.g. aicredits
@@ -41,10 +49,14 @@ def _openai_compatible_vision(prompt, image_bytes, mime_type, system, *, label,
             {"type": "text", "text": prompt},
             {"type": "image_url", "image_url": {"url": data_uri}},
         ]})
+        kwargs = {"model": model, "messages": messages, "temperature": 0.1,
+                  "max_tokens": max_tokens}
+        extra_body = _aicredits_extra_body(base_url)
+        if extra_body:
+            kwargs["extra_body"] = extra_body
         return _with_transient_retry(
-            lambda: client.chat.completions.create(
-                model=model, messages=messages, temperature=0.1, max_tokens=max_tokens
-            ).choices[0].message.content, label)
+            lambda: client.chat.completions.create(**kwargs).choices[0].message.content,
+            label)
     except Exception as exc:
         log.error("%s vision error: %s", label, exc)
         raise LLMError(f"{label} vision call failed: {exc}") from exc
@@ -103,6 +115,9 @@ def _openai_compatible(prompt, system, json_mode, *, label, api_key, base_url,
         # makes it unparseable. Match the Claude budget.
         kwargs = {"model": model, "messages": messages, "temperature": 0.1,
                   "max_tokens": max_tokens}
+        extra_body = _aicredits_extra_body(base_url)
+        if extra_body:
+            kwargs["extra_body"] = extra_body
         if json_mode and json_mode_on:
             kwargs["response_format"] = {"type": "json_object"}
         return _with_transient_retry(

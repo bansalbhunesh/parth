@@ -84,6 +84,14 @@ def test_openai_compatible_chat_plain_mode_and_failures(monkeypatch: pytest.Monk
     assert "response_format" not in completions.calls[0]
     assert completions.calls[0]["messages"] == [{"role": "user", "content": "prompt"}]
 
+    monkeypatch.setenv("AICREDITS_NO_CACHE", "1")
+    assert providers._openai_compatible(
+        "prompt", "", False, label="Gateway", api_key="api-key",
+        base_url="https://api.aicredits.in/v1", model="model-a",
+        json_mode_on=True, max_tokens=50,
+    ) == "provider-result"
+    assert completions.calls[1]["extra_body"] == {"no_cache": True}
+
     with pytest.raises(LLMError, match="API key not set"):
         providers._openai_compatible(
             "p", "", False, label="Gateway", api_key="", base_url="", model="m", json_mode_on=False, max_tokens=1
@@ -101,6 +109,7 @@ def test_openai_compatible_chat_plain_mode_and_failures(monkeypatch: pytest.Monk
 def test_openai_compatible_vision_encodes_image_and_wraps_failures(monkeypatch: pytest.MonkeyPatch) -> None:
     completions = _OpenAICompletions()
     _install_openai(monkeypatch, completions)
+    monkeypatch.setenv("AICREDITS_NO_CACHE", "1")
 
     assert providers._openai_compatible_vision(
         "inspect",
@@ -109,12 +118,13 @@ def test_openai_compatible_vision_encodes_image_and_wraps_failures(monkeypatch: 
         "vision-system",
         label="Vision",
         api_key="key",
-        base_url="https://vision.example/v1",
+        base_url="https://api.aicredits.in/v1",
         model="vision-model",
         max_tokens=99,
     ) == "provider-result"
     content = completions.calls[0]["messages"][1]["content"]
     assert content[1]["image_url"]["url"] == "data:image/png;base64,aW1hZ2U="
+    assert completions.calls[0]["extra_body"] == {"no_cache": True}
 
     assert providers._openai_compatible_vision(
         "inspect",

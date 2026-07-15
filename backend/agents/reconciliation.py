@@ -78,6 +78,16 @@ STEP-BY-STEP APPROACH:
 5. If the submittal falls short of the design basis, classify the deviation
    and assess severity.
 
+NON-NEGOTIABLE SCOPE BOUNDARY:
+- Every finding MUST map to a requirement explicitly written in the DESIGN
+  BASIS above. The governing standards may explain a stated requirement but
+  MUST NEVER create an additional requirement.
+- Never flag equipment, systems, clauses, component IDs, or required values
+  that do not appear in the DESIGN BASIS, even if they would normally apply to
+  a wider facility or certification tier.
+- Before emitting a finding, verify that its component and required_value can
+  both be located in the DESIGN BASIS. If either cannot, omit the finding.
+
 IMPORTANT — pay attention to:
 - Numeric values below specified minimums (e.g. 7 < 10, 12 < 24, 40 < 50)
 - Redundancy topology shortfalls (e.g. N+1 when N+2 is required)
@@ -129,12 +139,11 @@ Do NOT include items that meet or exceed their requirements.
 # do poorly. Schema-guided two-phase output (build the full requirement
 # checklist FIRST, then verify each row against the submittal) turns absence
 # detection into a per-item lookup. Opt-in via PRAMAAN_COVERAGE_MATRIX=1 and
-# OFF by default: the default prompt must stay byte-identical to the one the
-# published benchmark numbers were measured with. A complete one-pass
-# experiment on 2026-07-15 improved omission recall but doubled the
-# clean-negative false-alert rate, so this candidate remains disabled.
+# OFF by default. A complete one-pass experiment on 2026-07-15 improved
+# omission recall but doubled the clean-negative false-alert rate, so this
+# candidate remains disabled. Baseline prompt revisions are separately tagged.
 COVERAGE_MATRIX_ENV = "PRAMAAN_COVERAGE_MATRIX"
-BASELINE_PROMPT_VERSION = "reconcile-v2"
+BASELINE_PROMPT_VERSION = "reconcile-v3-scope-guard"
 COVERAGE_MATRIX_PROMPT_VERSION = "reconcile-v1.7-candidate"
 _BASELINE_OUTPUT_MARKER = "Return a JSON array of deviations found. Each element:"
 
@@ -259,16 +268,31 @@ def _value_is_grounded(required_value, spec_lower: str, spec_compact: str) -> bo
     words = [token for token in re.findall(r"[a-z]+", value) if len(token) > 2]
     if compact and compact in spec_compact:
         return True
+    if re.fullmatch(r"(?:[a-z]\+\d+|\d+[a-z])", compact):
+        return False
     if _numbers_are_grounded(numbers, spec_lower):
         return True
     return _words_are_grounded(words, spec_lower)
 
 
+def _component_is_grounded(component, spec_lower: str, spec_compact: str) -> bool:
+    value = str(component or "").strip().lower()
+    compact = re.sub(r"[^a-z0-9]", "", value)
+    if not compact:
+        return False
+    if len(compact) < 3:
+        return bool(re.search(r"\b" + re.escape(value) + r"\b", spec_lower))
+    if compact in spec_compact:
+        return True
+    return _words_are_grounded(
+        [token for token in re.findall(r"[a-z]+", value) if len(token) > 2],
+        spec_lower,
+    )
+
+
 def _ground_findings(devs, spec_text):
-    """Drop findings whose required_value is not present in the design basis —
-    the signature of a hallucinated requirement (the model confabulating a
-    'typical' Tier-III/IV value the spec never stated). A genuine deviation or
-    omission copies its required_value from the spec, so it survives.
+    """Drop findings whose component or required value is absent from the design
+    basis — the signature of a model importing an unrelated standards rule.
 
     A value is grounded if any of these hold against the spec: the whole value
     (alnum-compacted) is a substring; OR every number in it appears as a
@@ -280,10 +304,12 @@ def _ground_findings(devs, spec_text):
     spec_compact = re.sub(r"[^a-z0-9+]", "", spec_l)
     kept = []
     for d in devs:
-        rv = d.get("required_value")
-        ok = _value_is_grounded(rv, spec_l, spec_compact)
-        d["grounded"] = ok
-        if ok:
+        value_ok = _value_is_grounded(d.get("required_value"), spec_l, spec_compact)
+        component_ok = _component_is_grounded(d.get("component"), spec_l, spec_compact)
+        d["grounded_value"] = value_ok
+        d["grounded_component"] = component_ok
+        d["grounded"] = value_ok and component_ok
+        if d["grounded"]:
             kept.append(d)
     return kept
 

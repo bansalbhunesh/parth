@@ -677,12 +677,12 @@ class TestVisionEndpoint:
         monkeypatch.setattr(llm_mod, "complete_vision",
                             lambda p, img, mime, system="": fake)
         direct = analyze.run_vision_analysis(
-            "Icw required 65 kA", b"\x89PNG_fake_bytes", "image/png", "SWGR",
+            "SWGR Icw required 65 kA", b"\x89PNG_fake_bytes", "image/png", "SWGR",
         )
         assert direct.mode == "vision"
         assert direct.provider == "openai"
         r = client.post("/analyze/vision", files={
-            "spec_file": ("spec.md", b"Icw required 65 kA", "text/markdown"),
+            "spec_file": ("spec.md", b"SWGR Icw required 65 kA", "text/markdown"),
             "submittal_image": ("s.png", b"\x89PNG_fake_bytes", "image/png"),
         })
         d = r.json()

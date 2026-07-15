@@ -159,7 +159,7 @@ class TestGroundFindings:
             "separation shall be Form 4b.")
 
     def _dev(self, **kw):
-        d = {"component": "X", "parameter": "p", "required_value": "", "provided_value": "?"}
+        d = {"component": "Battery", "parameter": "p", "required_value": "", "provided_value": "?"}
         d.update(kw)
         return d
 
@@ -178,6 +178,10 @@ class TestGroundFindings:
         # 1200 kW module rating is nowhere in this spec.
         from backend.agents.reconciliation import _ground_findings
         out = _ground_findings([self._dev(required_value=1200)], self.SPEC)
+        assert out == []
+        out = _ground_findings(
+            [self._dev(component="DB-5", required_value=10)], self.SPEC,
+        )
         assert out == []
 
     def test_np2_not_grounded_by_ip42(self):

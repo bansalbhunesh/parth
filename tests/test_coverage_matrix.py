@@ -7,8 +7,8 @@ absence detection becomes a per-item lookup while preserving the proven
 deviation-array response shape. These tests pin the two
 properties that keep the published numbers honest:
 
-1. OFF by default — the default prompt stays byte-identical to the one the
-   frozen ps4_external_v1 numbers were measured with.
+1. OFF by default — the default builder stays byte-identical to the current,
+   separately versioned baseline template.
 2. When enabled, the baseline output clause is replaced with an internal
    checklist instruction and the same deviation-array contract.
 """

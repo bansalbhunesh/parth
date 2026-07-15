@@ -81,7 +81,7 @@ team's repository.
 
 1. **Adopted — prompt-path isolation.** The omission-recall coverage matrix is an
    explicit candidate prompt version. Live analysis and the public benchmark now
-   share one prompt builder, while baseline mode remains byte-identical and clears
+   share one prompt builder, while each baseline revision remains versioned and clears
    the candidate flag. Candidate output cannot overwrite a baseline run directory.
 2. **Adopted — evidence-scoped positioning.** DKDVE and DCBrain are named threats;
    repository-index leadership is kept separate from product and judge claims.

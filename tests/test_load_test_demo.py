@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
 from scripts import load_test_demo as load
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 class _Response:
@@ -104,3 +107,23 @@ def test_summary_and_evidence_artifact_fail_closed_on_overwrite(tmp_path) -> Non
     assert artifact["results"]["analysis_modes"] == {"deterministic": 1}
     with pytest.raises(FileExistsError):
         load._write_evidence(output, "http://service.test", args, summary)
+
+
+def test_committed_load_evidence_is_complete_and_secret_free() -> None:
+    artifacts = sorted((ROOT / "docs" / "evidence" / "load").glob("*.json"))
+    assert len(artifacts) >= 4
+
+    for path in artifacts:
+        text = path.read_text(encoding="utf-8")
+        artifact = json.loads(text)
+        profile = artifact["profile"]
+        results = artifact["results"]
+
+        assert artifact["schema_version"] == 1
+        assert profile["revision"] and profile["label"] and profile["target"]
+        assert results["requests_attempted"] == profile["requests"]
+        assert results["success_2xx"] + results["rate_limited_429"] + results["errors"] == results["requests_attempted"]
+        assert set(results["latency_ms"]) == {"p50", "p95", "min", "max"}
+        assert artifact["limitations"]
+        assert "x-demo-token" not in text.lower()
+        assert "authorization" not in text.lower()

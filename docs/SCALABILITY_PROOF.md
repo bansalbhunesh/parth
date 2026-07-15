@@ -119,7 +119,25 @@ Artifacts contain the target, revision, topology label, request profile,
 runtime, success/error/rate-limit counts, throughput, p50/p95/min/max latency,
 cache/mode mix, and explicit limitations. Tokens are never recorded.
 
-## 5. What local probes can and cannot prove
+## 5. Latest local HTTP evidence
+
+The dated artifacts in `docs/evidence/load/` are bound to source revision
+`ed152ca` and the `local-windows-two-uvicorn-workers` profile. With 20 concurrent
+connections they recorded 100% success across 3,200 requests:
+
+| Endpoint | Requests | p50 | p95 | Throughput |
+|---|---:|---:|---:|---:|
+| `/health/live` | 1,000 | 27 ms | 83 ms | 555.2 req/s |
+| `/health/ready` | 1,000 | 37 ms | 111 ms | 412.2 req/s |
+| `/health` | 1,000 | 36 ms | 128 ms | 305.0 req/s |
+| `/analyze` repeated cached input | 200 | 49 ms | 138 ms | 322.1 req/s |
+
+The liveness result clears the directional 100 ms p95 target in this local
+profile. It does not award the production gate: the run used two local Uvicorn
+workers, no managed dependencies, no live model provider, and no failure
+injection or sustained soak.
+
+## 6. What local probes can and cannot prove
 
 A local probe can expose correctness, queueing, connection, and single-host
 bottlenecks. It cannot certify:

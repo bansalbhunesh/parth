@@ -14,3 +14,22 @@ Local artifacts are directional diagnostics, not production SLA proof. The
 release gate requires a configured staging topology with at least two API
 replicas and one worker plus the soak and failure-injection profile described in
 `docs/SCALABILITY_PROOF.md`.
+
+## 2026-07-15 local two-worker diagnostic
+
+Source revision: `ed152ca`. Profile: `local-windows-two-uvicorn-workers`.
+All model-provider keys were disabled. The analysis profile repeated one input
+after warm-up, so it measures deterministic cached reuse rather than live-model
+latency.
+
+| Artifact | Requests / concurrency | Success | Throughput | p50 / p95 |
+|---|---:|---:|---:|---:|
+| [`health-live`](2026-07-15_ed152ca_local-two-worker_health-live.json) | 1,000 / 20 | 100% | 555.2 req/s | 27 / 83 ms |
+| [`health-ready`](2026-07-15_ed152ca_local-two-worker_health-ready.json) | 1,000 / 20 | 100% | 412.2 req/s | 37 / 111 ms |
+| [`health-legacy`](2026-07-15_ed152ca_local-two-worker_health-legacy.json) | 1,000 / 20 | 100% | 305.0 req/s | 36 / 128 ms |
+| [`analyze-cached`](2026-07-15_ed152ca_local-two-worker_analyze-cached.json) | 200 / 20 | 100% | 322.1 req/s | 49 / 138 ms |
+
+The liveness probe clears the repository's directional 100 ms p95 target in
+this profile. Readiness, legacy health, and cached analysis remain below their
+respective 250/300 ms read/write ceilings, but none of these local numbers can
+replace the required staged soak.

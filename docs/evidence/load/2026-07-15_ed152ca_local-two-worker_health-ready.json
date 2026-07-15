@@ -1,0 +1,45 @@
+{
+  "generated_at": "2026-07-15T09:42:28.343650+00:00",
+  "limitations": [
+    "A single-client-host probe does not prove multi-replica or managed-service capacity.",
+    "Cached deterministic analysis does not represent live-provider latency or cost."
+  ],
+  "profile": {
+    "concurrency": 20,
+    "endpoint": "/health/ready",
+    "label": "local-windows-two-uvicorn-workers",
+    "method": "GET",
+    "requests": 1000,
+    "revision": "ed152ca",
+    "target": "http://127.0.0.1:8106",
+    "timeout_seconds": 15.0,
+    "varied_inputs": false,
+    "warmup": false
+  },
+  "results": {
+    "accepted_200_202": 1000,
+    "analysis_modes": {},
+    "cache_hits": 0,
+    "concurrency": 20,
+    "error_rate_percent": 0.0,
+    "errors": 0,
+    "latency_ms": {
+      "max": 282.566,
+      "min": 9.628,
+      "p50": 37.103,
+      "p95": 111.373
+    },
+    "rate_limited_429": 0,
+    "requests_attempted": 1000,
+    "sample_error": "",
+    "success_2xx": 1000,
+    "success_rate_percent": 100.0,
+    "throughput_rps": 412.235,
+    "wall_seconds": 2.426
+  },
+  "runtime": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.14.3"
+  },
+  "schema_version": 1
+}

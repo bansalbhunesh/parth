@@ -10,7 +10,16 @@ project.
 3. Click `Analyze`.
 4. Check that each finding includes the mismatched value, cited basis, predicted
    commissioning test, severity, and lead-time impact.
-5. Open Evidence: <https://parth-tan.vercel.app/evidence>
+5. Read the **Systemic risk** panel above the findings — this is the 90-second
+   money shot. It shows the project compound-risk band, the **schedule cliff**
+   (the soonest week where two or more findings fail together), and a **Fix this
+   first** action. The story to tell: three findings are not three tickets — they
+   are *one cliff at Week 44*, and clearing the converged cluster reduces risk more
+   than any single fix (resolving one alone leaves the commissioning gate failing).
+6. Note each finding's **Evidence: <band>** chip — a deterministic strength read
+   (numeric exactness, rule/graph grounding, citation), not a probability of
+   correctness.
+7. Open Evidence: <https://parth-tan.vercel.app/evidence>
 
 ## What to verify locally
 
@@ -35,6 +44,10 @@ is intentionally the remaining submission blocker.
 
 - The core product does not stop at "values differ"; it maps each deviation to
   the commissioning test it will fail and the lead time at risk.
+- Beyond per-finding detection, a deterministic decision loop computes the
+  systemic compound risk, the schedule cliff, and a risk-ranked remediation plan
+  — offline and reproducible, each unit-tested at 100% line and branch. Fixing one
+  of a converged set is correctly surfaced as low-leverage.
 - The benchmark reports both positive labels and clean-negative controls, with
   reviewer status and fixture provenance labelled near the numbers.
 - The demo degrades honestly: provider failover is described as availability,

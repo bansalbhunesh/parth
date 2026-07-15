@@ -14,6 +14,7 @@ build/
 node_modules/
 .next/
 tsconfig.tsbuildinfo
+frontend/coverage/
 # playwright E2E artifacts
 frontend/test-results/
 frontend/playwright-report/

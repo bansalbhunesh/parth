@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "../../components/AppLink";
 import AnalyzePanel from "../../components/AnalyzePanel";
 import ThemeToggle from "../../components/ThemeToggle";
 import { BENCHMARK_LIMITATION, PRODUCT_CLAIMS } from "../../lib/claims";

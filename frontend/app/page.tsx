@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "../components/AppLink";
 import ResolutionWorkflow from "../components/ResolutionWorkflow";
 import ThemeToggle from "../components/ThemeToggle";
 import { BENCHMARK_LIMITATION, PRODUCT_CLAIMS } from "../lib/claims";

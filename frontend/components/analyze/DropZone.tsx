@@ -14,6 +14,8 @@ interface DropZoneProps {
 export default function DropZone({ label, file, onFile, accept, hint, disabled }: DropZoneProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
+  const hintText = hint ?? "Drop PDF/MD/TXT here or click to browse";
+  const fileSize = file ? `${(file.size / 1024).toFixed(1)} KB` : null;
 
   const handleDrop = useCallback(
     (event: React.DragEvent) => {
@@ -30,7 +32,6 @@ export default function DropZone({ label, file, onFile, accept, hint, disabled }
       className={`analyze-dropzone ${dragOver ? "drag-over" : ""} ${file ? "has-file" : ""}`}
       role="button"
       tabIndex={disabled ? -1 : 0}
-      aria-label={`${label}: drop a PDF, MD or TXT file here, or activate to browse`}
       aria-disabled={disabled}
       onDragOver={(event) => { event.preventDefault(); setDragOver(true); }}
       onDragLeave={() => setDragOver(false)}
@@ -48,7 +49,6 @@ export default function DropZone({ label, file, onFile, accept, hint, disabled }
         type="file"
         accept={accept}
         className="dropzone-input"
-        aria-label={`Choose ${label.toLowerCase()}`}
         onChange={(event) => {
           const selectedFile = event.target.files?.[0];
           if (selectedFile) onFile(selectedFile);
@@ -60,7 +60,7 @@ export default function DropZone({ label, file, onFile, accept, hint, disabled }
           <div className="dropzone-file-icon" aria-hidden="true">DOC</div>
           <div className="dropzone-file-info">
             <div className="dropzone-file-name">{file.name}</div>
-            <div className="dropzone-file-size">{(file.size / 1024).toFixed(1)} KB</div>
+            <div className="dropzone-file-size">{fileSize}</div>
           </div>
         </div>
       ) : (
@@ -73,7 +73,7 @@ export default function DropZone({ label, file, onFile, accept, hint, disabled }
             </svg>
           </div>
           <div className="dropzone-label">{label}</div>
-          <div className="dropzone-hint">{hint ?? "Drop PDF/MD/TXT here or click to browse"}</div>
+          <div className="dropzone-hint">{hintText}</div>
         </div>
       )}
     </div>

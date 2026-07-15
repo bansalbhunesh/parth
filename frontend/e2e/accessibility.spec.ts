@@ -16,6 +16,14 @@ for (const route of ROUTES) {
   });
 }
 
+test("visible control labels are contained in their accessible names", async ({ page }) => {
+  await page.goto("/judge", { waitUntil: "networkidle" });
+  const results = await new AxeBuilder({ page })
+    .withRules(["label-content-name-mismatch"])
+    .analyze();
+  expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+});
+
 test("primary routes reflow at the WCAG 400 percent equivalent width", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 800 });
   for (const route of ROUTES) {

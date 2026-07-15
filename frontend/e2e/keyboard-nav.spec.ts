@@ -27,7 +27,7 @@ test.describe("Keyboard navigation — analyze panel", () => {
     await page.goto("/judge");
     await page.getByRole("button", { name: "Upload PDFs" }).click();
 
-    const specDropzone = page.getByLabel(/Spec document/);
+    const specDropzone = page.getByRole("button", { name: /Spec document/ });
     await specDropzone.focus();
     await expect(specDropzone).toBeFocused();
     await expect(specDropzone).toHaveAttribute("role", "button");

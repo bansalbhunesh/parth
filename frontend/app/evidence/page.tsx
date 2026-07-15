@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "../../components/AppLink";
 import ThemeToggle from "../../components/ThemeToggle";
 import { getHealth } from "../../lib/api";
 import { BENCHMARK_LIMITATION, PRODUCT_CLAIMS } from "../../lib/claims";

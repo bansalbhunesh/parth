@@ -6,13 +6,13 @@ import { PRODUCT_CLAIMS } from "../lib/claims";
 const geologica = Geologica({
   subsets: ["latin"],
   variable: "--font-display",
-  display: "swap",
+  display: "optional",
 });
 
 const hanken = Hanken_Grotesk({
   subsets: ["latin"],
   variable: "--font-body",
-  display: "swap",
+  display: "optional",
 });
 
 const OG_IMAGE = {

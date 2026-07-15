@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "../../components/AppLink";
 import ThemeToggle from "../../components/ThemeToggle";
 import { getRegisterSnapshot, getRemediation, getSchedule, getSupplyChain } from "../../lib/api";
 

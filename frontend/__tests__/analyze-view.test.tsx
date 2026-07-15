@@ -57,7 +57,7 @@ describe("DropZone", () => {
     const onFile = vi.fn();
     const file = new File(["content"], "basis.txt", { type: "text/plain" });
     const { rerender } = render(<DropZone label="Spec" file={null} onFile={onFile} accept=".txt" disabled={false} />);
-    const zone = screen.getByRole("button", { name: /Spec: drop/ });
+    const zone = screen.getByRole("button", { name: /Spec Drop/ });
 
     fireEvent.dragOver(zone);
     expect(zone).toHaveClass("drag-over");
@@ -73,7 +73,7 @@ describe("DropZone", () => {
   it("opens the picker from keyboard but remains inert when disabled", () => {
     const clickSpy = vi.spyOn(HTMLInputElement.prototype, "click").mockImplementation(() => undefined);
     const { rerender } = render(<DropZone label="Spec" file={null} onFile={vi.fn()} accept=".txt" disabled={false} />);
-    const zone = screen.getByRole("button", { name: /Spec: drop/ });
+    const zone = screen.getByRole("button", { name: /Spec Drop/ });
     fireEvent.keyDown(zone, { key: "Enter" });
     fireEvent.keyDown(zone, { key: " " });
     fireEvent.click(zone);

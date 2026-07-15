@@ -17,8 +17,11 @@ test.describe("Live analysis — file upload", () => {
     // than relying on default state.
     await page.getByRole("button", { name: "Upload PDFs" }).click();
 
-    const specDropzone = page.getByLabel(/Spec document/);
-    const subDropzone = page.getByLabel(/Submittal document/);
+    // The accessible name intentionally changes to the selected filename, so
+    // keep a stable structural locator across that state transition.
+    const dropzones = page.locator(".analyze-dropzone");
+    const specDropzone = dropzones.nth(0);
+    const subDropzone = dropzones.nth(1);
 
     await specDropzone.locator('input[type="file"]').setInputFiles(SPEC_FIXTURE);
     await subDropzone.locator('input[type="file"]').setInputFiles(SUBMITTAL_FIXTURE);

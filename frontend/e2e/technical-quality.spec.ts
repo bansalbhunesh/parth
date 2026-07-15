@@ -2,6 +2,43 @@ import { expect, test } from "@playwright/test";
 
 const ROUTES = ["/", "/judge", "/evidence", "/war-room"];
 
+test("internal navigation remains operable without speculative prefetch", async ({ page }) => {
+  await page.goto("/", { waitUntil: "networkidle" });
+  await page.getByRole("link", { name: "Evidence" }).first().click();
+  await expect(page).toHaveURL(/\/evidence$/);
+  await expect(page.locator("h1")).toBeVisible();
+
+  await page.getByRole("link", { name: "Analyze" }).first().click();
+  await expect(page).toHaveURL(/\/judge$/);
+  await expect(page.locator("h1")).toBeVisible();
+
+  await page.getByRole("link", { name: "Interventions" }).first().click();
+  await expect(page).toHaveURL(/\/war-room$/);
+  await expect(page.locator("h1")).toBeVisible();
+});
+
+test("active routes emit no console errors, page errors, or unhandled rejections", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.addEventListener("unhandledrejection", (event) => {
+      console.error("unhandled rejection", event.reason);
+    });
+  });
+  for (const route of ROUTES) {
+    const failures: string[] = [];
+    const onConsole = (message: { type: () => string; text: () => string }) => {
+      if (message.type() === "error") failures.push(`console: ${message.text()}`);
+    };
+    const onPageError = (error: Error) => failures.push(`page: ${error.message}`);
+    page.on("console", onConsole);
+    page.on("pageerror", onPageError);
+    await page.goto(route, { waitUntil: "networkidle" });
+    await page.waitForTimeout(100);
+    page.off("console", onConsole);
+    page.off("pageerror", onPageError);
+    expect(failures, `${route}: runtime failures`).toEqual([]);
+  }
+});
+
 test("active routes preserve the semantic and interaction contract", async ({ page }) => {
   for (const route of ROUTES) {
     const response = await page.goto(route, { waitUntil: "load" });

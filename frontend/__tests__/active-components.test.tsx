@@ -59,7 +59,7 @@ describe("AnalyzePanel", () => {
 
     expect(screen.getByRole("button", { name: "Upload PDFs" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("button", { name: "Upload & Analyze" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: /Spec document:/ })).toHaveAttribute("aria-disabled", "false");
+    expect(screen.getByRole("button", { name: /Spec document Drop/ })).toHaveAttribute("aria-disabled", "false");
     expect(await screen.findByText(/OCR disabled in this deployment/)).toBeInTheDocument();
   });
 
@@ -116,7 +116,7 @@ describe("AnalyzePanel", () => {
 
   it("accepts files through both keyboard-operable drop zones", async () => {
     render(<AnalyzePanel />);
-    const [specZone, submittalZone] = screen.getAllByRole("button", { name: /drop a PDF/ });
+    const [specZone, submittalZone] = screen.getAllByRole("button", { name: /Drop PDF/ });
     const inputs = document.querySelectorAll<HTMLInputElement>('input[type="file"]');
 
     fireEvent.change(inputs[0], { target: { files: [new File(["spec"], "spec.txt", { type: "text/plain" })] } });

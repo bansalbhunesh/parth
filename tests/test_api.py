@@ -289,6 +289,22 @@ class TestAnalyzeEndpoint:
         r = client.post("/analyze", json={"spec_text": "short", "submittal_text": "short"})
         assert r.status_code == 422
 
+    def test_analyze_returns_compound_risk_layer(self):
+        spec = """# Design Basis
+- **UPS-02** — battery_runtime_min: shall be **10 min** (ref: DESIGN-BASIS; clause DB-1.1)
+- **UPS-02** — efficiency_pct: shall be **96 %** (ref: DESIGN-BASIS; clause DB-1.2)"""
+        submittal = """# Vendor Submittal
+- **UPS-02** — battery_runtime_min: **7 min** (vendor)
+- **UPS-02** — efficiency_pct: **90 %** (vendor)"""
+        r = client.post("/analyze", json={"spec_text": spec, "submittal_text": submittal})
+        assert r.status_code == 200
+        cr = r.json()["compound_risk"]
+        assert 0.0 <= cr["project_compound_risk"] <= 1.0
+        assert cr["risk_band"] in {"Critical", "High", "Moderate", "Low"}
+        assert cr["deviation_count"] == r.json()["count"]
+        assert isinstance(cr["clusters"], list)
+        assert "no LLM" in cr["method"]
+
 
 class TestDataEndpoints:
     def test_cx_plan(self):

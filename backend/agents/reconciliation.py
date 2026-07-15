@@ -133,7 +133,7 @@ Do NOT include items that meet or exceed their requirements.
 # omission recall but doubled the clean-negative false-alert rate, so this
 # candidate remains disabled. Baseline prompt revisions are separately tagged.
 COVERAGE_MATRIX_ENV = "PRAMAAN_COVERAGE_MATRIX"
-BASELINE_PROMPT_VERSION = "reconcile-v6-required-values"
+BASELINE_PROMPT_VERSION = "reconcile-v7-alphanumeric-values"
 COVERAGE_MATRIX_PROMPT_VERSION = "reconcile-v1.7-candidate"
 _BASELINE_OUTPUT_MARKER = "Return a JSON array of deviations found. Each element:"
 
@@ -249,6 +249,14 @@ def _words_are_grounded(words: list[str], spec_lower: str) -> bool:
     return bool(words) and all(word in spec_lower for word in words)
 
 
+def _has_mixed_alphanumeric_token(value: str) -> bool:
+    tokens = re.findall(r"[a-z0-9]+", value)
+    return any(
+        re.search(r"[a-z]", token) and re.search(r"\d", token)
+        for token in tokens
+    )
+
+
 def _value_is_grounded(required_value, spec_lower: str, spec_compact: str) -> bool:
     if required_value is None or not str(required_value).strip():
         return False
@@ -259,6 +267,8 @@ def _value_is_grounded(required_value, spec_lower: str, spec_compact: str) -> bo
     if compact and compact in spec_compact:
         return True
     if re.fullmatch(r"(?:[a-z]\+\d+|\d+[a-z])", compact):
+        return False
+    if _has_mixed_alphanumeric_token(value):
         return False
     if _numbers_are_grounded(numbers, spec_lower):
         return True

@@ -193,6 +193,8 @@ class TestGroundFindings:
         spec = "Ingress protection shall be IP42. Chiller plant shall be N+1."
         out = _ground_findings([self._dev(required_value="N+2")], spec)
         assert out == []
+        out = _ground_findings([self._dev(required_value="Type 2B")], spec)
+        assert out == []
 
     def test_string_requirement_kept(self):
         from backend.agents.reconciliation import _ground_findings

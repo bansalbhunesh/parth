@@ -1,6 +1,6 @@
 # PS4 External Benchmark — Report (v1.2.0)
 
-_Generated 2026-07-09T06:29:27+00:00 · run
+_Generated 2026-07-15T15:43:33+00:00 · run
 `scripts/benchmark_report.py` to refresh. Every metric carries an evidence label._
 
 > **Positioning (judge-safe):** Pramaan reports the repeatable 3-pass
@@ -62,7 +62,7 @@ _Generated 2026-07-09T06:29:27+00:00 · run
 
 ## Non-claims
 - NOT a real-world-accuracy, field-validation, or real-datasheet-accuracy claim.
-- Seed is team-authored and single-author labeled; primary-source acquisition and two-person reviewer adjudication are pending.
+- Seed is team-authored and single-author labeled; source-archive acquisition and two-person reviewer adjudication are pending.
 
 See [`BENCHMARK_PROTOCOL.md`](../BENCHMARK_PROTOCOL.md) for the acquisition backlog
 and [`labels/REVIEW_STATUS.md`](../labels/REVIEW_STATUS.md) for the review state.

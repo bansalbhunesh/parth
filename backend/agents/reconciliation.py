@@ -123,34 +123,55 @@ If there are ZERO deviations for this system, return an empty array [].
 Do NOT include items that meet or exceed their requirements.
 """
 
-# ── Coverage-matrix mode (prompt-pass v1.3 CANDIDATE — opt-in, unmeasured) ──
+# ── Coverage-matrix mode (prompt-pass v1.7 CANDIDATE — opt-in experiment) ──
 # The frozen ps4_external_v1 error analysis shows omissions are the top real
 # false-negative cause: a single pass is asked to "notice absence", which LLMs
 # do poorly. Schema-guided two-phase output (build the full requirement
 # checklist FIRST, then verify each row against the submittal) turns absence
 # detection into a per-item lookup. Opt-in via PRAMAAN_COVERAGE_MATRIX=1 and
 # OFF by default: the default prompt must stay byte-identical to the one the
-# published benchmark numbers were measured with. Do not flip the default
-# until a full benchmark pass has been run and reported with this suffix.
+# published benchmark numbers were measured with. A complete one-pass
+# experiment on 2026-07-15 improved omission recall but doubled the
+# clean-negative false-alert rate, so this candidate remains disabled.
 COVERAGE_MATRIX_ENV = "PRAMAAN_COVERAGE_MATRIX"
+BASELINE_PROMPT_VERSION = "reconcile-v2"
+COVERAGE_MATRIX_PROMPT_VERSION = "reconcile-v1.7-candidate"
+_BASELINE_OUTPUT_MARKER = "Return a JSON array of deviations found. Each element:"
 
 COVERAGE_MATRIX_SUFFIX = """
-=== COVERAGE MATRIX (build this FIRST) ===
-Instead of a bare array, return ONE JSON object with two keys, in this order:
+=== COVERAGE MATRIX (reason internally before answering) ===
+SCOPE GATE: first identify the equipment package, component, or system that the
+VENDOR SUBMITTAL actually covers. Build the INTERNAL checklist only from design-
+basis requirements governing that same submitted scope. A single-equipment
+submittal is not required to restate requirements for unrelated equipment in the
+owner's full design basis; never flag another system merely because it is absent
+from this package. If the submittal explicitly covers multiple systems, include
+each stated system's requirements.
 
-1. "checklist": one row for EVERY requirement in the design basis — walk every
-   table row and every clause; do not skip any. Each row:
-   {"component": "<exact id>", "parameter": "<exact snake_case machine_name>",
-    "required_value": <value from design basis>,
-    "addressed_in_submittal": true|false}
-   A requirement is addressed ONLY if the submittal states a corresponding
-   value for it somewhere. Judge every row independently — never assume a
-   section is complete because neighbouring rows were.
+Within that scope, checklist EVERY applicable requirement — walk every relevant
+table row and clause. For each row independently decide whether the submittal
+states a corresponding value. Never assume a section is complete because
+neighbouring rows were. Do NOT return this checklist.
 
-2. "deviations": the array specified above. For EVERY checklist row with
-   "addressed_in_submittal": false you MUST emit an omission deviation
-   (provided_value "Not stated", severity at least "Major"). Then add the
-   value/derived deviations for addressed rows that fail their requirement.
+For every internal row with no corresponding submitted value, emit an omission
+deviation with provided_value "Not stated" and severity at least "Major". Add
+value/derived deviations for addressed rows that fail their requirement.
+
+FINAL OUTPUT: return ONLY a JSON array of deviation objects, never checklist
+rows and never a wrapper object. EVERY deviation MUST include ALL keys below:
+{
+  "component": "<exact component id>",
+  "parameter": "<exact snake_case machine_name>",
+  "required_value": <number or string copied from design basis>,
+  "provided_value": <actual submitted value, or "Not stated" for omission>,
+  "unit": "<unit or empty string>",
+  "standard_ref": "<governing reference or DESIGN-BASIS>",
+  "spec_clause": "<clause or empty string>",
+  "severity": "Critical|Major|Minor",
+  "rationale": "<one-sentence grounded reason>",
+  "confidence": <0.0 to 1.0>
+}
+If there are ZERO deviations, return []. Do NOT return compliant requirements.
 """
 
 
@@ -158,6 +179,30 @@ def _prompt_suffix() -> str:
     """Read the env at call time (not import time) so tests and the eval
     harness can toggle the mode per-run."""
     return COVERAGE_MATRIX_SUFFIX if os.getenv(COVERAGE_MATRIX_ENV) == "1" else ""
+
+
+def build_reconciliation_prompt(spec: str, submittal: str, standards: str) -> str:
+    """Build the shared reconciliation prompt used by every text-analysis path.
+
+    Candidate mode replaces the baseline's final array-output clause instead
+    of appending a contradictory format instruction. With the flag absent,
+    this returns the exact historical prompt string byte-for-byte.
+    """
+    baseline = PROMPT_TEMPLATE.format(
+        spec=spec, submittal=submittal, standards=standards,
+    )
+    suffix = _prompt_suffix()
+    if not suffix:
+        return baseline
+    output_start = baseline.index(_BASELINE_OUTPUT_MARKER)
+    return baseline[:output_start] + suffix
+
+
+def active_prompt_version() -> str:
+    """Return a stable version label for benchmark/run provenance."""
+    if os.getenv(COVERAGE_MATRIX_ENV) == "1":
+        return COVERAGE_MATRIX_PROMPT_VERSION
+    return BASELINE_PROMPT_VERSION
 
 
 def _read(p):
@@ -295,14 +340,13 @@ def reconcile_system_at(base, sys_id: str, standards_text: str, with_cx: bool = 
         return []
     spec = spec_path.read_text(encoding="utf-8")
     submittal = sub_path.read_text(encoding="utf-8")
-    prompt = PROMPT_TEMPLATE.format(
-        spec=spec, submittal=submittal, standards=standards_text
-    ) + _prompt_suffix()
+    prompt = build_reconciliation_prompt(spec, submittal, standards_text)
     if feedback:
         prompt += (
             "\n\n=== SELF-REVIEW FEEDBACK (revise your previous answer) ===\n"
             + feedback
-            + "\nReturn the corrected JSON array of deviations.\n"
+            + "\nReturn ONLY the corrected JSON array of deviations; "
+            "never return a checklist or wrapper object.\n"
         )
     try:
         raw = complete_json(prompt, system=SYSTEM_PROMPT)

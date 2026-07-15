@@ -132,6 +132,13 @@ def test_timeout_not_run_counted_as_miss_in_primary():
     assert agg["primary_recall_semantic"] == 0.5      # pb's positive counted as a miss
     assert agg["secondary_recall_semantic"] == 1.0    # pb excluded from secondary
     assert agg["pairs_not_run"] == 1
+    import benchmark_revision_compare as C
+    metrics = C._metrics({
+        "positive_labels": 2, "primary_tp": 1, "false_positives_total": 1,
+        "primary_recall_exact": 0.5, "clean_negative_false_alert_rate": 0.25,
+        "latency_p50_ms": 10, "latency_p95_ms": 20, "pairs_not_run": 1,
+    })
+    assert metrics["recall"] == metrics["precision"] == metrics["f1"] == 0.5
 
 
 # ── independence from the seeded corpus ──────────────────────────────
@@ -153,6 +160,14 @@ def test_hash_and_report_run_without_keys(monkeypatch, tmp_path):
     assert H.main() == 0
     assert R.main() == 0
     assert (tmp_path / "reports" / "benchmark_card.json").exists()
+    clean_primary = {
+        "mode": "llm", "model": "google/gemini-3.1-flash-lite",
+        "repeats_total": 3, "prompt_mode": "baseline", "worktree_dirty": False,
+    }
+    assert L.is_featured_primary_run(clean_primary, clean_primary["model"])
+    assert not L.is_featured_primary_run(
+        {**clean_primary, "publication_role": "branch-comparison"}, clean_primary["model"]
+    )
 
 
 def test_rule_mode_run_one_no_key(monkeypatch):

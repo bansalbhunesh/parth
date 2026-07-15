@@ -51,17 +51,18 @@ EARLY_BATCH_MAX_PAIR = 15
 
 
 def _model_runs() -> list[pathlib.Path]:
-    """Same selection rule as scripts/benchmark_report.py's _model_runs: every
-    run directory whose summary.json reports mode=="llm" and this model,
-    sorted by directory name. Dynamic, not hardcoded to run1/2/3, so a future
-    run4 is picked up automatically."""
+    """Clean repeat-3 baseline passes for the published featured aggregate.
+
+    Candidate, one-off, and dirty-worktree evidence stays under ``runs/`` but
+    cannot alter the committed benchmark card or its calibration report.
+    """
     out = []
     for d in sorted(RUNS.glob("*")):
         sp = d / "summary.json"
         if not sp.exists():
             continue
         s = json.loads(sp.read_text(encoding="utf-8"))
-        if s.get("mode") == "llm" and s.get("model") == FEATURED_MODEL:
+        if L.is_featured_primary_run(s, FEATURED_MODEL):
             out.append(d)
     return out
 

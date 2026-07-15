@@ -8,3 +8,6 @@ run,mode,provider,model,primary_recall_semantic,primary_recall_exact,secondary_r
 2026-07-04_openai_google-gemini-3.1-flash-lite_run1,llm,openai,google/gemini-3.1-flash-lite,0.873,0.7143,0.873,55,63,3,0.0,0,0.0,2246.0,3199.8
 2026-07-04_openai_google-gemini-3.1-flash-lite_run2,llm,openai,google/gemini-3.1-flash-lite,0.873,0.6984,0.873,55,63,3,0.0,0,0.0,2531.0,3841.2
 2026-07-04_openai_google-gemini-3.1-flash-lite_run3,llm,openai,google/gemini-3.1-flash-lite,0.8413,0.6825,0.8833,53,63,2,0.0,1,0.0,2667.0,18430.7
+2026-07-15_openai_google-gemini-3.1-flash-lite_coverage-matrix-v1.6_run1,llm,openai,google/gemini-3.1-flash-lite,0.7937,0.6508,0.8772,50,63,43,0.0625,5,0.0943,3290.5,7345.8
+2026-07-15_openai_google-gemini-3.1-flash-lite_coverage-matrix-v1.7_run1,llm,openai,google/gemini-3.1-flash-lite,0.8095,0.6667,0.8947,51,63,9,0.0312,5,0.0943,2143.5,3322.9
+2026-07-15_openai_google-gemini-3.1-flash-lite_run1,llm,openai,google/gemini-3.1-flash-lite,0.8095,0.6667,0.8947,51,63,10,0.0156,5,0.0943,2125.0,4185.4

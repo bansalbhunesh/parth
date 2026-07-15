@@ -58,8 +58,11 @@ def _f1(r):
 
 
 def _model_runs(runs, model):
-    return sorted((r for r in runs if r.get("mode") == "llm" and r.get("model") == model),
-                  key=lambda r: r["_dir"])
+    if model == FEATURED_MODEL:
+        selected = (r for r in runs if L.is_featured_primary_run(r, model))
+    else:
+        selected = (r for r in runs if r.get("mode") == "llm" and r.get("model") == model)
+    return sorted(selected, key=lambda r: r["_dir"])
 
 
 def _aggregate_model(runs, model):

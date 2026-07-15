@@ -12,12 +12,12 @@ from typing import NamedTuple
 from backend.agents import cx_graph
 from backend.agents.commissioning import _RULES, predict_cx_impact
 from backend.agents.reconciliation import (
-    PROMPT_TEMPLATE,
     SYSTEM_PROMPT,
     _all_standards_text,
     _check_citation_faithfulness,
     _ground_findings,
     _validate_deviations,
+    build_reconciliation_prompt,
 )
 
 log = logging.getLogger("pramaan.analyze")
@@ -339,9 +339,7 @@ def run_analysis(
 ) -> AnalysisResult:
     t0 = time.time()
     standards = _all_standards_text(max_chars_per=1800)
-    prompt = PROMPT_TEMPLATE.format(
-        spec=spec_text, submittal=submittal_text, standards=standards,
-    )
+    prompt = build_reconciliation_prompt(spec_text, submittal_text, standards)
     standards_load_ms = round((time.time() - t0) * 1000)
     llm_call_ms = None
     provider = None
@@ -412,17 +410,19 @@ def run_vision_analysis(
     mime_type: str,
     system_id: str = "CUSTOM",
 ) -> AnalysisResult:
-    """Reconcile a text spec against a submittal supplied AS AN IMAGE, using
-    Gemini vision to read values straight from the picture (not OCR→text). This
-    is the 'reads the drawing' capability. Gemini-only; on any failure it
-    degrades to mode='vision-unavailable' with no findings rather than raising —
-    the caller can then fall back to the text/OCR path."""
+    """Reconcile a text spec against an image via the configured multimodal
+    provider (not OCR→text). Failures return mode='vision-unavailable' with no
+    findings, allowing callers to use the text/OCR path."""
     t0 = time.time()
     standards = _all_standards_text(max_chars_per=1800)
     prompt = _VISION_PROMPT.format(spec=spec_text, standards=standards)
     future = None
+    provider = None
     try:
         from backend.llm import _extract_json, complete_vision
+        provider = "openai" if (
+            os.getenv("PRAMAAN_LLM", "gemini") == "openai"
+            and os.environ.get("OPENAI_API_KEY")) else "gemini"
         future = _submit_llm(
             lambda: _extract_json(complete_vision(prompt, image_bytes, mime_type, SYSTEM_PROMPT))
         )
@@ -436,12 +436,14 @@ def run_vision_analysis(
         if future is not None:
             future.cancel()
         log.warning("Vision analysis exceeded %.0fs", _LLM_TIMEOUT_S)
-        devs, mode = [], "vision-unavailable"
+        devs, mode, provider = [], "vision-unavailable", None
     except Exception as exc:
         log.warning("Vision analysis failed: %s", exc)
-        devs, mode = [], "vision-unavailable"
+        devs, mode, provider = [], "vision-unavailable", None
     elapsed = round((time.time() - t0) * 1000)
-    return AnalysisResult(deviations=devs, mode=mode, elapsed_ms=elapsed)
+    return AnalysisResult(
+        deviations=devs, mode=mode, elapsed_ms=elapsed, provider=provider,
+    )
 
 
 def run_streaming_analysis(
@@ -453,9 +455,7 @@ def run_streaming_analysis(
 
     t0 = time.time()
     standards = _all_standards_text(max_chars_per=1800)
-    prompt = PROMPT_TEMPLATE.format(
-        spec=spec_text, submittal=submittal_text, standards=standards,
-    )
+    prompt = build_reconciliation_prompt(spec_text, submittal_text, standards)
 
     yield "event: status\ndata: Running AI reconciliation engine...\n\n"
 

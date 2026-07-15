@@ -46,8 +46,23 @@ the report gives the clean-negative false-alert rate.
 - `--mode llm` calls the live analysis path; a pair whose analysis fell back to
   the rule engine or errored is recorded `not_run` for the LLM metric — never
   fabricated. `--repeat N` runs each pair N times to expose variance.
+- `--prompt-mode baseline` preserves the exact prompt used for the published
+  v1.2 result. `--prompt-mode coverage-matrix-v1.7` is a measured, rejected,
+  opt-in experiment that
+  identifies the submitted equipment scope, enumerates every applicable design-
+  basis requirement internally, verifies each row, and returns only the stable
+  deviation-array schema;
+  it is never enabled implicitly and requires `--mode llm`.
 - Each run writes `run_config.yaml`, `predictions.jsonl`, `per_pair_results.csv`,
-  `summary.json`, `errors.jsonl` under `runs/<date>_<provider>_<model>_runK/`.
+  `summary.json`, `errors.jsonl` under a prompt-mode-specific run directory.
+  The config records both `prompt_mode` and `prompt_version`, preventing a
+  candidate run from being mistaken for or overwriting the published baseline.
+  It also records the Git revision, whether the worktree was dirty, and the
+  SHA-256 of the tracked-file diff so an experimental run cannot masquerade as
+  an unmodified commit. Per-pair artifacts record the provider that answered.
+- Published featured-model reports admit only clean-worktree, baseline-prompt
+  passes declared as part of a complete repeat-3 group. One-off and candidate
+  directories remain evidence, but cannot silently change the benchmark card.
 
 ## How not-run / timeouts are counted
 - **Primary recall** counts `not_run`/timeout pairs' positive labels as **misses**.
@@ -68,6 +83,35 @@ python scripts/benchmark_hash_sources.py
 python scripts/benchmark_ps4_external.py --mode rule
 python scripts/benchmark_report.py
 ```
+
+For an immutable three-pass comparison of a clean branch revision, use a
+unique tag and keep it out of the published-primary aggregate:
+
+```
+python scripts/benchmark_ps4_external.py --mode llm --provider openai \
+  --model google/gemini-3.1-flash-lite --repeat 3 \
+  --run-tag branch-e2e-<short-revision> --publication-role branch-comparison
+python scripts/benchmark_revision_compare.py \
+  --run-tag branch-e2e-<short-revision> --output-stem branch_vs_main_<date>
+```
+
+Run directories are immutable. Reusing a date/model/tag/run-index combination
+fails instead of overwriting evidence. Branch-comparison runs remain available
+to reports but cannot silently enter the published primary aggregate.
+
+To reproduce or extend the experimental omission candidate without changing the baseline:
+
+```
+python scripts/benchmark_ps4_external.py --mode llm --provider gemini \
+  --model <declared-model> --repeat 3 --prompt-mode coverage-matrix-v1.7
+```
+
+Publish baseline and candidate results side by side over the complete frozen
+benchmark. Do not enable the candidate by default unless the full run improves
+omission recall without breaching the precision or clean-negative controls.
+The 2026-07-15 single-pass v1.7 experiment improved omission recall but breached
+the clean-negative control, so it remains disabled; see
+[`reports/coverage_matrix_experiment_2026-07-15.md`](reports/coverage_matrix_experiment_2026-07-15.md).
 
 ## Limitations and non-claims (v1 seed)
 - Seed pairs are **team-authored**, not downloaded primary sources → **no external

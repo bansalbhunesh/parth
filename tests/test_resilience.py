@@ -101,12 +101,18 @@ class TestJSONExtraction:
         result = _extract_json('{"outer": {"inner": 5}}')
         assert result["outer"]["inner"] == 5
 
-    def test_array_preferred_over_object(self):
-        # Contract: deviations arrive as a top-level array, so the extractor
-        # prefers the first balanced [...] when both shapes are present.
+    def test_top_level_object_preserved_when_it_contains_arrays(self):
+        # A valid top-level object must not be reduced to its first nested
+        # array; coverage-matrix responses carry both checklist + deviations.
         from backend.llm import _extract_json
         result = _extract_json('{"wrap": [1, 2, 3]}')
-        assert result == [1, 2, 3]
+        assert result == {"wrap": [1, 2, 3]}
+        result = _extract_json(
+            '{"checklist": [{"parameter": "runtime"}], '
+            '"deviations": [{"provided_value": 8}]}'
+        )
+        assert result["checklist"][0]["parameter"] == "runtime"
+        assert result["deviations"][0]["provided_value"] == 8
 
     def test_malformed_raises(self):
         from backend.llm import _extract_json

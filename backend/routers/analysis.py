@@ -428,10 +428,10 @@ def _llm_check_deep(status: dict) -> dict:
     import time as _time
 
     from backend.agents.reconciliation import (
-        PROMPT_TEMPLATE,
         SYSTEM_PROMPT,
         _all_standards_text,
         _validate_deviations,
+        build_reconciliation_prompt,
     )
     from backend.analyze import _LLM_POOL, _LLM_TIMEOUT_S
 
@@ -442,9 +442,10 @@ def _llm_check_deep(status: dict) -> dict:
     except OSError:
         return {"ok": False, "probe": "deep", "reason": "demo_pair_missing",
                 **{k: status.get(k) for k in ("provider", "model")}}
-    prompt = PROMPT_TEMPLATE.format(
-        spec=spec, submittal=submittal,
-        standards=_all_standards_text(max_chars_per=1800),
+    prompt = build_reconciliation_prompt(
+        spec,
+        submittal,
+        _all_standards_text(max_chars_per=1800),
     )
     base = {
         "probe": "deep",
@@ -455,11 +456,18 @@ def _llm_check_deep(status: dict) -> dict:
     }
     t0 = _time.time()
     try:
-        from backend.llm import complete_json
+        from backend.llm import complete_json, failover_report
         raw = _LLM_POOL.submit(complete_json, prompt, SYSTEM_PROMPT).result(
             timeout=_LLM_TIMEOUT_S)
         devs = _validate_deviations(raw)
+        report = failover_report()
+        answering = report.get("last_successful_provider") or status["provider"]
+        answering_model = (
+            (report.get("providers", {}).get(answering) or {}).get("model")
+            or status.get("model")
+        )
         return {"ok": True, **base,
+                "provider": answering, "model": answering_model,
                 "elapsed_ms": round((_time.time() - t0) * 1000),
                 "findings": len(devs)}
     except concurrent.futures.TimeoutError:

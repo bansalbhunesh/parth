@@ -575,9 +575,23 @@ class TestLLMCheck:
     def test_llm_check_deep_success_reports_findings(self, monkeypatch):
         import backend.llm as llm_mod
         monkeypatch.setenv("GEMINI_API_KEY", "test-key-not-real")
+        monkeypatch.setenv("PRAMAAN_COVERAGE_MATRIX", "1")
         fake = [{"component": "UPS-02", "parameter": "battery_runtime_min",
                  "required_value": "10", "provided_value": "7"}]
-        monkeypatch.setattr(llm_mod, "complete_json", lambda prompt, system="": fake)
+        seen = []
+
+        def complete(prompt, system=""):
+            seen.append(prompt)
+            return fake
+
+        monkeypatch.setattr(llm_mod, "complete_json", complete)
+        monkeypatch.setattr(llm_mod, "failover_report", lambda: {
+            "providers": {
+                "gemini": {"configured": True, "model": "gemini-2.5-flash"},
+                "openai": {"configured": True, "model": "google/gemini-3.1-flash-lite"},
+            },
+            "last_successful_provider": "openai",
+        })
         r = client.get("/llm-check?deep=1")
         assert r.status_code == 200
         data = r.json()
@@ -587,6 +601,9 @@ class TestLLMCheck:
         # The probe must be demo-sized, not a token ping.
         assert data["prompt_chars"] > 5000
         assert "elapsed_ms" in data
+        assert "COVERAGE MATRIX" in seen[0]
+        assert data["provider"] == "openai"
+        assert data["model"] == "google/gemini-3.1-flash-lite"
 
     def test_llm_check_deep_surfaces_quota_error(self, monkeypatch):
         import backend.llm as llm_mod
@@ -653,10 +670,17 @@ class TestVisionEndpoint:
 
     def test_vision_success_returns_findings(self, monkeypatch):
         import backend.llm as llm_mod
-        monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+        from backend import analyze
+        monkeypatch.setenv("PRAMAAN_LLM", "openai")
+        monkeypatch.setenv("OPENAI_API_KEY", "test-key")
         fake = '[{"component":"SWGR","parameter":"icw_ka","required_value":"65","provided_value":"50"}]'
         monkeypatch.setattr(llm_mod, "complete_vision",
                             lambda p, img, mime, system="": fake)
+        direct = analyze.run_vision_analysis(
+            "Icw required 65 kA", b"\x89PNG_fake_bytes", "image/png", "SWGR",
+        )
+        assert direct.mode == "vision"
+        assert direct.provider == "openai"
         r = client.post("/analyze/vision", files={
             "spec_file": ("spec.md", b"Icw required 65 kA", "text/markdown"),
             "submittal_image": ("s.png", b"\x89PNG_fake_bytes", "image/png"),

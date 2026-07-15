@@ -191,6 +191,26 @@ def test_scan_covers_the_core_surfaces():
                  "frontend/app/evidence/page.tsx"):
         assert must in rels, f"claims gate no longer scans {must}"
 
+    competitive = (ROOT / "COMPETITIVE.md").read_text(encoding="utf-8")
+    snapshot = (ROOT / "docs/COMPETITIVE_SCAN_2026-07-15.md").read_text(
+        encoding="utf-8"
+    )
+    for threat in ("DKDVE/et-hackathon", "suryanshvermaa/DCBrain"):
+        assert threat in competitive
+    for retired_overclaim in (
+        "We are the only one you can actually check",
+        "Pramaan is the only entrant",
+    ):
+        assert retired_overclaim not in competitive
+    for evidence_boundary in (
+        "357 unique public candidates",
+        "not a judge ranking",
+        "0fb48d708c30",
+        "f1caf1925280",
+        "audit_et_hackathon_field.py",
+    ):
+        assert evidence_boundary in snapshot
+
 
 def _line_violates(line: str) -> bool:
     squashed = re.sub(r"\s+", " ", re.sub(r"[*_`]", "", line))

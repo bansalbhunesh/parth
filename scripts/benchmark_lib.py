@@ -95,6 +95,24 @@ def load_config(path: pathlib.Path | None = None) -> dict:
     return cfg
 
 
+def is_featured_primary_run(summary: dict, model: str) -> bool:
+    """True only for a clean, declared repeat-3 baseline pass.
+
+    Ad-hoc, dirty-worktree, and candidate-prompt runs remain inspectable under
+    ``runs/`` but must never silently enter the published primary aggregate.
+    Historical primary passes predate ``prompt_mode``/``worktree_dirty``, so
+    missing values mean baseline/clean for backward compatibility.
+    """
+    return (
+        summary.get("mode") == "llm"
+        and summary.get("model") == model
+        and summary.get("repeats_total") == 3
+        and summary.get("prompt_mode", "baseline") == "baseline"
+        and summary.get("publication_role", "primary") == "primary"
+        and not summary.get("worktree_dirty", False)
+    )
+
+
 def load_manifest(path: pathlib.Path | None = None) -> list[dict]:
     path = pathlib.Path(path or (BENCH / "manifest.csv"))
     if not path.exists():

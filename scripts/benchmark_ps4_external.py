@@ -16,18 +16,28 @@ import json
 import os
 import pathlib
 import re
+import subprocess
 import sys
 import time
+from collections import Counter
 from datetime import datetime, timezone
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import benchmark_lib as L  # noqa: E402
 
 sys.path.insert(0, str(L.ROOT))
+from backend.agents.reconciliation import (  # noqa: E402
+    COVERAGE_MATRIX_ENV,
+    active_prompt_version,
+)
 from backend.analyze import _resilient_fallback, run_analysis  # noqa: E402
 
+PROMPT_MODE_BASELINE = "baseline"
+PROMPT_MODE_COVERAGE_MATRIX = "coverage-matrix-v1.7"
+
 PER_PAIR_COLUMNS = [
-    "pair_id", "system_type", "modality", "mode_used", "not_run", "error_type", "latency_ms",
+    "pair_id", "system_type", "modality", "mode_used", "provider_used", "not_run",
+    "error_type", "latency_ms",
     "positives", "negatives", "contested", "tp_exact", "tp_semantic",
     "fp", "fn_semantic", "neg_false_alerts", "error",
 ]
@@ -44,6 +54,7 @@ def run_one(pair_id: str, labels: list[dict], mode: str) -> dict:
     system_id = pair_id.upper()
     modality = labels[0].get("modality", "text") if labels else "text"
     err = err_type = None
+    provider_used = None
     not_run = False
     t0 = time.time()
     if modality == "image":
@@ -54,6 +65,7 @@ def run_one(pair_id: str, labels: list[dict], mode: str) -> dict:
                 from backend.analyze import run_vision_analysis
                 res = run_vision_analysis(owner, png.read_bytes(), "image/png", system_id)
                 findings, mode_used, latency = res.deviations, res.mode, res.elapsed_ms
+                provider_used = res.provider if res.mode == "vision" else None
                 if res.mode != "vision":  # vision-unavailable → not an image result
                     not_run = True
                     err, err_type = "vision unavailable (provider/parse failure)", "vision_unavailable"
@@ -76,6 +88,7 @@ def run_one(pair_id: str, labels: list[dict], mode: str) -> dict:
             res = run_analysis(owner, sub, system_id)
             findings = res.deviations
             mode_used = res.mode
+            provider_used = res.provider
             latency = res.elapsed_ms
             if res.mode != "llm":
                 not_run = True  # fell back to the rule engine — not an LLM result
@@ -91,7 +104,8 @@ def run_one(pair_id: str, labels: list[dict], mode: str) -> dict:
         "pair_id": pair_id,
         "system_type": labels[0]["system_type"] if labels else "other",
         "modality": modality, "error_type": err_type,
-        "mode_used": mode_used, "not_run": not_run, "latency_ms": latency,
+        "mode_used": mode_used, "provider_used": provider_used,
+        "not_run": not_run, "latency_ms": latency,
         "positives": sem["positives"], "negatives": sem["negatives"], "contested": sem["contested"],
         "tp_semantic": sem["tp"], "tp_exact": exa["tp"], "fp": sem["fp"], "fn_semantic": sem["fn"],
         "neg_false_alerts": sem["neg_false_alerts"],
@@ -105,6 +119,10 @@ def run_one(pair_id: str, labels: list[dict], mode: str) -> dict:
 
 
 def _write_run(run_dir: pathlib.Path, results: list[dict], meta: dict) -> dict:
+    if run_dir.exists() and any(run_dir.iterdir()):
+        raise FileExistsError(
+            f"immutable benchmark run already exists: {run_dir}; use --run-tag"
+        )
     run_dir.mkdir(parents=True, exist_ok=True)
     # run_config.yaml (flat)
     (run_dir / "run_config.yaml").write_text(
@@ -114,6 +132,7 @@ def _write_run(run_dir: pathlib.Path, results: list[dict], meta: dict) -> dict:
         for r in results:
             f.write(json.dumps({
                 "pair_id": r["pair_id"], "mode_used": r["mode_used"], "not_run": r["not_run"],
+                "provider_used": r["provider_used"],
                 "latency_ms": r["latency_ms"], "input_sha256": r["input_sha256"],
                 "output_sha256": r["output_sha256"], "findings": r["_findings"],
             }, ensure_ascii=False) + "\n")
@@ -146,6 +165,9 @@ def _write_run(run_dir: pathlib.Path, results: list[dict], meta: dict) -> dict:
     # summary.json
     agg = L.aggregate(results, labs)
     summary = {**meta, **agg}
+    summary["providers_used"] = dict(Counter(
+        r["provider_used"] for r in results if r.get("provider_used")
+    ))
     (run_dir / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     return summary
 
@@ -158,6 +180,38 @@ def _sanitize(s: str) -> str:
     return re.sub(r"[^A-Za-z0-9.-]+", "-", s)
 
 
+def code_provenance() -> dict[str, str | bool]:
+    """Bind a run to both HEAD and any uncommitted tracked-file patch."""
+    try:
+        revision = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=L.ROOT, check=True,
+            capture_output=True, text=True,
+        ).stdout.strip()
+        diff = subprocess.run(
+            ["git", "diff", "--binary", "--no-ext-diff", "HEAD"],
+            cwd=L.ROOT, check=True, capture_output=True, text=True,
+        ).stdout
+    except (OSError, subprocess.CalledProcessError):
+        return {"code_revision": "unknown", "worktree_dirty": True,
+                "working_tree_diff_sha256": "unavailable"}
+    return {
+        "code_revision": revision,
+        "worktree_dirty": bool(diff),
+        "working_tree_diff_sha256": L.sha256_text(diff),
+    }
+
+
+def configure_prompt_mode(prompt_mode: str) -> str:
+    """Select a prompt pass without allowing state to leak between runs."""
+    if prompt_mode == PROMPT_MODE_COVERAGE_MATRIX:
+        os.environ[COVERAGE_MATRIX_ENV] = "1"
+    elif prompt_mode == PROMPT_MODE_BASELINE:
+        os.environ.pop(COVERAGE_MATRIX_ENV, None)
+    else:
+        raise ValueError(f"unsupported prompt mode: {prompt_mode}")
+    return active_prompt_version()
+
+
 def main() -> int:
     cfg = L.load_config()
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -168,7 +222,28 @@ def main() -> int:
     ap.add_argument("--pairs", default="", help="comma-separated pair ids (default: all)")
     ap.add_argument("--pair-limit", type=int, default=0, help="cap number of pairs (0 = all); for smoke runs")
     ap.add_argument("--sample", default="", help="comma-separated pair ids to sample (alias of --pairs)")
+    ap.add_argument(
+        "--prompt-mode",
+        choices=[PROMPT_MODE_BASELINE, PROMPT_MODE_COVERAGE_MATRIX],
+        default=PROMPT_MODE_BASELINE,
+        help="versioned text-reconciliation prompt pass; coverage matrix is an opt-in experiment",
+    )
+    ap.add_argument(
+        "--run-tag",
+        default="",
+        help="unique immutable series label appended before runN (recommended)",
+    )
+    ap.add_argument(
+        "--publication-role",
+        choices=("primary", "branch-comparison"),
+        default="primary",
+        help="branch-comparison evidence cannot alter the published primary",
+    )
     args = ap.parse_args()
+
+    if args.prompt_mode != PROMPT_MODE_BASELINE and args.mode != "llm":
+        ap.error("--prompt-mode coverage-matrix-v1.7 requires --mode llm")
+    prompt_version = configure_prompt_mode(args.prompt_mode)
 
     labels = L.load_labels()
     by_pair = L.group_labels_by_pair(labels)
@@ -185,7 +260,11 @@ def main() -> int:
     for k in range(1, args.repeat + 1):
         results = [run_one(pid, by_pair[pid], args.mode) for pid in pair_ids]
         stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-        run_dir = L.BENCH / "runs" / f"{stamp}_{_sanitize(provider)}_{_sanitize(model)}_run{k}"
+        prompt_tag = "" if args.prompt_mode == PROMPT_MODE_BASELINE else f"_{args.prompt_mode}"
+        series_tag = f"_{_sanitize(args.run_tag)}" if args.run_tag else ""
+        run_dir = L.BENCH / "runs" / (
+            f"{stamp}_{_sanitize(provider)}_{_sanitize(model)}{prompt_tag}{series_tag}_run{k}"
+        )
         meta = {
             "benchmark": "ps4_external_v1",
             "benchmark_version": freeze.get("benchmark_version"),
@@ -196,11 +275,19 @@ def main() -> int:
             "include_contested_in_primary": bool(cfg.get("include_contested_in_primary", False)),
             "count_not_run_as_miss": bool(cfg.get("count_not_run_as_miss", True)),
             "evidence_label": "deterministic_offline" if args.mode == "rule" else "live_model",
+            "prompt_mode": args.prompt_mode,
+            "prompt_version": prompt_version,
+            "run_tag": args.run_tag,
+            "publication_role": args.publication_role,
+            **code_provenance(),
         }
         meta["config_sha256"] = L.sha256_text(json.dumps(
             {k: meta[k] for k in ("mode", "provider", "model", "benchmark_version",
                                   "labels_freeze_sha256", "include_contested_in_primary",
-                                  "count_not_run_as_miss")}, sort_keys=True))
+                                  "count_not_run_as_miss", "prompt_mode", "run_tag",
+                                  "publication_role",
+                                  "prompt_version", "code_revision", "worktree_dirty",
+                                  "working_tree_diff_sha256")}, sort_keys=True))
         last_summary = _write_run(run_dir, results, meta)
         pr = last_summary
         print(f"[run{k}] {args.mode} {provider}/{model} -> "

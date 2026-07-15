@@ -325,7 +325,8 @@ def test_reconciliation_feedback_and_cx_enrichment_are_preserved(
     ) + (
         "\n\n=== SELF-REVIEW FEEDBACK (revise your previous answer) ===\n"
         "Correct the unsupported citation"
-        "\nReturn the corrected JSON array of deviations.\n"
+        "\nReturn ONLY the corrected JSON array of deviations; "
+        "never return a checklist or wrapper object.\n"
     )
     assert calls == [(expected_prompt, {"system": reconciliation.SYSTEM_PROMPT})]
     assert predicted == [{"component": "UPS-1", "parameter": "runtime", "system": "UPS"}]

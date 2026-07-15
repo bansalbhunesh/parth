@@ -1,7 +1,7 @@
 {
   "benchmark": "ps4_external_v1",
   "benchmark_version": "1.2.0",
-  "generated_utc": "2026-07-09T06:29:27+00:00",
+  "generated_utc": "2026-07-15T15:43:33+00:00",
   "featured_model": "google/gemini-3.1-flash-lite",
   "primary_result": {
     "model": "google/gemini-3.1-flash-lite",
@@ -96,6 +96,6 @@
   ],
   "non_claims": [
     "NOT a real-world-accuracy, field-validation, or real-datasheet-accuracy claim.",
-    "Seed is team-authored and single-author labeled; primary-source acquisition and two-person reviewer adjudication are pending."
+    "Seed is team-authored and single-author labeled; source-archive acquisition and two-person reviewer adjudication are pending."
   ]
 }

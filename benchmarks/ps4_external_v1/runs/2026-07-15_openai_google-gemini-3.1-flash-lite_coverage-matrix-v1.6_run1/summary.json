@@ -1,0 +1,183 @@
+{
+  "benchmark": "ps4_external_v1",
+  "benchmark_version": "1.2.0",
+  "labels_freeze_sha256": "f13a4f72895d8ef31df1fe716ad5a73526f109a152b9060e38cd1e5179710b12",
+  "mode": "llm",
+  "provider": "openai",
+  "model": "google/gemini-3.1-flash-lite",
+  "repeat_index": 1,
+  "repeats_total": 1,
+  "timestamp_utc": "2026-07-15T15:32:07+00:00",
+  "include_contested_in_primary": false,
+  "count_not_run_as_miss": true,
+  "evidence_label": "live_model",
+  "prompt_mode": "coverage-matrix-v1.6",
+  "prompt_version": "reconcile-v1.6-candidate",
+  "code_revision": "e48d223a775005209ac8c0282aedc041ad73d868",
+  "worktree_dirty": true,
+  "working_tree_diff_sha256": "945a2d4b2ffaa363bf22ad0d15c2cdd1d12e471499bf5fb0b725572937c8f7b0",
+  "config_sha256": "61475b8df33a84c7a1cf1eec602da62abd24a35b84099c7687ab01c52ebeaa47",
+  "pairs_total": 53,
+  "pairs_run": 48,
+  "pairs_not_run": 5,
+  "not_run_pair_ids": [
+    "pair_039",
+    "pair_040",
+    "pair_041",
+    "pair_042",
+    "pair_043"
+  ],
+  "positive_labels": 63,
+  "clean_negative_labels": 64,
+  "contested_labels": 2,
+  "primary_recall_semantic": 0.7937,
+  "primary_recall_exact": 0.6508,
+  "primary_tp": 50,
+  "primary_fn": 13,
+  "secondary_recall_semantic": 0.8772,
+  "secondary_positives": 57,
+  "false_positives_total": 43,
+  "clean_negative_false_alerts": 4,
+  "clean_negative_false_alert_rate": 0.0625,
+  "error_or_timeout_pairs": 5,
+  "error_rate": 0.0943,
+  "latency_p50_ms": 3290.5,
+  "latency_p95_ms": 7345.8,
+  "per_difficulty": {
+    "direct_value": {
+      "positives": 6,
+      "caught": 6,
+      "recall": 1.0
+    },
+    "categorical_reasoning": {
+      "positives": 17,
+      "caught": 17,
+      "recall": 1.0
+    },
+    "unit_conversion": {
+      "positives": 2,
+      "caught": 0,
+      "recall": 0.0
+    },
+    "derived_arithmetic": {
+      "positives": 4,
+      "caught": 4,
+      "recall": 1.0
+    },
+    "domain_recall": {
+      "positives": 6,
+      "caught": 5,
+      "recall": 0.8333
+    },
+    "omission_detection": {
+      "positives": 8,
+      "caught": 6,
+      "recall": 0.75
+    },
+    "adversarial_noise": {
+      "positives": 6,
+      "caught": 6,
+      "recall": 1.0
+    },
+    "table_or_layout": {
+      "positives": 8,
+      "caught": 6,
+      "recall": 0.75
+    },
+    "scanned_or_image": {
+      "positives": 6,
+      "caught": 0,
+      "recall": 0.0
+    }
+  },
+  "per_system": {
+    "ups": {
+      "positives": 7,
+      "caught": 6,
+      "recall": 0.8571
+    },
+    "metering_power_quality": {
+      "positives": 2,
+      "caught": 2,
+      "recall": 1.0
+    },
+    "switchgear": {
+      "positives": 8,
+      "caught": 5,
+      "recall": 0.625
+    },
+    "generator": {
+      "positives": 6,
+      "caught": 5,
+      "recall": 0.8333
+    },
+    "crac_crah": {
+      "positives": 2,
+      "caught": 1,
+      "recall": 0.5
+    },
+    "battery": {
+      "positives": 2,
+      "caught": 2,
+      "recall": 1.0
+    },
+    "refrigerant": {
+      "positives": 4,
+      "caught": 4,
+      "recall": 1.0
+    },
+    "cabling": {
+      "positives": 5,
+      "caught": 4,
+      "recall": 0.8
+    },
+    "transformer": {
+      "positives": 2,
+      "caught": 2,
+      "recall": 1.0
+    },
+    "chiller": {
+      "positives": 6,
+      "caught": 4,
+      "recall": 0.6667
+    },
+    "pdu_rpp": {
+      "positives": 5,
+      "caught": 4,
+      "recall": 0.8
+    },
+    "bms": {
+      "positives": 3,
+      "caught": 2,
+      "recall": 0.6667
+    },
+    "fire_suppression": {
+      "positives": 2,
+      "caught": 1,
+      "recall": 0.5
+    },
+    "ats_sts": {
+      "positives": 3,
+      "caught": 2,
+      "recall": 0.6667
+    },
+    "cooling_tower": {
+      "positives": 2,
+      "caught": 2,
+      "recall": 1.0
+    },
+    "rack_aisle": {
+      "positives": 2,
+      "caught": 2,
+      "recall": 1.0
+    },
+    "networking": {
+      "positives": 2,
+      "caught": 2,
+      "recall": 1.0
+    }
+  },
+  "providers_used": {
+    "openai": 48
+  }
+}

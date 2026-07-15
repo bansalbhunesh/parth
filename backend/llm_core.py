@@ -347,10 +347,21 @@ def _extract_json(text: str):
     text = re.sub(r"^```(?:json)?", "", text).strip()
     text = re.sub(r"```$", "", text).strip()
     try:
-        for start, end in [("[", "]"), ("{", "}")]:
-            i = text.find(start)
-            if i == -1:
-                continue
+        # Preserve the provider's actual top-level shape whenever it returned
+        # valid JSON. Searching for "[" first used to unwrap any object that
+        # contained a nested array (for example {"checklist": [...],
+        # "deviations": [...]}), silently discarding the rest of the object.
+        try:
+            return json.loads(text)
+        except (ValueError, TypeError):
+            pass
+
+        containers = sorted(
+            (i, start, end)
+            for start, end in [("[", "]"), ("{", "}")]
+            if (i := text.find(start)) != -1
+        )
+        for i, start, end in containers:
             parsed = _balanced_json(text, i, start, end)
             if parsed is not None:
                 return parsed

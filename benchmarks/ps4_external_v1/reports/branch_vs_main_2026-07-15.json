@@ -1,0 +1,66 @@
+{
+  "benchmark": "ps4_external_v1",
+  "model": "google/gemini-3.1-flash-lite",
+  "run_tag": "branch-e2e-9d8ac01",
+  "generated_utc": "2026-07-15T16:35:53+00:00",
+  "main": {
+    "recall_mean": 0.8624,
+    "precision_mean": 0.9534,
+    "f1_mean": 0.9055,
+    "exact_recall_mean": 0.6984,
+    "clean_far_mean": 0.0,
+    "false_positives_mean": 2.6667,
+    "p50_ms_mean": 2481.3333,
+    "p95_ms_mean": 8490.5667,
+    "not_run_mean": 0.3333,
+    "passes": 3,
+    "run_dirs": [
+      "2026-07-04_openai_google-gemini-3.1-flash-lite_run1",
+      "2026-07-04_openai_google-gemini-3.1-flash-lite_run2",
+      "2026-07-04_openai_google-gemini-3.1-flash-lite_run3"
+    ],
+    "code_revisions": [
+      "unknown"
+    ],
+    "providers_used": []
+  },
+  "branch": {
+    "recall_mean": 0.9101,
+    "precision_mean": 0.8006,
+    "f1_mean": 0.8517,
+    "exact_recall_mean": 0.7619,
+    "clean_far_mean": 0.0417,
+    "false_positives_mean": 14.3333,
+    "p50_ms_mean": 1994.3333,
+    "p95_ms_mean": 4092.3333,
+    "not_run_mean": 0.0,
+    "passes": 3,
+    "run_dirs": [
+      "2026-07-15_openai_google-gemini-3.1-flash-lite_branch-e2e-9d8ac01_run1",
+      "2026-07-15_openai_google-gemini-3.1-flash-lite_branch-e2e-9d8ac01_run2",
+      "2026-07-15_openai_google-gemini-3.1-flash-lite_branch-e2e-9d8ac01_run3"
+    ],
+    "code_revisions": [
+      "9d8ac01c71159183bb555a3e7d4105e005ac9219"
+    ],
+    "providers_used": [
+      "openai"
+    ]
+  },
+  "delta_branch_minus_main": {
+    "recall_mean": 0.0477,
+    "precision_mean": -0.1528,
+    "f1_mean": -0.0538,
+    "exact_recall_mean": 0.0635,
+    "clean_far_mean": 0.0417,
+    "false_positives_mean": 11.6666,
+    "p50_ms_mean": -487.0,
+    "p95_ms_mean": -4398.2334
+  },
+  "verdict": "mixed",
+  "complete_vision_branch": true,
+  "limitations": [
+    "Three passes estimate run-to-run variation but do not establish field accuracy.",
+    "The benchmark sources and labels remain team-authored and single-author frozen."
+  ]
+}

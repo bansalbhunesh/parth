@@ -1,0 +1,179 @@
+{
+  "benchmark": "ps4_external_v1",
+  "benchmark_version": "1.2.0",
+  "labels_freeze_sha256": "f13a4f72895d8ef31df1fe716ad5a73526f109a152b9060e38cd1e5179710b12",
+  "mode": "llm",
+  "provider": "openai",
+  "model": "google/gemini-3.1-flash-lite",
+  "repeat_index": 1,
+  "repeats_total": 3,
+  "timestamp_utc": "2026-07-15T16:30:58+00:00",
+  "include_contested_in_primary": false,
+  "count_not_run_as_miss": true,
+  "evidence_label": "live_model",
+  "prompt_mode": "baseline",
+  "prompt_version": "reconcile-v2",
+  "run_tag": "branch-e2e-9d8ac01",
+  "publication_role": "branch-comparison",
+  "code_revision": "9d8ac01c71159183bb555a3e7d4105e005ac9219",
+  "worktree_dirty": false,
+  "working_tree_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "config_sha256": "20ac6954c90ddc262e0665c3cce55d3fedd5c7d3c7d44492695dec2c11398668",
+  "pairs_total": 53,
+  "pairs_run": 53,
+  "pairs_not_run": 0,
+  "not_run_pair_ids": [],
+  "positive_labels": 63,
+  "clean_negative_labels": 64,
+  "contested_labels": 2,
+  "primary_recall_semantic": 0.9206,
+  "primary_recall_exact": 0.7778,
+  "primary_tp": 58,
+  "primary_fn": 5,
+  "secondary_recall_semantic": 0.9206,
+  "secondary_positives": 63,
+  "false_positives_total": 14,
+  "clean_negative_false_alerts": 3,
+  "clean_negative_false_alert_rate": 0.0469,
+  "error_or_timeout_pairs": 0,
+  "error_rate": 0.0,
+  "latency_p50_ms": 2111.0,
+  "latency_p95_ms": 3657.0,
+  "per_difficulty": {
+    "direct_value": {
+      "positives": 6,
+      "caught": 6,
+      "recall": 1.0
+    },
+    "categorical_reasoning": {
+      "positives": 17,
+      "caught": 16,
+      "recall": 0.9412
+    },
+    "unit_conversion": {
+      "positives": 2,
+      "caught": 0,
+      "recall": 0.0
+    },
+    "derived_arithmetic": {
+      "positives": 4,
+      "caught": 4,
+      "recall": 1.0
+    },
+    "domain_recall": {
+      "positives": 6,
+      "caught": 6,
+      "recall": 1.0
+    },
+    "omission_detection": {
+      "positives": 8,
+      "caught": 7,
+      "recall": 0.875
+    },
+    "adversarial_noise": {
+      "positives": 6,
+      "caught": 6,
+      "recall": 1.0
+    },
+    "table_or_layout": {
+      "positives": 8,
+      "caught": 7,
+      "recall": 0.875
+    },
+    "scanned_or_image": {
+      "positives": 6,
+      "caught": 6,
+      "recall": 1.0
+    }
+  },
+  "per_system": {
+    "ups": {
+      "positives": 7,
+      "caught": 7,
+      "recall": 1.0
+    },
+    "metering_power_quality": {
+      "positives": 2,
+      "caught": 2,
+      "recall": 1.0
+    },
+    "switchgear": {
+      "positives": 8,
+      "caught": 8,
+      "recall": 1.0
+    },
+    "generator": {
+      "positives": 6,
+      "caught": 6,
+      "recall": 1.0
+    },
+    "crac_crah": {
+      "positives": 2,
+      "caught": 1,
+      "recall": 0.5
+    },
+    "battery": {
+      "positives": 2,
+      "caught": 2,
+      "recall": 1.0
+    },
+    "refrigerant": {
+      "positives": 4,
+      "caught": 4,
+      "recall": 1.0
+    },
+    "cabling": {
+      "positives": 5,
+      "caught": 4,
+      "recall": 0.8
+    },
+    "transformer": {
+      "positives": 2,
+      "caught": 2,
+      "recall": 1.0
+    },
+    "chiller": {
+      "positives": 6,
+      "caught": 5,
+      "recall": 0.8333
+    },
+    "pdu_rpp": {
+      "positives": 5,
+      "caught": 5,
+      "recall": 1.0
+    },
+    "bms": {
+      "positives": 3,
+      "caught": 2,
+      "recall": 0.6667
+    },
+    "fire_suppression": {
+      "positives": 2,
+      "caught": 2,
+      "recall": 1.0
+    },
+    "ats_sts": {
+      "positives": 3,
+      "caught": 2,
+      "recall": 0.6667
+    },
+    "cooling_tower": {
+      "positives": 2,
+      "caught": 2,
+      "recall": 1.0
+    },
+    "rack_aisle": {
+      "positives": 2,
+      "caught": 2,
+      "recall": 1.0
+    },
+    "networking": {
+      "positives": 2,
+      "caught": 2,
+      "recall": 1.0
+    }
+  },
+  "providers_used": {
+    "openai": 53
+  }
+}

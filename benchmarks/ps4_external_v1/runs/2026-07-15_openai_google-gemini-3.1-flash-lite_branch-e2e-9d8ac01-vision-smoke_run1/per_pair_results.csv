@@ -1,0 +1,2 @@
+pair_id,system_type,modality,mode_used,provider_used,not_run,error_type,latency_ms,positives,negatives,contested,tp_exact,tp_semantic,fp,fn_semantic,neg_false_alerts,error
+pair_039,ups,image,vision,openai,False,,5999,1,1,0,1,1,0,0,0,

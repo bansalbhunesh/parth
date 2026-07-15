@@ -30,7 +30,7 @@ from backend.analyze import run_analysis
 
 # Bump when SYSTEM_PROMPT / PROMPT_TEMPLATE change so cached results from an old
 # prompt are not reused under a new one (part of the input-hash "config version").
-PROMPT_VERSION = "reconcile-v4-balanced-scope"
+PROMPT_VERSION = "reconcile-v5-grounded-values"
 
 
 def _int_env(name: str, default: int) -> int:

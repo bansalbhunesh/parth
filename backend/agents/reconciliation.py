@@ -78,16 +78,6 @@ STEP-BY-STEP APPROACH:
 5. If the submittal falls short of the design basis, classify the deviation
    and assess severity.
 
-NON-NEGOTIABLE SCOPE BOUNDARY:
-- Every finding MUST map to a requirement explicitly written in the DESIGN
-  BASIS above. The governing standards may explain a stated requirement but
-  MUST NEVER create an additional requirement.
-- Never flag equipment, systems, clauses, component IDs, or required values
-  that do not appear in the DESIGN BASIS, even if they would normally apply to
-  a wider facility or certification tier.
-- Before emitting a finding, verify that its component and required_value can
-  both be located in the DESIGN BASIS. If either cannot, omit the finding.
-
 IMPORTANT — pay attention to:
 - Numeric values below specified minimums (e.g. 7 < 10, 12 < 24, 40 < 50)
 - Redundancy topology shortfalls (e.g. N+1 when N+2 is required)
@@ -143,7 +133,7 @@ Do NOT include items that meet or exceed their requirements.
 # omission recall but doubled the clean-negative false-alert rate, so this
 # candidate remains disabled. Baseline prompt revisions are separately tagged.
 COVERAGE_MATRIX_ENV = "PRAMAAN_COVERAGE_MATRIX"
-BASELINE_PROMPT_VERSION = "reconcile-v4-balanced-scope"
+BASELINE_PROMPT_VERSION = "reconcile-v5-grounded-values"
 COVERAGE_MATRIX_PROMPT_VERSION = "reconcile-v1.7-candidate"
 _BASELINE_OUTPUT_MARKER = "Return a JSON array of deviations found. Each element:"
 

@@ -51,6 +51,7 @@ class TestOffByDefault:
         # the coverage matrix at all.
         assert "COVERAGE MATRIX" not in PROMPT_TEMPLATE
         assert "checklist" not in PROMPT_TEMPLATE
+        assert "NON-NEGOTIABLE SCOPE BOUNDARY" not in PROMPT_TEMPLATE
 
     def test_shared_builder_is_byte_identical_to_measured_template(self, monkeypatch):
         monkeypatch.delenv(COVERAGE_MATRIX_ENV, raising=False)

@@ -27,7 +27,7 @@ Backend coverage is ratcheted at the final 95% line and 90% branch threshold. Se
 - Browser: 145/145 production-mode journeys pass across Chromium, Firefox, WebKit, Pixel, and iPhone projects, including exact visible-label matching, route-wide console/error/rejection guards, and real no-prefetch navigation.
 - Database: empty reset succeeds; 36/36 pgTAP assertions pass; schema lint and both database advisors report no issues.
 - Security/evidence: both locked Python dependency audits are clean, Bandit reports no medium/high issue, and the frozen benchmark manifest/hash/calibration/evaluation checks pass.
-- Mutation: the fresh remote gate contains 1,315 scored mutants and scores 97.26% detected (768 explicit kills, 511 bounded timeouts, 36 survivors), exceeding the enforced 85% minimum.
+- Mutation: two consecutive completed remote gates each scored 1,315 mutants and passed well above the enforced 85% minimum: 97.26% (768 explicit kills, 511 bounded timeouts, 36 survivors) and 96.73% (767 explicit kills, 505 bounded timeouts, 43 survivors). Exact-head status remains a required PR check.
 
 ## Implemented but deployment-dependent
 

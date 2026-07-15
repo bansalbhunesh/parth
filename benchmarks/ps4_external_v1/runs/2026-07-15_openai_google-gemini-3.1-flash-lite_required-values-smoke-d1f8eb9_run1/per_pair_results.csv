@@ -1,0 +1,9 @@
+pair_id,system_type,modality,mode_used,provider_used,not_run,error_type,latency_ms,positives,negatives,contested,tp_exact,tp_semantic,fp,fn_semantic,neg_false_alerts,error
+pair_003,switchgear,text,llm,openai,False,,8047,1,0,0,1,1,0,0,0,
+pair_004,generator,text,llm,openai,False,,4058,1,0,0,1,1,0,0,0,
+pair_009,cabling,text,llm,openai,False,,2409,1,0,0,1,1,0,0,0,
+pair_016,ups,text,llm,openai,False,,2666,1,0,0,1,1,0,0,0,
+pair_028,cabling,text,llm,openai,False,,2934,2,3,0,1,2,0,0,0,
+pair_033,crac_crah,text,llm,openai,False,,8133,0,3,0,0,0,1,0,0,
+pair_039,ups,image,vision,openai,False,,2728,1,1,0,1,1,0,0,0,
+pair_050,cabling,text,llm,openai,False,,2500,2,0,0,1,1,0,1,0,

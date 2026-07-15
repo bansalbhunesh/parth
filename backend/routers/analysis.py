@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 
 from backend import security
 from backend.agents.compound_risk import analyze_compound_risk
+from backend.agents.evidence_strength import evidence_report
 from backend.agents.ingestion import extract_pdf_bytes
 from backend.agents.remediation import plan_remediation
 from backend.analyze import run_analysis, run_streaming_analysis
@@ -48,6 +49,7 @@ def analyze(req: AnalyzeRequest):
         "count": view["count"],
         "compound_risk": analyze_compound_risk(view["deviations"]),
         "remediation": plan_remediation(view["deviations"]),
+        "evidence": evidence_report(view["deviations"]),
         "elapsed_ms": view["elapsed_ms"],
         "mode": view["mode"],
         "timing": view["timing"],

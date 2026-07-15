@@ -310,6 +310,13 @@ class TestAnalyzeEndpoint:
         if rem["actions"]:
             assert rem["highest_leverage"] == rem["actions"][0]
             assert 0.0 <= rem["actions"][0]["risk_reduction"] <= 1.0
+        ev = r.json()["evidence"]
+        assert ev["count"] == r.json()["count"]
+        assert len(ev["findings"]) == r.json()["count"]
+        assert "not a probability of correctness" in ev["basis"]
+        for finding in ev["findings"]:
+            assert 0.0 <= finding["score"] <= 1.0
+            assert finding["band"] in {"Strong", "Moderate", "Weak", "Thin"}
 
 
 class TestDataEndpoints:

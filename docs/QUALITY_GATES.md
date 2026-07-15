@@ -18,11 +18,11 @@ Passing a gate means the named artifact or command exists and passes. It does no
 - A CycloneDX SBOM is generated on every CI run.
 - The scheduled or explicitly `mutation-ready` PR run fails below an 85% mutation score and rejects incomplete runs. Detected mutants are reported as explicit test/type-check kills and bounded timeouts separately; survivors, untested, suspicious, crashed, or incomplete mutants never count as detected.
 
-Backend coverage is ratcheted at the final 95% line and 90% branch threshold. Security, job state/idempotency, citation provenance, Redis cache, durable worker, and webhook delivery modules must each retain 100% line and branch coverage. The threshold only increases through tests that assert behavior, never exclusions or generated lines.
+Backend coverage is ratcheted at the final 95% line and 90% branch threshold. Security, job state/idempotency, citation provenance, Redis cache, durable worker, and webhook delivery modules must each retain 100% line and branch coverage. Every other backend module must additionally clear an 80% line / 65% branch per-file floor so no single file can silently rot behind the whole-tree average; `backend/agents/ocr_util.py` is the one documented exemption, because its coverage depends on the tesseract binary, which is present only in the container image. The threshold only increases through tests that assert behavior, never exclusions or generated lines.
 
 ## Latest verified working-tree evidence (2026-07-15)
 
-- Backend: 847 tests; 96.45% line and 91.84% branch coverage; every critical module is 100% line and branch covered.
+- Backend: 858 tests; 96.72% line and 92.67% branch coverage; every critical module is 100% line and branch covered, and every non-exempt module clears the 80% line / 65% branch per-file floor.
 - Frontend: 43 component tests; 99.26% line and 91.79% branch coverage; strict TypeScript, design-system audit, dependency audit, and production build pass. Every discovered page is within the enforced 200 KiB initial-JavaScript budget (181.25-188.95 KiB gzip in the latest local build).
 - Browser: 155/155 production-mode journeys pass across Chromium, Firefox, WebKit, Pixel, and iPhone projects, including exact visible-label matching, route-wide console/error/rejection guards, no-JavaScript navigation, and deferred-layout anchor behavior.
 - Database: empty reset succeeds; 36/36 pgTAP assertions pass; schema lint and both database advisors report no issues.

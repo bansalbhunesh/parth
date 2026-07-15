@@ -132,6 +132,11 @@ def build_comparison(run_tag: str) -> dict:
         "limitations": [
             "Three passes estimate run-to-run variation but do not establish field accuracy.",
             "The benchmark sources and labels remain team-authored and single-author frozen.",
+            "The published main summaries predate exact code-revision and "
+            "provider-used metadata, so this is same-model/dataset evidence "
+            "rather than an isolated code-only A/B test.",
+            "Main averaged 0.333 not-run pairs; branch ran every pair including "
+            "vision, so recall also reflects evaluation completeness.",
         ],
     }
 
@@ -153,6 +158,7 @@ def _markdown(result: dict) -> str:
         f"| {label} | {main[key]:.4f} | {branch[key]:.4f} | {branch[key] - main[key]:+.4f} |"
         for label, key in rows
     )
+    limitations = "\n".join(f"- {item}" for item in result["limitations"])
     return f"""# Main vs branch — clean three-pass comparison
 
 Generated `{result['generated_utc']}` from frozen `ps4_external_v1` evidence.
@@ -173,8 +179,7 @@ Branch runs: {', '.join(f'`{name}`' for name in branch['run_dirs'])}
 
 ## Limitations
 
-- {result['limitations'][0]}
-- {result['limitations'][1]}
+{limitations}
 """
 
 

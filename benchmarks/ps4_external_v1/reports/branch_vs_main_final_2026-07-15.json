@@ -1,0 +1,68 @@
+{
+  "benchmark": "ps4_external_v1",
+  "model": "google/gemini-3.1-flash-lite",
+  "run_tag": "branch-e2e-69aaf94-alphanumeric",
+  "generated_utc": "2026-07-15T17:31:17+00:00",
+  "main": {
+    "recall_mean": 0.8624,
+    "precision_mean": 0.9534,
+    "f1_mean": 0.9055,
+    "exact_recall_mean": 0.6984,
+    "clean_far_mean": 0.0,
+    "false_positives_mean": 2.6667,
+    "p50_ms_mean": 2481.3333,
+    "p95_ms_mean": 8490.5667,
+    "not_run_mean": 0.3333,
+    "passes": 3,
+    "run_dirs": [
+      "2026-07-04_openai_google-gemini-3.1-flash-lite_run1",
+      "2026-07-04_openai_google-gemini-3.1-flash-lite_run2",
+      "2026-07-04_openai_google-gemini-3.1-flash-lite_run3"
+    ],
+    "code_revisions": [
+      "unknown"
+    ],
+    "providers_used": []
+  },
+  "branch": {
+    "recall_mean": 0.9048,
+    "precision_mean": 0.9145,
+    "f1_mean": 0.9096,
+    "exact_recall_mean": 0.7619,
+    "clean_far_mean": 0.026,
+    "false_positives_mean": 5.3333,
+    "p50_ms_mean": 2371.6667,
+    "p95_ms_mean": 4074.0667,
+    "not_run_mean": 0.0,
+    "passes": 3,
+    "run_dirs": [
+      "2026-07-15_openai_google-gemini-3.1-flash-lite_branch-e2e-69aaf94-alphanumeric_run1",
+      "2026-07-15_openai_google-gemini-3.1-flash-lite_branch-e2e-69aaf94-alphanumeric_run2",
+      "2026-07-15_openai_google-gemini-3.1-flash-lite_branch-e2e-69aaf94-alphanumeric_run3"
+    ],
+    "code_revisions": [
+      "69aaf94b17448bc1f0b72faa1e17ff50455f116c"
+    ],
+    "providers_used": [
+      "openai"
+    ]
+  },
+  "delta_branch_minus_main": {
+    "recall_mean": 0.0424,
+    "precision_mean": -0.0389,
+    "f1_mean": 0.0041,
+    "exact_recall_mean": 0.0635,
+    "clean_far_mean": 0.026,
+    "false_positives_mean": 2.6666,
+    "p50_ms_mean": -109.6666,
+    "p95_ms_mean": -4416.5
+  },
+  "verdict": "mixed",
+  "complete_vision_branch": true,
+  "limitations": [
+    "Three passes estimate run-to-run variation but do not establish field accuracy.",
+    "The benchmark sources and labels remain team-authored and single-author frozen.",
+    "The published main summaries predate exact code-revision and provider-used metadata, so this is same-model/dataset evidence rather than an isolated code-only A/B test.",
+    "Main averaged 0.333 not-run pairs; branch ran every pair including vision, so recall also reflects evaluation completeness."
+  ]
+}

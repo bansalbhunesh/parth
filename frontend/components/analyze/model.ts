@@ -12,12 +12,58 @@ export interface AnalyzeDeviation {
   lead_time_weeks?: number;
 }
 
+export interface CompoundCluster {
+  kind: string;
+  key: string | number;
+  member_count: number;
+  members: string[];
+  compound_risk: number;
+  earliest_week_fail: number | null;
+}
+
+export interface ScheduleCliff {
+  week_fail: number;
+  converging_deviations: number;
+  compound_risk: number;
+  deviations: string[];
+}
+
+export interface CompoundRisk {
+  project_compound_risk: number;
+  risk_band: "Critical" | "High" | "Moderate" | "Low";
+  deviation_count: number;
+  converged_cx_tests: Array<string | number>;
+  schedule_cliff: ScheduleCliff | null;
+  clusters: CompoundCluster[];
+  method: string;
+}
+
+export interface RemediationAction {
+  kind: "fix_deviation" | "clear_cluster";
+  target: string;
+  resolves: string[];
+  risk_reduction: number;
+  residual_project_risk: number;
+  clears_schedule_cliff: boolean;
+  new_schedule_cliff_week: number | null;
+}
+
+export interface Remediation {
+  actions: RemediationAction[];
+  highest_leverage: RemediationAction | null;
+  has_convergence: boolean;
+  note: string;
+  method: string;
+}
+
 export interface AnalyzeResult {
   system: string;
   deviations: AnalyzeDeviation[];
   count: number;
   elapsed_ms: number;
   mode: string;
+  compound_risk?: CompoundRisk;
+  remediation?: Remediation;
   timing?: {
     standards_load_ms: number;
     llm_call_ms: number | null;

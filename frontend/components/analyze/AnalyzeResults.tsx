@@ -1,4 +1,5 @@
 import type { UploadExtraction } from "../../lib/api";
+import RiskRemediation from "./RiskRemediation";
 import { formatElapsed, isModelBacked, provenance, timingTitle, type AnalyzeResult } from "./model";
 
 interface AnalyzeResultsProps {
@@ -25,6 +26,8 @@ export default function AnalyzeResults({ result, extraction }: AnalyzeResultsPro
           <span className="analyze-results-time" title={timingTitle(result.timing)}>{formatElapsed(result.elapsed_ms)}</span>
         </span>
       </div>
+
+      <RiskRemediation compoundRisk={result.compound_risk} remediation={result.remediation} />
 
       {result.deviations.length === 0 ? (
         isModelBacked(result.mode) ? (

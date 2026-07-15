@@ -420,3 +420,118 @@
   border-color: var(--major-ink);
   background: var(--paper);
 }
+
+.rr-panel {
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  background: var(--paper);
+}
+
+.rr-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.rr-title {
+  font-family: var(--display);
+  font-weight: 650;
+  font-size: 0.95rem;
+}
+
+.rr-band {
+  padding: 3px 9px;
+  border-radius: 3px;
+  border: 1px solid var(--hairline);
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.rr-band-critical {
+  background: var(--critical-wash);
+  color: var(--critical-ink);
+  border-color: var(--critical-ink);
+}
+
+.rr-band-high {
+  background: var(--major-wash);
+  color: var(--major-ink);
+  border-color: var(--major-ink);
+}
+
+.rr-band-moderate {
+  background: var(--minor-wash);
+  color: var(--minor-ink);
+  border-color: var(--minor-ink);
+}
+
+.rr-cliff {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ink-strong);
+}
+
+.rr-clusters {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rr-cluster {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 8px;
+  border: 1px solid var(--hairline);
+  border-radius: 3px;
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+}
+
+.rr-cluster-key {
+  font-weight: 600;
+  color: var(--ink-strong);
+}
+
+.rr-fix {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--major-ink);
+  border-radius: 3px;
+  background: var(--major-wash);
+}
+
+.rr-fix-label {
+  font-size: 0.72rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--major-ink);
+}
+
+.rr-fix-target {
+  font-weight: 600;
+  color: var(--ink-strong);
+}
+
+.rr-fix-gain {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+.rr-method {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}

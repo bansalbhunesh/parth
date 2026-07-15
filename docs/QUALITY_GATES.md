@@ -38,7 +38,7 @@ Backend coverage is ratcheted at the final 95% line and 90% branch threshold. Se
 
 ## External gates still required before a 10/10 claim
 
-- The exact-revision local mobile lab does not yet pass: three Lighthouse 13.4.0 runs against the standalone homepage scored 79, 78, and 82 (median 79); median LCP was 2.677 s, median TBT 654 ms, and CLS was 0. Accessibility, Best Practices, and SEO were 100 in all three. Host benchmark indices varied from 996.5 to 1,237.5 on the memory-constrained Windows runner, so the result is directional rather than a stable regression baseline. The Windows launcher reported profile-cleanup errors only after writing each valid, parsed report. A stable Linux/production rerun, a mobile performance score of at least 95, and production INP p75 evidence remain required.
+- The mobile performance lab target is now met on Linux. A `ubuntu-latest` Lighthouse job (`.github/workflows/perf.yml`, `@lhci/cli`, five mobile runs, median-of-five) against the standalone bundle scored a **median 97** (runs 75/97/97/97/99), median LCP 2.535 s, median TBT 74 ms — versus the earlier memory-constrained Windows median of 79 (TBT 654 ms), which was CPU starvation, not a bundle-budget problem. The single 75 is a cold-start outlier; four of five runs scored ≥ 97. This is a lab measurement recorded as evidence, not yet a per-push blocking gate. Production **INP p75** (real-user field data via a Speed-Insights-style collector) remains the one outstanding mobile-performance artifact.
 - Independent WCAG 2.2 AA keyboard and screen-reader review.
 - External penetration test with no open critical/high issue.
 - Staging restore rehearsal proving RPO/RTO, deletion across database/storage, load/soak, worker termination, and alerts.

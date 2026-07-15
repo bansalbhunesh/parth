@@ -206,6 +206,30 @@ The category proves the *demand* is real and buyers already pay for adjacent
 tooling. Pramaan's wedge is the **commissioning-risk layer on top** — the part
 that ties a document deviation to a dated, costed schedule event.
 
+### 5a. The systemic decision loop (deterministic, added this build)
+
+Beyond per-finding detection, Pramaan now computes three deterministic layers over
+the findings — no LLM, fully reproducible, each unit-tested at 100% line and branch:
+
+1. **Compound Risk Layer** — detects when several deviations converge on the same
+   commissioning test, system, or milestone week, and surfaces the *schedule cliff*:
+   the soonest week where two or more findings fail together. The project compound
+   risk is the probabilistic-OR of the per-deviation commissioning risk; it aggregates
+   scores that already exist and does not add an accuracy claim.
+2. **Remediation Intelligence** — ranks each candidate action (resolve one deviation,
+   or clear a whole convergence cluster) by its marginal reduction in project compound
+   risk, and flags which action clears the cliff. When findings converge on one gate,
+   it correctly floats the cluster-level fix above any single fix — resolving one alone
+   leaves the gate failing.
+3. **Evidence-strength scoring** — a deterministic composite of each finding's checkable
+   signals (numeric exactness, rule/graph grounding, standard and clause citation). It is
+   *evidence strength, not a probability of correctness*.
+
+Each is offline, reproducible, and surfaced in the analysis result. Among the public
+PS4 feature sets inspected in the dated scan, none expose this systemic risk →
+optimal-remediation loop; it is the deterministic decision layer on top of the
+commissioning-risk join.
+
 ## 6. The durable moat — what compounds with use
 
 Features can be copied; the items below get *harder* to catch the longer Pramaan

@@ -133,7 +133,7 @@ Do NOT include items that meet or exceed their requirements.
 # omission recall but doubled the clean-negative false-alert rate, so this
 # candidate remains disabled. Baseline prompt revisions are separately tagged.
 COVERAGE_MATRIX_ENV = "PRAMAAN_COVERAGE_MATRIX"
-BASELINE_PROMPT_VERSION = "reconcile-v5-grounded-values"
+BASELINE_PROMPT_VERSION = "reconcile-v6-required-values"
 COVERAGE_MATRIX_PROMPT_VERSION = "reconcile-v1.7-candidate"
 _BASELINE_OUTPUT_MARKER = "Return a JSON array of deviations found. Each element:"
 
@@ -265,27 +265,8 @@ def _value_is_grounded(required_value, spec_lower: str, spec_compact: str) -> bo
     return _words_are_grounded(words, spec_lower)
 
 
-def _component_is_grounded(component, spec_lower: str, spec_compact: str) -> bool:
-    value = str(component or "").strip().lower()
-    compact = re.sub(r"[^a-z0-9]", "", value)
-    if not compact:
-        return False
-    if compact in spec_compact:
-        return True
-    # Models often use a harmless descriptive alias (for example, "Battery
-    # system" for a requirement headed "Battery"). Requiring every alias word
-    # to occur verbatim discarded valid findings in the measured scope-guard
-    # experiment. Reject only clause-like identifiers imported from the
-    # standards; an identifier explicitly present in the spec was accepted
-    # above. Required-value grounding remains the stronger scope control.
-    return re.match(
-        r"^(?:db|clause|section)\s*[-.]?\s*\d+(?:[.-]\d+)*(?:\b|_)",
-        value,
-    ) is None
-
-
 def _ground_findings(devs, spec_text):
-    """Drop findings whose component or required value is absent from the design
+    """Drop findings whose required value is absent from the design
     basis — the signature of a model importing an unrelated standards rule.
 
     A value is grounded if any of these hold against the spec: the whole value
@@ -299,10 +280,8 @@ def _ground_findings(devs, spec_text):
     kept = []
     for d in devs:
         value_ok = _value_is_grounded(d.get("required_value"), spec_l, spec_compact)
-        component_ok = _component_is_grounded(d.get("component"), spec_l, spec_compact)
         d["grounded_value"] = value_ok
-        d["grounded_component"] = component_ok
-        d["grounded"] = value_ok and component_ok
+        d["grounded"] = value_ok
         if d["grounded"]:
             kept.append(d)
     return kept

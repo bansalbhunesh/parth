@@ -179,17 +179,13 @@ class TestGroundFindings:
         from backend.agents.reconciliation import _ground_findings
         out = _ground_findings([self._dev(required_value=1200)], self.SPEC)
         assert out == []
+
+    def test_clause_like_component_does_not_suppress_grounded_value(self):
+        from backend.agents.reconciliation import _ground_findings
         out = _ground_findings(
             [self._dev(component="DB-5", required_value=10)], self.SPEC,
         )
-        assert out == []
-
-    def test_descriptive_component_alias_is_kept(self):
-        from backend.agents.reconciliation import _ground_findings
-        out = _ground_findings(
-            [self._dev(component="Battery system", required_value=10)], self.SPEC,
-        )
-        assert len(out) == 1 and out[0]["grounded_component"] is True
+        assert len(out) == 1 and out[0]["grounded_value"] is True
 
     def test_np2_not_grounded_by_ip42(self):
         # "N+2" must NOT be grounded by a stray '2' inside 'IP42'.

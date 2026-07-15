@@ -56,6 +56,22 @@ export interface Remediation {
   method: string;
 }
 
+export interface EvidenceFinding {
+  target: string;
+  score: number;
+  band: "Strong" | "Moderate" | "Weak" | "Thin";
+  signals: string[];
+  missing: string[];
+}
+
+export interface EvidenceReport {
+  findings: EvidenceFinding[];
+  count: number;
+  strong_count: number;
+  thin_count: number;
+  basis: string;
+}
+
 export interface AnalyzeResult {
   system: string;
   deviations: AnalyzeDeviation[];
@@ -64,6 +80,7 @@ export interface AnalyzeResult {
   mode: string;
   compound_risk?: CompoundRisk;
   remediation?: Remediation;
+  evidence?: EvidenceReport;
   timing?: {
     standards_load_ms: number;
     llm_call_ms: number | null;

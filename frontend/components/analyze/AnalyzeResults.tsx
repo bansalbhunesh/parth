@@ -10,6 +10,7 @@ interface AnalyzeResultsProps {
 export default function AnalyzeResults({ result, extraction }: AnalyzeResultsProps) {
   const source = provenance(result.mode);
   const usedOcr = extraction?.spec.ocr_used || extraction?.submittal.ocr_used;
+  const evidenceByTarget = new Map((result.evidence?.findings ?? []).map((finding) => [finding.target, finding]));
   return (
     <div className="analyze-results" aria-live="polite">
       <div className="analyze-results-header">
@@ -41,7 +42,9 @@ export default function AnalyzeResults({ result, extraction }: AnalyzeResultsPro
         )
       ) : (
         <div className="analyze-devs">
-          {result.deviations.map((deviation, index) => (
+          {result.deviations.map((deviation, index) => {
+            const strength = evidenceByTarget.get(`${deviation.component || "?"}/${deviation.parameter || "?"}`);
+            return (
             <article key={`${deviation.component}-${deviation.parameter}-${index}`} className={`analyze-dev analyze-dev-${deviation.severity.toLowerCase()}`}>
               <div className="analyze-dev-header">
                 <span className="analyze-dev-component">{deviation.component || "—"}</span>
@@ -58,9 +61,15 @@ export default function AnalyzeResults({ result, extraction }: AnalyzeResultsPro
                 {deviation.spec_clause ? <span className="analyze-dev-ref">{deviation.spec_clause}</span> : null}
                 {deviation.predicted_cx_test ? <span className="analyze-dev-ref">Cx: {deviation.predicted_cx_test}</span> : null}
                 {deviation.lead_time_weeks && deviation.lead_time_weeks > 0 ? <span className="analyze-dev-ref">{deviation.lead_time_weeks}w lead</span> : null}
+                {strength ? (
+                  <span className="analyze-dev-ref" title={strength.signals.join(", ") || "no corroborating signals"}>
+                    Evidence: {strength.band}
+                  </span>
+                ) : null}
               </div>
             </article>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

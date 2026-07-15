@@ -50,6 +50,35 @@ describe("AnalyzeResults", () => {
     expect(screen.getByText("9w lead")).toBeInTheDocument();
     expect(screen.getByText("—")).toBeInTheDocument();
   });
+
+  it("shows an evidence-strength chip per finding, with signals in the title", () => {
+    render(
+      <AnalyzeResults
+        result={{
+          ...EMPTY_RESULT,
+          count: 2,
+          mode: "llm",
+          deviations: [
+            { component: "UPS", parameter: "runtime", required_value: 10, provided_value: 7, unit: "min", severity: "Critical", rationale: "" },
+            { component: "BMS", parameter: "notes", required_value: "x", provided_value: "y", unit: "", severity: "Minor", rationale: "" },
+          ],
+          evidence: {
+            findings: [
+              { target: "UPS/runtime", score: 1.0, band: "Strong", signals: ["exact numeric mismatch"], missing: [] },
+              { target: "BMS/notes", score: 0.0, band: "Thin", signals: [], missing: ["exact numeric mismatch"] },
+            ],
+            count: 2,
+            strong_count: 1,
+            thin_count: 1,
+            basis: "not a probability of correctness",
+          },
+        }}
+        extraction={null}
+      />,
+    );
+    expect(screen.getByText(/Evidence: Strong/)).toHaveAttribute("title", "exact numeric mismatch");
+    expect(screen.getByText(/Evidence: Thin/)).toHaveAttribute("title", "no corroborating signals");
+  });
 });
 
 describe("DropZone", () => {

@@ -136,7 +136,7 @@ def _summarize(results, wall, args):
     successes = [result for result in results if result[1] and 200 <= result[1] < 300]
     accepted = [result for result in results if result[1] in (200, 202)]
     limited = [result for result in results if result[1] == 429]
-    errors = [result for result in results if result[1] is None or (result[1] >= 400 and result[1] != 429)]
+    errors = [result for result in results if result[1] is None or (not 200 <= result[1] < 300 and result[1] != 429)]
     cached = sum(1 for _, _, body in results if isinstance(body, dict) and body.get("cached") is True)
     modes = {}
     for _, _, body in results:

@@ -83,10 +83,11 @@ async def test_async_probe_reports_network_failures_without_crashing() -> None:
 
 
 def test_summary_and_evidence_artifact_fail_closed_on_overwrite(tmp_path) -> None:
-    args = _args(method="POST", endpoint="/analyze")
+    args = _args(method="POST", endpoint="/analyze", requests=3)
     summary = load._summarize(
         [
             (10.0, 200, {"cached": True, "mode": "deterministic"}),
+            (15.0, 302, {}),
             (20.0, 429, {}),
         ],
         0.1,
@@ -101,8 +102,9 @@ def test_summary_and_evidence_artifact_fail_closed_on_overwrite(tmp_path) -> Non
     assert artifact["profile"]["label"] == "unit-test"
     assert artifact["profile"]["revision"] == "abc1234"
     assert artifact["profile"]["target"] == "http://service.test"
-    assert artifact["results"]["success_rate_percent"] == 50.0
+    assert artifact["results"]["success_rate_percent"] == 33.333
     assert artifact["results"]["rate_limited_429"] == 1
+    assert artifact["results"]["errors"] == 1
     assert artifact["results"]["cache_hits"] == 1
     assert artifact["results"]["analysis_modes"] == {"deterministic": 1}
     with pytest.raises(FileExistsError):

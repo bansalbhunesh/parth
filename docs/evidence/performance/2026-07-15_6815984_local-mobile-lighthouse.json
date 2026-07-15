@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-07-15T11:47:18.775Z",
+  "source_revision": "6815984",
+  "profile": {
+    "name": "local-windows-lighthouse-default-mobile",
+    "target": "http://127.0.0.1:39124/",
+    "build": "Next.js production standalone",
+    "lighthouse_version": "13.4.0",
+    "browser": "HeadlessChrome/149.0.0.0",
+    "form_factor": "mobile",
+    "screen": {
+      "width": 412,
+      "height": 823,
+      "device_scale_factor": 1.75
+    },
+    "throttling": {
+      "method": "simulate",
+      "rtt_ms": 150,
+      "throughput_kbps": 1638.4,
+      "cpu_slowdown_multiplier": 4
+    }
+  },
+  "runs": [
+    {
+      "run": 1,
+      "fetch_time": "2026-07-15T11:46:15.115Z",
+      "source_report_sha256": "39cf1a59e09bd6c9c81dde6a7a1cb2ecc7b17b45b00e0ae017def69c9f00c71b",
+      "host_benchmark_index": 1022.0,
+      "performance": 79,
+      "accessibility": 100,
+      "best_practices": 100,
+      "seo": 100,
+      "lcp_ms": 2677,
+      "tbt_ms": 654,
+      "cls": 0,
+      "main_thread_ms": 2358
+    },
+    {
+      "run": 2,
+      "fetch_time": "2026-07-15T11:46:46.196Z",
+      "source_report_sha256": "e46b4be7322cdbf69d034c2aae9a5eb00594b6ca4992fee78653ba984e391129",
+      "host_benchmark_index": 996.5,
+      "performance": 78,
+      "accessibility": 100,
+      "best_practices": 100,
+      "seo": 100,
+      "lcp_ms": 2715,
+      "tbt_ms": 676,
+      "cls": 0,
+      "main_thread_ms": 2251
+    },
+    {
+      "run": 3,
+      "fetch_time": "2026-07-15T11:47:18.775Z",
+      "source_report_sha256": "357b49d766c35fa809f0fca3244f23a91bf690aed4ba6c15b82b8cab3d2d0624",
+      "host_benchmark_index": 1237.5,
+      "performance": 82,
+      "accessibility": 100,
+      "best_practices": 100,
+      "seo": 100,
+      "lcp_ms": 2671,
+      "tbt_ms": 566,
+      "cls": 0,
+      "main_thread_ms": 2083
+    }
+  ],
+  "median": {
+    "host_benchmark_index": 1022.0,
+    "performance": 79,
+    "accessibility": 100,
+    "best_practices": 100,
+    "seo": 100,
+    "lcp_ms": 2677,
+    "tbt_ms": 654,
+    "cls": 0,
+    "main_thread_ms": 2251
+  },
+  "bundle_gzip_kib": {
+    "/": 182.96,
+    "/evidence": 181.25,
+    "/judge": 188.93,
+    "/war-room": 181.25
+  },
+  "limitations": [
+    "This is a local Windows diagnostic, not production or field evidence.",
+    "The host benchmark index ranged from 996.5 to 1237.5, indicating substantial runner contention.",
+    "Lighthouse wrote each valid JSON report before Chrome launcher cleanup returned EPERM.",
+    "Production INP p75 was not measured."
+  ]
+}

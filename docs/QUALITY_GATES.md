@@ -38,7 +38,7 @@ Backend coverage is ratcheted at the final 95% line and 90% branch threshold. Se
 
 ## External gates still required before a 10/10 claim
 
-- The local mobile lab gate now passes directionally: three Lighthouse 13.4.0 runs against the standalone homepage scored 97, 98, and 97 (median 97); median LCP was 1.964 s, median TBT 142 ms, and CLS was 0. Accessibility, Best Practices, and SEO were 100 in all three. The Windows launcher reported profile-cleanup errors only after writing each valid, parsed report. A stable Linux/production rerun and production INP p75 evidence are still required before the final performance claim.
+- The exact-revision local mobile lab does not yet pass: three Lighthouse 13.4.0 runs against the standalone homepage scored 79, 78, and 82 (median 79); median LCP was 2.677 s, median TBT 654 ms, and CLS was 0. Accessibility, Best Practices, and SEO were 100 in all three. Host benchmark indices varied from 996.5 to 1,237.5 on the memory-constrained Windows runner, so the result is directional rather than a stable regression baseline. The Windows launcher reported profile-cleanup errors only after writing each valid, parsed report. A stable Linux/production rerun, a mobile performance score of at least 95, and production INP p75 evidence remain required.
 - Independent WCAG 2.2 AA keyboard and screen-reader review.
 - External penetration test with no open critical/high issue.
 - Staging restore rehearsal proving RPO/RTO, deletion across database/storage, load/soak, worker termination, and alerts.

@@ -1,0 +1,74 @@
+name: Mobile performance
+
+# Linux Lighthouse lab measurement of the standalone production bundle.
+# Manual/scheduled only — this is evidence collection, not a per-push gate yet.
+# The assert step runs the 95 median gate but is non-blocking until the score
+# lands there, so every run records the real number as an artifact.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 4 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: perf-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24.17.0"
+      - name: Build standalone bundle
+        working-directory: frontend
+        run: |
+          npm ci --ignore-scripts
+          npm run build
+      - name: Serve standalone bundle
+        working-directory: frontend
+        run: |
+          node scripts/start-standalone.mjs &
+          npx --yes wait-on -t 60000 http://127.0.0.1:3100
+      - name: Lighthouse mobile — collect 5 runs
+        working-directory: frontend
+        run: npx --yes @lhci/cli@0.14.x collect
+      - name: Assert median mobile performance >= 95
+        id: assert
+        continue-on-error: true
+        working-directory: frontend
+        run: npx --yes @lhci/cli@0.14.x assert
+      - name: Median score summary
+        if: always()
+        working-directory: frontend
+        run: |
+          node -e '
+            const fs = require("fs");
+            const dir = ".lighthouseci";
+            const files = fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => /^lhr-.*\.json$/.test(f)) : [];
+            const runs = files
+              .map((f) => JSON.parse(fs.readFileSync(dir + "/" + f, "utf8")))
+              .map((r) => ({
+                perf: Math.round(r.categories.performance.score * 100),
+                lcp: Math.round((r.audits["largest-contentful-paint"] || {}).numericValue || 0),
+                tbt: Math.round((r.audits["total-blocking-time"] || {}).numericValue || 0),
+              }))
+              .sort((a, b) => a.perf - b.perf);
+            console.log("performance runs:", runs.map((r) => r.perf).join(", "));
+            if (runs.length) {
+              const m = runs[Math.floor(runs.length / 2)];
+              console.log("MEDIAN mobile performance:", m.perf, "| LCP", m.lcp, "ms | TBT", m.tbt, "ms");
+              console.log(m.perf >= 95 ? "GATE MET: median >= 95" : "GATE NOT YET MET: median < 95");
+            }
+          '
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: lighthouse-reports
+          path: frontend/.lighthouseci
+          retention-days: 14

@@ -304,6 +304,12 @@ class TestAnalyzeEndpoint:
         assert cr["deviation_count"] == r.json()["count"]
         assert isinstance(cr["clusters"], list)
         assert "no LLM" in cr["method"]
+        rem = r.json()["remediation"]
+        assert isinstance(rem["actions"], list)
+        assert "has_convergence" in rem
+        if rem["actions"]:
+            assert rem["highest_leverage"] == rem["actions"][0]
+            assert 0.0 <= rem["actions"][0]["risk_reduction"] <= 1.0
 
 
 class TestDataEndpoints:

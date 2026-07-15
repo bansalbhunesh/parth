@@ -1,0 +1,5 @@
+pair_id,system_type,modality,mode_used,provider_used,not_run,error_type,latency_ms,positives,negatives,contested,tp_exact,tp_semantic,fp,fn_semantic,neg_false_alerts,error
+pair_001,ups,text,llm,openai,False,,6424,1,0,0,1,1,0,0,0,
+pair_010,ups,text,llm,openai,False,,1932,1,0,0,0,1,0,0,0,
+pair_033,crac_crah,text,llm,openai,False,,8368,0,3,0,0,0,0,0,0,
+pair_039,ups,image,vision,openai,False,,3978,1,1,0,1,1,0,0,0,

@@ -23,7 +23,8 @@ class DemoAnalyzeRequest(BaseModel):
 
 
 @router.get("/health/live", tags=["platform"], include_in_schema=True)
-def live() -> dict[str, str]:
+async def live() -> dict[str, str]:
+    # No dependency I/O or thread-pool work belongs in the liveness path.
     return {"status": "ok"}
 
 

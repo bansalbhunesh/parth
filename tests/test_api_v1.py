@@ -2,12 +2,21 @@
 
 from __future__ import annotations
 
+import inspect
+
 from fastapi.testclient import TestClient
 
 from backend.main import V1_COMPATIBILITY_ROUTE_COUNT, app
 from backend.platform.config import reset_platform_settings
+from backend.routers.analysis import health
+from backend.routers.platform import live
 
 client = TestClient(app)
+
+
+def test_nonblocking_health_handlers_stay_off_the_worker_thread_pool() -> None:
+    assert inspect.iscoroutinefunction(live)
+    assert inspect.iscoroutinefunction(health)
 
 
 def _operations(prefix: str) -> set[tuple[str, str]]:

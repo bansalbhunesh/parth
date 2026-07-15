@@ -1,135 +1,139 @@
-# Scalability & Reliability — Prototype Proof
+# Scalability and reliability evidence
 
-**Honest scope:** Pramaan is a **demo / prototype-hardened** build. This document
-describes a *prototype-level* scalability proof — enough to show the shape scales
-and to keep the live demo reliable under a burst — **not** a production system.
-Everything here is **single-instance and in-memory**; a restart or a second
-replica loses this state.
+**Status:** repository-controlled foundation implemented; production capacity is
+not yet certified.
 
-Implemented in `backend/jobs.py` (+ `/analyze`, `/jobs/*` in `backend/main.py`),
-probed by `scripts/load_test_demo.py`. Tests: `tests/test_jobs_cache.py`.
+Pramaan has two deliberately different runtime postures. The local/public-demo
+path stays deterministic and low-operations. The managed production path has
+reviewed interfaces, adapters, and database migrations, but it becomes evidence
+only after those services are configured and exercised in staging.
 
----
+## 1. Runtime boundaries
 
-## 1. What was added
+| Path | Current implementation | What is proven |
+|---|---|---|
+| Local/public demo | SQLite plus bounded in-process cache, rate limits, and jobs | Unit, integration, mutation, browser, and local HTTP probes |
+| Managed production foundation | Supabase Postgres/Auth/private Storage/Queues, Redis limits/cache/leases, durable worker, signed webhooks, and optional OTLP export | Adapter contracts, migration reset, 36 pgTAP assertions, schema lint, and clean database advisors |
+| Deployed production topology | At least two API replicas and an independently scalable worker | **Not yet proven**; requires configured staging, load/soak, failure injection, restore, and alert evidence |
 
-### Idempotency / input-hash caching
-Every analysis is keyed by
-```
+The managed foundation does not silently turn the demo deployment into a
+production system. `docs/PRODUCTION_BLUEPRINT.md` records the required cutover
+and `docs/ADR-001-MANAGED-PLATFORM.md` records the authoritative-service
+decision.
+
+## 2. Local/demo reliability behavior
+
+### Idempotency and input-hash caching
+
+Each analysis is keyed by:
+
+```text
 input_hash = sha256(owner_doc + vendor_doc + system_id + pipeline_signature)
 pipeline_signature = "<primary_provider>:<model>:<PROMPT_VERSION>"
 ```
-- An identical spec+submittal (same model/prompt version) is **computed once**
-  and reused; the response carries `cached: true`. A model or prompt change flips
-  the signature and invalidates old entries.
-- **Single-flight:** concurrent identical requests coalesce behind a per-hash
-  lock, so a burst of duplicates triggers **one** compute, not N. (Test:
-  `test_single_flight_computes_once`.)
-- The hash is **one-way** and reversible to nothing; **no secrets and no raw
-  uploaded bytes are cached** — only the computed deviations + metadata (hashes,
-  timings, mode). Cache is bounded (LRU, `PRAMAAN_CACHE_MAX=256`) with a TTL
-  (`PRAMAAN_CACHE_TTL_S=3600`).
 
-Every `/analyze` response now includes `request_id`, `input_hash`, and `cached`
-for traceability.
+- Identical work is reused and returns `cached: true`.
+- Concurrent identical requests coalesce behind a per-hash lock.
+- The cache stores results and bounded metadata, never raw uploaded bytes.
+- Cache size and TTL are bounded by `PRAMAAN_CACHE_MAX` and
+  `PRAMAAN_CACHE_TTL_S`.
+- Model or prompt changes alter the pipeline signature and invalidate stale
+  entries.
 
-### Async-style job flow
+### Local job flow
+
+```text
+POST /jobs/analyze          -> 202 queued job
+GET  /jobs/{job_id}         -> queued | running | done | error
+GET  /jobs/{job_id}/result  -> result | 202 | 404
 ```
-POST /jobs/analyze      -> 202 { job_id, request_id, input_hash, status:"queued", poll, result }
-GET  /jobs/{job_id}     -> status metadata (queued|running|done|error, timings, latency_ms, cached)
-GET  /jobs/{job_id}/result -> 200 done + deviations | 202 running | 404 unknown/expired
-```
-A bounded in-memory job store (`PRAMAAN_JOB_MAX=256`) + a small worker pool
-(`PRAMAAN_JOB_WORKERS=2`) run analyses off the request thread and reuse the
-cache. Same auth + analysis rate limit as `/analyze`; job-status GETs require
-auth (when enabled) but are not rate-limited (polling). Unguessable 128-bit ids.
 
-`GET /health` → `scalability` block exposes non-secret counters
-(`cache_entries`, `cache_max`, `jobs_tracked`, `job_workers`, `pipeline_signature`).
+This compatibility path is intentionally in-process and restart-ephemeral. It
+is not the production queue. The production worker uses visibility-timeout
+reads, bounded retries, dead-letter handling, and archives only after successful
+processing.
 
----
+### Health semantics
 
-## 2. Load-test method
+- `GET /health/live` performs no dependency I/O and stays on the event loop.
+- `GET /health/ready` checks the configured authoritative dependencies and
+  returns 503 when configuration or a required dependency is unavailable.
+- `GET /health` preserves the legacy diagnostic payload from cached,
+  non-secret state.
+- `/internal/metrics` is private and returns 404 without the configured bearer
+  token.
 
-`scripts/load_test_demo.py` fires N requests at a chosen concurrency and reports
-attempted / success / error / 429 counts, p50 & p95 latency, throughput, cache
-hits, and the analysis-mode mix (llm / deterministic / cached).
+## 3. Managed production foundation
 
-**Safe by default:** it sends the *same* payload, so after a one-request warm-up
-every hit is a cache hit — **at most one real analysis is computed** regardless
-of `--requests`, and no LLM quota is burned. `--vary` forces distinct
-(uncached) inputs and prints a quota warning.
+Repository-controlled production pieces include:
+
+- strict Supabase JWT verification and database-membership authorization;
+- RLS on every exposed tenant table and private worker-only objects;
+- private organization/case storage paths with short-lived signed URLs;
+- Supabase Queue reads with visibility timeouts and non-destructive
+  acknowledgement;
+- Redis shared rate limits, short cache, provider budgets, and idempotency
+  leases, never authoritative case/job storage;
+- tenant-consistent foreign keys, retention enforcement, webhook delivery
+  records, retry scheduling, and audit events;
+- correlated request/job identifiers, structured logs, optional OTLP traces,
+  and private operational metrics.
+
+These pieces are covered by tests and migration checks. They are not a claim
+that a managed environment has been provisioned, restored, soaked, or failed
+over successfully.
+
+## 4. Reproducible load probe
+
+`scripts/load_test_demo.py` supports two modes:
+
+- `--local`: in-process `TestClient` for a fast behavioral probe;
+- `--base-url`: bounded asynchronous HTTP concurrency against a running server.
+
+The safe default repeats one payload. After one warm-up, requests reuse the
+input-hash cache and do not spend one provider call per request. `--vary`
+defeats the cache and prints an explicit quota warning.
 
 ```powershell
-# in-process, no network (default, safe):
+# Fast local behavior check
 python scripts/load_test_demo.py --local --requests 20 --concurrency 5
-# against a running server:
-python scripts/load_test_demo.py --base-url http://localhost:8000 --requests 20 --concurrency 5
-# pure throughput (no analysis): --method GET --endpoint /health
+
+# Real HTTP health probe
+python scripts/load_test_demo.py `
+  --base-url http://127.0.0.1:8000 `
+  --method GET --endpoint /health/live `
+  --requests 1000 --concurrency 20
+
+# Immutable evidence: revision and topology label are mandatory, and an
+# existing artifact is never overwritten.
+python scripts/load_test_demo.py `
+  --base-url https://staging.example.test `
+  --method GET --endpoint /health/live `
+  --requests 1000 --concurrency 20 `
+  --revision <git-sha> `
+  --profile-label staging-two-api-replicas `
+  --json-output docs/evidence/load/<dated-name>.json
 ```
 
-### Measured (local, in-process, deterministic engine)
+Artifacts contain the target, revision, topology label, request profile,
+runtime, success/error/rate-limit counts, throughput, p50/p95/min/max latency,
+cache/mode mix, and explicit limitations. Tokens are never recorded.
 
-`--local --requests 20 --concurrency 5` (rate limiting off):
-```
-success (2xx)      : 20  (100.0%)
-errors             : 0
-rate-limited (429) : 0
-latency p50 / p95  : 16 / 21 ms
-throughput         : ~300 req/s
-cache hits         : 20   (all served from cache after warm-up)
-analysis modes     : { deterministic: 20 }
-```
+## 5. What local probes can and cannot prove
 
-Rate-limit behavior — `--requests 25 --concurrency 5`,
-`PRAMAAN_ANALYSIS_LIMIT_PER_HOUR=10`:
-```
-success (2xx)      : 9
-rate-limited (429) : 16     (clean 429 + Retry-After; warm-up consumed 1 slot)
-errors             : 0
-```
+A local probe can expose correctness, queueing, connection, and single-host
+bottlenecks. It cannot certify:
 
-**What this shows:** the pipeline stays correct and fast under concurrency,
-caching/single-flight makes repeated work free (and quota-safe), and the limiter
-sheds excess load cleanly rather than failing. **What it does NOT show:**
-multi-node throughput, sustained real-LLM load, or behavior under memory
-pressure — those need the production pieces below.
+- production network or managed-service latency;
+- multi-replica coordination or Redis/Supabase failure behavior;
+- live-provider cost, latency, or quota behavior when the cached deterministic
+  profile is used;
+- recovery after worker termination;
+- RPO/RTO, backup restore, cross-store deletion, or alert delivery;
+- two-hour stability under 100 active users and 20 concurrent analyses.
 
-### Limitations of the probe
-- In-process `--local` mode shares the interpreter with the app (not a true
-  network/multi-process load test); `--base-url` adds real HTTP but is still
-  single-client.
-- Latency reflects the deterministic engine unless a live LLM key is present.
-- Numbers are indicative on a laptop, not a benchmarked SLA.
-
----
-
-## 3. Honest limitations (current state)
-
-- **Not distributed.** The rate limiter, cache, and job store are all
-  **in-process** — no shared state across replicas, no persistence across
-  restart. On a multi-instance deploy each replica limits/caches independently.
-- **No tenant isolation.** There is no per-tenant auth, quota, or data
-  separation — the optional demo token is a single shared secret, not
-  access control.
-- **Rate limiting is best-effort.** The socket peer is used by default;
-  `X-Forwarded-For` is trusted only when explicitly enabled behind the hosting
-  proxy. It slows abuse; it is not DDoS protection.
-- **Jobs are ephemeral.** Job/cache entries are bounded and lost on restart;
-  there is no durable result store.
-
-## 4. What production would need
-
-| Concern | Prototype (now) | Production |
-|---|---|---|
-| Rate limiting | in-process sliding window | **Redis** (or gateway) shared counter behind a trusted proxy |
-| Result cache / idempotency | in-memory LRU+TTL | Redis / durable KV, keyed by the same input hash |
-| Job queue | in-process thread pool | **worker queue** (Celery/RQ/Cloud Tasks) + brokers, retries, backpressure |
-| Result store | in-memory dict | **persistent DB** (Postgres/object store) with TTL/GC |
-| Multi-tenant | none | **tenant auth**, per-tenant quotas + data isolation |
-| Observability | logs + `/health` | **tracing** (OpenTelemetry), metrics, structured request-id propagation |
-| Horizontal scale | single instance | stateless app + externalized state (all of the above) |
-
-The input-hash contract and the submit→poll→result shape are deliberately the
-same ones a production queue would use, so the migration is "swap the in-memory
-store for Redis/DB + a real worker," not a rewrite.
+The production exit gate therefore remains a staged two-hour soak with at least
+two API replicas and one worker, 100 active users, 20 concurrent analyses,
+worker termination without lost or duplicated visible effects, and tested
+database/storage/provider/alert failure paths. Results must be committed as
+dated, non-overwriting evidence artifacts before a 10/10 reliability claim.

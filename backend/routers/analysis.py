@@ -277,7 +277,8 @@ def _llm_status() -> dict:
 
 
 @router.get("/health")
-def health():
+async def health():
+    # Preserve the compatibility payload while avoiding worker-pool queueing.
     import os
 
     from backend.agents import ocr_util

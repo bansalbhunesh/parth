@@ -22,7 +22,7 @@ Backend coverage is ratcheted at the final 95% line and 90% branch threshold. Se
 
 ## Latest verified working-tree evidence (2026-07-15)
 
-- Backend: 832 tests; 96.43% line and 91.87% branch coverage; every critical module is 100% line and branch covered.
+- Backend: 838 tests; 96.43% line and 91.87% branch coverage; every critical module is 100% line and branch covered.
 - Frontend: 43 component tests; 99.26% line and 91.79% branch coverage; strict TypeScript, design-system audit, dependency audit, and production build pass. Every discovered page is within the enforced 200 KiB initial-JavaScript budget (184.6-192.3 KiB gzip in the latest local build).
 - Browser: 145/145 production-mode journeys pass across Chromium, Firefox, WebKit, Pixel, and iPhone projects, including exact visible-label matching, route-wide console/error/rejection guards, and real no-prefetch navigation.
 - Database: empty reset succeeds; 36/36 pgTAP assertions pass; schema lint and both database advisors report no issues.

@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -16,7 +17,9 @@ sys.path.insert(0, str(ROOT))
 def contract_schema() -> dict[str, Any]:
     from backend.main import app
 
-    schema = app.openapi()
+    # FastAPI returns its cached schema object. Filter a deep copy so running
+    # this exporter inside a test process cannot delete routes from the app.
+    schema = deepcopy(app.openapi())
     schema["paths"] = {
         path: value
         for path, value in schema["paths"].items()

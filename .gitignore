@@ -27,6 +27,8 @@ frontend/playwright/.cache/
 # are ever regenerated fresh, re-add with: git add -f data/corpus/<file>.json
 data/corpus/
 .coverage
+coverage-backend.json
+coverage-backend.xml
 # benchmark raw primary sources: large/unverified binaries stay out of git; the
 # placeholder and normalized text extracts are tracked.
 benchmarks/ps4_external_v1/sources/raw/*

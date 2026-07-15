@@ -212,13 +212,35 @@ def configure_prompt_mode(prompt_mode: str) -> str:
     return active_prompt_version()
 
 
+def repeat_indexes(start: int, count: int, total: int) -> range:
+    """Return repeat indexes for a resumable immutable benchmark series."""
+    if start < 1:
+        raise ValueError("repeat start must be at least 1")
+    if count < 1:
+        raise ValueError("repeat count must be at least 1")
+    if total < start + count - 1:
+        raise ValueError("repeat total cannot be smaller than the final repeat index")
+    return range(start, start + count)
+
+
 def main() -> int:
     cfg = L.load_config()
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--mode", choices=["rule", "llm"], default=cfg.get("default_mode", "rule"))
     ap.add_argument("--provider", default=cfg.get("default_provider", "gemini"))
     ap.add_argument("--model", default=os.getenv("GEMINI_MODEL", "gemini-2.5-flash"))
-    ap.add_argument("--repeat", type=int, default=int(cfg.get("default_repeat", 1)))
+    ap.add_argument(
+        "--repeat", type=int, default=int(cfg.get("default_repeat", 1)),
+        help="number of passes to run in this invocation",
+    )
+    ap.add_argument(
+        "--repeat-start", type=int, default=1,
+        help="first pass index for resuming an immutable series",
+    )
+    ap.add_argument(
+        "--repeat-total", type=int, default=0,
+        help="declared total passes for the series (default: --repeat)",
+    )
     ap.add_argument("--pairs", default="", help="comma-separated pair ids (default: all)")
     ap.add_argument("--pair-limit", type=int, default=0, help="cap number of pairs (0 = all); for smoke runs")
     ap.add_argument("--sample", default="", help="comma-separated pair ids to sample (alias of --pairs)")
@@ -241,6 +263,12 @@ def main() -> int:
     )
     args = ap.parse_args()
 
+    repeats_total = args.repeat_total or args.repeat
+    try:
+        indexes = repeat_indexes(args.repeat_start, args.repeat, repeats_total)
+    except ValueError as exc:
+        ap.error(str(exc))
+
     if args.prompt_mode != PROMPT_MODE_BASELINE and args.mode != "llm":
         ap.error("--prompt-mode coverage-matrix-v1.7 requires --mode llm")
     prompt_version = configure_prompt_mode(args.prompt_mode)
@@ -257,7 +285,7 @@ def main() -> int:
     model = "rule-engine" if args.mode == "rule" else args.model
 
     last_summary = {}
-    for k in range(1, args.repeat + 1):
+    for k in indexes:
         results = [run_one(pid, by_pair[pid], args.mode) for pid in pair_ids]
         stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         prompt_tag = "" if args.prompt_mode == PROMPT_MODE_BASELINE else f"_{args.prompt_mode}"
@@ -270,7 +298,7 @@ def main() -> int:
             "benchmark_version": freeze.get("benchmark_version"),
             "labels_freeze_sha256": freeze.get("labels_freeze_sha256"),
             "mode": args.mode, "provider": provider, "model": model,
-            "repeat_index": k, "repeats_total": args.repeat,
+            "repeat_index": k, "repeats_total": repeats_total,
             "timestamp_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "include_contested_in_primary": bool(cfg.get("include_contested_in_primary", False)),
             "count_not_run_as_miss": bool(cfg.get("count_not_run_as_miss", True)),

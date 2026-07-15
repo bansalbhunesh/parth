@@ -143,7 +143,7 @@ Do NOT include items that meet or exceed their requirements.
 # omission recall but doubled the clean-negative false-alert rate, so this
 # candidate remains disabled. Baseline prompt revisions are separately tagged.
 COVERAGE_MATRIX_ENV = "PRAMAAN_COVERAGE_MATRIX"
-BASELINE_PROMPT_VERSION = "reconcile-v3-scope-guard"
+BASELINE_PROMPT_VERSION = "reconcile-v4-balanced-scope"
 COVERAGE_MATRIX_PROMPT_VERSION = "reconcile-v1.7-candidate"
 _BASELINE_OUTPUT_MARKER = "Return a JSON array of deviations found. Each element:"
 
@@ -280,14 +280,18 @@ def _component_is_grounded(component, spec_lower: str, spec_compact: str) -> boo
     compact = re.sub(r"[^a-z0-9]", "", value)
     if not compact:
         return False
-    if len(compact) < 3:
-        return bool(re.search(r"\b" + re.escape(value) + r"\b", spec_lower))
     if compact in spec_compact:
         return True
-    return _words_are_grounded(
-        [token for token in re.findall(r"[a-z]+", value) if len(token) > 2],
-        spec_lower,
-    )
+    # Models often use a harmless descriptive alias (for example, "Battery
+    # system" for a requirement headed "Battery"). Requiring every alias word
+    # to occur verbatim discarded valid findings in the measured scope-guard
+    # experiment. Reject only clause-like identifiers imported from the
+    # standards; an identifier explicitly present in the spec was accepted
+    # above. Required-value grounding remains the stronger scope control.
+    return re.match(
+        r"^(?:db|clause|section)\s*[-.]?\s*\d+(?:[.-]\d+)*(?:\b|_)",
+        value,
+    ) is None
 
 
 def _ground_findings(devs, spec_text):

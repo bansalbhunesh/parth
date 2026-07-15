@@ -184,6 +184,13 @@ class TestGroundFindings:
         )
         assert out == []
 
+    def test_descriptive_component_alias_is_kept(self):
+        from backend.agents.reconciliation import _ground_findings
+        out = _ground_findings(
+            [self._dev(component="Battery system", required_value=10)], self.SPEC,
+        )
+        assert len(out) == 1 and out[0]["grounded_component"] is True
+
     def test_np2_not_grounded_by_ip42(self):
         # "N+2" must NOT be grounded by a stray '2' inside 'IP42'.
         from backend.agents.reconciliation import _ground_findings

@@ -178,3 +178,5 @@ def test_benchmark_prompt_mode_is_versioned_and_isolated(monkeypatch):
     assert len(provenance["code_revision"]) == 40
     assert len(provenance["working_tree_diff_sha256"]) == 64
     assert benchmark._sanitize("branch e2e / exact") == "branch-e2e-exact"
+    assert list(benchmark.repeat_indexes(1, 1, 3)) == [1]
+    assert list(benchmark.repeat_indexes(2, 2, 3)) == [2, 3]

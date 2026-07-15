@@ -1,0 +1,66 @@
+{
+  "benchmark": "ps4_external_v1",
+  "model": "google/gemini-3.1-flash-lite",
+  "run_tag": "branch-e2e-541dae8-scope-guard",
+  "generated_utc": "2026-07-15T16:54:49+00:00",
+  "main": {
+    "recall_mean": 0.8624,
+    "precision_mean": 0.9534,
+    "f1_mean": 0.9055,
+    "exact_recall_mean": 0.6984,
+    "clean_far_mean": 0.0,
+    "false_positives_mean": 2.6667,
+    "p50_ms_mean": 2481.3333,
+    "p95_ms_mean": 8490.5667,
+    "not_run_mean": 0.3333,
+    "passes": 3,
+    "run_dirs": [
+      "2026-07-04_openai_google-gemini-3.1-flash-lite_run1",
+      "2026-07-04_openai_google-gemini-3.1-flash-lite_run2",
+      "2026-07-04_openai_google-gemini-3.1-flash-lite_run3"
+    ],
+    "code_revisions": [
+      "unknown"
+    ],
+    "providers_used": []
+  },
+  "branch": {
+    "recall_mean": 0.7619,
+    "precision_mean": 0.9173,
+    "f1_mean": 0.8324,
+    "exact_recall_mean": 0.6137,
+    "clean_far_mean": 0.0104,
+    "false_positives_mean": 4.3333,
+    "p50_ms_mean": 2160.3333,
+    "p95_ms_mean": 6040.6667,
+    "not_run_mean": 0.0,
+    "passes": 3,
+    "run_dirs": [
+      "2026-07-15_openai_google-gemini-3.1-flash-lite_branch-e2e-541dae8-scope-guard_run1",
+      "2026-07-15_openai_google-gemini-3.1-flash-lite_branch-e2e-541dae8-scope-guard_run2",
+      "2026-07-15_openai_google-gemini-3.1-flash-lite_branch-e2e-541dae8-scope-guard_run3"
+    ],
+    "code_revisions": [
+      "541dae88ef77acd291c605ea9cc176eefd1f1959"
+    ],
+    "providers_used": [
+      "openai"
+    ]
+  },
+  "delta_branch_minus_main": {
+    "recall_mean": -0.1005,
+    "precision_mean": -0.0361,
+    "f1_mean": -0.0731,
+    "exact_recall_mean": -0.0847,
+    "clean_far_mean": 0.0104,
+    "false_positives_mean": 1.6666,
+    "p50_ms_mean": -321.0,
+    "p95_ms_mean": -2449.9
+  },
+  "verdict": "main_stronger",
+  "complete_vision_branch": true,
+  "limitations": [
+    "Three passes estimate run-to-run variation but do not establish field accuracy.",
+    "The benchmark sources and labels remain team-authored and single-author frozen."
+  ]
+}

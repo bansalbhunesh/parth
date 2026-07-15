@@ -1,0 +1,179 @@
+{
+  "benchmark": "ps4_external_v1",
+  "benchmark_version": "1.2.0",
+  "labels_freeze_sha256": "f13a4f72895d8ef31df1fe716ad5a73526f109a152b9060e38cd1e5179710b12",
+  "mode": "llm",
+  "provider": "openai",
+  "model": "google/gemini-3.1-flash-lite",
+  "repeat_index": 1,
+  "repeats_total": 3,
+  "timestamp_utc": "2026-07-15T17:05:06+00:00",
+  "include_contested_in_primary": false,
+  "count_not_run_as_miss": true,
+  "evidence_label": "live_model",
+  "prompt_mode": "baseline",
+  "prompt_version": "reconcile-v4-balanced-scope",
+  "run_tag": "branch-e2e-d605b54-balanced",
+  "publication_role": "branch-comparison",
+  "code_revision": "d605b5443faad2792ea7433b51191552ca1d272c",
+  "worktree_dirty": false,
+  "working_tree_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "config_sha256": "638f8f5c319c860e9ba23870a40a8c1d4a6db56093f227ecc31a9db2c52b59d9",
+  "pairs_total": 53,
+  "pairs_run": 53,
+  "pairs_not_run": 0,
+  "not_run_pair_ids": [],
+  "positive_labels": 63,
+  "clean_negative_labels": 64,
+  "contested_labels": 2,
+  "primary_recall_semantic": 0.7778,
+  "primary_recall_exact": 0.619,
+  "primary_tp": 49,
+  "primary_fn": 14,
+  "secondary_recall_semantic": 0.7778,
+  "secondary_positives": 63,
+  "false_positives_total": 4,
+  "clean_negative_false_alerts": 0,
+  "clean_negative_false_alert_rate": 0.0,
+  "error_or_timeout_pairs": 0,
+  "error_rate": 0.0,
+  "latency_p50_ms": 2629.0,
+  "latency_p95_ms": 7031.4,
+  "per_difficulty": {
+    "direct_value": {
+      "positives": 6,
+      "caught": 5,
+      "recall": 0.8333
+    },
+    "categorical_reasoning": {
+      "positives": 17,
+      "caught": 12,
+      "recall": 0.7059
+    },
+    "unit_conversion": {
+      "positives": 2,
+      "caught": 0,
+      "recall": 0.0
+    },
+    "derived_arithmetic": {
+      "positives": 4,
+      "caught": 3,
+      "recall": 0.75
+    },
+    "domain_recall": {
+      "positives": 6,
+      "caught": 6,
+      "recall": 1.0
+    },
+    "omission_detection": {
+      "positives": 8,
+      "caught": 6,
+      "recall": 0.75
+    },
+    "adversarial_noise": {
+      "positives": 6,
+      "caught": 5,
+      "recall": 0.8333
+    },
+    "table_or_layout": {
+      "positives": 8,
+      "caught": 6,
+      "recall": 0.75
+    },
+    "scanned_or_image": {
+      "positives": 6,
+      "caught": 6,
+      "recall": 1.0
+    }
+  },
+  "per_system": {
+    "ups": {
+      "positives": 7,
+      "caught": 5,
+      "recall": 0.7143
+    },
+    "metering_power_quality": {
+      "positives": 2,
+      "caught": 2,
+      "recall": 1.0
+    },
+    "switchgear": {
+      "positives": 8,
+      "caught": 7,
+      "recall": 0.875
+    },
+    "generator": {
+      "positives": 6,
+      "caught": 4,
+      "recall": 0.6667
+    },
+    "crac_crah": {
+      "positives": 2,
+      "caught": 0,
+      "recall": 0.0
+    },
+    "battery": {
+      "positives": 2,
+      "caught": 2,
+      "recall": 1.0
+    },
+    "refrigerant": {
+      "positives": 4,
+      "caught": 4,
+      "recall": 1.0
+    },
+    "cabling": {
+      "positives": 5,
+      "caught": 0,
+      "recall": 0.0
+    },
+    "transformer": {
+      "positives": 2,
+      "caught": 2,
+      "recall": 1.0
+    },
+    "chiller": {
+      "positives": 6,
+      "caught": 6,
+      "recall": 1.0
+    },
+    "pdu_rpp": {
+      "positives": 5,
+      "caught": 5,
+      "recall": 1.0
+    },
+    "bms": {
+      "positives": 3,
+      "caught": 2,
+      "recall": 0.6667
+    },
+    "fire_suppression": {
+      "positives": 2,
+      "caught": 2,
+      "recall": 1.0
+    },
+    "ats_sts": {
+      "positives": 3,
+      "caught": 2,
+      "recall": 0.6667
+    },
+    "cooling_tower": {
+      "positives": 2,
+      "caught": 2,
+      "recall": 1.0
+    },
+    "rack_aisle": {
+      "positives": 2,
+      "caught": 2,
+      "recall": 1.0
+    },
+    "networking": {
+      "positives": 2,
+      "caught": 2,
+      "recall": 1.0
+    }
+  },
+  "providers_used": {
+    "openai": 53
+  }
+}

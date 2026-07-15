@@ -136,7 +136,7 @@ The pooled recall isn't the whole story — stratified 95% confidence intervals
 by system type, difficulty, modality, and construction batch:
 [`calibration_report.md`](../benchmarks/ps4_external_v1/reports/calibration_report.md).
 
-**839 backend tests + 43 frontend tests + 145 Playwright journeys · GitHub Actions CI.** Deeper runtime detail:
+**843 backend tests + 43 frontend tests + 155 Playwright journeys · GitHub Actions CI.** Deeper runtime detail:
 [`TECHNICAL_OVERVIEW.md`](TECHNICAL_OVERVIEW.md).
 
 ## Tech stack
@@ -147,7 +147,7 @@ by system type, difficulty, modality, and construction batch:
 | Orchestration | LangGraph (`StateGraph`, `add_conditional_edges`, two bounded cycles) → sequential fallback |
 | Deterministic services | commissioning rule table · CPM + Monte Carlo schedule · supply-chain scoring · project graph · TF-IDF copilot |
 | Backend | FastAPI (Python 3.11), SSE streaming — Render |
-| Frontend | Next.js 15, React 19, TypeScript — Vercel |
+| Frontend | Next.js 16, React 19, TypeScript — Vercel |
 | Extraction | pdfplumber (primary) + PyMuPDF (fallback) + Tesseract OCR (scanned/image, where installed) |
 | Retrieval | TF-IDF (demo) → pgvector / Qdrant (scale path) |
 

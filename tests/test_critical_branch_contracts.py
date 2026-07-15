@@ -34,6 +34,11 @@ def test_security_invalid_integer_config_fails_to_safe_default(monkeypatch: pyte
     assert security.analysis_limit() == 20
 
 
+def test_case_create_limit_honors_its_named_override(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("PRAMAAN_CASE_CREATE_LIMIT_PER_HOUR", "13")
+    assert security.case_create_limit() == 13
+
+
 def test_security_defaults_and_status_contract_are_exact(monkeypatch: pytest.MonkeyPatch) -> None:
     from backend import llm
     from backend.agents import ocr_util
@@ -79,6 +84,37 @@ def test_security_defaults_and_status_contract_are_exact(monkeypatch: pytest.Mon
     }
 
 
+def test_security_disabled_status_contract_is_exact(monkeypatch: pytest.MonkeyPatch) -> None:
+    from backend import llm
+    from backend.agents import ocr_util
+
+    monkeypatch.delenv("PRAMAAN_REDIS_URL", raising=False)
+    monkeypatch.delenv("PRAMAAN_CORS_ORIGINS", raising=False)
+    monkeypatch.setattr(security, "auth_required", lambda: False)
+    monkeypatch.setattr(security, "rate_limit_enabled", lambda: False)
+    monkeypatch.setattr(security, "max_upload_mb", lambda: 20)
+    monkeypatch.setattr(ocr_util, "max_pdf_pages", lambda: 50)
+    monkeypatch.setattr(ocr_util, "max_image_pixels", lambda: 40_000_000)
+    monkeypatch.setattr(ocr_util, "tesseract_available_cached", lambda: True)
+    monkeypatch.setattr(ocr_util, "ocr_enabled", lambda: False)
+    monkeypatch.setattr(llm, "provider_chain", lambda: ["primary"])
+
+    assert security.security_status() == {
+        "auth_required": False,
+        "rate_limit_enabled": False,
+        "rate_limit_backend": "process-local",
+        "rate_limits_per_hour": None,
+        "max_upload_mb": 20,
+        "max_pdf_pages": 50,
+        "max_image_pixels": 40_000_000,
+        "cors_locked": False,
+        "ocr_available": False,
+        "llm_providers_configured": 1,
+        "llm_failover_available": False,
+        "deterministic_fallback_available": True,
+    }
+
+
 def test_security_client_key_hashes_tokens_and_honors_trusted_first_hop(monkeypatch: pytest.MonkeyPatch) -> None:
     token = "never-store-this-token"
     monkeypatch.setenv("PRAMAAN_TRUST_PROXY_HEADERS", "true")
@@ -104,6 +140,17 @@ def test_deep_probe_dependency_uses_its_own_bucket_and_limit(monkeypatch: pytest
     security.rl_deep_probe(request)
 
     assert calls == [(request, "deep_probe", 7)]
+
+
+def test_case_create_dependency_uses_its_own_bucket_and_limit(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[tuple[Request, str, int]] = []
+    request = _request()
+    monkeypatch.setattr(security, "case_create_limit", lambda: 13)
+    monkeypatch.setattr(security, "enforce_rate_limit", lambda *args: calls.append(args))
+
+    security.rl_case_create(request)
+
+    assert calls == [(request, "case_create", 13)]
 
 
 def test_job_numeric_config_uses_safe_defaults_for_invalid_values(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -240,7 +287,7 @@ def test_worker_tolerates_eviction_while_handling_failure(monkeypatch: pytest.Mo
 
 
 def test_reconciliation_feedback_and_cx_enrichment_are_preserved(
-    tmp_path, monkeypatch: pytest.MonkeyPatch
+    tmp_path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
 ) -> None:
     (tmp_path / "specs").mkdir()
     (tmp_path / "submittals").mkdir()
@@ -262,13 +309,14 @@ def test_reconciliation_feedback_and_cx_enrichment_are_preserved(
         lambda received: predicted.append(received.copy()) or {"cx_stage": "L4"},
     )
 
-    result = reconciliation.reconcile_system_at(
-        tmp_path,
-        "UPS",
-        "governing standard",
-        with_cx=True,
-        feedback="Correct the unsupported citation",
-    )
+    with caplog.at_level("INFO", logger=reconciliation.log.name):
+        result = reconciliation.reconcile_system_at(
+            tmp_path,
+            "UPS",
+            "governing standard",
+            with_cx=True,
+            feedback="Correct the unsupported citation",
+        )
 
     expected_prompt = reconciliation.PROMPT_TEMPLATE.format(
         spec="owner requirement",
@@ -282,6 +330,25 @@ def test_reconciliation_feedback_and_cx_enrichment_are_preserved(
     assert calls == [(expected_prompt, {"system": reconciliation.SYSTEM_PROMPT})]
     assert predicted == [{"component": "UPS-1", "parameter": "runtime", "system": "UPS"}]
     assert result == [{"component": "UPS-1", "parameter": "runtime", "system": "UPS", "cx_stage": "L4"}]
+    assert caplog.messages == ["System UPS: 1 deviations found"]
+
+
+def test_reconciliation_failure_log_preserves_system_and_safe_reason(
+    tmp_path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    (tmp_path / "specs").mkdir()
+    (tmp_path / "submittals").mkdir()
+    (tmp_path / "specs" / "UPS.md").write_text("owner requirement", encoding="utf-8")
+    (tmp_path / "submittals" / "UPS.md").write_text("vendor offer", encoding="utf-8")
+
+    def fail_analysis(*_args: object, **_kwargs: object) -> None:
+        raise reconciliation.LLMError("provider unavailable")
+
+    monkeypatch.setattr(reconciliation, "complete_json", fail_analysis)
+    with caplog.at_level("ERROR", logger=reconciliation.log.name):
+        assert reconciliation.reconcile_system_at(tmp_path, "UPS", "standard") == []
+
+    assert caplog.messages == ["LLM reconciliation failed for UPS: provider unavailable"]
 
 
 def test_reconciliation_defaults_missing_inputs_and_wrapper_contract(

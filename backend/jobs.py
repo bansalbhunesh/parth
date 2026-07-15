@@ -34,15 +34,21 @@ PROMPT_VERSION = "reconcile-v2"
 
 
 def _int_env(name: str, default: int) -> int:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
     try:
-        return int(os.getenv(name, str(default)))
+        return int(raw)
     except (ValueError, TypeError):
         return default
 
 
 def _float_env(name: str, default: float) -> float:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
     try:
-        return float(os.getenv(name, str(default)))
+        return float(raw)
     except (ValueError, TypeError):
         return default
 

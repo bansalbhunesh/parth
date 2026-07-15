@@ -33,8 +33,11 @@ def _truthy(v) -> bool:
 
 
 def _int_env(name: str, default: int) -> int:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
     try:
-        return int(os.getenv(name, str(default)))
+        return int(raw)
     except (ValueError, TypeError):
         return default
 

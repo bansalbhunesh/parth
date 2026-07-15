@@ -133,7 +133,7 @@
 }
 
 .section-number {
-  color: var(--brand-mark);
+  color: var(--brand-mark-strong);
   font-size: 0.77rem;
   font-weight: 760;
   letter-spacing: 0.07em;

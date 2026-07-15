@@ -157,7 +157,7 @@ Instead of a bare array, return ONE JSON object with two keys, in this order:
 def _prompt_suffix() -> str:
     """Read the env at call time (not import time) so tests and the eval
     harness can toggle the mode per-run."""
-    return COVERAGE_MATRIX_SUFFIX if os.getenv(COVERAGE_MATRIX_ENV, "0") == "1" else ""
+    return COVERAGE_MATRIX_SUFFIX if os.getenv(COVERAGE_MATRIX_ENV) == "1" else ""
 
 
 def _read(p):

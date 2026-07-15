@@ -22,9 +22,9 @@ Backend coverage is ratcheted at the final 95% line and 90% branch threshold. Se
 
 ## Latest verified working-tree evidence (2026-07-15)
 
-- Backend: 839 tests; 96.43% line and 91.87% branch coverage; every critical module is 100% line and branch covered.
-- Frontend: 43 component tests; 99.26% line and 91.79% branch coverage; strict TypeScript, design-system audit, dependency audit, and production build pass. Every discovered page is within the enforced 200 KiB initial-JavaScript budget (184.6-192.3 KiB gzip in the latest local build).
-- Browser: 145/145 production-mode journeys pass across Chromium, Firefox, WebKit, Pixel, and iPhone projects, including exact visible-label matching, route-wide console/error/rejection guards, and real no-prefetch navigation.
+- Backend: 843 tests; 96.43% line and 91.92% branch coverage; every critical module is 100% line and branch covered.
+- Frontend: 43 component tests; 99.26% line and 91.79% branch coverage; strict TypeScript, design-system audit, dependency audit, and production build pass. Every discovered page is within the enforced 200 KiB initial-JavaScript budget (181.25-188.93 KiB gzip in the latest local build).
+- Browser: 155/155 production-mode journeys pass across Chromium, Firefox, WebKit, Pixel, and iPhone projects, including exact visible-label matching, route-wide console/error/rejection guards, no-JavaScript navigation, and deferred-layout anchor behavior.
 - Database: empty reset succeeds; 36/36 pgTAP assertions pass; schema lint and both database advisors report no issues.
 - Security/evidence: both locked Python dependency audits are clean, Bandit reports no medium/high issue, and the frozen benchmark manifest/hash/calibration/evaluation checks pass.
 - Mutation: two consecutive completed remote gates each scored 1,315 mutants and passed well above the enforced 85% minimum: 97.26% (768 explicit kills, 511 bounded timeouts, 36 survivors) and 96.73% (767 explicit kills, 505 bounded timeouts, 43 survivors). Exact-head status remains a required PR check.
@@ -38,7 +38,7 @@ Backend coverage is ratcheted at the final 95% line and 90% branch threshold. Se
 
 ## External gates still required before a 10/10 claim
 
-- Mobile Lighthouse performance is not yet a passing release gate. Three directional Lighthouse 13.4.0 runs against the local standalone `/judge` route scored 75, 85, and 97 (median 85); median LCP was 3.04 s, median TBT 376 ms, and CLS was 0. Accessibility, Best Practices, and SEO remained 100 in all three. The Windows launcher also reported profile-cleanup errors after writing each valid report, so a stable Linux/production rerun is required rather than selecting the best sample.
+- The local mobile lab gate now passes directionally: three Lighthouse 13.4.0 runs against the standalone homepage scored 97, 98, and 97 (median 97); median LCP was 1.964 s, median TBT 142 ms, and CLS was 0. Accessibility, Best Practices, and SEO were 100 in all three. The Windows launcher reported profile-cleanup errors only after writing each valid, parsed report. A stable Linux/production rerun and production INP p75 evidence are still required before the final performance claim.
 - Independent WCAG 2.2 AA keyboard and screen-reader review.
 - External penetration test with no open critical/high issue.
 - Staging restore rehearsal proving RPO/RTO, deletion across database/storage, load/soak, worker termination, and alerts.

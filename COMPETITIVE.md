@@ -12,7 +12,7 @@ for different reasons:
 
 | Threat | Why it can beat us in a judge room | Pramaan's answer |
 |---|---|---|
-| [`sanskar9999/prahari`](https://github.com/sanskar9999/prahari) | Public-safety/fraud story is emotionally immediate; its current README links a phone-capable GitHub Pages demo, documents a 3–4 minute guided flow, and the repository now includes a GitHub Pages deployment workflow. It does not currently document a test suite. | We cannot out-drama digital-arrest scams. We out-verify: backend + frontend deploys, 839 backend tests, 43 frontend tests, 145 browser journeys, a frozen benchmark, claims register, explicit provenance, and no hidden eval. |
+| [`sanskar9999/prahari`](https://github.com/sanskar9999/prahari) | Public-safety/fraud story is emotionally immediate; its current README links a phone-capable GitHub Pages demo, documents a 3–4 minute guided flow, and the repository now includes a GitHub Pages deployment workflow. It does not currently document a test suite. | We cannot out-drama digital-arrest scams. We out-verify: backend + frontend deploys, 843 backend tests, 43 frontend tests, 155 browser journeys, a frozen benchmark, claims register, explicit provenance, and no hidden eval. |
 | [`Agent-A345/PlantIQ`](https://github.com/Agent-A345/PlantIQ) | Industrial domain is close to ours; the current public repository documents 5 specialist agents, 22+ implemented features, 6 real government PDFs, a knowledge graph, Docker, and a useful honest disclosure that operating telemetry is simulated. It does not currently document a public deployment or test suite. | We avoid feature fog: one LLM reasoning core, deterministic services, a benchmark card, CI, and a judge path that proves one consequential workflow end to end. |
 | [`Exyons/ET-GenAI-Hackathon`](https://github.com/Exyons/ET-GenAI-Hackathon) | Agriculture has broad social impact; the current repository links a live Vercel frontend and documents multilingual web/SMS/WhatsApp access plus a drone simulation. It does not currently document a test suite. | We make the business consequence concrete: a vendor deviation becomes a dated commissioning failure and an owned resolution, with citations and reproducible checks. |
 
@@ -170,8 +170,8 @@ of the following is in their public feature set — and together they are the mo
 2. **Lead-time-to-failure.** A quantified "you caught this N weeks before the test
    fails" — the number that converts a finding into a dated, prioritised action
    and a board-level schedule-risk metric.
-3. **Open, reproducible eval + benchmark result.** A public test harness, 839
-   backend tests, 43 frontend tests, 145 browser journeys, and a frozen **53-pair / 129-label / 17-system** benchmark with
+3. **Open, reproducible eval + benchmark result.** A public test harness, 843
+   backend tests, 43 frontend tests, 155 browser journeys, and a frozen **53-pair / 129-label / 17-system** benchmark with
    repeat-run model results, clean-negative controls, and a rule baseline
    ([`benchmarks/ps4_external_v1/METHODOLOGY.md`](benchmarks/ps4_external_v1/METHODOLOGY.md)).
    Closed SaaS asks you to trust the marketing; we ship the harness and its limits.

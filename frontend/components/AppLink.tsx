@@ -1,13 +1,14 @@
-import NextLink from "next/link";
-import type { ComponentProps } from "react";
+import type { AnchorHTMLAttributes } from "react";
 
-type AppLinkProps = ComponentProps<typeof NextLink>;
+type AppLinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & {
+  href: string;
+};
 
 /**
- * Internal navigation without speculative RSC requests. The site has four
- * small routes, so viewport prefetching adds work and has triggered rejected
- * requests in WebKit without a meaningful navigation benefit.
+ * Progressively enhanced internal navigation. The site has four small routes,
+ * so native anchors avoid speculative RSC requests and retain reliable
+ * navigation even before hydration or when JavaScript is unavailable.
  */
-export default function AppLink(props: AppLinkProps) {
-  return <NextLink {...props} prefetch={false} />;
+export default function AppLink({ href, ...props }: AppLinkProps) {
+  return <a href={href} {...props} />;
 }

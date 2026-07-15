@@ -114,6 +114,22 @@ body {
   min-width: 320px;
 }
 
+/* Keep the first route section immediately renderable while deferring layout
+   for substantial below-fold dossiers. ``auto`` preserves find-in-page,
+   focus, anchor navigation, and accessibility semantics; the intrinsic block
+   size reserves stable scroll space until a section approaches the viewport. */
+@supports (content-visibility: auto) {
+  main > section:not(:first-child),
+  .site-footer {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 800px;
+  }
+
+  .site-footer {
+    contain-intrinsic-size: auto 180px;
+  }
+}
+
 ::selection {
   background: var(--brand-mark);
   color: var(--paper-raised);

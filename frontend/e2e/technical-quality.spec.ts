@@ -17,6 +17,42 @@ test("internal navigation remains operable without speculative prefetch", async 
   await expect(page.locator("h1")).toBeVisible();
 });
 
+test("primary navigation works before or without client JavaScript", async ({ browser, baseURL }) => {
+  expect(baseURL).toBeTruthy();
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  try {
+    await page.goto(`${baseURL}/`, { waitUntil: "load" });
+    await page.getByRole("link", { name: "Evidence" }).first().click();
+    await expect(page).toHaveURL(/\/evidence$/);
+    await expect(page.locator("h1")).toHaveText("Every headline number should survive a second question.");
+  } finally {
+    await context.close();
+  }
+});
+
+test("below-fold sections defer layout without weakening anchor navigation", async ({ page }) => {
+  await page.goto("/", { waitUntil: "load" });
+  const audit = await page.locator("main > section").nth(1).evaluate((section) => {
+    const style = getComputedStyle(section);
+    return {
+      supported: CSS.supports("content-visibility", "auto"),
+      contentVisibility: style.contentVisibility,
+      containIntrinsicSize: style.containIntrinsicSize,
+      heading: section.querySelector("h2")?.textContent?.trim(),
+    };
+  });
+
+  expect(audit.heading).toBe("The evidence chain stays attached to the consequence.");
+  if (audit.supported) {
+    expect(audit.contentVisibility).toBe("auto");
+    expect(audit.containIntrinsicSize).toContain("800px");
+  }
+
+  await page.locator('a[href="#register"]').first().click();
+  await expect(page.locator("#register")).toBeInViewport();
+});
+
 test("active routes emit no console errors, page errors, or unhandled rejections", async ({ page }) => {
   await page.addInitScript(() => {
     window.addEventListener("unhandledrejection", (event) => {

@@ -73,6 +73,29 @@ jobs:
           path: coverage-backend.xml
           retention-days: 14
 
+  database:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: supabase/setup-cli@3c2f5e2ae34c34e428e8e206e2c4d21fa2d20fbf # v2
+        with:
+          version: 2.109.1
+      - name: Rebuild migrations from an empty database
+        run: |
+          supabase db start
+          supabase db reset --local
+          supabase migration list --local
+      - name: Lint schema, exercise RLS, and run database advisors
+        run: |
+          supabase db lint --local --schema public,private --fail-on error
+          supabase test db --local
+          supabase db advisors --local --type security --fail-on warn
+          supabase db advisors --local --type performance --fail-on warn
+      - name: Stop local database
+        if: always()
+        run: supabase stop --no-backup
+
   frontend:
     runs-on: ubuntu-latest
     timeout-minutes: 25

@@ -96,11 +96,27 @@ test("reduced-motion preference suppresses non-essential motion", async ({ page 
   expect(animated).toEqual([]);
 });
 
-test("the first keyboard action exposes a working skip link", async ({ page }) => {
+test("the skip link is first in focus order and keyboard-operable", async ({ browserName, page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  await page.keyboard.press("Tab");
-
   const skipLink = page.getByRole("link", { name: "Skip to main content" });
+
+  const isFirstFocusable = await page.evaluate(() => {
+    const candidate = document.querySelector<HTMLElement>(
+      "a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), "
+      + "select:not([disabled]), [tabindex]:not([tabindex='-1'])",
+    );
+    return candidate?.classList.contains("skip-link") === true && candidate.tabIndex === 0;
+  });
+  expect(isFirstFocusable).toBe(true);
+
+  if (browserName === "webkit") {
+    // Safari excludes links from plain-Tab navigation unless the host enables
+    // full keyboard access. Playwright cannot toggle that host preference, so
+    // WebKit proves DOM focus order plus focus/Enter behavior directly.
+    await skipLink.focus();
+  } else {
+    await page.keyboard.press("Tab");
+  }
   await expect(skipLink).toBeFocused();
   await expect(skipLink).toBeVisible();
   await page.keyboard.press("Enter");

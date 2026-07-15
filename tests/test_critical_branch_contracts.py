@@ -34,6 +34,51 @@ def test_security_invalid_integer_config_fails_to_safe_default(monkeypatch: pyte
     assert security.analysis_limit() == 20
 
 
+def test_security_defaults_and_status_contract_are_exact(monkeypatch: pytest.MonkeyPatch) -> None:
+    from backend import llm
+    from backend.agents import ocr_util
+
+    monkeypatch.delenv("PRAMAAN_CASE_CREATE_LIMIT_PER_HOUR", raising=False)
+    monkeypatch.delenv("PRAMAAN_METRICS_TOKEN", raising=False)
+    assert security.case_create_limit() == 10
+    assert security.metrics_token() == ""
+
+    monkeypatch.setenv("PRAMAAN_REDIS_URL", "redis://cache")
+    monkeypatch.setenv("PRAMAAN_CORS_ORIGINS", "https://app.example")
+    monkeypatch.setattr(security, "auth_required", lambda: True)
+    monkeypatch.setattr(security, "rate_limit_enabled", lambda: True)
+    monkeypatch.setattr(security, "analysis_limit", lambda: 21)
+    monkeypatch.setattr(security, "upload_limit", lambda: 9)
+    monkeypatch.setattr(security, "deep_probe_limit", lambda: 4)
+    monkeypatch.setattr(security, "case_create_limit", lambda: 3)
+    monkeypatch.setattr(security, "max_upload_mb", lambda: 18)
+    monkeypatch.setattr(ocr_util, "max_pdf_pages", lambda: 77)
+    monkeypatch.setattr(ocr_util, "max_image_pixels", lambda: 88_000_000)
+    monkeypatch.setattr(ocr_util, "tesseract_available_cached", lambda: True)
+    monkeypatch.setattr(ocr_util, "ocr_enabled", lambda: True)
+    monkeypatch.setattr(llm, "provider_chain", lambda: ["primary", "secondary"])
+
+    assert security.security_status() == {
+        "auth_required": True,
+        "rate_limit_enabled": True,
+        "rate_limit_backend": "redis",
+        "rate_limits_per_hour": {
+            "analysis": 21,
+            "upload": 9,
+            "deep_probe": 4,
+            "case_create": 3,
+        },
+        "max_upload_mb": 18,
+        "max_pdf_pages": 77,
+        "max_image_pixels": 88_000_000,
+        "cors_locked": True,
+        "ocr_available": True,
+        "llm_providers_configured": 2,
+        "llm_failover_available": True,
+        "deterministic_fallback_available": True,
+    }
+
+
 def test_security_client_key_hashes_tokens_and_honors_trusted_first_hop(monkeypatch: pytest.MonkeyPatch) -> None:
     token = "never-store-this-token"
     monkeypatch.setenv("PRAMAAN_TRUST_PROXY_HEADERS", "true")
@@ -66,6 +111,34 @@ def test_job_numeric_config_uses_safe_defaults_for_invalid_values(monkeypatch: p
     monkeypatch.setenv("TEST_JOB_FLOAT", "invalid")
     assert jobs._int_env("TEST_JOB_INTEGER", 11) == 11
     assert jobs._float_env("TEST_JOB_FLOAT", 2.5) == 2.5
+
+    monkeypatch.setenv("TEST_JOB_INTEGER", "17")
+    monkeypatch.setenv("TEST_JOB_FLOAT", "3.25")
+    assert jobs._int_env("TEST_JOB_INTEGER", 11) == 17
+    assert jobs._float_env("TEST_JOB_FLOAT", 2.5) == 3.25
+
+    monkeypatch.delenv("TEST_JOB_INTEGER")
+    monkeypatch.delenv("TEST_JOB_FLOAT")
+    assert jobs._int_env("TEST_JOB_INTEGER", 11) == 11
+    assert jobs._float_env("TEST_JOB_FLOAT", 2.5) == 2.5
+
+
+def test_job_stats_report_exact_live_counts(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(jobs, "_CACHE_MAX", 7)
+    monkeypatch.setattr(jobs, "_MAX_WORKERS", 3)
+    monkeypatch.setattr(jobs, "pipeline_signature", lambda: "pipeline-signature")
+    with jobs._cache_lock:
+        jobs._cache["one"] = {"value": 1}
+    with jobs._jobs_lock:
+        jobs._jobs["job"] = {"status": "queued"}
+
+    assert jobs.stats() == {
+        "cache_entries": 1,
+        "cache_max": 7,
+        "jobs_tracked": 1,
+        "job_workers": 3,
+        "pipeline_signature": "pipeline-signature",
+    }
 
 
 def test_cache_and_job_registries_evict_oldest_entries(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -173,12 +246,21 @@ def test_reconciliation_feedback_and_cx_enrichment_are_preserved(
     (tmp_path / "submittals").mkdir()
     (tmp_path / "specs" / "UPS.md").write_text("owner requirement", encoding="utf-8")
     (tmp_path / "submittals" / "UPS.md").write_text("vendor offer", encoding="utf-8")
-    prompts: list[str] = []
+    calls: list[tuple[str, dict[str, object]]] = []
     finding = {"component": "UPS-1", "parameter": "runtime"}
-    monkeypatch.setattr(reconciliation, "complete_json", lambda prompt, **_kwargs: prompts.append(prompt) or [])
+    monkeypatch.setattr(
+        reconciliation,
+        "complete_json",
+        lambda prompt, **kwargs: calls.append((prompt, kwargs)) or [],
+    )
     monkeypatch.setattr(reconciliation, "_validate_deviations", lambda _raw: [finding.copy()])
     monkeypatch.setattr(reconciliation, "_check_citation_faithfulness", lambda devs, *_args: devs)
-    monkeypatch.setattr(reconciliation, "predict_cx_impact", lambda _finding: {"cx_stage": "L4"})
+    predicted: list[dict[str, object]] = []
+    monkeypatch.setattr(
+        reconciliation,
+        "predict_cx_impact",
+        lambda received: predicted.append(received.copy()) or {"cx_stage": "L4"},
+    )
 
     result = reconciliation.reconcile_system_at(
         tmp_path,
@@ -188,9 +270,61 @@ def test_reconciliation_feedback_and_cx_enrichment_are_preserved(
         feedback="Correct the unsupported citation",
     )
 
-    assert "SELF-REVIEW FEEDBACK" in prompts[0]
-    assert "Correct the unsupported citation" in prompts[0]
+    expected_prompt = reconciliation.PROMPT_TEMPLATE.format(
+        spec="owner requirement",
+        submittal="vendor offer",
+        standards="governing standard",
+    ) + (
+        "\n\n=== SELF-REVIEW FEEDBACK (revise your previous answer) ===\n"
+        "Correct the unsupported citation"
+        "\nReturn the corrected JSON array of deviations.\n"
+    )
+    assert calls == [(expected_prompt, {"system": reconciliation.SYSTEM_PROMPT})]
+    assert predicted == [{"component": "UPS-1", "parameter": "runtime", "system": "UPS"}]
     assert result == [{"component": "UPS-1", "parameter": "runtime", "system": "UPS", "cx_stage": "L4"}]
+
+
+def test_reconciliation_defaults_missing_inputs_and_wrapper_contract(
+    tmp_path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    (tmp_path / "specs").mkdir()
+    (tmp_path / "submittals").mkdir()
+    (tmp_path / "specs" / "UPS.md").write_text("owner requirement", encoding="utf-8")
+
+    with caplog.at_level("WARNING", logger=reconciliation.log.name):
+        assert reconciliation.reconcile_system_at(tmp_path, "UPS", "standard") == []
+    assert caplog.messages == ["Missing spec or submittal for UPS"]
+
+    (tmp_path / "submittals" / "UPS.md").write_text("vendor offer", encoding="utf-8")
+    finding = {"component": "UPS-1", "parameter": "runtime"}
+    monkeypatch.setattr(reconciliation, "complete_json", lambda *_args, **_kwargs: [])
+    monkeypatch.setattr(reconciliation, "_validate_deviations", lambda _raw: [finding.copy()])
+    monkeypatch.setattr(reconciliation, "_check_citation_faithfulness", lambda devs, *_args: devs)
+    monkeypatch.setattr(
+        reconciliation,
+        "predict_cx_impact",
+        lambda _finding: pytest.fail("default with_cx=False must not predict commissioning impact"),
+    )
+    assert reconciliation.reconcile_system_at(tmp_path, "UPS", "standard") == [
+        {"component": "UPS-1", "parameter": "runtime", "system": "UPS"}
+    ]
+
+    wrapper_calls: list[tuple[object, ...]] = []
+    monkeypatch.setattr(
+        reconciliation,
+        "reconcile_system_at",
+        lambda *args, **kwargs: wrapper_calls.append((*args, kwargs)) or ["result"],
+    )
+    assert reconciliation.reconcile_system("UPS", "standard", feedback="review") == ["result"]
+    assert wrapper_calls == [
+        (reconciliation.CORPUS, "UPS", "standard", {"with_cx": True, "feedback": "review"})
+    ]
+
+
+def test_reconciliation_word_grounding_requires_every_word() -> None:
+    assert reconciliation._words_are_grounded(["battery", "runtime"], "battery runtime requirement") is True
+    assert reconciliation._words_are_grounded(["battery", "missing"], "battery runtime requirement") is False
+    assert reconciliation._words_are_grounded([], "battery runtime requirement") is False
 
 
 def test_reconciliation_corpus_walk_and_reader_are_deterministic(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:

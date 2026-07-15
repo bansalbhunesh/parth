@@ -14,6 +14,9 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
+  // Bound process pressure so Firefox/WebKit are not starved by five browser
+  // projects plus both application servers on smaller CI and developer hosts.
+  workers: 2,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? "github" : "list",
   use: {
@@ -59,12 +62,17 @@ export default defineConfig({
       },
     },
     {
-      command: "npm run dev -- --port 3100",
+      // Exercise the deployable bundle. The development HMR client can emit
+      // transient chunk-load rejections during parallel cross-browser runs,
+      // which measures the dev server rather than production behavior.
+      command: "npm run build && npm run start:e2e",
       url: "http://127.0.0.1:3100",
       reuseExistingServer: !process.env.CI,
-      timeout: 60_000,
+      timeout: 120_000,
       env: {
         ...process.env,
+        HOSTNAME: "127.0.0.1",
+        PORT: "3100",
         NEXT_PUBLIC_API: "http://127.0.0.1:8100",
       },
     },

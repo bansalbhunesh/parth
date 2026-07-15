@@ -31,7 +31,9 @@ test("primary routes reflow at the WCAG 400 percent equivalent width", async ({ 
 test("forced-colors mode preserves focus and status text", async ({ page }) => {
   await page.emulateMedia({ forcedColors: "active" });
   await page.goto("/judge", { waitUntil: "domcontentloaded" });
-  await page.keyboard.press("Tab");
-  await expect(page.getByRole("link", { name: "Skip to main content" })).toBeFocused();
+  const skipLink = page.getByRole("link", { name: "Skip to main content" });
+  await skipLink.focus();
+  await expect(skipLink).toBeFocused();
+  await expect(skipLink).toBeVisible();
   await expect(page.getByText("No result is relabelled as live when the API or model is unavailable.")).toBeVisible();
 });

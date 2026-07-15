@@ -97,6 +97,8 @@ export default async function EvidencePage() {
         </div>
         <div className="verification-list">
           <div><strong>{PRODUCT_CLAIMS.verification.backendTests}</strong><span>backend tests collected in the current tree</span></div>
+          <div><strong>{PRODUCT_CLAIMS.verification.frontendTests}</strong><span>active-component tests with branch coverage</span></div>
+          <div><strong>{PRODUCT_CLAIMS.verification.browserJourneys}</strong><span>production-mode journeys across five browser/device projects</span></div>
           <div><strong>Typed</strong><span>strict frontend typecheck and production build</span></div>
           <div><strong>End to end</strong><span>document analysis, keyboard, links, responsive layout, and resolution workflow</span></div>
           <div><strong>Fail closed</strong><span>configured auth, case secrets, bounded LLM capacity, and case-scoped webhooks</span></div>

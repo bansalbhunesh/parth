@@ -164,15 +164,21 @@ class FakeRedis:
 def test_redis_cache_is_ttl_bounded_and_supports_idempotency_leases(monkeypatch) -> None:
     client = FakeRedis()
     cache = RedisCache(client, prefix="test")
+    assert cache._client is client
+    assert cache._prefix == "test"
     assert cache.get("missing") is None
-    cache.set("result", b"value", 10)
+    cache.set("result", b"value", 1)
+    assert client.calls[-1] == ("set", "test:result", b"value", {"ex": 1})
     assert cache.get("result") == b"value"
-    assert cache.acquire("lock", b"owner", 5) is True
+    assert cache.acquire("lock", b"owner", 1) is True
+    assert client.calls[-1] == ("set", "test:lock", b"owner", {"ex": 1, "nx": True})
     assert cache.acquire("lock", b"other", 5) is False
-    with pytest.raises(ValueError, match="positive"):
+    with pytest.raises(ValueError) as set_error:
         cache.set("bad", b"value", 0)
-    with pytest.raises(ValueError, match="positive"):
+    assert str(set_error.value) == "ttl_seconds must be positive"
+    with pytest.raises(ValueError) as acquire_error:
         cache.acquire("bad", b"value", 0)
+    assert str(acquire_error.value) == "ttl_seconds must be positive"
 
     calls = {}
 
@@ -183,8 +189,16 @@ def test_redis_cache_is_ttl_bounded_and_supports_idempotency_leases(monkeypatch)
             return client
 
     monkeypatch.setitem(sys.modules, "redis", SimpleNamespace(Redis=RedisFactory))
-    assert isinstance(RedisCache.from_url("redis://cache"), RedisCache)
-    assert calls["socket_timeout"] == 1
+    created = RedisCache.from_url("redis://cache")
+    assert isinstance(created, RedisCache)
+    assert created._client is client
+    assert created._prefix == "pramaan"
+    assert calls == {
+        "url": "redis://cache",
+        "decode_responses": False,
+        "socket_connect_timeout": 1,
+        "socket_timeout": 1,
+    }
 
 
 class FakeQueue:
@@ -234,14 +248,25 @@ def test_worker_dead_letters_at_bound_and_checks_archive_results() -> None:
     dead = FakeQueue()
     worker = DurableWorker(queue, dead, lambda _payload: (_ for _ in ()).throw(RuntimeError()), max_attempts=3)
     assert worker.run_once() == WorkerBatchResult(dead_lettered=1)
-    assert dead.enqueued[0][0]["source_message_id"] == 7
+    assert dead.enqueued == [
+        (
+            {
+                "source_message_id": 7,
+                "read_count": 3,
+                "payload": {"job_id": "job-7"},
+            },
+            0,
+        )
+    ]
     assert queue.archived == [7]
 
     broken = DurableWorker(FakeQueue([_message(8, 1)], archive_result=False), dead, lambda _payload: None)
-    with pytest.raises(RuntimeError, match="completed"):
+    with pytest.raises(RuntimeError) as completed_error:
         broken.run_once()
-    with pytest.raises(ValueError, match="positive"):
+    assert str(completed_error.value) == "failed to archive completed message"
+    with pytest.raises(ValueError) as bounds_error:
         DurableWorker(queue, dead, lambda _payload: None, visibility_seconds=0)
+    assert str(bounds_error.value) == "worker bounds must be positive"
 
     dead_archive = FakeQueue([_message(9, 5)], archive_result=False)
     broken_dead = DurableWorker(
@@ -250,5 +275,52 @@ def test_worker_dead_letters_at_bound_and_checks_archive_results() -> None:
         lambda _payload: (_ for _ in ()).throw(RuntimeError()),
         max_attempts=2,
     )
-    with pytest.raises(RuntimeError, match="dead-lettered"):
+    with pytest.raises(RuntimeError) as dead_letter_error:
         broken_dead.run_once()
+    assert str(dead_letter_error.value) == "failed to archive dead-lettered message"
+
+
+def test_worker_defaults_boundaries_and_multi_message_accounting() -> None:
+    empty_queue = FakeQueue()
+    empty_worker = DurableWorker(empty_queue, FakeQueue(), lambda _payload: None)
+    assert empty_worker._visibility_seconds == 120
+    assert empty_worker._max_attempts == 5
+    assert empty_worker.run_once() == WorkerBatchResult()
+    assert empty_queue.read_calls == [(120, 10)]
+
+    boundary_worker = DurableWorker(
+        FakeQueue(),
+        FakeQueue(),
+        lambda _payload: None,
+        visibility_seconds=1,
+        max_attempts=1,
+    )
+    assert boundary_worker._visibility_seconds == 1
+    assert boundary_worker._max_attempts == 1
+
+    mixed_queue = FakeQueue([_message(10, 1), _message(11, 1), _message(12, 1), _message(13, 2)])
+    handled: list[str] = []
+
+    def mixed_handler(payload):  # noqa: ANN001
+        handled.append(payload["job_id"])
+        if payload["job_id"] in {"job-11", "job-13"}:
+            raise RuntimeError("retry")
+
+    mixed_worker = DurableWorker(mixed_queue, FakeQueue(), mixed_handler, max_attempts=3)
+    assert mixed_worker.run_once(4) == WorkerBatchResult(completed=2, retrying=2, dead_lettered=0)
+    assert handled == ["job-10", "job-11", "job-12", "job-13"]
+    assert mixed_queue.archived == [10, 12]
+
+    dead_queue = FakeQueue([_message(20, 3), _message(21, 4)])
+    dead_letters = FakeQueue()
+    dead_worker = DurableWorker(
+        dead_queue,
+        dead_letters,
+        lambda _payload: (_ for _ in ()).throw(RuntimeError("terminal")),
+        max_attempts=3,
+    )
+    assert dead_worker.run_once(2) == WorkerBatchResult(completed=0, retrying=0, dead_lettered=2)
+    assert [entry[0] for entry in dead_letters.enqueued] == [
+        {"source_message_id": 20, "read_count": 3, "payload": {"job_id": "job-20"}},
+        {"source_message_id": 21, "read_count": 4, "payload": {"job_id": "job-21"}},
+    ]

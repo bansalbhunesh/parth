@@ -139,6 +139,10 @@ only_mutate = [
     "backend/platform/webhook_delivery.py",
 ]
 mutate_only_covered_lines = true
+# Pin Mutmut's bounded detection window so timeout results are reproducible and
+# mean the mutated behavior exceeded 15x its measured tests plus one second.
+timeout_multiplier = 15.0
+timeout_constant = 1.0
 # Mutmut 3.6 resolves every traversed frame with strict=True while collecting
 # coverage stats. Finite filtering can reach Python's synthetic
 # ``<frozen importlib._bootstrap>`` frame and abort before any mutant runs.

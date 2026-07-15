@@ -230,7 +230,7 @@ export default async function Page() {
           <div><dt>Semantic recall</dt><dd>{claims.recall.toFixed(3)}</dd><dd className="ledger-note"><small>mean of three repeat runs</small></dd></div>
           <div><dt>Precision / F1</dt><dd>{claims.precision.toFixed(3)} / {claims.f1.toFixed(3)}</dd><dd className="ledger-note"><small>{claims.labels} frozen labels</small></dd></div>
           <div><dt>False alerts</dt><dd>{claims.falseAlerts} / {claims.cleanNegatives}</dd><dd className="ledger-note"><small>clean-negative controls</small></dd></div>
-          <div><dt>Backend verification</dt><dd>{PRODUCT_CLAIMS.verification.backendTests}</dd><dd className="ledger-note"><small>collected tests · current tree</small></dd></div>
+          <div><dt>Automated verification</dt><dd>{PRODUCT_CLAIMS.verification.backendTests} + {PRODUCT_CLAIMS.verification.frontendTests} + {PRODUCT_CLAIMS.verification.browserJourneys}</dd><dd className="ledger-note"><small>backend · frontend · browser journeys</small></dd></div>
         </dl>
         <Link className="button button-secondary" href="/evidence">Inspect sources and limitations</Link>
       </section>

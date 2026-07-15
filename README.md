@@ -253,5 +253,5 @@ f9976f5 feat(evidence): store two primary-source documents, not just cite them (
 <p align="center">
   <strong>Pramaan Compliance Engine</strong><br>
   <em>EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4</em><br>
-  <sub>678 tests collected &middot; CI gated &middot; provenance labelled</sub>
+  <sub>832 backend tests &middot; 43 frontend tests &middot; 130 browser journeys &middot; CI gated</sub>
 </p>

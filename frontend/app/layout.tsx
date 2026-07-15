@@ -19,7 +19,7 @@ const OG_IMAGE = {
   url: "/og.png",
   width: 1200,
   height: 630,
-  alt: `Pramaan traces a vendor deviation to its commissioning consequence and resolution. Benchmark v${PRODUCT_CLAIMS.benchmark.version}: recall ${PRODUCT_CLAIMS.benchmark.recall}, ${PRODUCT_CLAIMS.benchmark.falseAlerts}/${PRODUCT_CLAIMS.benchmark.cleanNegatives} false alerts, ${PRODUCT_CLAIMS.verification.backendTests} backend tests.`,
+  alt: `Pramaan traces a vendor deviation to its commissioning consequence and resolution. Benchmark v${PRODUCT_CLAIMS.benchmark.version}: recall ${PRODUCT_CLAIMS.benchmark.recall}, ${PRODUCT_CLAIMS.benchmark.falseAlerts}/${PRODUCT_CLAIMS.benchmark.cleanNegatives} false alerts, ${PRODUCT_CLAIMS.verification.backendTests} backend tests, ${PRODUCT_CLAIMS.verification.frontendTests} frontend tests, and ${PRODUCT_CLAIMS.verification.browserJourneys} browser journeys.`,
 };
 
 export const metadata: Metadata = {

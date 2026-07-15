@@ -47,8 +47,9 @@ jobs:
             --critical backend/platform/durable_worker.py \
             --critical backend/platform/webhook_delivery.py
           mutmut run --max-children 4
-          mutmut results --all | tee mutation-results.txt
-          python scripts/check_mutation_score.py mutation-results.txt --minimum 85 --json-output mutation-summary.json
+          python scripts/check_mutation_score.py mutants --minimum 85 \
+            --results-output mutation-results.txt \
+            --json-output mutation-summary.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:

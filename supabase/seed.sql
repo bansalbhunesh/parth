@@ -1,0 +1,2 @@
+-- Production data is never seeded. This intentionally empty file keeps local
+-- resets deterministic and prevents the CLI from depending on an absent path.

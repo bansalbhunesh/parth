@@ -654,6 +654,25 @@ class TestLLMCheck:
         assert data["provider"] == "openai"
         assert data["model"] == "google/gemini-3.1-flash-lite"
 
+    def test_llm_check_deep_degrades_cleanly_at_capacity(self, monkeypatch):
+        """Deep probes ride the same bounded pool as live analyses — a full
+        queue must refuse the probe honestly (2026-07-16 audit: the probe
+        submitted straight to the pool, bypassing capacity accounting)."""
+        from backend import analyze
+        monkeypatch.setenv("GEMINI_API_KEY", "test-key-not-real")
+
+        class NoCapacity:
+            def acquire(self, blocking=False):
+                return False
+
+        monkeypatch.setattr(analyze, "_LLM_CAPACITY", NoCapacity())
+        r = client.get("/llm-check?deep=1")
+        data = r.json()
+        assert r.status_code == 200
+        assert data["ok"] is False
+        assert data["probe"] == "deep"
+        assert "capacity" in data["error"]
+
     def test_llm_check_deep_surfaces_quota_error(self, monkeypatch):
         import backend.llm as llm_mod
         monkeypatch.setenv("GEMINI_API_KEY", "test-key-not-real")

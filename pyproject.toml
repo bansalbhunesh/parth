@@ -27,7 +27,7 @@ dependencies = [
     # Explicit security floor for the multipart upload parser (transitive via
     # FastAPI). <0.0.31 has several parsing DoS CVEs (CVE-2026-40347/42561/
     # 53538-53540); pin the patched floor since Phase 5 hardens the upload path.
-    "python-multipart>=0.0.31",
+    "python-multipart>=0.0.31,<1.0",
     # Toolchain floor: PYSEC-2026-3447 (fixed 83.0.0) — CI's pip-audit gates
     # on the runner venv's setuptools, so the floor lives with the app deps.
     "setuptools>=83.0.0",
@@ -37,7 +37,7 @@ dependencies = [
     "PyJWT[crypto]>=2.10,<3.0",
     "psycopg[binary,pool]>=3.2,<4.0",
     "redis>=6.0,<7.0",
-    "openai>=1.0",
+    "openai>=1.0.0",
     "opentelemetry-api>=1.36,<2.0",
     "opentelemetry-sdk>=1.36,<2.0",
     "opentelemetry-exporter-otlp-proto-http>=1.36,<2.0",

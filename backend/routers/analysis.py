@@ -436,7 +436,7 @@ def _llm_check_deep(status: dict) -> dict:
         _validate_deviations,
         build_reconciliation_prompt,
     )
-    from backend.analyze import _LLM_POOL, _LLM_TIMEOUT_S
+    from backend.analyze import _LLM_TIMEOUT_S, LLMCapacityError, _submit_llm
 
     demo = CORPUS.parent / "demo"
     try:
@@ -460,7 +460,9 @@ def _llm_check_deep(status: dict) -> dict:
     t0 = _time.time()
     try:
         from backend.llm import complete_json, failover_report
-        raw = _LLM_POOL.submit(complete_json, prompt, SYSTEM_PROMPT).result(
+        # Same bounded slot as live analyses: a probe must never stack hidden
+        # provider spend past the capacity the demo itself is allowed.
+        raw = _submit_llm(complete_json, prompt, SYSTEM_PROMPT).result(
             timeout=_LLM_TIMEOUT_S)
         devs = _validate_deviations(raw)
         report = failover_report()
@@ -473,6 +475,13 @@ def _llm_check_deep(status: dict) -> dict:
                 "provider": answering, "model": answering_model,
                 "elapsed_ms": round((_time.time() - t0) * 1000),
                 "findings": len(devs)}
+    except LLMCapacityError:
+        return {"ok": False, **base,
+                "elapsed_ms": round((_time.time() - t0) * 1000),
+                "error": "LLM analysis capacity is currently full - the probe "
+                         "was not started",
+                "hint": "Live analyses hold every bounded LLM slot; retry once "
+                        "the demo is idle."}
     except concurrent.futures.TimeoutError:
         return {"ok": False, **base,
                 "elapsed_ms": round((_time.time() - t0) * 1000),

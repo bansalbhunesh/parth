@@ -4,6 +4,7 @@ import concurrent.futures
 import json
 import logging
 import os
+import queue
 import threading
 import time
 from typing import NamedTuple
@@ -174,6 +175,58 @@ def run_analysis(
     )
 
 
+_STREAM_DONE = object()
+
+
+def _stream_llm_bounded(prompt: str, system: str, timeout_s: float | None = None):
+    """Yield provider chunks with the same guards as the sync path.
+
+    The failover stream runs on the bounded LLM pool: a full queue raises
+    LLMCapacityError immediately (degrade, don't stack hidden provider spend),
+    and the whole stream shares one wall-clock ceiling so a stalled provider
+    raises TimeoutError instead of hanging the SSE response forever. A
+    timed-out or abandoned worker stops consuming the provider stream at the
+    next chunk boundary, and its capacity permit is released by the worker
+    itself — mirroring how the sync path abandons a timed-out future.
+    """
+    from backend.llm import complete_stream
+
+    limit = _LLM_TIMEOUT_S if timeout_s is None else timeout_s
+    chunks: queue.Queue = queue.Queue()
+    abandoned = threading.Event()
+
+    def _pump():
+        try:
+            for chunk in complete_stream(prompt, system=system):
+                if abandoned.is_set():
+                    return  # consumer gave up; stop burning provider tokens
+                chunks.put(chunk)
+            chunks.put(_STREAM_DONE)
+        except BaseException as exc:  # noqa: BLE001 — relayed to the consumer
+            chunks.put(exc)
+
+    _submit_llm(_pump)  # raises LLMCapacityError when the bounded queue is full
+    deadline = time.monotonic() + limit
+    try:
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise concurrent.futures.TimeoutError(
+                    f"LLM stream exceeded {limit:.0f}s")
+            try:
+                item = chunks.get(timeout=remaining)
+            except queue.Empty:
+                raise concurrent.futures.TimeoutError(
+                    f"LLM stream exceeded {limit:.0f}s") from None
+            if item is _STREAM_DONE:
+                return
+            if isinstance(item, BaseException):
+                raise item
+            yield item
+    finally:
+        abandoned.set()
+
+
 _VISION_PROMPT = """You are given a design specification (text) and a vendor
 submittal supplied AS AN IMAGE (a datasheet page, table, or drawing). Read the
 values directly from the image — do not assume a text transcript exists.
@@ -248,9 +301,9 @@ def run_streaming_analysis(
     yield "event: status\ndata: Running AI reconciliation engine...\n\n"
     try:
         from backend.llm import _extract_json
-        from backend.llm import complete_stream as llm_stream
         full_text = ""
-        for chunk in llm_stream(prompt, system=SYSTEM_PROMPT):
+        # Same guards as the sync path: bounded pool slot + wall-clock timeout.
+        for chunk in _stream_llm_bounded(prompt, SYSTEM_PROMPT):
             full_text += chunk
             yield f"event: token\ndata: {json.dumps(chunk)}\n\n"
 

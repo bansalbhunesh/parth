@@ -88,8 +88,14 @@ def _deliver_webhooks(subscriptions: list[dict], payload: dict, slack_payload: d
         try:
             if _webhook_url_error(url):
                 continue
-            pinned = tuple(subscription.get("resolved_ips", ()))
-            if not pinned or _resolved_webhook_addresses(url) != pinned:
+            # Rebinding guard, not an exact pin: CDN-backed receivers (Slack)
+            # legitimately rotate part of their record set between subscribe
+            # and delivery, so require an overlap with the subscribe-time set
+            # rather than equality. A rebind to a fully different set is still
+            # dropped, and _webhook_url_error above re-blocks private/loopback
+            # targets on every delivery regardless.
+            pinned = set(subscription.get("resolved_ips", ()))
+            if not pinned or pinned.isdisjoint(_resolved_webhook_addresses(url)):
                 log.warning("Webhook destination DNS changed; delivery dropped")
                 continue
             httpx.post(url, json=body, timeout=2.0, follow_redirects=False)

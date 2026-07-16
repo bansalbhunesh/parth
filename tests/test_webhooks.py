@@ -169,6 +169,31 @@ def test_delivery_routes_payload_and_refuses_redirects(monkeypatch):
     assert all(post[2]["follow_redirects"] is False for post in posts)
 
 
+def test_delivery_survives_partial_cdn_rotation(monkeypatch):
+    """CDN-backed receivers (hooks.slack.com) rotate part of their record set
+    between subscribe and delivery; an overlap with the pinned set must still
+    deliver — only a fully disjoint (rebound) set is dropped."""
+    posts = []
+    monkeypatch.setattr(
+        "httpx.post",
+        lambda url, json=None, **kwargs: posts.append(url),
+    )
+    monkeypatch.setattr(webhooks, "_webhook_url_error", lambda _url: None)
+    monkeypatch.setattr(
+        webhooks,
+        "_resolved_webhook_addresses",
+        lambda _url: ("8.8.8.8", "9.9.9.9"),
+    )
+
+    webhooks._deliver_webhooks(
+        [{"url": _PUBLIC_URL, "resolved_ips": ("8.8.8.8", "1.1.1.1")}],
+        {},
+        {},
+    )
+
+    assert posts == [_PUBLIC_URL]
+
+
 def test_delivery_drops_dns_rebinding(monkeypatch):
     posts = []
     monkeypatch.setattr("httpx.post", lambda *args, **kwargs: posts.append(args))

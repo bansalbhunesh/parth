@@ -78,6 +78,19 @@ def test_input_hash_folds_in_model_and_prompt_version(monkeypatch):
     assert h1 != h2  # a model change invalidates cached results
 
 
+def test_input_hash_folds_in_every_failover_leg_model(monkeypatch):
+    """A cached result may have been answered by any configured leg, so a
+    model change on ANY leg — not just the gemini primary — must invalidate."""
+    _no_llm(monkeypatch)
+    baseline = jobs.compute_input_hash("a", "b", "UPS")
+    seen = {baseline}
+    for env in ("PRAMAAN_LLM", "OPENAI_MODEL", "GROQ_MODEL", "CLAUDE_MODEL"):
+        monkeypatch.setenv(env, f"changed-{env.lower()}")
+        h = jobs.compute_input_hash("a", "b", "UPS")
+        assert h not in seen, f"{env} change did not invalidate the cache key"
+        seen.add(h)
+
+
 def test_single_flight_computes_once(monkeypatch):
     """Concurrent identical requests coalesce to a single compute."""
     _no_llm(monkeypatch)

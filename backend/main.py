@@ -99,10 +99,3 @@ for application_router in APPLICATION_ROUTERS:
     app.include_router(application_router)
 
 V1_COMPATIBILITY_ROUTE_COUNT = register_v1_compatibility(app, APPLICATION_ROUTERS)
-
-# Transitional internal exports used by the existing webhook verification suite.
-MAX_WEBHOOKS = webhooks.MAX_WEBHOOKS
-SUBSCRIBED_WEBHOOKS = webhooks.SUBSCRIBED_WEBHOOKS
-_deliver_webhooks = webhooks._deliver_webhooks
-_webhook_url_error = webhooks._webhook_url_error
-trigger_webhooks = webhooks.trigger_webhooks

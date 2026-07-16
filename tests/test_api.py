@@ -705,6 +705,22 @@ class TestLLMCheck:
         assert data["model"] == "llama-3.3-70b-versatile"
 
 
+class TestHealthProviderReporting:
+    def test_health_reports_groq_primary_honestly(self, monkeypatch):
+        """PRAMAAN_LLM=groq must surface as groq on /health — the status
+        builder used to fall through to the gemini branch and misreport the
+        primary (2026-07-16 audit)."""
+        monkeypatch.setenv("PRAMAAN_LLM", "groq")
+        monkeypatch.setenv("GROQ_API_KEY", "test-key-not-real")
+        monkeypatch.setenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+
+        llm = client.get("/health").json()["llm"]
+
+        assert llm["provider"] == "groq"
+        assert llm["key_set"] is True
+        assert llm["model"] == "llama-3.3-70b-versatile"
+
+
 class TestVisionEndpoint:
     """Vision path: Gemini reads the submittal from an image. Mocked so CI has
     no live-LLM dependency; the real capability is proven in VISION_RESULT.md."""

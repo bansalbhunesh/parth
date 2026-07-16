@@ -32,16 +32,16 @@ def _reset_process_state():
     from backend.platform.config import reset_platform_settings
     from backend.platform.identity import reset_identity_provider
 
-    # Do not import the complete FastAPI application just to reset one legacy
-    # collection.  Pulling every router into otherwise-isolated unit tests also
-    # loads NumPy/PyMuPDF C extensions, slows collection, and prevents tools
-    # such as Mutmut from safely replaying the suite in-process.  App-level
-    # tests import ``backend.main`` during collection; tests that import it
-    # later are covered by the post-test lookup below.
+    # Do not import the webhook router just to reset one collection.  Pulling
+    # every router into otherwise-isolated unit tests also loads NumPy/PyMuPDF
+    # C extensions, slows collection, and prevents tools such as Mutmut from
+    # safely replaying the suite in-process.  App-level tests import the
+    # router during collection; tests that import it later are covered by the
+    # post-test lookup below.
     def clear_webhooks_if_loaded():
-        main_module = sys.modules.get("backend.main")
-        if main_module is not None:
-            main_module.SUBSCRIBED_WEBHOOKS.clear()
+        webhooks_module = sys.modules.get("backend.routers.webhooks")
+        if webhooks_module is not None:
+            webhooks_module.SUBSCRIBED_WEBHOOKS.clear()
 
     reset_platform_settings()
     reset_identity_provider()

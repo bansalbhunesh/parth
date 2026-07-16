@@ -69,10 +69,18 @@ _MAX_WORKERS = _int_env("PRAMAAN_JOB_WORKERS", 2)
 
 def pipeline_signature() -> str:
     """Short, non-secret signature of the analysis pipeline config, folded into
-    the input hash so a model/prompt change invalidates cached results."""
+    the input hash so a model/prompt change invalidates cached results. A
+    cached result may have been answered by ANY leg of the failover chain, so
+    every leg's model is folded in — changing e.g. GROQ_MODEL must invalidate
+    exactly like a GEMINI_MODEL change."""
     primary = os.getenv("PRAMAAN_LLM", "gemini").lower()
-    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-    return f"{primary}:{model}:{PROMPT_VERSION}"
+    models = ":".join((
+        os.getenv("GEMINI_MODEL", "gemini-2.5-flash"),
+        os.getenv("OPENAI_MODEL", ""),
+        os.getenv("GROQ_MODEL", ""),
+        os.getenv("CLAUDE_MODEL", ""),
+    ))
+    return f"{primary}:{models}:{PROMPT_VERSION}"
 
 
 def compute_input_hash(spec: str, submittal: str, system_id: str = "CUSTOM") -> str:

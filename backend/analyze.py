@@ -297,17 +297,26 @@ def run_streaming_analysis(
     t0 = time.time()
     standards = _all_standards_text(max_chars_per=1800)
     prompt = build_reconciliation_prompt(spec_text, submittal_text, standards)
+    standards_load_ms = round((time.time() - t0) * 1000)
+    llm_call_ms = None
+    postprocess_ms = 0
+    provider = None
 
     yield "event: status\ndata: Running AI reconciliation engine...\n\n"
     try:
+        from backend import llm as llm_module
         from backend.llm import _extract_json
         full_text = ""
+        t_llm = time.time()
         # Same guards as the sync path: bounded pool slot + wall-clock timeout.
         for chunk in _stream_llm_bounded(prompt, SYSTEM_PROMPT):
             full_text += chunk
             yield f"event: token\ndata: {json.dumps(chunk)}\n\n"
+        llm_call_ms = round((time.time() - t_llm) * 1000)
+        provider = llm_module.FAILOVER_STATUS.get("last_successful_provider")
 
         yield "event: status\ndata: Validating deviations...\n\n"
+        t_post = time.time()
         raw = _extract_json(full_text)
         devs = _validate_deviations(raw)
         devs = _check_citation_faithfulness(devs, spec_text, submittal_text, standards)
@@ -315,11 +324,15 @@ def run_streaming_analysis(
         for d in devs:
             _enrich_cx(d, system_id)  # rule-table only — no extra LLM calls
         mode = "llm"
+        postprocess_ms = round((time.time() - t_post) * 1000)
     except Exception as exc:
         log.warning("LLM stream analysis failed, rule-based fallback: %s", exc)
         yield "event: status\ndata: AI engine unavailable — running rule-based detector...\n\n"
         devs = _resilient_fallback(spec_text, submittal_text, system_id)
         mode = "deterministic"
+        llm_call_ms = None
+        postprocess_ms = 0
+        provider = None
 
     elapsed = round((time.time() - t0) * 1000)
     result = {
@@ -329,12 +342,15 @@ def run_streaming_analysis(
         **decision_blocks(devs),
         "mode": mode,
         "elapsed_ms": elapsed,
+        # Same provenance contract as /analyze: llm_call_ms/provider are set
+        # only when a provider actually answered, so the UI's provenance chip
+        # can name the failover leg behind a streamed result too.
         "telemetry": {
             "total_ms": elapsed,
-            "llm_call_ms": elapsed,  # Stream doesn't currently time segments separately
-            "standards_load_ms": 0,
-            "postprocess_ms": 0,
-            "provider": None,
+            "llm_call_ms": llm_call_ms,
+            "standards_load_ms": standards_load_ms,
+            "postprocess_ms": postprocess_ms,
+            "provider": provider,
         }
     }
     yield f"event: result\ndata: {json.dumps(result)}\n\n"

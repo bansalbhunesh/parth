@@ -249,8 +249,6 @@ def _llm_status() -> dict:
     is unconfigured (the system runs on the deterministic rule-engine floor).
     `provider`/`model` describe the *primary* for display; `chain` lists the
     configured providers in the order they will be tried."""
-    import os
-
     from backend.llm import (
         _gateway_base_url,
         _gateway_model,
@@ -269,6 +267,9 @@ def _llm_status() -> dict:
         }
     elif provider == "claude":
         base = {"provider": "claude", "key_set": bool(_key("claude"))}
+    elif provider == "groq":
+        base = {"provider": "groq", "key_set": bool(_key("groq")),
+                "model": os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")}
     elif provider == "ollama":
         base = {"provider": "ollama", "key_set": True,
                 "model": os.getenv("OLLAMA_MODEL", "llama3.1")}
@@ -283,8 +284,6 @@ def _llm_status() -> dict:
 @router.get("/health")
 async def health():
     # Preserve the compatibility payload while avoiding worker-pool queueing.
-    import os
-
     from backend.agents import ocr_util
     llm = _llm_status()
     return {

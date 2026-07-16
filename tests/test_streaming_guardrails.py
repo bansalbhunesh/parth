@@ -144,7 +144,11 @@ def test_abandoned_worker_stops_consuming_provider(monkeypatch):
     assert consumed == []  # the worker returned at the abandoned check
 
 
-def test_streaming_success_path_reports_llm_mode(monkeypatch):
+def test_streaming_success_path_reports_llm_mode_and_provenance(monkeypatch):
+    import json
+
+    import backend.llm as llm_mod
+
     payload = (
         '[{"component": "UPS-02", "parameter": "battery_runtime_min", '
         '"required_value": "10", "provided_value": "7", "unit": "min", '
@@ -157,6 +161,7 @@ def test_streaming_success_path_reports_llm_mode(monkeypatch):
         yield payload[len(payload) // 2:]
 
     monkeypatch.setattr("backend.llm.complete_stream", json_stream)
+    monkeypatch.setitem(llm_mod.FAILOVER_STATUS, "last_successful_provider", "groq")
 
     events = "".join(analyze.run_streaming_analysis(SPEC, SUBMITTAL, "UPS"))
 
@@ -164,6 +169,36 @@ def test_streaming_success_path_reports_llm_mode(monkeypatch):
     assert '"mode": "llm"' in events
     assert "battery_runtime_min" in events
     assert "event: done" in events
+    # The streamed result carries the same provenance contract as /analyze:
+    # the answering failover leg and a real LLM-segment timing, not placeholders.
+    result_line = next(
+        line for line in events.splitlines()
+        if line.startswith("data: ") and "telemetry" in line
+    )
+    telemetry = json.loads(result_line[len("data: "):])["telemetry"]
+    assert telemetry["provider"] == "groq"
+    assert telemetry["llm_call_ms"] is not None
+    assert telemetry["standards_load_ms"] >= 0
+
+
+def test_streaming_fallback_reports_null_provenance(monkeypatch):
+    import json
+
+    def failing_stream(prompt, system=""):
+        raise RuntimeError("no provider")
+        yield  # pragma: no cover — makes this a generator
+
+    monkeypatch.setattr("backend.llm.complete_stream", failing_stream)
+
+    events = "".join(analyze.run_streaming_analysis(SPEC, SUBMITTAL, "UPS"))
+
+    result_line = next(
+        line for line in events.splitlines()
+        if line.startswith("data: ") and "telemetry" in line
+    )
+    telemetry = json.loads(result_line[len("data: "):])["telemetry"]
+    assert telemetry["provider"] is None
+    assert telemetry["llm_call_ms"] is None
 
 
 def test_submit_failure_releases_capacity_permit(monkeypatch):

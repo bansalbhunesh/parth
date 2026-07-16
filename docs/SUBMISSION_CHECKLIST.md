@@ -23,7 +23,7 @@
 | 3 | **Architecture document** | [`docs/ARCHITECTURE.md`](ARCHITECTURE.md) (+ `docs/pipeline-diagram.svg`) | ✅ |
 | 4 | **Impact model** (quantified business benefit) | [`docs/BUSINESS.md`](BUSINESS.md) — every figure cited | ✅ |
 | 5 | Pitch deck (if the form takes a file) | [`docs/Pramaan_Deck.pdf`](Pramaan_Deck.pdf) — 12 pages, regenerate with `python scripts/export_deck.py` after any deck edit | ✅ |
-| 6 | Live demo URL | `https://parth-tan.vercel.app/judge` (front) · `https://parth-1-ma30.onrender.com/health` (API) | ✅ live & verified 2026-07-05 against the deployed stack: `/health` → `"ready": true` (key set, commit matched `main`) · `/llm-check?deep=1` → gemini, 5 findings/12.7 s · `/analyze` demo pair → `mode: llm`, 5 findings/15 s · scanned-PDF upload → OCR (`ocr_used: true`) + 3 findings · `/ocr-check` → `"status":"ready"` (tesseract 5.5.0 in the `Dockerfile.backend` Render image). Re-verify on submission day with `make verify-live` |
+| 6 | Live demo URL | `https://parth-tan.vercel.app/judge` (front) · `https://parth-1-ma30.onrender.com/health` (API) | ✅ live & verified 2026-07-16 against deployed `main` (`6adc9ad`): `verify_live.py` passed 10/10 in 142 s · `/health` ready · all three PS4 layers live · deep probe 5 findings/13.9 s · `/analyze` and `/analyze/stream` both `mode: llm` with 5 findings · frontend `/` and `/judge` 200. `/ocr-check` remains the hosted Docker/Tesseract readiness gate. Re-verify after the final submission commit and again on submission day with `make verify-live` |
 | 7 | Team details | 1–4 members, one team per person — from the Unstop registration | ⬜ confirm roster matches registration |
 
 ## Pre-submission gates (run in this order, same day)

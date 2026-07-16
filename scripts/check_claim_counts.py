@@ -38,6 +38,9 @@ EXACT_BACKEND_SURFACES: tuple[tuple[str, str], ...] = (
     ("docs/QUALITY_GATES.md", r"Backend:\s*(\d+) tests"),
     ("docs/UNSTOP_SUBMISSION.md", r"(\d{3,}) (?:automated )?tests"),
     ("docs/detailed_submission.html", r"(\d{3,}) (?:automated )?tests"),
+    ("presentation.html", r"card-value purple\">(\d+)</div><div class=\"card-label\">automated tests"),
+    ("docs/DECK.md", r"\*\*(\d+)\*\* tests"),
+    ("docs/FINAL_SUBMISSION_CHECKLIST.md", r"\*\*Tests\*\*.*?(\d+) passed"),
 )
 
 FLOOR_BACKEND_SURFACES: tuple[tuple[str, str], ...] = (

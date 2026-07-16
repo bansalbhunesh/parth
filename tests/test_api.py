@@ -106,6 +106,26 @@ class TestStreamingEndpoints:
         assert "event: result" in body or "event: status" in body
         assert "event: done" in body
 
+    def test_analyze_stream_result_carries_decision_loop_blocks(self):
+        # The demo drives the streaming path, so the risk/remediation/evidence
+        # blocks that power the Judge-Mode panel MUST ride the SSE result event,
+        # not only the non-streaming POST /analyze.
+        import json as _json
+
+        r = client.post("/analyze/stream", json={
+            "spec_text": "**UPS-02** — battery_runtime_min: shall be **10 min**",
+            "submittal_text": "**UPS-02** — battery_runtime_min: **7 min**",
+        })
+        assert r.status_code == 200
+        result_line = next(
+            line for line in r.text.splitlines() if line.startswith("data: ") and "compound_risk" in line
+        )
+        payload = _json.loads(result_line[len("data: "):])
+        assert "compound_risk" in payload
+        assert "remediation" in payload
+        assert "evidence" in payload
+        assert payload["evidence"]["count"] == payload["count"]
+
 
 class TestPdfUploadEndpoints:
     def _make_text_file(self, content, filename):

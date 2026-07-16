@@ -1,6 +1,7 @@
 """Shared analysis logic — used by all /analyze endpoints."""
 
 import concurrent.futures
+import json
 import logging
 import operator
 import os
@@ -11,6 +12,7 @@ from typing import NamedTuple
 
 from backend.agents import cx_graph
 from backend.agents.commissioning import _RULES, predict_cx_impact
+from backend.agents.decision import decision_blocks
 from backend.agents.reconciliation import (
     SYSTEM_PROMPT,
     _all_standards_text,
@@ -451,14 +453,11 @@ def run_streaming_analysis(
     submittal_text: str,
     system_id: str = "CUSTOM",
 ):
-    import json
-
     t0 = time.time()
     standards = _all_standards_text(max_chars_per=1800)
     prompt = build_reconciliation_prompt(spec_text, submittal_text, standards)
 
     yield "event: status\ndata: Running AI reconciliation engine...\n\n"
-
     try:
         from backend.llm import _extract_json
         from backend.llm import complete_stream as llm_stream
@@ -486,6 +485,7 @@ def run_streaming_analysis(
         "system": system_id,
         "deviations": devs,
         "count": len(devs),
+        **decision_blocks(devs),
         "mode": mode,
         "elapsed_ms": elapsed,
         "telemetry": {

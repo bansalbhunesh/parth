@@ -107,6 +107,7 @@ demo-gate:  ## Pre-judge gate: repo checks, security, E2E, frontend checks, live
 	$(PY) -m pip_audit --local
 	$(PY) -m bandit -r backend/ scripts/ --severity-level medium
 	$(PY) -m pytest tests/ -q --tb=short
+	$(PY) scripts/check_claim_counts.py
 	$(PY) scripts/benchmark_manifest_check.py
 	$(PY) scripts/benchmark_hash_sources.py
 	$(PY) scripts/benchmark_calibration.py

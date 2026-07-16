@@ -58,6 +58,8 @@ jobs:
             --critical backend/platform/redis_cache.py \
             --critical backend/platform/durable_worker.py \
             --critical backend/platform/webhook_delivery.py
+      - name: Verify published test-count claims against the collected suite
+        run: python scripts/check_claim_counts.py
       - name: Verify benchmark evidence
         run: |
           python scripts/benchmark_manifest_check.py

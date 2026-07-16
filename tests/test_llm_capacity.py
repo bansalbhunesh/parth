@@ -44,6 +44,41 @@ def test_timed_out_future_is_cancelled_before_fallback(monkeypatch):
     assert result.mode == "deterministic"
 
 
+def test_timeout_before_submit_still_degrades(monkeypatch):
+    """A TimeoutError raised before any future exists (capacity contention
+    surfaced as a timeout) must fall back without touching a None future."""
+    def raise_timeout(*_args, **_kwargs):
+        raise concurrent.futures.TimeoutError
+
+    monkeypatch.setattr(analyze, "_submit_llm", raise_timeout)
+
+    result = analyze.run_analysis(SPEC, SUBMITTAL, "UPS")
+
+    assert result.mode == "deterministic"
+
+
+def test_vision_timeout_reports_unavailable(monkeypatch):
+    class TimedOutFuture:
+        cancelled = False
+
+        def result(self, timeout):
+            raise concurrent.futures.TimeoutError
+
+        def cancel(self):
+            self.cancelled = True
+            return True
+
+    future = TimedOutFuture()
+    monkeypatch.setattr(analyze, "_submit_llm", lambda *_args, **_kwargs: future)
+
+    result = analyze.run_vision_analysis(SPEC, b"not-an-image", "image/png", "UPS")
+
+    assert future.cancelled is True
+    assert result.mode == "vision-unavailable"
+    assert result.deviations == []
+    assert result.provider is None
+
+
 def test_capacity_status_never_reports_negative_availability():
     status = analyze.llm_capacity_status()
 

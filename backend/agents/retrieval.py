@@ -31,11 +31,6 @@ def _norm(s):
     return re.sub(r"[^a-z0-9]+", "", str(s).strip().lower())
 
 
-def available_standards():
-    """The standard keys this tool can retrieve (those with a scraped doc)."""
-    return [k for k, fname, _ in _INDEX if (_SCRAPED / fname).exists()]
-
-
 def retrieve_standard(ref):
     """Return the most relevant standard text for a cited reference, or None if
     the reference is not in the knowledge base."""

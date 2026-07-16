@@ -104,3 +104,77 @@ def test_stream_provider_error_relayed_to_caller(monkeypatch):
 
     with pytest.raises(RuntimeError, match="provider exploded"):
         list(analyze._stream_llm_bounded("p", "s", timeout_s=5))
+
+
+def test_stream_zero_timeout_raises_before_reading(monkeypatch):
+    def quick_stream(prompt, system=""):
+        yield "token"
+
+    monkeypatch.setattr("backend.llm.complete_stream", quick_stream)
+
+    with pytest.raises(concurrent.futures.TimeoutError):
+        list(analyze._stream_llm_bounded("p", "s", timeout_s=0))
+
+
+def test_abandoned_worker_stops_consuming_provider(monkeypatch):
+    resume = threading.Event()
+    consumed = []
+
+    def slow_stream(prompt, system=""):
+        yield "a"
+        resume.wait(timeout=5)
+        yield "b"
+        consumed.append("b was pulled")  # runs only if the worker keeps iterating
+        yield "c"
+
+    monkeypatch.setattr("backend.llm.complete_stream", slow_stream)
+    before = analyze.llm_capacity_status()["available"]
+
+    stream = analyze._stream_llm_bounded("p", "s", timeout_s=5)
+    assert next(stream) == "a"
+    stream.close()  # consumer walks away -> abandoned flag set
+    resume.set()
+
+    deadline = time.monotonic() + 5
+    while time.monotonic() < deadline:
+        if analyze.llm_capacity_status()["available"] == before:
+            break
+        time.sleep(0.01)
+    assert analyze.llm_capacity_status()["available"] == before
+    assert consumed == []  # the worker returned at the abandoned check
+
+
+def test_streaming_success_path_reports_llm_mode(monkeypatch):
+    payload = (
+        '[{"component": "UPS-02", "parameter": "battery_runtime_min", '
+        '"required_value": "10", "provided_value": "7", "unit": "min", '
+        '"standard_ref": "DESIGN-BASIS", "spec_clause": "", '
+        '"severity": "Critical", "rationale": "runtime below requirement"}]'
+    )
+
+    def json_stream(prompt, system=""):
+        yield payload[: len(payload) // 2]
+        yield payload[len(payload) // 2:]
+
+    monkeypatch.setattr("backend.llm.complete_stream", json_stream)
+
+    events = "".join(analyze.run_streaming_analysis(SPEC, SUBMITTAL, "UPS"))
+
+    assert "event: token" in events
+    assert '"mode": "llm"' in events
+    assert "battery_runtime_min" in events
+    assert "event: done" in events
+
+
+def test_submit_failure_releases_capacity_permit(monkeypatch):
+    class BrokenPool:
+        def submit(self, *args, **kwargs):
+            raise RuntimeError("pool is shut down")
+
+    monkeypatch.setattr(analyze, "_LLM_POOL", BrokenPool())
+    before = analyze.llm_capacity_status()["available"]
+
+    with pytest.raises(RuntimeError, match="pool is shut down"):
+        analyze._submit_llm(lambda: None)
+
+    assert analyze.llm_capacity_status()["available"] == before

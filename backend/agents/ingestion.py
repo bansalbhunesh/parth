@@ -6,7 +6,6 @@ import hashlib
 import logging
 import pathlib
 import re
-from typing import Optional
 
 from backend.agents import ocr_util
 from backend.paths import CORPUS
@@ -24,19 +23,6 @@ def _clean_text(text: str) -> str:
     text = re.sub(r"\n{3,}", "\n\n", text)
     text = re.sub(r"[ \t]+", " ", text)
     return text.strip()
-
-
-def _pdf_text_layer(data: bytes, filename: str) -> str:
-    """Pull the embedded text layer (pdfplumber, then PyMuPDF). Returns "" for
-    scanned/image-only PDFs, which carry no text layer. Thin wrapper over
-    ocr_util (kept for the existing import surface)."""
-    return ocr_util.extract_text_from_pdf(data, filename)
-
-
-def _ocr_pdf_bytes(data: bytes, filename: str) -> str:
-    """OCR fallback for scanned / image-only PDFs. Thin wrapper over ocr_util
-    (kept for the existing import surface); see ocr_util.ocr_pdf_bytes."""
-    return ocr_util.ocr_pdf_bytes(data, filename)
 
 
 def extract_pdf_bytes(data: bytes, filename: str = "upload.pdf") -> str:
@@ -143,12 +129,3 @@ def ingest_corpus() -> dict:
         "total_systems": len(systems),
         "total_standards": len(standards),
     }
-
-
-def get_document_text(system_id: str, doc_type: str = "spec") -> Optional[str]:
-    sub_dir = "specs" if doc_type == "spec" else "submittals"
-    path = CORPUS / sub_dir / f"{system_id}.md"
-    if not path.exists():
-        return None
-    doc = ingest_file(path)
-    return doc.get("text")

@@ -443,10 +443,6 @@ class TestIngestionRobustness:
         finally:
             os.unlink(tmp)
 
-    def test_get_document_text_missing_system(self):
-        from backend.agents.ingestion import get_document_text
-        assert get_document_text("NONEXISTENT_SYSTEM_XYZ") is None
-
     def test_ingest_corpus_has_systems(self):
         from backend.agents.ingestion import ingest_corpus
         result = ingest_corpus()
@@ -503,70 +499,6 @@ class TestReconciliationValidation:
     def test_reconcile_missing_system_returns_empty(self):
         from backend.agents.reconciliation import reconcile_system
         assert reconcile_system("NONEXISTENT_XYZ", "") == []
-
-
-class TestExtractionScoring:
-    """Extraction scoring math is correct across all precision/recall regimes."""
-
-    def test_perfect_extraction(self):
-        import json
-
-        from backend.agents.extraction import score_extraction
-        ref = [{"component": "A", "parameter": "p"},
-               {"component": "B", "parameter": "q"}]
-        with tempfile.NamedTemporaryFile(
-            suffix=".json", mode="w", delete=False, dir=str(CORPUS)
-        ) as f:
-            json.dump(ref, f)
-            tmp = pathlib.Path(f.name)
-        try:
-            extracted = [{"component": "A", "parameter": "p"},
-                         {"component": "B", "parameter": "q"}]
-            scores = score_extraction(extracted, tmp.name)
-            assert scores["precision"] == 1.0
-            assert scores["recall"] == 1.0
-            assert scores["f1"] == 1.0
-        finally:
-            tmp.unlink()
-
-    def test_false_positive_lowers_precision(self):
-        import json
-
-        from backend.agents.extraction import score_extraction
-        ref = [{"component": "A", "parameter": "p"}]
-        with tempfile.NamedTemporaryFile(
-            suffix=".json", mode="w", delete=False, dir=str(CORPUS)
-        ) as f:
-            json.dump(ref, f)
-            tmp = pathlib.Path(f.name)
-        try:
-            extracted = [{"component": "A", "parameter": "p"},
-                         {"component": "FALSE", "parameter": "positive"}]
-            scores = score_extraction(extracted, tmp.name)
-            assert scores["precision"] == 0.5
-            assert scores["recall"] == 1.0
-            assert scores["fp"] == 1
-        finally:
-            tmp.unlink()
-
-    def test_missed_deviation_lowers_recall(self):
-        import json
-
-        from backend.agents.extraction import score_extraction
-        ref = [{"component": "A", "parameter": "p"},
-               {"component": "B", "parameter": "q"}]
-        with tempfile.NamedTemporaryFile(
-            suffix=".json", mode="w", delete=False, dir=str(CORPUS)
-        ) as f:
-            json.dump(ref, f)
-            tmp = pathlib.Path(f.name)
-        try:
-            extracted = [{"component": "A", "parameter": "p"}]
-            scores = score_extraction(extracted, tmp.name)
-            assert scores["recall"] == 0.5
-            assert scores["fn"] == 1
-        finally:
-            tmp.unlink()
 
 
 class TestOrchestratorResilience:

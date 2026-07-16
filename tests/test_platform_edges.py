@@ -12,7 +12,7 @@ import pytest
 from fastapi import HTTPException, Request
 
 from backend import security
-from backend.http import RequestContextMiddleware, _safe_detail, problem_response, request_id_from_scope
+from backend.http import RequestContextMiddleware, _safe_detail, problem_response
 from backend.platform import identity, readiness
 from backend.platform.config import PlatformConfigurationError, PlatformSettings
 from backend.platform.contracts import Principal
@@ -54,10 +54,7 @@ def _request(path: str = "/api/v1/test", authorization: str = "") -> Request:
     )
 
 
-def test_request_id_scope_and_problem_defaults() -> None:
-    scope: dict = {}
-    generated = request_id_from_scope(scope)
-    assert request_id_from_scope(scope) == generated
+def test_problem_response_defaults() -> None:
     request = _request()
     response = problem_response(request, status_code=418, detail="No tea", errors=[{"field": "cup"}])
     body = json.loads(response.body)

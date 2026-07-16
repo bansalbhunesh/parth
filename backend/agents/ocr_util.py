@@ -163,14 +163,6 @@ def extract_text_from_pdf(data: bytes, filename: str = "upload.pdf") -> str:
         return ""
 
 
-def is_scanned_pdf(data: bytes, filename: str = "upload.pdf") -> bool:
-    """Heuristic: a PDF is treated as scanned when its whole-document text layer
-    is shorter than _OCR_MIN_CHARS. This is deliberately crude — a mostly-image
-    PDF carrying a few stray characters (headers/form fields) is NOT detected as
-    scanned. Per-page image detection is a known limitation, not fixed here."""
-    return len(extract_text_from_pdf(data, filename).strip()) < _OCR_MIN_CHARS
-
-
 # ── OCR: scanned PDF ────────────────────────────────────────────────
 
 def ocr_pdf_bytes(data: bytes, filename: str = "upload.pdf") -> str:

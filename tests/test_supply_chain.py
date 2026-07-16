@@ -11,7 +11,6 @@ from backend.agents.supply_chain import (
     delivery_risk,
     prob_late,
     project_eta,
-    rank_alternatives,
     supplier_risk,
 )
 
@@ -83,18 +82,6 @@ class TestAnalyzeShipment:
         a = analyze_shipment(s, today_week=0)
         assert a["slack_weeks"] > 0
         assert a["at_risk"] is False
-
-
-class TestAlternatives:
-    def test_ranking_by_net_benefit(self):
-        opts = [
-            {"option": "AIR_FREIGHT", "weeks_saved": 5, "delta_cost": 180},
-            {"option": "ALTERNATE_SUPPLIER", "weeks_saved": 1, "delta_cost": 1500},
-        ]
-        ranked = rank_alternatives(opts, weekly_delay_cost=840)  # ~$120k/day
-        assert ranked[0]["option"] == "AIR_FREIGHT"
-        assert ranked[0]["justified"] is True
-        assert ranked[1]["justified"] is False  # 1*840 - 1500 < 0
 
 
 class TestAnalyzeSupplyChain:

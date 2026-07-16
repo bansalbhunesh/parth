@@ -1,95 +1,14 @@
-"""Operational edge coverage for extraction and telemetry boundaries."""
+"""Operational edge coverage for telemetry boundaries."""
 
 from __future__ import annotations
 
-import json
 import sys
 from types import ModuleType, SimpleNamespace
 
 import pytest
 from fastapi import FastAPI
 
-from backend.agents import extraction
 from backend.platform import observability
-
-
-def test_extract_preserves_document_type_and_non_invention_instruction(monkeypatch: pytest.MonkeyPatch) -> None:
-    calls: list[tuple[str, str]] = []
-    monkeypatch.setattr(
-        extraction,
-        "complete_json",
-        lambda prompt, system: calls.append((prompt, system)) or [{"component": "UPS-1"}],
-    )
-
-    assert extraction.extract("runtime shall be 10 minutes", "submittal") == [{"component": "UPS-1"}]
-    assert "DOCUMENT (submittal)" in calls[0][0]
-    assert "runtime shall be 10 minutes" in calls[0][0]
-    assert "Never invent values" in calls[0][1]
-
-
-def test_bulk_extraction_handles_missing_corpus_directories(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(extraction, "CORPUS", tmp_path)
-    assert extraction.extract_all_specs() == []
-    assert extraction.extract_all_submittals() == []
-
-
-def test_bulk_extraction_is_sorted_and_adds_source_provenance(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
-    specs = tmp_path / "specs"
-    submittals = tmp_path / "submittals"
-    specs.mkdir()
-    submittals.mkdir()
-    (specs / "B.md").write_text("spec-b", encoding="utf-8")
-    (specs / "A.md").write_text("spec-a", encoding="utf-8")
-    (submittals / "B.md").write_text("sub-b", encoding="utf-8")
-    (submittals / "A.md").write_text("sub-a", encoding="utf-8")
-    monkeypatch.setattr(extraction, "CORPUS", tmp_path)
-    monkeypatch.setattr(
-        extraction,
-        "extract",
-        lambda text, doc_type: [{"component": text, "parameter": doc_type}],
-    )
-
-    spec_results = extraction.extract_all_specs()
-    submittal_results = extraction.extract_all_submittals()
-
-    assert [item["system"] for item in spec_results] == ["A", "B"]
-    assert [item["source"] for item in spec_results] == ["specs/A.md", "specs/B.md"]
-    assert [item["parameter"] for item in spec_results] == ["spec", "spec"]
-    assert [item["system"] for item in submittal_results] == ["A", "B"]
-    assert [item["source"] for item in submittal_results] == ["submittals/A.md", "submittals/B.md"]
-    assert [item["parameter"] for item in submittal_results] == ["submittal", "submittal"]
-
-
-def test_extraction_scoring_covers_empty_and_mixed_confusion_sets(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
-    reference = tmp_path / "reference.json"
-    reference.write_text("[]", encoding="utf-8")
-    monkeypatch.setattr(extraction, "CORPUS", tmp_path)
-    assert extraction.score_extraction([], "reference.json") == {
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "tp": 0,
-        "fp": 0,
-        "fn": 0,
-    }
-
-    reference.write_text(
-        json.dumps(
-            [
-                {"component": "A", "parameter": "runtime"},
-                {"component": "B", "parameter": "rating"},
-            ]
-        ),
-        encoding="utf-8",
-    )
-    score = extraction.score_extraction(
-        [
-            {"component": "A", "parameter": "runtime"},
-            {"component": "C", "parameter": "material"},
-        ],
-        "reference.json",
-    )
-    assert score == {"precision": 0.5, "recall": 0.5, "f1": 0.5, "tp": 1, "fp": 1, "fn": 1}
 
 
 def test_observability_is_a_noop_without_export_endpoint(monkeypatch: pytest.MonkeyPatch) -> None:

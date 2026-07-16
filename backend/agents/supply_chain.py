@@ -15,14 +15,6 @@ from __future__ import annotations
 
 import math
 
-# 10-stage long-lead equipment pipeline (PO -> installed). Means are illustrative
-# defaults; per-item values come from data. Real 2024-26 data-centre lead times:
-# transformers ~128wk, MV switchgear ~44wk, gensets 50-90wk, UPS 30-52wk.
-PIPELINE = [
-    "PO_PLACED", "ENGINEERING_SUBMITTAL", "MANUFACTURING", "FAT", "EX_WORKS",
-    "OCEAN_FREIGHT", "PORT_CUSTOMS", "INLAND_TRANSPORT", "SITE_DELIVERED", "INSTALLED",
-]
-
 # Supplier-risk factor weights (sum to 1.0). Transparent so a judge sees why a
 # supplier is flagged.
 _SUPPLIER_WEIGHTS = {
@@ -148,19 +140,6 @@ def analyze_shipment(shipment: dict, today_week: float) -> dict:
         "at_risk": bool(at_risk),
         "linked_task_id": shipment.get("linked_task_id"),
     }
-
-
-def rank_alternatives(options: list[dict], weekly_delay_cost: float) -> list[dict]:
-    """Rank mitigation options by net benefit = weeks_saved * weekly_delay_cost
-    - delta_cost. Highest positive net benefit first."""
-    ranked = []
-    for o in options:
-        weeks_saved = float(o.get("weeks_saved", 0.0))
-        delta_cost = float(o.get("delta_cost", 0.0))
-        net = weeks_saved * weekly_delay_cost - delta_cost
-        ranked.append({**o, "net_benefit": round(net, 0), "justified": net > 0})
-    ranked.sort(key=lambda x: -x["net_benefit"])
-    return ranked
 
 
 def analyze_supply_chain(data: dict, today_week: float | None = None) -> dict:

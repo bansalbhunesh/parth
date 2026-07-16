@@ -1,7 +1,7 @@
 """Tests for the standards retrieval tool and the retrieval tool-call loop."""
 
 import backend.orchestrator as orch
-from backend.agents.retrieval import available_standards, retrieve_standard
+from backend.agents.retrieval import retrieve_standard
 from backend.orchestrator import (
     _init_state,
     build_graph,
@@ -26,10 +26,6 @@ def test_retrieve_unknown_standard_returns_none():
     assert retrieve_standard("IEC 61439-6") is None
     assert retrieve_standard("NFPA 110") is None  # must NOT resolve to NFPA-75
     assert retrieve_standard("") is None
-
-
-def test_available_standards_nonempty():
-    assert len(available_standards()) >= 5
 
 
 # ── the loop node ────────────────────────────────────────────────────

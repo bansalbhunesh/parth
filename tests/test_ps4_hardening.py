@@ -145,12 +145,6 @@ class TestProperties:
                  "impact": {"optimistic": 2, "most_likely": 4, "pessimistic": 8}}]
         assert monte_carlo(_CHAIN, risks=risk, n=10000, seed=3)["p80"] >= base["p80"]
 
-    def test_rank_alternatives_sorted_and_justified(self):
-        opts = [{"weeks_saved": 1, "delta_cost": 100}, {"weeks_saved": 5, "delta_cost": 50}]
-        r = supply_chain.rank_alternatives(opts, weekly_delay_cost=100)
-        assert r[0]["net_benefit"] >= r[1]["net_benefit"]
-        assert all(o["justified"] == (o["net_benefit"] > 0) for o in r)
-
     def test_supplier_risk_bounded(self):
         r = supply_chain.supplier_risk({"single_source": 1.0, "geo": 0.5})
         assert 0 <= r["score"] <= 100

@@ -68,10 +68,10 @@ SAMPLE = [
 def test_scanned_pdf_has_no_text_layer():
     """Sanity: the simulated scan genuinely carries no text layer, so this
     exercises the OCR path rather than plain extraction."""
-    from backend.agents.ingestion import _pdf_text_layer
+    from backend.agents import ocr_util
 
     pdf = _build_scanned_pdf(SAMPLE)
-    assert len(_pdf_text_layer(pdf, "scan.pdf").strip()) < 20
+    assert len(ocr_util.extract_text_from_pdf(pdf, "scan.pdf").strip()) < 20
 
 
 @pytest.mark.skipif(not _tesseract_available(), reason="tesseract binary not installed")
@@ -159,19 +159,6 @@ def test_ocr_enabled_flag_both_aliases(monkeypatch):
     monkeypatch.setenv("PRAMAAN_OCR", "1")
     monkeypatch.setenv("PRAMAAN_OCR_ENABLED", "0")
     assert ocr_util.ocr_enabled() is False
-
-
-def test_is_scanned_pdf_true_for_scanned():
-    from backend.agents import ocr_util
-
-    assert ocr_util.is_scanned_pdf(_build_scanned_pdf(SAMPLE), "scan.pdf") is True
-
-
-def test_is_scanned_pdf_false_for_text_pdf():
-    from backend.agents import ocr_util
-
-    pdf = _build_text_pdf("UPS-02 battery runtime minimum shall be 10 minutes at full load")
-    assert ocr_util.is_scanned_pdf(pdf, "digital.pdf") is False
 
 
 def test_image_ocr_disabled_returns_empty(monkeypatch):

@@ -148,10 +148,6 @@ def _extract_upload_doc(file: UploadFile) -> dict:
     return doc  # plain text (possibly empty) — unchanged legacy behavior
 
 
-def _extract_upload_text(file: UploadFile) -> str:
-    return _extract_upload_doc(file)["text"]
-
-
 def _require_case(case_id: str, request: Request) -> str:
     """Hide case existence unless the caller presents its local/demo secret."""
     secret = request.headers.get("x-case-secret", "")

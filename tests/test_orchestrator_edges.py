@@ -150,29 +150,3 @@ def test_sequential_pipeline_exercises_retrieval_and_reflexion_cycles(monkeypatc
 
     assert passes["reconcile"] == 3
     assert result == [{"component": "UPS-1", "system": "UPS", "week_caught": 11}]
-
-
-def test_full_pipeline_handles_missing_and_sorted_corpora(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
-    missing_root = tmp_path / "missing"
-    monkeypatch.setattr(orchestrator, "CORPUS", missing_root)
-    assert orchestrator.run_full_pipeline() == {"deviations": [], "systems": 0, "elapsed_ms": 0}
-
-    corpus = tmp_path / "corpus"
-    specs = corpus / "specs"
-    specs.mkdir(parents=True)
-    (specs / "B.md").write_text("B", encoding="utf-8")
-    (specs / "A.md").write_text("A", encoding="utf-8")
-    monkeypatch.setattr(orchestrator, "CORPUS", corpus)
-    calls: list[str] = []
-    monkeypatch.setattr(
-        orchestrator,
-        "run_pipeline",
-        lambda system_id: calls.append(system_id) or [{"system": system_id}],
-    )
-
-    result = orchestrator.run_full_pipeline()
-
-    assert calls == ["A", "B"]
-    assert result["deviations"] == [{"system": "A"}, {"system": "B"}]
-    assert result["systems_scanned"] == 2
-    assert result["per_system"] == {"A": 1, "B": 1}

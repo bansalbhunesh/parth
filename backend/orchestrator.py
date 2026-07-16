@@ -32,7 +32,6 @@ from backend.agents.commissioning import compute_risk_score, predict_cx_impact
 from backend.agents.ingestion import ingest_system
 from backend.agents.reconciliation import _all_standards_text, reconcile_system
 from backend.agents.retrieval import retrieve_standard
-from backend.paths import CORPUS
 
 log = logging.getLogger("pramaan.orchestrator")
 
@@ -409,26 +408,3 @@ def run_pipeline(system_id: str) -> List[dict]:
     elapsed = round((time.time() - t0) * 1000)
     log.info("Pipeline for %s: %d deviations in %dms", system_id, len(devs), elapsed)
     return devs
-
-
-def run_full_pipeline() -> dict:
-    t0 = time.time()
-    specs_dir = CORPUS / "specs"
-    if not specs_dir.exists():
-        return {"deviations": [], "systems": 0, "elapsed_ms": 0}
-
-    all_devs = []
-    system_results = {}
-    for p in sorted(specs_dir.glob("*.md")):
-        sys_id = p.stem
-        devs = run_pipeline(sys_id)
-        system_results[sys_id] = len(devs)
-        all_devs.extend(devs)
-
-    elapsed = round((time.time() - t0) * 1000)
-    return {
-        "deviations": all_devs,
-        "systems_scanned": len(system_results),
-        "per_system": system_results,
-        "elapsed_ms": elapsed,
-    }

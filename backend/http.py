@@ -38,16 +38,6 @@ _STATUS_CODES = {
 }
 
 
-def request_id_from_scope(scope: dict[str, Any]) -> str:
-    state = scope.setdefault("state", {})
-    request_id = state.get("request_id")
-    if isinstance(request_id, str):
-        return request_id
-    request_id = uuid.uuid4().hex
-    state["request_id"] = request_id
-    return request_id
-
-
 def problem_response(
     request: Request,
     *,

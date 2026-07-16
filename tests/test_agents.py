@@ -53,38 +53,6 @@ class TestIngestionAgent:
         result = ingest_file(pathlib.Path("/fake/file.xyz"))
         assert "error" in result
 
-    def test_get_document_text(self):
-        from backend.agents.ingestion import get_document_text
-        text = get_document_text("UPS", "spec")
-        if text is not None:
-            assert len(text) > 0
-
-    def test_get_document_text_missing(self):
-        from backend.agents.ingestion import get_document_text
-        text = get_document_text("NONEXISTENT_SYSTEM", "spec")
-        assert text is None
-
-
-class TestExtractionAgent:
-    def test_extract_prompt_template(self):
-        from backend.agents.extraction import EXTRACT_PROMPT
-        assert "{text}" in EXTRACT_PROMPT
-        assert "{doc_type}" in EXTRACT_PROMPT
-
-    def test_score_extraction(self):
-        extracted = [
-            {"component": "UPS-02", "parameter": "battery_runtime_min"},
-            {"component": "FAKE", "parameter": "fake_param"},
-        ]
-        ref_path = "ground_truth.json"
-        gt = json.loads((CORPUS / ref_path).read_text())
-        ref = gt["seeded_deviations"]
-        ref_keys = {(r["component"], r["parameter"]) for r in ref}
-        ext_keys = {(e["component"], e["parameter"]) for e in extracted}
-        tp = ref_keys & ext_keys
-        assert len(tp) == 1
-
-
 class TestCommissioningAgent:
     def test_rules_mapping(self):
         from backend.agents.commissioning import _RULES

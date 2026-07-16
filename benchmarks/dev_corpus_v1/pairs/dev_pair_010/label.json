@@ -1,0 +1,64 @@
+[
+  {
+    "pair_id": "dev_pair_010",
+    "label_id": "D010-N01",
+    "system_type": "generator",
+    "modality": "text",
+    "label_type": "clean_negative",
+    "difficulty": "unit_conversion",
+    "component": "generator acoustic enclosure",
+    "parameter": "sound_pressure_dba_1m",
+    "required_value": "65 dBA at 1 m",
+    "submitted_value": "62 dB(A), radius 1000 mm",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — dB(A) is dBA, 1000 mm is 1 m, and 62 is below the 65 maximum.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "65 dBA at 1 m"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "Package declaration",
+      "quote_or_span": "62 dB(A), radius 1000 mm"
+    },
+    "expected_commissioning_test": "Full-load sound-pressure survey",
+    "schedule_impact_category": "none",
+    "source_basis": "team_authored_from_public_values",
+    "status": "frozen",
+    "reviewer_notes": "Development-only alternate-notation control.",
+    "contested": false
+  },
+  {
+    "pair_id": "dev_pair_010",
+    "label_id": "D010-N02",
+    "system_type": "generator",
+    "modality": "text",
+    "label_type": "clean_negative",
+    "difficulty": "table_or_layout",
+    "component": "discharge attenuator",
+    "parameter": "insertion_loss_db_250hz",
+    "required_value": "25 dB",
+    "submitted_value": "28 dB",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — the acoustic schedule states 28 dB at 250 Hz, exceeding the 25 dB minimum.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§2",
+      "quote_or_span": "at least 25 dB in the 250 Hz octave band"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "Acoustic schedule",
+      "quote_or_span": "Discharge splitter attenuator | 250 Hz | 28 dB"
+    },
+    "expected_commissioning_test": "Attenuator schedule review",
+    "schedule_impact_category": "none",
+    "source_basis": "team_authored_from_public_values",
+    "status": "frozen",
+    "reviewer_notes": "Development-only table control.",
+    "contested": false
+  }
+]

@@ -1,0 +1,64 @@
+[
+  {
+    "pair_id": "dev_pair_006",
+    "label_id": "D006-N01",
+    "system_type": "other",
+    "modality": "text",
+    "label_type": "clean_negative",
+    "difficulty": "unit_conversion",
+    "component": "earthing grid",
+    "parameter": "grid_resistance_ohm",
+    "required_value": "1 ohm",
+    "submitted_value": "950 milliohms",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 950 milliohms equals 0.95 ohm and meets the 1 ohm maximum.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "1 ohm or less"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "Measured performance",
+      "quote_or_span": "950 milliohms"
+    },
+    "expected_commissioning_test": "Fall-of-potential resistance test",
+    "schedule_impact_category": "none",
+    "source_basis": "team_authored_from_public_values",
+    "status": "frozen",
+    "reviewer_notes": "Development-only restatement control.",
+    "contested": false
+  },
+  {
+    "pair_id": "dev_pair_006",
+    "label_id": "D006-N02",
+    "system_type": "other",
+    "modality": "text",
+    "label_type": "clean_negative",
+    "difficulty": "unit_conversion",
+    "component": "earthing grid",
+    "parameter": "conductor_size_mm2",
+    "required_value": "70 mm2",
+    "submitted_value": "95 sqmm",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 95 sqmm exceeds the 70 mm2 minimum.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§2",
+      "quote_or_span": "minimum cross-section 70 mm2"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "Materials",
+      "quote_or_span": "95 sqmm bare copper"
+    },
+    "expected_commissioning_test": "Installation record review",
+    "schedule_impact_category": "none",
+    "source_basis": "team_authored_from_public_values",
+    "status": "frozen",
+    "reviewer_notes": "Development-only restatement control.",
+    "contested": false
+  }
+]

@@ -1,0 +1,64 @@
+[
+  {
+    "pair_id": "dev_pair_008",
+    "label_id": "D008-N01",
+    "system_type": "fire_suppression",
+    "modality": "text",
+    "label_type": "clean_negative",
+    "difficulty": "categorical_reasoning",
+    "component": "EPO stations",
+    "parameter": "station_action_type",
+    "required_value": "dual-action",
+    "submitted_value": "dual-action (lift-cover-then-push)",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — dual-action stations are explicitly confirmed in the clause-compliance statement.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§7.2",
+      "quote_or_span": "dual-action (lift cover, then push)"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "Statement of compliance",
+      "quote_or_span": "dual-action (lift-cover-then-push)"
+    },
+    "expected_commissioning_test": "EPO station operation test",
+    "schedule_impact_category": "none",
+    "source_basis": "team_authored_from_public_values",
+    "status": "frozen",
+    "reviewer_notes": "Development-only compliance-by-reference control.",
+    "contested": false
+  },
+  {
+    "pair_id": "dev_pair_008",
+    "label_id": "D008-N02",
+    "system_type": "fire_suppression",
+    "modality": "text",
+    "label_type": "clean_negative",
+    "difficulty": "categorical_reasoning",
+    "component": "EPO wiring",
+    "parameter": "wiring_supervision_24vdc",
+    "required_value": "24 V DC supervised",
+    "submitted_value": "supervised 24 V DC",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — supervised 24 V DC wiring is explicitly confirmed in the clause-compliance statement.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§7.2",
+      "quote_or_span": "24 V DC supervised circuits"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "Statement of compliance",
+      "quote_or_span": "supervised 24 V DC circuits, in accordance with design basis §7.2"
+    },
+    "expected_commissioning_test": "Open- and short-circuit supervision test",
+    "schedule_impact_category": "none",
+    "source_basis": "team_authored_from_public_values",
+    "status": "frozen",
+    "reviewer_notes": "Development-only compliance-by-reference control.",
+    "contested": false
+  }
+]

@@ -1,0 +1,95 @@
+[
+  {
+    "pair_id": "dev_pair_012",
+    "label_id": "D012-L01",
+    "system_type": "generator",
+    "modality": "text",
+    "label_type": "positive_deviation",
+    "difficulty": "direct_value",
+    "component": "SCR emissions",
+    "parameter": "nox_g_bhp_hr",
+    "required_value": "0.67 g/bhp-hr",
+    "submitted_value": "1.10 g/bhp-hr",
+    "deviation_type": "above_limit",
+    "severity": "high",
+    "expected_finding": "NOx of 1.10 g/bhp-hr exceeds the 0.67 g/bhp-hr maximum.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "shall not exceed 0.67 g/bhp-hr"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "Guaranteed values",
+      "quote_or_span": "1.10 g/bhp-hr"
+    },
+    "expected_commissioning_test": "Rated-load emissions test",
+    "schedule_impact_category": "redesign_or_reselection",
+    "source_basis": "team_authored_from_public_values",
+    "status": "frozen",
+    "reviewer_notes": "Development-only direct-value regression case.",
+    "contested": false
+  },
+  {
+    "pair_id": "dev_pair_012",
+    "label_id": "D012-L02",
+    "system_type": "generator",
+    "modality": "text",
+    "label_type": "positive_deviation",
+    "difficulty": "direct_value",
+    "component": "SCR emissions",
+    "parameter": "ammonia_slip_ppm",
+    "required_value": "5 ppm",
+    "submitted_value": "10 ppm",
+    "deviation_type": "above_limit",
+    "severity": "medium",
+    "expected_finding": "Ammonia slip of 10 ppm exceeds the 5 ppm maximum.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "shall not exceed 5 ppm"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "Guaranteed values",
+      "quote_or_span": "10 ppm"
+    },
+    "expected_commissioning_test": "Rated-load ammonia-slip test",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "team_authored_from_public_values",
+    "status": "frozen",
+    "reviewer_notes": "Development-only direct-value regression case.",
+    "contested": false
+  },
+  {
+    "pair_id": "dev_pair_012",
+    "label_id": "D012-L03",
+    "system_type": "generator",
+    "modality": "text",
+    "label_type": "positive_deviation",
+    "difficulty": "direct_value",
+    "component": "DEF storage",
+    "parameter": "def_autonomy_hr",
+    "required_value": "72 hours",
+    "submitted_value": "48 hours",
+    "deviation_type": "below_requirement",
+    "severity": "medium",
+    "expected_finding": "DEF autonomy of 48 hours is below the 72-hour minimum.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§2",
+      "quote_or_span": "at least 72 hours"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "Reductant storage",
+      "quote_or_span": "48 hours autonomy"
+    },
+    "expected_commissioning_test": "DEF autonomy calculation review",
+    "schedule_impact_category": "procurement_delay_risk",
+    "source_basis": "team_authored_from_public_values",
+    "status": "frozen",
+    "reviewer_notes": "Development-only direct-value regression case.",
+    "contested": false
+  }
+]

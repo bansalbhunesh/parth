@@ -39,7 +39,17 @@ benchmark is never a suspicious 1.000.
 ## Clean negatives
 `clean_negative` labels assert a value is compliant and must **not** be flagged.
 A predicted finding touching a negative-control parameter is a **false alert**;
-the report gives the clean-negative false-alert rate.
+the report gives the clean-negative false-alert rate. When both the finding and
+control name a parameter, attribution is parameter-granular; broad component
+overlap is used only for legacy rows missing a parameter. This prevents one
+unrelated finding from tripping every clean control on the same equipment.
+
+## Isolated prompt development
+
+Future omission prompts must be developed on `../dev_corpus_v1`, not on named
+frozen benchmark pairs. The development corpus has its own frozen labels and
+content hash, reuses this benchmark's validator and one-to-one scorer, and is
+explicitly excluded from benchmark and product claims.
 
 ## Model runs
 - `--mode rule` calls the deterministic rule detector only (no LLM, no key).
@@ -82,6 +92,7 @@ python scripts/benchmark_manifest_check.py
 python scripts/benchmark_hash_sources.py
 python scripts/benchmark_ps4_external.py --mode rule
 python scripts/benchmark_report.py
+python scripts/dev_corpus_eval.py --validate-only --require-frozen
 ```
 
 For an immutable three-pass comparison of a clean branch revision, use a

@@ -43,14 +43,19 @@ PER_PAIR_COLUMNS = [
 ]
 
 
-def _read_pair(pair_id: str):
-    d = L.BENCH / "pairs" / pair_id
+def _read_pair(pair_id: str, bench_dir: pathlib.Path = L.BENCH):
+    d = bench_dir / "pairs" / pair_id
     return (d / "owner_requirement.md").read_text(encoding="utf-8"), \
            (d / "vendor_submittal.md").read_text(encoding="utf-8")
 
 
-def run_one(pair_id: str, labels: list[dict], mode: str) -> dict:
-    owner, sub = _read_pair(pair_id)
+def run_one(
+    pair_id: str,
+    labels: list[dict],
+    mode: str,
+    bench_dir: pathlib.Path = L.BENCH,
+) -> dict:
+    owner, sub = _read_pair(pair_id, bench_dir)
     system_id = pair_id.upper()
     modality = labels[0].get("modality", "text") if labels else "text"
     err = err_type = None
@@ -58,7 +63,7 @@ def run_one(pair_id: str, labels: list[dict], mode: str) -> dict:
     not_run = False
     t0 = time.time()
     if modality == "image":
-        png = L.BENCH / "pairs" / pair_id / "vendor_submittal.png"
+        png = bench_dir / "pairs" / pair_id / "vendor_submittal.png"
         if mode == "llm" and png.exists():
             # Read values straight from the rendered image via the vision path.
             try:
@@ -118,7 +123,12 @@ def run_one(pair_id: str, labels: list[dict], mode: str) -> dict:
     }
 
 
-def _write_run(run_dir: pathlib.Path, results: list[dict], meta: dict) -> dict:
+def _write_run(
+    run_dir: pathlib.Path,
+    results: list[dict],
+    meta: dict,
+    labels: list[dict] | None = None,
+) -> dict:
     if run_dir.exists() and any(run_dir.iterdir()):
         raise FileExistsError(
             f"immutable benchmark run already exists: {run_dir}; use --run-tag"
@@ -148,7 +158,7 @@ def _write_run(run_dir: pathlib.Path, results: list[dict], meta: dict) -> dict:
             if r.get("error"):
                 f.write(json.dumps({"pair_id": r["pair_id"], "error": r["error"]}) + "\n")
     # per_label_results.csv (per-label TP/FP/FN visibility)
-    labs = load_labels_flat()
+    labs = labels if labels is not None else load_labels_flat()
     caught_s, caught_e = set(), set()
     for r in results:
         if not r["not_run"]:

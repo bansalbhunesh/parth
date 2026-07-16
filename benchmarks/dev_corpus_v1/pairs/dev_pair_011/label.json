@@ -1,0 +1,64 @@
+[
+  {
+    "pair_id": "dev_pair_011",
+    "label_id": "D011-N01",
+    "system_type": "cabling",
+    "modality": "text",
+    "label_type": "clean_negative",
+    "difficulty": "categorical_reasoning",
+    "component": "cable transit fire seal",
+    "parameter": "fire_integrity_minutes",
+    "required_value": "120 minutes fire integrity",
+    "submitted_value": "E 120 / EI 120",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — the E 120 classification states 120 minutes of integrity.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "120 minutes fire integrity"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "Classification schedule",
+      "quote_or_span": "E 120 / EI 120"
+    },
+    "expected_commissioning_test": "Fire-classification document review",
+    "schedule_impact_category": "none",
+    "source_basis": "team_authored_from_public_values",
+    "status": "frozen",
+    "reviewer_notes": "Development-only classification-notation control.",
+    "contested": false
+  },
+  {
+    "pair_id": "dev_pair_011",
+    "label_id": "D011-N02",
+    "system_type": "cabling",
+    "modality": "text",
+    "label_type": "clean_negative",
+    "difficulty": "table_or_layout",
+    "component": "cable transit fire seal",
+    "parameter": "air_leakage_m3h_50pa",
+    "required_value": "0.25 m3/h at 50 Pa",
+    "submitted_value": "0.20 cubic metres per hour at 50 pascals",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — the footnoted 0.20 m3/h at 50 Pa is below the 0.25 maximum.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§2",
+      "quote_or_span": "0.25 m3/h at 50 Pa"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "Qualification footnote",
+      "quote_or_span": "0.20 cubic metres per hour at 50 pascals"
+    },
+    "expected_commissioning_test": "Leakage qualification review",
+    "schedule_impact_category": "none",
+    "source_basis": "team_authored_from_public_values",
+    "status": "frozen",
+    "reviewer_notes": "Development-only footnote control.",
+    "contested": false
+  }
+]

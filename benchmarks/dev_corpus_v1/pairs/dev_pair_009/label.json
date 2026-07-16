@@ -1,0 +1,64 @@
+[
+  {
+    "pair_id": "dev_pair_009",
+    "label_id": "D009-N01",
+    "system_type": "generator",
+    "modality": "text",
+    "label_type": "clean_negative",
+    "difficulty": "unit_conversion",
+    "component": "SCR emissions",
+    "parameter": "nox_g_bhp_hr",
+    "required_value": "0.67 g/bhp-hr or less",
+    "submitted_value": "0.60 grams per brake-horsepower-hour",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — 0.60 grams per brake-horsepower-hour is the same unit and is below the 0.67 maximum.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "0.67 g/bhp-hr or less"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "Certified emissions",
+      "quote_or_span": "0.60 grams per brake-horsepower-hour"
+    },
+    "expected_commissioning_test": "Emissions certificate review",
+    "schedule_impact_category": "none",
+    "source_basis": "team_authored_from_public_values",
+    "status": "frozen",
+    "reviewer_notes": "Development-only rewording control.",
+    "contested": false
+  },
+  {
+    "pair_id": "dev_pair_009",
+    "label_id": "D009-N02",
+    "system_type": "generator",
+    "modality": "text",
+    "label_type": "clean_negative",
+    "difficulty": "derived_arithmetic",
+    "component": "DEF storage",
+    "parameter": "def_autonomy_hr",
+    "required_value": "72 hours",
+    "submitted_value": "75 h autonomy",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — the sizing note states 75 hours, exceeding the 72-hour minimum.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§2",
+      "quote_or_span": "at least 72 hours"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "Sizing note",
+      "quote_or_span": "75 h autonomy"
+    },
+    "expected_commissioning_test": "DEF capacity calculation review",
+    "schedule_impact_category": "none",
+    "source_basis": "team_authored_from_public_values",
+    "status": "frozen",
+    "reviewer_notes": "Development-only footnote control.",
+    "contested": false
+  }
+]

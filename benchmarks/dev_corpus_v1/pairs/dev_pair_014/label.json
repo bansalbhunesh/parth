@@ -1,0 +1,95 @@
+[
+  {
+    "pair_id": "dev_pair_014",
+    "label_id": "D014-L01",
+    "system_type": "cabling",
+    "modality": "text",
+    "label_type": "positive_deviation",
+    "difficulty": "direct_value",
+    "component": "cable transit fire seal",
+    "parameter": "fire_integrity_minutes",
+    "required_value": "120 minutes",
+    "submitted_value": "90 minutes",
+    "deviation_type": "below_requirement",
+    "severity": "high",
+    "expected_finding": "Fire integrity of 90 minutes is below the 120-minute minimum.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "at least 120 minutes fire integrity"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "Declared ratings",
+      "quote_or_span": "90 minutes"
+    },
+    "expected_commissioning_test": "Fire-classification document review",
+    "schedule_impact_category": "redesign_or_reselection",
+    "source_basis": "team_authored_from_public_values",
+    "status": "frozen",
+    "reviewer_notes": "Development-only direct-value regression case.",
+    "contested": false
+  },
+  {
+    "pair_id": "dev_pair_014",
+    "label_id": "D014-L02",
+    "system_type": "cabling",
+    "modality": "text",
+    "label_type": "positive_deviation",
+    "difficulty": "direct_value",
+    "component": "cable transit fire seal",
+    "parameter": "water_pressure_bar",
+    "required_value": "0.30 bar",
+    "submitted_value": "0.20 bar",
+    "deviation_type": "below_requirement",
+    "severity": "high",
+    "expected_finding": "Hydrostatic qualification of 0.20 bar is below the 0.30 bar minimum.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "at least 0.30 bar water pressure"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "Declared ratings",
+      "quote_or_span": "0.20 bar"
+    },
+    "expected_commissioning_test": "Hydrostatic qualification review",
+    "schedule_impact_category": "redesign_or_reselection",
+    "source_basis": "team_authored_from_public_values",
+    "status": "frozen",
+    "reviewer_notes": "Development-only direct-value regression case.",
+    "contested": false
+  },
+  {
+    "pair_id": "dev_pair_014",
+    "label_id": "D014-L03",
+    "system_type": "cabling",
+    "modality": "text",
+    "label_type": "positive_deviation",
+    "difficulty": "direct_value",
+    "component": "cable transit frame",
+    "parameter": "spare_capacity_pct",
+    "required_value": "25 percent",
+    "submitted_value": "15 percent",
+    "deviation_type": "below_requirement",
+    "severity": "medium",
+    "expected_finding": "Spare module capacity of 15 percent is below the 25 percent minimum.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§2",
+      "quote_or_span": "at least 25 percent spare module capacity"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "Installed arrangement",
+      "quote_or_span": "15 percent spare capacity"
+    },
+    "expected_commissioning_test": "Transit module schedule review",
+    "schedule_impact_category": "procurement_delay_risk",
+    "source_basis": "team_authored_from_public_values",
+    "status": "frozen",
+    "reviewer_notes": "Development-only direct-value regression case.",
+    "contested": false
+  }
+]

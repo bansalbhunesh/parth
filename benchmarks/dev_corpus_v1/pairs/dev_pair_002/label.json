@@ -1,0 +1,33 @@
+[
+  {
+    "pair_id": "dev_pair_002",
+    "label_id": "D002-L01",
+    "system_type": "generator",
+    "modality": "text",
+    "label_type": "omission",
+    "difficulty": "omission_detection",
+    "component": "fuel polishing",
+    "parameter": "fuel_cleanliness_iso4406",
+    "required_value": "ISO 4406 code 18/16/13",
+    "submitted_value": "Not stated",
+    "deviation_type": "omission",
+    "severity": "high",
+    "expected_finding": "Submittal states flow, water removal, and filter stages but never the achieved ISO 4406 cleanliness code.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§2",
+      "quote_or_span": "ISO 4406 code 18/16/13 or better"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "Performance",
+      "quote_or_span": "Water removal: coalescer stage reduces free and emulsified water"
+    },
+    "expected_commissioning_test": "Fuel cleanliness laboratory sample",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "team_authored_from_public_values",
+    "status": "frozen",
+    "reviewer_notes": "Development-only label; not independent validation.",
+    "contested": false
+  }
+]

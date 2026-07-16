@@ -1,0 +1,33 @@
+[
+  {
+    "pair_id": "dev_pair_003",
+    "label_id": "D003-L01",
+    "system_type": "bms",
+    "modality": "text",
+    "label_type": "omission",
+    "difficulty": "omission_detection",
+    "component": "water leak detection",
+    "parameter": "alarm_report_time_s",
+    "required_value": "30 seconds",
+    "submitted_value": "Not stated",
+    "deviation_type": "omission",
+    "severity": "medium",
+    "expected_finding": "Submittal covers detection coverage, accuracy, and supervision but never states the leak-to-BMS reporting time.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§2",
+      "quote_or_span": "reported to the BMS within 30 seconds"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "System",
+      "quote_or_span": "Locating accuracy: leak position resolved to 1 m"
+    },
+    "expected_commissioning_test": "Timed wet-cable alarm integration test",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "team_authored_from_public_values",
+    "status": "frozen",
+    "reviewer_notes": "Development-only label; not independent validation.",
+    "contested": false
+  }
+]

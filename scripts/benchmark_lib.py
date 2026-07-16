@@ -226,6 +226,23 @@ def _param_overlap(label: dict, finding: dict) -> set:
     return lab & fnd
 
 
+def _negative_control_overlap(label: dict, finding: dict) -> bool:
+    """Attribute a finding to a clean control at parameter granularity.
+
+    Broad component overlap is useful for forgiving positive-label matching,
+    but it must not make one unmatched finding trip every clean parameter on
+    the same equipment. Fall back to component overlap only for legacy rows
+    where either side lacks a parameter.
+    """
+    label_parameter = toks(label.get("parameter", ""))
+    finding_parameter = toks(finding.get("parameter", ""))
+    if label_parameter and finding_parameter:
+        return bool(label_parameter & finding_parameter)
+    label_component = toks(label.get("component", ""))
+    finding_component = toks(finding.get("component", ""))
+    return bool(label_component & finding_component)
+
+
 def _lead_num(v):
     m = re.search(r"-?\d+(?:\.\d+)?", str(v))
     return float(m.group(0)) if m else None
@@ -299,7 +316,11 @@ def score_pair(pair_labels: list[dict], findings: list[dict], matcher,
     tp = len(matched)
     fn = len(pos) - tp
     fp = len(unmatched)
-    neg_false = sum(1 for nl in negs if any(_param_overlap(nl, findings[fi]) for fi in unmatched))
+    neg_false = sum(
+        1
+        for nl in negs
+        if any(_negative_control_overlap(nl, findings[fi]) for fi in unmatched)
+    )
     contested_flagged = sum(1 for cl in contested if any(matcher(cl, f) for f in findings))
     return {
         "tp": tp, "fn": fn, "fp": fp,

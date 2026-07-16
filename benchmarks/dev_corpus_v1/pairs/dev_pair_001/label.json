@@ -1,0 +1,33 @@
+[
+  {
+    "pair_id": "dev_pair_001",
+    "label_id": "D001-L01",
+    "system_type": "other",
+    "modality": "text",
+    "label_type": "omission",
+    "difficulty": "omission_detection",
+    "component": "lightning protection earthing",
+    "parameter": "earth_resistance_ohm",
+    "required_value": "10 ohms or less",
+    "submitted_value": "Not stated",
+    "deviation_type": "omission",
+    "severity": "high",
+    "expected_finding": "Submittal never states the achieved or guaranteed earth resistance at down-conductor test points.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§3",
+      "quote_or_span": "earth resistance of 10 ohms or less"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "Accessories",
+      "quote_or_span": "Test clamps supplied at each down conductor"
+    },
+    "expected_commissioning_test": "Seasonally dry earth-resistance test",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "team_authored_from_public_values",
+    "status": "frozen",
+    "reviewer_notes": "Development-only label; not independent validation.",
+    "contested": false
+  }
+]

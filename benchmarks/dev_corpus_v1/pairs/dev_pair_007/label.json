@@ -1,0 +1,33 @@
+[
+  {
+    "pair_id": "dev_pair_007",
+    "label_id": "D007-N01",
+    "system_type": "cooling_tower",
+    "modality": "text",
+    "label_type": "clean_negative",
+    "difficulty": "table_or_layout",
+    "component": "condenser water treatment",
+    "parameter": "conductivity_band_us_cm",
+    "required_value": "1200 and 1800 microsiemens per cm",
+    "submitted_value": "1.2 - 1.8 mS/cm",
+    "deviation_type": "none",
+    "severity": "none",
+    "expected_finding": "No deviation — the summary-table range 1.2–1.8 mS/cm equals 1200–1800 µS/cm.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§1",
+      "quote_or_span": "between 1200 and 1800 microsiemens per cm"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "Controller settings summary",
+      "quote_or_span": "Conductivity control band | 1.2–1.8 mS/cm"
+    },
+    "expected_commissioning_test": "Conductivity controller set-point review",
+    "schedule_impact_category": "none",
+    "source_basis": "team_authored_from_public_values",
+    "status": "frozen",
+    "reviewer_notes": "Development-only summary-table control.",
+    "contested": false
+  }
+]

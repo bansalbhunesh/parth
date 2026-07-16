@@ -1,0 +1,8 @@
+{
+  "corpus_version": "1.0.0",
+  "frozen_on": "2026-07-16",
+  "pair_count": 14,
+  "label_count": 25,
+  "labels_freeze_sha256": "8a344577d489fc6e736a522ea1ab409668393e13d6ff3a612114d46d385f3e21",
+  "corpus_content_sha256": "e2065a9ee7afd748bdc4955c061b5dbf39a48b5d3bb21d9efc175ad816ee131f"
+}

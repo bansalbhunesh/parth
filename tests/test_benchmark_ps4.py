@@ -111,6 +111,20 @@ def test_clean_negative_not_counted_positive_and_false_alert():
     assert s2["neg_false_alerts"] == 1 and s2["fp"] == 1
 
 
+def test_clean_negative_alert_requires_parameter_overlap_when_available():
+    neg = {
+        **_pos(
+            "p", "N1", "0.67", "0.60",
+            comp="generator SCR and DEF", param="nox_g_bhp_hr",
+        ),
+        "label_type": "clean_negative",
+    }
+    unrelated = _find("generator SCR and DEF", "ammonia_slip_ppm", "5", "Not stated")
+    score = L.score_pair([neg], [unrelated], L.matches_semantic)
+    assert score["fp"] == 1
+    assert score["neg_false_alerts"] == 0
+
+
 def test_contested_excluded_from_primary_unless_configured():
     con = {**_pos("p", "C1", "27", "30", comp="supply-air", param="supply_air_temp_c"),
            "label_type": "ambiguous_contested", "contested": True}

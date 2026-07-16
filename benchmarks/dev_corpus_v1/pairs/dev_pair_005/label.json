@@ -1,0 +1,33 @@
+[
+  {
+    "pair_id": "dev_pair_005",
+    "label_id": "D005-L01",
+    "system_type": "generator",
+    "modality": "text",
+    "label_type": "omission",
+    "difficulty": "omission_detection",
+    "component": "load bank",
+    "parameter": "remote_load_step_control",
+    "required_value": "25 / 50 / 75 / 100 percent",
+    "submitted_value": "Not stated",
+    "deviation_type": "omission",
+    "severity": "medium",
+    "expected_finding": "Submittal covers rating and protection but never addresses remote load-step control in 25, 50, 75, and 100 percent steps.",
+    "evidence_required": {
+      "document": "owner_requirement.md",
+      "page_or_section": "§2",
+      "quote_or_span": "25 / 50 / 75 / 100 percent steps"
+    },
+    "evidence_submitted": {
+      "document": "vendor_submittal.md",
+      "page_or_section": "Protection",
+      "quote_or_span": "Element over-temperature switches and differential-pressure airflow proving"
+    },
+    "expected_commissioning_test": "Remote load-step functional test",
+    "schedule_impact_category": "commissioning_delay_risk",
+    "source_basis": "team_authored_from_public_values",
+    "status": "frozen",
+    "reviewer_notes": "Development-only label; not independent validation.",
+    "contested": false
+  }
+]

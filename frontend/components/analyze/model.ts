@@ -74,6 +74,9 @@ export interface EvidenceReport {
 
 export interface AnalyzeResult {
   system: string;
+  request_id?: string;
+  input_hash?: string;
+  cached?: boolean;
   deviations: AnalyzeDeviation[];
   count: number;
   elapsed_ms: number;
@@ -90,6 +93,15 @@ export interface AnalyzeResult {
 }
 
 export type InputMode = "text" | "pdf";
+
+export function resultIdentity(result: AnalyzeResult): string {
+  if (result.input_hash) return result.input_hash;
+  const findings = result.deviations
+    .map((deviation) => `${deviation.component}/${deviation.parameter}`)
+    .sort()
+    .join("|");
+  return `${result.system}:${findings}`;
+}
 
 export function formatElapsed(ms: number | undefined | null): string {
   if (ms == null || Number.isNaN(ms)) return "—";

@@ -35,6 +35,7 @@
     <a href="docs/JUDGE_BRIEF.md">Judge brief</a> ·
     <a href="docs/PRODUCTION_BLUEPRINT.md">Production blueprint</a> ·
     <a href="docs/ARCHITECTURE.md">Architecture one-pager</a> ·
+    <a href="docs/HACKATHON_WINNING_PLAYBOOK.md">Hackathon playbook</a> ·
     <a href="docs/DECK.md">Pitch deck outline</a>
   </sub>
 </p>
@@ -96,8 +97,16 @@ Pramaan runs a single compliance reasoning graph wrapping a generative reasoning
 <p align="center">
   <img src="docs/demo.gif" alt="Pramaan judge mode: load a realistic vendor document, hit Analyze, watch the AI stream its reasoning and return cited deviations" width="900">
   <br>
-  <sub>The real flow: <strong>Load deviation demo ★ → Analyze → cited findings</strong> — try it yourself in <a href="https://parth-tan.vercel.app/judge">Judge Mode</a>.</sub>
+  <sub>The judge flow: <strong>Analyze → cited finding → named owner → issued RFI → verified Revision C → audit evidence</strong> — try it in <a href="https://parth-tan.vercel.app/judge">Judge Mode</a>.</sub>
 </p>
+
+The resolution console uses the exact finding produced above it, rather than a
+separate scripted case. It persists evidence, assigns accountability, drafts and
+issues an RFI, re-analyzes the revised vendor text, and closes only after the same
+finding disappears. Repeated identical demo inputs reuse an input-hash cache and
+are labelled **Verified cache replay**; the UI never calls a replay a fresh model
+request. The case secret remains in the browser tab while the server stores only
+its one-way hash.
 
 - **Catches Silent Omissions:** Flagging when a required design clause (like safety clearances or seismic ratings) is completely absent from a vendor submittal.
 - **Performs Derived Calculations:** Tracing implicit math (e.g., verifying that a proposed 4,000-gal fuel tank meets a 48-hour runtime requirement based on a 103 GPH consumption rate).

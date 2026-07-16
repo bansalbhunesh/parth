@@ -1,7 +1,7 @@
-# Pramaan — 3–4 Minute Pitch Video Runbook
+# Pramaan — 2:50 Pitch Video Runbook
 
 > You speak; this document runs the shoot. The words are in [`PITCH.md`](../PITCH.md)
-> (timed to ~3:30) — rehearse them twice out loud before recording anything.
+> (timed to 2:50) — rehearse them twice out loud before recording anything.
 
 ## 0. Go / no-go (do not record before all three)
 
@@ -25,18 +25,19 @@
 
 | # | Time | On screen | You say (PITCH.md §) | Splice-safe cut |
 |---|---|---|---|---|
-| 1 | 0:00–0:20 | Title slide of `presentation.html` (slide 1, full screen) | §[0:00–0:20] Problem / stakes | ✂ |
-| 2 | 0:20–0:50 | Slide 2–4 (the three-documents problem, the requirement→deviation→Cx→window solution) | §[0:20–0:50] What Pramaan does | ✂ |
-| 3 | 0:50–1:30 | **THE STAR**: `/judge` → Load deviation demo ★ → Analyze → let the stream visibly run → point (cursor) at: the 2N→N+1 redundancy drop, the battery-autonomy shortfall (10→8 min), each cited to the clause and mapped to the Cx test; then the provenance chip (live-model vs rule floor). Then Load compliant demo ✓ → zero deviations | §[0:50–1:30] Live demo flow | do NOT cut inside |
-| 4 | 1:30–2:00 | Scroll the findings; trace requirement → deviation → Cx test → schedule risk; flash `PROVENANCE.md` in a second tab | §[1:30–2:00] Evidence chain | ✂ |
-| 5 | 2:00–2:35 | Switch to `/evidence` (or slide 7): the frozen v1.2 benchmark card — 53 pairs, 129 labels, recall 0.862 vs rule baseline 0.111 | §[2:00–2:35] Benchmark result | ✂ |
-| 6 | 2:35–3:05 | Architecture slide / interactive diagram (one LLM core + deterministic services + 2 cycles); flash `/llm-check` for the failover story | §[2:35–3:05] Architecture and reliability | ✂ |
-| 7 | 3:05–3:30 | Slide 8 (Trust & limitations) → end on Judge Mode / `/evidence` with the limitation labels visible. Say the safe line verbatim | §[3:05–3:30] Limitations, roadmap, close | ✂ |
+| 1 | 0:00–0:12 | Title slide, full screen | §[0:00–0:12] Stakes | ✂ |
+| 2 | 0:12–0:25 | Requirement → deviation → Cx → decision-window slide | §[0:12–0:25] Promise | ✂ |
+| 3 | 0:25–0:55 | **THE STAR**: `/judge` → Load deviation demo ★ → Analyze. Point at 2N→N+1, 10→8 minutes, clauses, Cx tests, provenance, and cache-replay chip if this exact input was warmed up | §[0:25–0:55] Live finding | do NOT cut inside |
+| 4 | 0:55–1:25 | In the same result: persist the actual finding → name owner → draft/issue RFI → re-analyze prefilled Revision C → show read-back closure and audit count | §[0:55–1:25] Consequence to closure | do NOT cut inside |
+| 5 | 1:25–1:50 | `/evidence`: frozen benchmark card and limitation labels | §[1:25–1:50] Measured evidence | ✂ |
+| 6 | 1:50–2:15 | Architecture slide: one LLM reasoning core, deterministic services, cache, rule floor; flash `/llm-check` | §[1:50–2:15] Architecture | ✂ |
+| 7 | 2:15–2:38 | Trust/limitations slide: team-authored fixtures, single-author labels, omission and conversion misses | §[2:15–2:38] Boundaries | ✂ |
+| 8 | 2:38–2:50 | End on the resolved finding and audit evidence | §[2:38–2:50] Close | ✂ |
 
-**Scene 3 insurance:** record the star scene (scene 3) TWICE before judging the
-take. If the LLM path degrades mid-recording (429), STOP — re-run `make verify-live`,
-swap key if needed, redo. Never ship a take where the fallback banner is visible
-unless you're narrating the resilience story on purpose.
+**Scenes 3–4 insurance:** record the full analysis-to-closure flow twice. A warm-up
+may produce a **Verified cache replay**; that is truthful and safe to narrate, but
+never call it a fresh model call. If the provider degrades and the deterministic
+floor answers, say so. Never relabel cached or fallback output as live reasoning.
 
 **Scene 6 setup (optional):** if you want the green scoreboard on camera for the
 reliability beat, start `make verify` in a visible terminal ~90 s before scene 6

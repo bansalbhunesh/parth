@@ -290,6 +290,35 @@
   opacity: 0.46;
 }
 
+.analyze-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 18px;
+}
+
+.analyze-actions .analyze-submit {
+  margin-top: 0;
+}
+
+.analyze-cancel,
+.resolution-reset {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.analyze-cancel:hover,
+.resolution-reset:hover {
+  color: var(--brand-mark);
+}
+
 .analyze-error,
 .ocr-warning {
   display: flex;
@@ -386,6 +415,7 @@
 
 .analyze-prov,
 .analyze-results-time,
+.analyze-results-hash,
 .analyze-dev-ref {
   padding: 4px 7px;
   border: 1px solid var(--hairline);
@@ -429,6 +459,110 @@
   border: 1px solid var(--hairline);
   border-radius: 4px;
   background: var(--paper);
+}
+
+.prov-cache {
+  border-color: var(--minor-ink);
+  background: var(--minor-wash);
+  color: var(--minor-ink);
+}
+
+.analyze-results-hash {
+  font-family: var(--mono);
+}
+
+.resolution-console-inline {
+  width: 100%;
+  margin: 30px 0 0;
+  color-scheme: light;
+}
+
+.resolution-summary {
+  max-width: 62ch;
+  margin-top: 8px;
+  color: var(--workflow-soft);
+  font-size: 0.82rem;
+}
+
+.resolution-impact {
+  display: grid;
+  grid-template-columns: 1.2fr 0.9fr 0.7fr;
+  margin-top: 28px;
+  border-block: 1px solid var(--workflow-border);
+}
+
+.resolution-impact > div {
+  padding: 16px 16px 16px 0;
+}
+
+.resolution-impact > div + div {
+  padding-left: 16px;
+  border-left: 1px solid var(--workflow-border);
+}
+
+.resolution-impact dt,
+.resolution-field > span {
+  color: var(--workflow-soft);
+  font-size: 0.7rem;
+  font-weight: 760;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.resolution-impact dd {
+  margin-top: 5px;
+  color: var(--workflow-ink);
+  font-family: var(--display);
+  font-size: 1rem;
+  font-weight: 620;
+}
+
+.resolution-field {
+  display: grid;
+  gap: 8px;
+  max-width: 760px;
+  margin-bottom: 18px;
+}
+
+.resolution-field input,
+.resolution-field textarea {
+  width: 100%;
+  border: 1px solid var(--workflow-border);
+  border-radius: 3px;
+  background: var(--paper);
+  color: var(--workflow-ink);
+  font: inherit;
+}
+
+.resolution-field input {
+  min-height: 46px;
+  padding: 0 13px;
+}
+
+.resolution-field textarea {
+  padding: 13px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.resolution-field small,
+.resolution-success small {
+  color: var(--workflow-subtle);
+  font-size: 0.72rem;
+}
+
+.resolution-reset {
+  margin-top: 16px;
+  color: var(--workflow-soft);
+}
+
+.resolution-unavailable {
+  margin-top: 24px;
+  padding: 14px 16px;
+  border: 1px solid var(--major-ink);
+  background: var(--major-wash);
+  color: var(--major-ink);
+  font-size: 0.82rem;
 }
 
 .rr-head {

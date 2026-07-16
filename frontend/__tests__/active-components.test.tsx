@@ -256,7 +256,6 @@ describe("AnalyzePanel", () => {
   });
 
   it("does not silently run the local text engine against uploaded files", async () => {
-    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => undefined);
     const user = userEvent.setup();
     render(<AnalyzePanel />);
     const inputs = document.querySelectorAll<HTMLInputElement>('input[type="file"]');
@@ -265,7 +264,7 @@ describe("AnalyzePanel", () => {
     await user.click(screen.getByRole("checkbox", { name: "Local Engine (Instant)" }));
     await user.click(screen.getByRole("button", { name: "Upload & Analyze" }));
 
-    expect(alertSpy).toHaveBeenCalledWith(expect.stringContaining("optimized for pasted text"));
+    expect(await screen.findByRole("alert")).toHaveTextContent(/runs pasted text only/i);
     expect(mockedStreamUploadAnalyze).not.toHaveBeenCalled();
   });
 });

@@ -126,6 +126,30 @@ class TestStreamingEndpoints:
         assert "evidence" in payload
         assert payload["evidence"]["count"] == payload["count"]
 
+    def test_analyze_stream_reuses_the_input_hash_cache(self):
+        import json as _json
+
+        request = {
+            "spec_text": "**UPS-02** — battery_runtime_min: shall be **10 min**",
+            "submittal_text": "**UPS-02** — battery_runtime_min: **7 min**",
+            "system_id": "UPS",
+        }
+        first = client.post("/analyze/stream", json=request)
+        second = client.post("/analyze/stream", json=request)
+
+        def result_payload(response):
+            line = next(
+                item for item in response.text.splitlines()
+                if item.startswith("data: ") and '"input_hash"' in item
+            )
+            return _json.loads(line[len("data: "):])
+
+        first_result = result_payload(first)
+        second_result = result_payload(second)
+        assert first_result["input_hash"] == second_result["input_hash"]
+        assert second_result["cached"] is True
+        assert "Reused the matching verified analysis result." in second.text
+
 
 class TestPdfUploadEndpoints:
     def _make_text_file(self, content, filename):

@@ -133,6 +133,26 @@
     width: 100%;
   }
 
+  .analyze-actions,
+  .analyze-cancel {
+    width: 100%;
+  }
+
+  .resolution-impact {
+    grid-template-columns: 1fr;
+  }
+
+  .resolution-impact > div,
+  .resolution-impact > div + div {
+    padding: 14px 0;
+    border-top: 1px solid var(--workflow-border);
+    border-left: 0;
+  }
+
+  .resolution-impact > div:first-child {
+    border-top: 0;
+  }
+
   .judge-proof dl {
     display: grid;
     grid-template-columns: 1fr 1fr;

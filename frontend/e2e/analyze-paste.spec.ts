@@ -39,6 +39,26 @@ test.describe("Live analysis — paste text", () => {
     await expect(result.first()).toBeVisible({ timeout: 30_000 });
   });
 
+  test("turns the analyzed finding into owned, verified closure", async ({ page }) => {
+    await page.goto("/judge");
+    await page.getByRole("button", { name: "Paste Text" }).click();
+    await page.getByRole("button", { name: "Load compact example" }).click();
+    await page.getByRole("button", { name: "Analyze for deviations" }).click();
+
+    await expect(page.getByRole("button", { name: "Persist the highest-priority finding" })).toBeVisible({ timeout: 30_000 });
+    await page.getByRole("button", { name: "Persist the highest-priority finding" }).click();
+    await expect(page.getByLabel("Accountable owner")).toHaveValue(/Commissioning Authority/);
+    await page.getByRole("button", { name: "Assign owner and accept" }).click();
+    await page.getByRole("button", { name: "Draft and issue the RFI" }).click();
+    await expect(page.getByLabel("Vendor revision to verify")).toHaveValue(/REVISION C/);
+    await page.getByRole("button", { name: "Re-analyze revision and close" }).click();
+
+    await expect(page.getByText("Closed with read-back evidence.")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText(/audit events/)).toBeVisible();
+    await page.getByRole("button", { name: "Delete this demo case and restart" }).click();
+    await expect(page.getByRole("button", { name: "Persist the highest-priority finding" })).toBeVisible();
+  });
+
   test("shows a friendly error, not a crash, for an empty submission", async ({ page }) => {
     await page.goto("/judge");
     await page.getByRole("button", { name: "Paste Text" }).click();

@@ -1,8 +1,10 @@
-import type { CompoundRisk, Remediation } from "./model";
+import type { AnalyzeDeviation, CompoundRisk, Remediation } from "./model";
+import { humanizeRiskTarget } from "./resolution-model";
 
 interface RiskRemediationProps {
   compoundRisk?: CompoundRisk;
   remediation?: Remediation;
+  deviations?: AnalyzeDeviation[];
 }
 
 const BAND_CLASS: Record<string, string> = {
@@ -14,7 +16,7 @@ const BAND_CLASS: Record<string, string> = {
 
 const pct = (value: number): number => Math.round(value * 100);
 
-export default function RiskRemediation({ compoundRisk, remediation }: RiskRemediationProps) {
+export default function RiskRemediation({ compoundRisk, remediation, deviations = [] }: RiskRemediationProps) {
   if (!compoundRisk || compoundRisk.deviation_count === 0) return null;
 
   const bandClass = BAND_CLASS[compoundRisk.risk_band] ?? "rr-band-low";
@@ -41,7 +43,7 @@ export default function RiskRemediation({ compoundRisk, remediation }: RiskRemed
         <ul className="rr-clusters">
           {clusters.map((cluster) => (
             <li key={`${cluster.kind}-${cluster.key}`} className="rr-cluster">
-              <span className="rr-cluster-key">{cluster.key}</span>
+              <span className="rr-cluster-key">{humanizeRiskTarget(String(cluster.key), deviations)}</span>
               <span className="rr-cluster-meta">
                 {cluster.member_count} findings · {pct(cluster.compound_risk)}%
               </span>
@@ -53,7 +55,7 @@ export default function RiskRemediation({ compoundRisk, remediation }: RiskRemed
       {top ? (
         <div className="rr-fix">
           <span className="rr-fix-label">Fix this first</span>
-          <span className="rr-fix-target">{top.target}</span>
+          <span className="rr-fix-target">{humanizeRiskTarget(top.target, deviations)}</span>
           <span className="rr-fix-gain">
             −{pct(top.risk_reduction)}% risk{top.clears_schedule_cliff ? " · clears the cliff" : ""}
           </span>

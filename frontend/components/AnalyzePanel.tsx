@@ -113,7 +113,8 @@ export default function AnalyzePanel() {
   const [ocr, setOcr] = useState<OcrStatus | null>(null);
   const [extraction, setExtraction] = useState<UploadExtraction | null>(null);
   const [localMode, setLocalMode] = useState(false);
-  const abortRef = useRef(false);
+  const [systemId, setSystemId] = useState("CUSTOM");
+  const abortRef = useRef<AbortController | null>(null);
 
   // Probe whether THIS deployment can OCR, so the UI reflects reality instead of
   // implying a capability the backend may not have. null = unknown → claim nothing.
@@ -122,6 +123,8 @@ export default function AnalyzePanel() {
     getOcrCheck().then((s) => { if (alive) setOcr(s); });
     return () => { alive = false; };
   }, []);
+
+  useEffect(() => () => abortRef.current?.abort(), []);
 
   // Only offer image upload when the backend can actually OCR images.
   const imageOcrOk = ocr?.image_ocr_supported ?? false;
@@ -140,8 +143,10 @@ export default function AnalyzePanel() {
   const canAnalyzePdf = specFile !== null && submittalFile !== null;
   const canAnalyze = mode === "text" ? canAnalyzeText : canAnalyzePdf;
 
-  const resetState = () => {
-    abortRef.current = false;
+  const resetState = (): AbortController => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
     setLoading(true);
     setStreaming(true);
     setError("");
@@ -150,40 +155,47 @@ export default function AnalyzePanel() {
     setSpecPreview("");
     setSubPreview("");
     setExtraction(null);
+    return controller;
   };
 
-  const finalize = () => {
+  const finalize = (controller?: AbortController) => {
+    if (controller && abortRef.current !== controller) return;
     setLoading(false);
     setStreaming(false);
     setStatus("");
+    abortRef.current = null;
   };
 
   const handleAnalyzePdf = async () => {
     if (localMode) {
-      alert("Local Mode is optimized for pasted text. Please uncheck 'Local Engine (Instant)' or switch to 'Paste Text' mode to run.");
+      setError("Local Engine runs pasted text only. Switch to Paste Text or turn off Local Engine to upload documents.");
       return;
     }
     if (!specFile || !submittalFile) return;
-    resetState();
+    const controller = resetState();
     setStatus("Uploading documents...");
 
     const formData = new FormData();
     formData.append("spec_file", specFile);
     formData.append("submittal_file", submittalFile);
+    formData.append("system_id", systemId);
 
     await streamUploadAnalyze(formData, {
       onStatus: setStatus,
       onPreview: (p) => { setSpecPreview(p.spec || ""); setSubPreview(p.submittal || ""); },
       onExtraction: setExtraction,
-      onToken: (token) => { if (!abortRef.current) setStreamText((prev) => prev + token); },
+      onToken: (token) => { if (!controller.signal.aborted) setStreamText((prev) => prev + token); },
       onResult: (res: any) => {
         setResult(res as AnalyzeResult);
         setStreamText("");
         setStreaming(false);
       },
-      onError: (err) => setError(err),
-      onDone: finalize,
-    });
+      onError: (err) => {
+        if (err !== "Analysis cancelled.") setError(err);
+        finalize(controller);
+      },
+      onDone: () => finalize(controller),
+    }, controller.signal);
   };
 
   const handleAnalyzeText = async () => {
@@ -191,14 +203,15 @@ export default function AnalyzePanel() {
       setError("Both spec and submittal must be at least 10 characters.");
       return;
     }
-    resetState();
+    const controller = resetState();
 
     if (localMode) {
       setStatus("Running client-side rule engine (instant)...");
       setTimeout(() => {
+        if (controller.signal.aborted) return;
         const localResult = runLocalReconciliation(spec, submittal);
         setResult(localResult);
-        finalize();
+        finalize(controller);
       }, 400);
       return;
     }
@@ -210,32 +223,39 @@ export default function AnalyzePanel() {
         spec,
         submittal,
         setStatus,
-        (token) => { if (!abortRef.current) setStreamText((prev) => prev + token); },
+        (token) => { if (!controller.signal.aborted) setStreamText((prev) => prev + token); },
         (res: any) => {
           setResult(res as AnalyzeResult);
           setStreamText("");
           setStreaming(false);
         },
-        finalize,
+        () => finalize(controller),
         async (err) => {
+          if (controller.signal.aborted || err === "Analysis cancelled.") {
+            finalize(controller);
+            return;
+          }
           try {
             const r = await fetch(`${API}/analyze`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ spec_text: spec, submittal_text: submittal }),
+              body: JSON.stringify({ spec_text: spec, submittal_text: submittal, system_id: systemId }),
+              signal: controller.signal,
             });
             if (!r.ok) throw new Error(`HTTP ${r.status}`);
             const data = await r.json();
             setResult(data);
           } catch (e) {
-            setError(e instanceof Error ? e.message : err);
+            if (!controller.signal.aborted) setError(e instanceof Error ? e.message : err);
           }
-          finalize();
+          finalize(controller);
         },
+        controller.signal,
+        systemId,
       );
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Analysis failed");
-      finalize();
+      if (!controller.signal.aborted) setError(e instanceof Error ? e.message : "Analysis failed");
+      finalize(controller);
     }
   };
 
@@ -248,6 +268,7 @@ export default function AnalyzePanel() {
     setResult(null);
     setError("");
     setStreamText("");
+    setSystemId("UPS");
   };
 
   const loadRealSample = () => {
@@ -257,6 +278,7 @@ export default function AnalyzePanel() {
     setResult(null);
     setError("");
     setStreamText("");
+    setSystemId("UPS");
   };
 
   // Clean-negative: same spec, a fully compliant submittal → expect 0 deviations.
@@ -267,6 +289,16 @@ export default function AnalyzePanel() {
     setResult(null);
     setError("");
     setStreamText("");
+    setSystemId("UPS");
+  };
+
+  const cancelAnalysis = () => {
+    abortRef.current?.abort();
+    setError("");
+    setStatus("Analysis cancelled. Your documents are still here.");
+    setLoading(false);
+    setStreaming(false);
+    abortRef.current = null;
   };
 
   return (
@@ -282,7 +314,7 @@ export default function AnalyzePanel() {
       <div className="analyze-mode-toggle">
         <button
           className={`analyze-mode-btn ${mode === "pdf" ? "active" : ""}`}
-          onClick={() => setMode("pdf")}
+          onClick={() => { setMode("pdf"); setSystemId("CUSTOM"); setError(""); }}
           disabled={loading}
           aria-pressed={mode === "pdf"}
         >
@@ -294,7 +326,7 @@ export default function AnalyzePanel() {
         </button>
         <button
           className={`analyze-mode-btn ${mode === "text" ? "active" : ""}`}
-          onClick={() => setMode("text")}
+          onClick={() => { setMode("text"); setError(""); }}
           disabled={loading}
           aria-pressed={mode === "text"}
         >
@@ -390,13 +422,16 @@ export default function AnalyzePanel() {
         </div>
       )}
 
-      <button
-        className="analyze-submit"
-        onClick={handleAnalyze}
-        disabled={loading || !canAnalyze}
-      >
-        {loading ? "Analyzing..." : mode === "pdf" ? "Upload & Analyze" : "Analyze for deviations"}
-      </button>
+      <div className="analyze-actions">
+        <button
+          className="analyze-submit"
+          onClick={handleAnalyze}
+          disabled={loading || !canAnalyze}
+        >
+          {loading ? "Analyzing..." : mode === "pdf" ? "Upload & Analyze" : "Analyze for deviations"}
+        </button>
+        {loading ? <button className="analyze-cancel" type="button" onClick={cancelAnalysis}>Cancel analysis</button> : null}
+      </div>
 
       {error && <div className="analyze-error" role="alert">{friendlyError(error)}</div>}
 
@@ -436,7 +471,7 @@ export default function AnalyzePanel() {
 
       {streaming && streamText && (
         <div className="analyze-stream">
-          <div className="analyze-stream-label">Model reasoning</div>
+          <div className="analyze-stream-label">Structured extraction trace</div>
           <pre className="analyze-stream-text">
             {streamText}
             <span className="copilot-cursor" />
@@ -444,7 +479,14 @@ export default function AnalyzePanel() {
         </div>
       )}
 
-      {result ? <AnalyzeResults result={result} extraction={extraction} /> : null}
+      {result ? (
+        <AnalyzeResults
+          result={result}
+          extraction={extraction}
+          specText={mode === "text" ? spec : ""}
+          submittalText={mode === "text" ? submittal : ""}
+        />
+      ) : null}
     </div>
   );
 }

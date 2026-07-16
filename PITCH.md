@@ -1,6 +1,6 @@
-# Pramaan — 3–4 Minute Pitch Script
+# Pramaan — 2:50 Pitch Script
 
-> The words you actually say, timed to ~3:30. Built for a panel that rewards
+> The words you actually say, timed to 2:50. Built for a panel that rewards
 > *trust*: lead with the stakes, let one live catch carry the wow, and close on
 > honest limitations. Rehearse the demo until it's muscle memory.
 > Recording the video? The shoot is run by [`docs/VIDEO_RUNBOOK.md`](docs/VIDEO_RUNBOOK.md).
@@ -22,79 +22,63 @@
 
 ---
 
-## [0:00–0:20] — Problem / stakes
+## [0:00–0:12] — Stakes
 
-> "Billions are pouring into data-centre construction, and most large builds slip
-> schedule. The most expensive slips happen at **commissioning** — when a vendor
-> submittal that quietly failed the spec finally gets caught, after the gear is
-> fabricated, shipped, and installed. It's the most expensive question in the
-> project: *did the vendor actually deliver what we specified?*"
+> "A vendor deviation found at commissioning is already late: the equipment is
+> fabricated, shipped, and installed. Pramaan answers the expensive question on
+> submittal day: did the vendor deliver what the owner specified?"
 
-## [0:20–0:50] — What Pramaan does
+## [0:12–0:25] — Promise
 
-> "Pramaan answers that question **the day the submittal lands.** It reconciles the
-> owner's requirement, the vendor's submittal, and the governing standards, flags
-> every deviation, and — this is the part no one else does — tells you exactly
-> which **commissioning test** that deviation will fail and how many **weeks of lead
-> time** you have to fix it first. Let me show you, live."
+> "Pramaan reconciles the requirement, submittal, and standards; cites the gap;
+> maps it to the commissioning test; and shows the decision window to fix it."
 
-## [0:50–1:30] — Live demo flow
+## [0:25–0:55] — Live finding
 
 *(On `/judge` → Live Analysis. Hit **Load deviation demo ★**.)*
 
-> "This is a realistic design basis against a vendor submittal, in natural prose —
-> nothing pre-seeded. Watch it reason from the raw documents."
+> "These are two controlled natural-language documents, not a seeded result."
 
 *(Click Analyze; let it stream. Point at the findings.)*
 
-> "It surfaces the non-compliances a human skims past — a redundancy dropped from
-> 2N to N+1, battery autonomy quoted at end-of-life below spec — each cited to the
-> clause, mapped to the commissioning test it fails, with the lead time. And notice
-> the **provenance chip**: it tells you honestly whether this came from the live
-> model or the deterministic floor."
+> "It catches 2N reduced to N+1 and ten minutes reduced to eight, with clause,
+> commissioning gate, and lead time. The provenance chips say whether this was a
+> model result, deterministic floor, or a verified replay of identical inputs."
 
-*(Hit **Load compliant demo ✓**.)*
+## [0:55–1:25] — Consequence to closure
 
-> "Now a fully compliant submittal. The correct answer is **zero deviations** — and
-> it doesn't cry wolf. That's the behaviour our 64 clean-negative controls measure."
+*(Persist the top finding, keep the named owner, issue the RFI, then re-analyze Revision C.)*
 
-## [1:30–2:00] — Evidence chain
+> "A flag is not a workflow. This is the exact finding we analyzed—persisted with
+> its evidence, assigned to a named owner, converted to an RFI, and checked again
+> against Revision C. It closes only when read-back analysis no longer finds the
+> same gap. The audit count and verification hash make that closure inspectable."
 
-> "So the chain is: **requirement → deviation → commissioning test → schedule
-> risk.** A 7-minute battery against a 10-minute spec isn't just a compliance flag —
-> Pramaan traces it to the integrated systems test it fails at Week 38, and the
-> milestone that slips. Caught at submittal review in Week 11, that's a 27-week
-> window to fix it — a one-line RFI instead of a seven-figure slip."
+## [1:25–1:50] — Measured evidence
 
-## [2:00–2:35] — Benchmark result
-
-> "And this is measured, not asserted. On our frozen benchmark — **53
+> "On our frozen benchmark—**53
 > spec–submittal pairs, 129 labels, 17 systems, 64 clean negatives** — the featured
 > model over a 3-pass run reports **0.862 recall, 0.953 precision, 0.905 F1, and
-> zero false alerts** on the clean negatives, versus a deterministic rule baseline
-> of **0.111** on the same labels. The reasoning core clearly beats the floor — and
-> you can reproduce the deterministic parts on your own laptop, no key required."
+> zero false alerts** on clean negatives, versus **0.111 recall** for the rule
+> floor. These are benchmark results, not field-ROI claims."
 
-## [2:35–3:05] — Architecture and reliability
+## [1:50–2:15] — Architecture and reliability
 
-> "Under the hood it's **one compliance reasoning graph, not five AI agents.**
-> Exactly one step reasons with an LLM; ingestion, retrieval, self-critique, and
-> commissioning mapping are deterministic and inspectable, plus deterministic
-> schedule and supply-chain services. And it's built for the bad day: when a
-> provider is rate-limited it **fails over for availability** — gemini, Groq,
-> gateway, Claude, local — and if none answer, a rule engine still returns the headline
-> deviations. Failover buys uptime, never accuracy. Every leg is scored the same."
+> "This is one compliance graph, not an agent swarm. One step reasons with an LLM;
+> ingestion, validation, commissioning mapping, cache identity, and audit are
+> deterministic. Providers fail over for availability, and the low-recall rule
+> floor is labelled honestly. Failover buys uptime, never accuracy."
 
-## [3:05–3:30] — Limitations, roadmap, close
+## [2:15–2:38] — Boundaries
 
-> "I'll be straight about what this is. **Pramaan is not claiming field-validated
-> ROI yet. It is a benchmarked prototype that proves a reliable first-pass deviation
-> detection workflow across EPC document pairs.** The fixtures are team-authored,
-> the labels are single-author frozen with a second human reviewer still pending,
-> and the automated cross-check is machine QA, not a human review — and the app says
-> so, everywhere. Next is stored primary sources, two-person adjudication, and
-> production hardening. Everything I just claimed is on the **/evidence** page with
-> its limitation. Evidence before confidence. Thank you."
+> "The boundaries matter: this is a benchmarked prototype, not field-validated ROI.
+> Fixtures are team-authored; labels are single-author with reviewer two pending;
+> omission recall is 3 of 8 and unit conversion 0 of 2. Those limits are published."
+
+## [2:38–2:50] — Close
+
+> "Pramaan turns a buried document mismatch into an owned, verified decision before
+> commissioning makes it expensive. Evidence before confidence."
 
 ---
 

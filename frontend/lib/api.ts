@@ -31,6 +31,10 @@ export * from "./api-fallbacks";
 
 const API = process.env.NEXT_PUBLIC_API ?? "http://127.0.0.1:8000";
 
+export function apiUrl(path: string): string {
+  return `${API}${path}`;
+}
+
 // Time-box server-rendered data fetches. A cold Render free-tier backend can
 // take 30s+ to wake; without a timeout the page render blocks on it. With one,
 // we render instantly from the bundled fallback data if the API is slow.
@@ -48,6 +52,7 @@ function fetchOpts(opts: RequestInit = {}): RequestInit {
 async function consumeSSE(
   response: Response,
   handlers: Record<string, (data: string) => void>,
+  signal?: AbortSignal,
 ): Promise<void> {
   if (!response.body) return;
   const reader = response.body.getReader();
@@ -55,21 +60,26 @@ async function consumeSSE(
   let buffer = "";
   let currentEvent = "";
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split("\n");
-    buffer = lines.pop() || "";
+  try {
+    while (true) {
+      if (signal?.aborted) throw new DOMException("Analysis cancelled", "AbortError");
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
 
-    for (const line of lines) {
-      if (line.startsWith("event: ")) {
-        currentEvent = line.slice(7).trim();
-      } else if (line.startsWith("data: ")) {
-        const handler = handlers[currentEvent];
-        if (handler) handler(line.slice(6));
+      for (const line of lines) {
+        if (line.startsWith("event: ")) {
+          currentEvent = line.slice(7).trim();
+        } else if (line.startsWith("data: ")) {
+          const handler = handlers[currentEvent];
+          if (handler) handler(line.slice(6));
+        }
       }
     }
+  } finally {
+    if (signal?.aborted) await reader.cancel().catch(() => undefined);
   }
 }
 
@@ -268,12 +278,15 @@ export async function streamAnalyze(
   onResult: (result: unknown) => void,
   onDone: () => void,
   onError: (err: string) => void,
+  signal?: AbortSignal,
+  systemId = "CUSTOM",
 ): Promise<void> {
   try {
     const r = await fetch(`${API}/analyze/stream`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ spec_text: specText, submittal_text: submittalText }),
+      body: JSON.stringify({ spec_text: specText, submittal_text: submittalText, system_id: systemId }),
+      signal,
     });
     if (!r.ok || !r.body) throw new Error(`HTTP ${r.status}`);
 
@@ -281,11 +294,15 @@ export async function streamAnalyze(
       status: (data) => onStatus(data),
       token: (data) => { try { onToken(JSON.parse(data)); } catch { onToken(data); } },
       result: (data) => { try { onResult(JSON.parse(data)); } catch {} },
-      done: () => { onDone(); },
-    });
+      done: () => undefined,
+    }, signal);
     onDone();
-  } catch {
-    onError("Analysis failed — backend not connected.");
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      onError("Analysis cancelled.");
+    } else {
+      onError(error instanceof Error ? error.message : "Analysis failed — backend not connected.");
+    }
   }
 }
 
@@ -300,11 +317,13 @@ export async function streamUploadAnalyze(
     onError: (err: string) => void;
     onDone: () => void;
   },
+  signal?: AbortSignal,
 ): Promise<void> {
   try {
     const r = await fetch(`${API}/analyze/upload/stream`, {
       method: "POST",
       body: formData,
+      signal,
     });
     if (!r.ok || !r.body) throw new Error(`HTTP ${r.status}`);
 
@@ -317,12 +336,35 @@ export async function streamUploadAnalyze(
       },
       result: (data) => { try { handlers.onResult(JSON.parse(data)); } catch {} },
       error: (data) => handlers.onError(data),
-      done: () => { handlers.onDone(); },
-    });
+      done: () => undefined,
+    }, signal);
     handlers.onDone();
   } catch (e) {
-    handlers.onError(e instanceof Error ? e.message : "Upload failed");
+    handlers.onError(
+      e instanceof DOMException && e.name === "AbortError"
+        ? "Analysis cancelled."
+        : e instanceof Error ? e.message : "Upload failed",
+    );
   }
+}
+
+export async function analyzeOnce<T>(
+  specText: string,
+  submittalText: string,
+  systemId: string,
+  signal?: AbortSignal,
+): Promise<T> {
+  const response = await fetch(`${API}/analyze`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ spec_text: specText, submittal_text: submittalText, system_id: systemId }),
+    signal,
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(String(body.detail || `Analysis failed (${response.status})`));
+  }
+  return body as T;
 }
 
 export async function getMetrics(): Promise<Record<string, unknown> | null> {

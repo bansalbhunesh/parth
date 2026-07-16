@@ -22,6 +22,8 @@ describe("AnalyzeResults", () => {
           spec: { method: "ocr_pdf", chars: 10, ocr_used: true, truncated: false, warning: null },
           submittal: { method: "text_layer", chars: 10, ocr_used: false, truncated: false, warning: null },
         }}
+        specText=""
+        submittalText=""
       />,
     );
     expect(screen.getByText(/meets all identified requirements/)).toBeInTheDocument();
@@ -42,6 +44,8 @@ describe("AnalyzeResults", () => {
           ],
         }}
         extraction={null}
+        specText=""
+        submittalText=""
       />,
     );
     expect(screen.getByText("2 deviations found")).toBeInTheDocument();
@@ -74,10 +78,39 @@ describe("AnalyzeResults", () => {
           },
         }}
         extraction={null}
+        specText=""
+        submittalText=""
       />,
     );
     expect(screen.getByText(/Evidence: Strong/)).toHaveAttribute("title", "exact numeric mismatch");
     expect(screen.getByText(/Evidence: Thin/)).toHaveAttribute("title", "no corroborating signals");
+  });
+
+  it("labels a cached response without relabelling its original reasoning mode", () => {
+    const { rerender } = render(
+      <AnalyzeResults
+        result={{ ...EMPTY_RESULT, mode: "llm", cached: true, input_hash: "abcdef1234567890" }}
+        extraction={null}
+        specText=""
+        submittalText=""
+      />,
+    );
+    expect(screen.getByText("Live LLM reasoning")).toBeInTheDocument();
+    expect(screen.getByText("Verified cache replay")).toBeInTheDocument();
+    expect(screen.getByText("Input abcdef1234")).toHaveAttribute("title", "abcdef1234567890");
+
+    rerender(
+      <AnalyzeResults
+        result={{ ...EMPTY_RESULT, mode: "llm", cached: true }}
+        extraction={null}
+        specText=""
+        submittalText=""
+      />,
+    );
+    expect(screen.getByText("Verified cache replay")).toHaveAttribute(
+      "title",
+      "Reused a verified result for the same documents, system, prompt and model configuration.",
+    );
   });
 });
 

@@ -16,7 +16,7 @@ See it work (90 seconds):  https://parth-tan.vercel.app/judge
   → click "Load deviation demo ★", hit Analyze, watch it reason live.
 Every number + its limitation:  https://parth-tan.vercel.app/evidence
 Full source, benchmark, 892 tests, CI:  https://github.com/bansalbhunesh/parth
-Pitch video (3 min):  <VIDEO_LINK_HERE>
+Pitch video (2:50):  <VIDEO_LINK_HERE>
 ```
 
 ## Project description (main body)

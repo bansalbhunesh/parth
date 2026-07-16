@@ -56,7 +56,7 @@ describe("RiskRemediation", () => {
     expect(screen.getByText(/2 findings fail together/)).toBeInTheDocument();
     expect(screen.getByText("IST-07")).toBeInTheDocument();
     expect(screen.getByText("Fix this first")).toBeInTheDocument();
-    expect(screen.getByText("IST-07 (cx_test)")).toBeInTheDocument();
+    expect(screen.getByText("IST-07 (cx test)")).toBeInTheDocument();
     expect(screen.getByText(/clears the cliff/)).toBeInTheDocument();
     expect(screen.getByText(/no LLM/)).toBeInTheDocument();
   });

@@ -10,7 +10,8 @@ from fastapi.responses import JSONResponse
 from backend import security
 from backend.agents.decision import decision_blocks
 from backend.agents.ingestion import extract_pdf_bytes
-from backend.analyze import run_analysis, run_streaming_analysis
+from backend.analysis_events import cached_analysis_events
+from backend.analyze import run_analysis
 from backend.api_context import (
     _PROTECT_ANALYSIS,
     _PROTECT_LLMCHECK,
@@ -27,6 +28,7 @@ from backend.uploads import validate_upload
 
 router = APIRouter()
 log = logging.getLogger("pramaan.api")
+
 
 # ── Analysis endpoints ──────────────────────────────────────────────
 
@@ -109,7 +111,7 @@ def get_job_result(job_id: str):
 def analyze_stream(req: AnalyzeRequest):
     def generate():
         yield "event: status\ndata: Loading standards knowledge base...\n\n"
-        yield from run_streaming_analysis(req.spec_text, req.submittal_text, req.system_id)
+        yield from cached_analysis_events(req.spec_text, req.submittal_text, req.system_id)
 
     return _sse_response(generate())
 
@@ -233,7 +235,7 @@ def analyze_upload_stream(
 
         yield f"event: preview\ndata: {json.dumps({'spec': spec_text[:500], 'submittal': submittal_text[:500]})}\n\n"
         yield "event: status\ndata: Loading standards knowledge base...\n\n"
-        yield from run_streaming_analysis(spec_text, submittal_text, system_id)
+        yield from cached_analysis_events(spec_text, submittal_text, system_id)
 
     return _sse_response(generate())
 
@@ -288,6 +290,7 @@ async def health():
     llm = _llm_status()
     return {
         "ok": True,
+        "product": "Pramaan",
         "project": "Project Meghdoot",
         "version": "2.0.0",
         # Deployed commit — lets you verify the running build at a glance.

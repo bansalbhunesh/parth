@@ -273,6 +273,29 @@ describe("AnalyzePanel", () => {
     expect(screen.getByRole("button", { name: "Analyze for deviations" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Upload & Analyze" })).not.toBeInTheDocument();
   });
+
+  it("allows the user to cancel an ongoing analysis", async () => {
+    // Hang the analyze endpoint so we can cancel it while it's loading
+    let resolveStream!: (value: any) => void;
+    mockedStreamAnalyze.mockImplementationOnce(() => new Promise((resolve) => { resolveStream = resolve; }));
+    
+    const user = userEvent.setup();
+    render(<AnalyzePanel />);
+    
+    await user.click(screen.getByRole("button", { name: /Load realistic deviation demo/ }));
+    await user.click(screen.getByRole("button", { name: "Analyze for deviations" }));
+    
+    // While loading, the cancel button should appear
+    const cancelBtn = await screen.findByRole("button", { name: "Cancel analysis" });
+    await user.click(cancelBtn);
+    
+    // The cancel button should disappear and the main button should return to idle state
+    expect(screen.queryByRole("button", { name: "Cancel analysis" })).not.toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Analyze for deviations" })).not.toBeDisabled();
+    
+    // Resolve the hanging promise to cleanup, which shouldn't throw an unhandled error
+    resolveStream(null);
+  });
 });
 
 describe("ResolutionWorkflow", () => {

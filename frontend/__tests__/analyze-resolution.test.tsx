@@ -190,4 +190,27 @@ describe("AnalyzeResolutionWorkflow", () => {
     resolveCreate(credentials);
     // If we reach here without an unhandled rejection, the abort guard works.
   });
+
+  it("blocks verification if the revised submittal text is cleared", async () => {
+    const user = userEvent.setup();
+    render(<AnalyzeResolutionWorkflow result={RESULT} specText="spec" submittalText="Runtime is 8 min." />);
+    
+    // Idle -> Opened
+    await user.click(screen.getByRole("button", { name: "Persist the highest-priority finding" }));
+    
+    // Opened -> Owned
+    await user.type(screen.getByLabelText("Accountable owner"), "Eng");
+    await user.click(screen.getByRole("button", { name: "Assign owner and accept" }));
+    
+    // Owned -> Issued
+    await user.click(screen.getByRole("button", { name: "Draft and issue the RFI" }));
+    
+    // Clear the revision textarea
+    const textarea = await screen.findByRole("textbox", { name: "Vendor revision to verify" });
+    await user.clear(textarea);
+    
+    // Try to advance and verify the error message appears
+    await user.click(screen.getByRole("button", { name: "Re-analyze revision and close" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Paste the full design basis and revised vendor text before verification.");
+  });
 });

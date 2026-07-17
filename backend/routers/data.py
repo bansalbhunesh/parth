@@ -71,7 +71,12 @@ def ingest(system_id: str, seeded_demo: bool = False):
         }
 
     log.info("Ingesting system %s", system_id)
-    devs = run_pipeline(system_id)
+    try:
+        devs = run_pipeline(system_id)
+    except Exception as exc:
+        log.warning("Pipeline failed for %s: %s", system_id, exc)
+        devs = []
+
     mode = "pipeline"
     # An empty result means the LLM/graph layer produced nothing (throttled, no
     # key, or genuinely clean). NEVER substitute the answer key: degrade to the

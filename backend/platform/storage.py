@@ -1,4 +1,5 @@
-"""Authorized private-storage URL issuance for organization/case object paths."""
+"""Not yet wired into the running app — see PRODUCTION_BLUEPRINT.md.
+Authorized private-storage URL issuance for organization/case object paths."""
 
 from __future__ import annotations
 

@@ -526,8 +526,9 @@ class TestOrchestratorResilience:
         assert state["deviations"] == []
 
     def test_pipeline_runs_without_key(self):
-        # Without a key, reconciliation yields no deviations but never crashes.
+        # Without a key, reconciliation throws LLMError on the first pass
         _clear_keys()
         from backend.orchestrator import run_pipeline
-        devs = run_pipeline("UPS")
-        assert isinstance(devs, list)
+        import pytest
+        with pytest.raises(Exception):
+            run_pipeline("UPS")

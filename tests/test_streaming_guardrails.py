@@ -64,11 +64,11 @@ def test_stream_times_out_instead_of_hanging(monkeypatch):
 
 
 def test_stream_timeout_falls_back_to_rule_floor(monkeypatch):
-    def stalled_stream(prompt, system=""):
+    def stalled_stream(prompt, system="", **kwargs):
         time.sleep(5)
-        yield "never delivered"
+        return []
 
-    monkeypatch.setattr("backend.llm.complete_stream", stalled_stream)
+    monkeypatch.setattr("backend.agents.reconciliation.complete_json", stalled_stream)
     monkeypatch.setattr(analyze, "_LLM_TIMEOUT_S", 0.3)
 
     events = "".join(analyze.run_streaming_analysis(SPEC, SUBMITTAL, "UPS"))
@@ -156,11 +156,11 @@ def test_streaming_success_path_reports_llm_mode_and_provenance(monkeypatch):
         '"severity": "Critical", "rationale": "runtime below requirement"}]'
     )
 
-    def json_stream(prompt, system=""):
-        yield payload[: len(payload) // 2]
-        yield payload[len(payload) // 2:]
+    def json_stream(prompt, system="", **kwargs):
+        import json
+        return json.loads(payload)
 
-    monkeypatch.setattr("backend.llm.complete_stream", json_stream)
+    monkeypatch.setattr("backend.agents.reconciliation.complete_json", json_stream)
     monkeypatch.setitem(llm_mod.FAILOVER_STATUS, "last_successful_provider", "groq")
 
     events = "".join(analyze.run_streaming_analysis(SPEC, SUBMITTAL, "UPS"))
@@ -184,11 +184,11 @@ def test_streaming_success_path_reports_llm_mode_and_provenance(monkeypatch):
 def test_streaming_fallback_reports_null_provenance(monkeypatch):
     import json
 
-    def failing_stream(prompt, system=""):
-        raise RuntimeError("no provider")
-        yield  # pragma: no cover — makes this a generator
+    def failing_stream(prompt, system="", **kwargs):
+        from backend.llm import LLMError
+        raise LLMError("no provider")
 
-    monkeypatch.setattr("backend.llm.complete_stream", failing_stream)
+    monkeypatch.setattr("backend.agents.reconciliation.complete_json", failing_stream)
 
     events = "".join(analyze.run_streaming_analysis(SPEC, SUBMITTAL, "UPS"))
 

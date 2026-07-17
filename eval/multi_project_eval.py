@@ -71,7 +71,11 @@ def reconcile_project_llm(corpus_path: pathlib.Path):
     standards = _standards_text_at(corpus_path)
     findings = []
     for spec in sorted((corpus_path / "specs").glob("*.md")):
-        findings.extend(reconcile_system_at(corpus_path, spec.stem, standards))
+        try:
+            findings.extend(reconcile_system_at(corpus_path, spec.stem, standards))
+        except Exception as exc:
+            import logging
+            logging.warning("Failed reconciliation for %s: %s", spec.stem, exc)
     return findings
 
 

@@ -334,7 +334,7 @@ def _validate_deviations(raw) -> list[dict]:
 
 
 def reconcile_system_at(base, sys_id: str, standards_text: str, with_cx: bool = False,
-                        feedback: str = None):
+                        feedback: str = None, spec_text: str = None, submittal_text: str = None):
     """Path-agnostic LLM reconciliation for a single system under `base`
     (a project corpus root with specs/ and submittals/). Set with_cx=True to
     attach commissioning predictions (rule table is Meghdoot-specific).
@@ -342,13 +342,17 @@ def reconcile_system_at(base, sys_id: str, standards_text: str, with_cx: bool = 
     `feedback` carries a self-critique from a prior pass (the reflexion loop in
     the orchestrator): when present, the model is asked to REVISE its previous
     answer against the critique rather than start cold."""
-    spec_path = base / "specs" / f"{sys_id}.md"
-    sub_path = base / "submittals" / f"{sys_id}.md"
-    if not spec_path.exists() or not sub_path.exists():
-        log.warning("Missing spec or submittal for %s", sys_id)
-        return []
-    spec = spec_path.read_text(encoding="utf-8")
-    submittal = sub_path.read_text(encoding="utf-8")
+    if spec_text and submittal_text:
+        spec = spec_text
+        submittal = submittal_text
+    else:
+        spec_path = base / "specs" / f"{sys_id}.md"
+        sub_path = base / "submittals" / f"{sys_id}.md"
+        if not spec_path.exists() or not sub_path.exists():
+            log.warning("Missing spec or submittal for %s", sys_id)
+            return []
+        spec = spec_path.read_text(encoding="utf-8")
+        submittal = sub_path.read_text(encoding="utf-8")
     prompt = build_reconciliation_prompt(spec, submittal, standards_text)
     if feedback:
         prompt += (
@@ -361,7 +365,7 @@ def reconcile_system_at(base, sys_id: str, standards_text: str, with_cx: bool = 
         raw = complete_json(prompt, system=SYSTEM_PROMPT)
     except LLMError as exc:
         log.error("LLM reconciliation failed for %s: %s", sys_id, exc)
-        return []
+        raise
     devs = _validate_deviations(raw)
     devs = _check_citation_faithfulness(devs, spec, submittal, standards_text)
     log.info("System %s: %d deviations found", sys_id, len(devs))
@@ -372,9 +376,9 @@ def reconcile_system_at(base, sys_id: str, standards_text: str, with_cx: bool = 
     return devs
 
 
-def reconcile_system(sys_id: str, standards_text: str, feedback: str = None):
+def reconcile_system(sys_id: str, standards_text: str, feedback: str = None, spec_text: str = None, submittal_text: str = None):
     return reconcile_system_at(CORPUS, sys_id, standards_text, with_cx=True,
-                               feedback=feedback)
+                               feedback=feedback, spec_text=spec_text, submittal_text=submittal_text)
 
 
 def run_reconciliation_over_corpus():

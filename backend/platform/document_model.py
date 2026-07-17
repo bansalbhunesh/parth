@@ -1,4 +1,5 @@
-"""Normalized document structure with explicit provenance and reading order."""
+"""Not yet wired into the running app — see PRODUCTION_BLUEPRINT.md.
+Normalized document structure with explicit provenance and reading order."""
 
 from __future__ import annotations
 

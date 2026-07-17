@@ -60,7 +60,7 @@ def test_loop_removes_false_positive_and_terminates(monkeypatch):
     back, the revised pass drops it, and the loop stops. Proves the cycle works."""
     calls = {"n": 0}
 
-    def fake_reconcile(sys_id, standards_text, feedback=None):
+    def fake_reconcile(sys_id, standards_text, feedback=None, **kwargs):
         calls["n"] += 1
         if feedback:  # revised pass — the model corrected itself
             return [_dev("GEN-01", "start_time_sec", "10", "15")]
@@ -86,7 +86,7 @@ def test_loop_removes_false_positive_and_terminates(monkeypatch):
 
 def test_loop_is_bounded_even_if_model_never_fixes(monkeypatch):
     """If revision never clears the issue, the loop must still terminate."""
-    def stubborn(sys_id, standards_text, feedback=None):
+    def stubborn(sys_id, standards_text, feedback=None, **kwargs):
         return [_dev("COOL-01", "redundancy", "N+1", "N+1")]  # always a FP
 
     monkeypatch.setattr(orch, "reconcile_system", stubborn)

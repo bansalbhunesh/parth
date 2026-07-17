@@ -164,8 +164,13 @@ def test_delivery_routes_payload_and_refuses_redirects(monkeypatch):
         {"text": "alert"},
     )
 
-    assert posts[0][1] == {"text": "alert"}
-    assert posts[1][1] == {"event": "deviation_detected"}
+    if posts[0][1] is not None:
+        assert posts[0][1] == {"text": "alert"}
+        assert posts[1][1] == {"event": "deviation_detected"}
+    else:
+        import json
+        assert json.loads(posts[0][2]["content"]) == {"text": "alert"}
+        assert json.loads(posts[1][2]["content"]) == {"event": "deviation_detected"}
     assert all(post[2]["follow_redirects"] is False for post in posts)
 
 

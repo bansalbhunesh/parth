@@ -195,7 +195,7 @@ def test_scan_covers_the_core_surfaces():
     snapshot = (ROOT / "docs/COMPETITIVE_SCAN_2026-07-15.md").read_text(
         encoding="utf-8"
     )
-    for threat in ("DKDVE/et-hackathon", "suryanshvermaa/DCBrain"):
+    for threat in ("Competitor A", "Competitor B"):
         assert threat in competitive
     for retired_overclaim in (
         "We are the only one you can actually check",

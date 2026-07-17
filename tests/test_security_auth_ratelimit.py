@@ -164,7 +164,7 @@ def test_deep_probe_has_its_own_tight_limit(monkeypatch):
     monkeypatch.setenv("PRAMAAN_RATE_LIMIT_ENABLED", "1")
     monkeypatch.setenv("PRAMAAN_DEEP_PROBE_LIMIT_PER_HOUR", "1")
     monkeypatch.setenv("GEMINI_API_KEY", "test-key")
-    monkeypatch.setattr(llm_mod, "complete_json", lambda prompt, system="": [])
+    monkeypatch.setattr("backend.agents.reconciliation.complete_json", lambda prompt, system="": [])
     assert client.get("/llm-check?deep=1").status_code == 200
     assert client.get("/llm-check?deep=1").status_code == 429
 

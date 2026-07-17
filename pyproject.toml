@@ -167,10 +167,15 @@ target-version = "py311"
 line-length = 120
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "W"]
+select = ["E", "F", "I", "W", "C90"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
 
 [tool.ruff.lint.per-file-ignores]
 # Corpus generator: long standards-text literals are data, not code style.
 "data/generate_projects.py" = ["E501"]
 # Benchmark seed authoring: long owner/submittal document literals are data.
 "scripts/benchmark_seed_pairs.py" = ["E501"]
+"data/*" = ["C901"]
+"scripts/*" = ["C901"]

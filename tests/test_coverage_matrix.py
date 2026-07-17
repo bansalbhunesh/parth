@@ -146,7 +146,7 @@ class TestPromptWiring:
             seen.append(prompt)
             return {"checklist": [], "deviations": [dict(_DEV)]}
 
-        monkeypatch.setattr("backend.llm.complete_json", fake_complete_json)
+        monkeypatch.setattr("backend.agents.reconciliation.complete_json", fake_complete_json)
         monkeypatch.setattr(analyze, "_all_standards_text", lambda **_kwargs: "")
 
         monkeypatch.delenv(COVERAGE_MATRIX_ENV, raising=False)

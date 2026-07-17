@@ -347,7 +347,9 @@ def test_reconciliation_failure_log_preserves_system_and_safe_reason(
 
     monkeypatch.setattr(reconciliation, "complete_json", fail_analysis)
     with caplog.at_level("ERROR", logger=reconciliation.log.name):
-        assert reconciliation.reconcile_system_at(tmp_path, "UPS", "standard") == []
+        import pytest
+        with pytest.raises(reconciliation.LLMError, match="provider unavailable"):
+            reconciliation.reconcile_system_at(tmp_path, "UPS", "standard")
 
     assert caplog.messages == ["LLM reconciliation failed for UPS: provider unavailable"]
 
@@ -385,7 +387,7 @@ def test_reconciliation_defaults_missing_inputs_and_wrapper_contract(
     )
     assert reconciliation.reconcile_system("UPS", "standard", feedback="review") == ["result"]
     assert wrapper_calls == [
-        (reconciliation.CORPUS, "UPS", "standard", {"with_cx": True, "feedback": "review"})
+        (reconciliation.CORPUS, "UPS", "standard", {"with_cx": True, "feedback": "review", "spec_text": None, "submittal_text": None})
     ]
 
 

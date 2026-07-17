@@ -1,4 +1,5 @@
-"""Visibility-timeout worker semantics with bounded retry and dead-lettering."""
+"""Not yet wired into the running app — see PRODUCTION_BLUEPRINT.md.
+Visibility-timeout worker semantics with bounded retry and dead-lettering."""
 
 from __future__ import annotations
 

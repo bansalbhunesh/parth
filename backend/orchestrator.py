@@ -151,6 +151,12 @@ class PipelineState(TypedDict):
 
 
 def node_ingest(state: PipelineState) -> PipelineState:
+    if state.get("spec_text") and state.get("submittal_text"):
+        log.info("Skipping disk ingest for %s: text provided directly", state["system_id"])
+        word_count = len(state["spec_text"].split()) + len(state["submittal_text"].split())
+        state["ingestion_meta"] = {"total_documents": 2, "total_words": word_count}
+        return state
+
     sys_id = state["system_id"]
     result = ingest_system(sys_id)
     state["ingestion_meta"] = {
@@ -191,19 +197,19 @@ def node_reconcile(state: PipelineState) -> PipelineState:
     if feedback:
         log.info("Reconcile pass %d for %s (revising on self-critique)",
                  state["iteration"], state["system_id"])
-    revised = reconcile_system(state["system_id"],
-                               state["standards_text"],
-                               feedback=feedback)
-    # Best-so-far retention: a revision pass must refine, never regress. If the
-    # second pass throttles to [] or returns fewer findings than the prior pass
-    # (e.g. LLMError swallowed -> []), keep the prior result rather than letting a
-    # degraded retry silently erase legitimate findings.
-    if feedback and len(revised) < len(prior):
-        log.warning("Revision for %s returned %d < prior %d; keeping prior findings",
-                    state["system_id"], len(revised), len(prior))
-        state["deviations"] = prior
-    else:
+    try:
+        revised = reconcile_system(state["system_id"],
+                                   state["standards_text"],
+                                   feedback=feedback,
+                                   spec_text=state.get("spec_text"),
+                                   submittal_text=state.get("submittal_text"))
         state["deviations"] = revised
+    except Exception as exc:
+        log.warning("Revision for %s failed (%s); keeping prior findings",
+                    state["system_id"], exc)
+        if not prior:
+            raise
+        state["deviations"] = prior
     return state
 
 
@@ -360,12 +366,12 @@ def build_graph():
     return g.compile()
 
 
-def _init_state(system_id: str) -> PipelineState:
+def _init_state(system_id: str, spec_text: Optional[str] = None, submittal_text: Optional[str] = None) -> PipelineState:
     return {
         "system_id": system_id,
         "standards_text": "",
-        "spec_text": None,
-        "submittal_text": None,
+        "spec_text": spec_text,
+        "submittal_text": submittal_text,
         "ingestion_meta": None,
         "extracted_triples": None,
         "deviations": [],
@@ -380,10 +386,10 @@ def _init_state(system_id: str) -> PipelineState:
     }
 
 
-def run_pipeline(system_id: str) -> List[dict]:
+def run_pipeline(system_id: str, spec_text: Optional[str] = None, submittal_text: Optional[str] = None) -> List[dict]:
     t0 = time.time()
     graph = build_graph()
-    state = _init_state(system_id)
+    state = _init_state(system_id, spec_text, submittal_text)
     if graph is not None:
         log.info("Running LangGraph 5-node pipeline for %s", system_id)
         result = graph.invoke(state)

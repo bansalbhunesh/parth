@@ -1,4 +1,5 @@
-"""Server-only Supabase Queue adapter using pgmq read and archive semantics."""
+"""Not yet wired into the running app — see PRODUCTION_BLUEPRINT.md.
+Server-only Supabase Queue adapter using pgmq read and archive semantics."""
 
 from __future__ import annotations
 

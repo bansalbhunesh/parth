@@ -657,7 +657,7 @@ class TestLLMCheck:
             seen.append(prompt)
             return fake
 
-        monkeypatch.setattr(llm_mod, "complete_json", complete)
+        monkeypatch.setattr("backend.llm.complete_json", complete)
         monkeypatch.setattr(llm_mod, "failover_report", lambda: {
             "providers": {
                 "gemini": {"configured": True, "model": "gemini-2.5-flash"},
@@ -703,7 +703,7 @@ class TestLLMCheck:
 
         def boom(prompt, system=""):
             raise llm_mod.LLMError("429 RESOURCE_EXHAUSTED: quota exceeded")
-        monkeypatch.setattr(llm_mod, "complete_json", boom)
+        monkeypatch.setattr("backend.llm.complete_json", boom)
         r = client.get("/llm-check?deep=1")
         assert r.status_code == 200
         data = r.json()

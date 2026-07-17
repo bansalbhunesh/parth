@@ -13,10 +13,8 @@ from backend.agents.decision import decision_blocks
 from backend.agents.reconciliation import (
     SYSTEM_PROMPT,
     _all_standards_text,
-    _check_citation_faithfulness,
     _ground_findings,
     _validate_deviations,
-    build_reconciliation_prompt,
 )
 
 # The deterministic rule floor lives in backend.rule_engine; these names stay
@@ -129,29 +127,21 @@ def run_analysis(
     system_id: str = "CUSTOM",
 ) -> AnalysisResult:
     t0 = time.time()
-    standards = _all_standards_text(max_chars_per=1800)
-    prompt = build_reconciliation_prompt(spec_text, submittal_text, standards)
-    standards_load_ms = round((time.time() - t0) * 1000)
+    standards_load_ms = 0
     llm_call_ms = None
     provider = None
     t_llm = time.time()
     future = None
     try:
         from backend import llm as llm_module
-        from backend.llm import complete_json
-        # Bound the wait: a free-tier model that 503-retries for 40s+ would
-        # otherwise hang the demo. A timed-out call is abandoned (left running)
-        # and we degrade to the instant rule-based detector.
-        future = _submit_llm(complete_json, prompt, SYSTEM_PROMPT)
-        raw = future.result(timeout=_LLM_TIMEOUT_S)
+        from backend.orchestrator import run_pipeline
+
+        future = _submit_llm(run_pipeline, system_id, spec_text, submittal_text)
+        devs = future.result(timeout=_LLM_TIMEOUT_S)
         llm_call_ms = round((time.time() - t_llm) * 1000)
         provider = llm_module.FAILOVER_STATUS.get("last_successful_provider")
         t_post = time.time()
-        devs = _validate_deviations(raw)
-        devs = _check_citation_faithfulness(devs, spec_text, submittal_text, standards)
         devs = _ground_findings(devs, spec_text)  # drop hallucinated requirements
-        for d in devs:
-            _enrich_cx(d, system_id)  # rule-table only — no extra LLM calls
         mode = "llm"
         postprocess_ms = round((time.time() - t_post) * 1000)
     except concurrent.futures.TimeoutError:
@@ -295,36 +285,31 @@ def run_streaming_analysis(
     system_id: str = "CUSTOM",
 ):
     t0 = time.time()
-    standards = _all_standards_text(max_chars_per=1800)
-    prompt = build_reconciliation_prompt(spec_text, submittal_text, standards)
-    standards_load_ms = round((time.time() - t0) * 1000)
+    standards_load_ms = 0
     llm_call_ms = None
     postprocess_ms = 0
     provider = None
 
-    yield "event: status\ndata: Running AI reconciliation engine...\n\n"
+    yield "event: status\ndata: Running LangGraph Agent Pipeline...\n\n"
     try:
         from backend import llm as llm_module
-        from backend.llm import _extract_json
-        full_text = ""
+        from backend.orchestrator import run_pipeline
         t_llm = time.time()
-        # Same guards as the sync path: bounded pool slot + wall-clock timeout.
-        for chunk in _stream_llm_bounded(prompt, SYSTEM_PROMPT):
-            full_text += chunk
-            yield f"event: token\ndata: {json.dumps(chunk)}\n\n"
+
+        future = _submit_llm(run_pipeline, system_id, spec_text, submittal_text)
+        devs = future.result(timeout=_LLM_TIMEOUT_S)
+
         llm_call_ms = round((time.time() - t_llm) * 1000)
         provider = llm_module.FAILOVER_STATUS.get("last_successful_provider")
 
         yield "event: status\ndata: Validating deviations...\n\n"
         t_post = time.time()
-        raw = _extract_json(full_text)
-        devs = _validate_deviations(raw)
-        devs = _check_citation_faithfulness(devs, spec_text, submittal_text, standards)
         devs = _ground_findings(devs, spec_text)  # drop hallucinated requirements
-        for d in devs:
-            _enrich_cx(d, system_id)  # rule-table only — no extra LLM calls
         mode = "llm"
         postprocess_ms = round((time.time() - t_post) * 1000)
+
+        # Emulate the trace output by dumping the final JSON as a single token
+        yield f"event: token\ndata: {json.dumps(json.dumps(devs, indent=2))}\n\n"
     except Exception as exc:
         log.warning("LLM stream analysis failed, rule-based fallback: %s", exc)
         yield "event: status\ndata: AI engine unavailable — running rule-based detector...\n\n"

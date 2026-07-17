@@ -92,7 +92,7 @@ def test_deterministic_demo_is_bounded_and_non_persistent(monkeypatch) -> None:
     def provider_must_not_run(*args, **kwargs):  # noqa: ANN002, ANN003
         raise AssertionError("provider access is prohibited in deterministic demo mode")
 
-    monkeypatch.setattr("backend.llm.complete_json", provider_must_not_run)
+    monkeypatch.setattr("backend.agents.reconciliation.complete_json", provider_must_not_run)
     response = client.post(
         "/api/v1/demo/analyze",
         json={

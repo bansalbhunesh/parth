@@ -177,7 +177,7 @@ def test_job_path_leaks_no_secret(monkeypatch):
     monkeypatch.setenv("GEMINI_API_KEY", secret)
     import backend.llm as llm
     # fast-fail the LLM so the job degrades to the deterministic path instantly
-    monkeypatch.setattr(llm, "complete_json",
+    monkeypatch.setattr("backend.agents.reconciliation.complete_json",
                         lambda p, system="": (_ for _ in ()).throw(llm.LLMError("boom")))
     sub = client.post("/jobs/analyze", json=_PAYLOAD).json()
     st = _poll(sub["job_id"])

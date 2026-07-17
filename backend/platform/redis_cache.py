@@ -1,4 +1,5 @@
-"""Short-lived Redis cache and idempotency leases; never authoritative data."""
+"""Not yet wired into the running app — see PRODUCTION_BLUEPRINT.md.
+Short-lived Redis cache and idempotency leases; never authoritative data."""
 
 from __future__ import annotations
 

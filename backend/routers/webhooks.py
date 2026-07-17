@@ -12,6 +12,7 @@ from pydantic import BaseModel
 
 from backend import case_store
 from backend.api_context import _require_case
+from backend.platform.webhook_delivery import WebhookSigner
 
 router = APIRouter()
 log = logging.getLogger("pramaan.api")
@@ -24,6 +25,9 @@ class WebhookSubscribeRequest(BaseModel):
 # case secret; public analysis cannot subscribe a receiver for another case.
 SUBSCRIBED_WEBHOOKS: dict[str, list[dict]] = {}
 MAX_WEBHOOKS = 10
+
+_WEBHOOK_SECRET = os.getenv("PRAMAAN_WEBHOOK_SECRET", "dummy-secret-for-demo-purposes-only-with-at-least-32-chars")
+_SIGNER = WebhookSigner(_WEBHOOK_SECRET)
 
 
 def _resolved_webhook_addresses(url: str) -> tuple[str, ...]:
@@ -81,6 +85,8 @@ def _redact_webhook(url: str) -> str:
 def _deliver_webhooks(subscriptions: list[dict], payload: dict, slack_payload: dict) -> None:
     """POST to every subscriber (runs on a worker thread). One dead subscriber
     must never block delivery to the rest."""
+    import json
+
     import httpx
     for subscription in subscriptions:
         url = str(subscription.get("url", ""))
@@ -98,7 +104,15 @@ def _deliver_webhooks(subscriptions: list[dict], payload: dict, slack_payload: d
             if not pinned or pinned.isdisjoint(_resolved_webhook_addresses(url)):
                 log.warning("Webhook destination DNS changed; delivery dropped")
                 continue
-            httpx.post(url, json=body, timeout=2.0, follow_redirects=False)
+
+            body_bytes = json.dumps(body).encode("utf-8")
+            signature = _SIGNER.sign(body_bytes)
+            headers = {
+                "pramaan-signature": signature.header,
+                "Content-Type": "application/json"
+            }
+
+            httpx.post(url, content=body_bytes, headers=headers, timeout=2.0, follow_redirects=False)
         except Exception as exc:
             log.warning(
                 "Webhook delivery failed for %s: %s",

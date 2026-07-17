@@ -337,10 +337,10 @@ export default function AnalyzePanel() {
           </svg>
           Paste Text
         </button>
-        <button className="analyze-example-btn" onClick={loadRealSample} disabled={loading} aria-label="Load realistic deviation demo with hidden non-compliances">
+        <button className="analyze-example-btn" onClick={loadRealSample} disabled={loading} aria-label="Load deviation demo ★: realistic demo with hidden non-compliances">
           Load deviation demo ★
         </button>
-        <button className="analyze-example-btn" onClick={loadCleanSample} disabled={loading} aria-label="Load compliant demo with zero expected deviations">
+        <button className="analyze-example-btn" onClick={loadCleanSample} disabled={loading} aria-label="Load compliant demo ✓: with zero expected deviations">
           Load compliant demo ✓
         </button>
         <button className="analyze-example-btn" onClick={loadExample} disabled={loading}>

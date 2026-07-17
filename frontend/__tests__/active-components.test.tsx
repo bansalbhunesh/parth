@@ -107,7 +107,7 @@ describe("AnalyzePanel", () => {
   it("runs the realistic deviation fixture through the local rule floor", async () => {
     const user = userEvent.setup();
     render(<AnalyzePanel />);
-    await user.click(screen.getByRole("button", { name: /Load realistic deviation demo/ }));
+    await user.click(screen.getByRole("button", { name: /Load deviation demo/ }));
     await user.click(screen.getByRole("checkbox", { name: "Local Engine (Instant)" }));
     await user.click(screen.getByRole("button", { name: "Analyze for deviations" }));
     expect(await screen.findByText(/deviation(s)? found/, {}, { timeout: 2_000 })).toBeInTheDocument();
@@ -282,7 +282,7 @@ describe("AnalyzePanel", () => {
     const user = userEvent.setup();
     render(<AnalyzePanel />);
     
-    await user.click(screen.getByRole("button", { name: /Load realistic deviation demo/ }));
+    await user.click(screen.getByRole("button", { name: /Load deviation demo/ }));
     await user.click(screen.getByRole("button", { name: "Analyze for deviations" }));
     
     // While loading, the cancel button should appear

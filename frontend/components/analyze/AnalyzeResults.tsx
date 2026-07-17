@@ -1,7 +1,7 @@
 import type { UploadExtraction } from "../../lib/api";
 import AnalyzeResolutionWorkflow from "./AnalyzeResolutionWorkflow";
 import RiskRemediation from "./RiskRemediation";
-import { formatElapsed, isModelBacked, provenance, timingTitle, type AnalyzeResult } from "./model";
+import { formatElapsed, isModelBacked, provenance, resultIdentity, timingTitle, type AnalyzeResult } from "./model";
 
 interface AnalyzeResultsProps {
   result: AnalyzeResult;
@@ -90,7 +90,7 @@ export default function AnalyzeResults({ result, extraction, specText, submittal
       )}
 
       {result.deviations.length > 0 && specText && submittalText ? (
-        <AnalyzeResolutionWorkflow result={result} specText={specText} submittalText={submittalText} />
+        <AnalyzeResolutionWorkflow key={resultIdentity(result)} result={result} specText={specText} submittalText={submittalText} />
       ) : result.deviations.length > 0 ? (
         <p className="resolution-unavailable">
           To demonstrate verified closure, switch to Paste Text so the revised vendor document can be re-analyzed in this browser.

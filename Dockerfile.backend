@@ -22,7 +22,8 @@ COPY data/ data/
 # Frozen benchmark reports only (52K) — /metrics reads benchmark_card.json to
 # surface the headline result. The bulk of benchmarks/ (pairs/runs) is not shipped.
 COPY benchmarks/ps4_external_v1/reports/ benchmarks/ps4_external_v1/reports/
-RUN chown -R pramaan:pramaan /app
+# Only writable directories need ownership; app source stays root-owned/read-only.
+RUN mkdir -p /app/data /tmp/pramaan && chown -R pramaan:pramaan /app/data /tmp/pramaan
 
 USER pramaan
 EXPOSE 8000

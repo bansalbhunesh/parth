@@ -57,7 +57,7 @@ benchmarks, and breadth support the loop; they do not replace it.
 5. Put timeouts and bounded retries around external providers. Cancellation must
    stop client reads and should stop server work where the runtime permits it.
 6. Keep deterministic validation and workflow state transitions inspectable.
-   Provider failover improves availability, not benchmark equivalence.
+   Provider failover increases availability, not benchmark equivalence.
 7. Make state-changing judge flows explicit: finding persisted, owner accepted,
    RFI issued, response verified, audit read back, demo record deletable.
 8. Keep health responses product-correct and non-secret. Separate product name,

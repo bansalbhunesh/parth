@@ -337,10 +337,10 @@ export default function AnalyzePanel() {
           </svg>
           Paste Text
         </button>
-        <button className="analyze-example-btn" onClick={loadRealSample} disabled={loading} title="A realistic vendor datasheet vs design basis — natural prose, not the structured corpus. Catches a hidden 2N→N+1 and 10min→8min non-compliance.">
+        <button className="analyze-example-btn" onClick={loadRealSample} disabled={loading} aria-label="Load realistic deviation demo with hidden non-compliances">
           Load deviation demo ★
         </button>
-        <button className="analyze-example-btn" onClick={loadCleanSample} disabled={loading} title="Same design basis, a fully compliant submittal. The correct answer is zero deviations — it shows Pramaan does not false-alarm on a compliant document.">
+        <button className="analyze-example-btn" onClick={loadCleanSample} disabled={loading} aria-label="Load compliant demo with zero expected deviations">
           Load compliant demo ✓
         </button>
         <button className="analyze-example-btn" onClick={loadExample} disabled={loading}>
@@ -350,7 +350,7 @@ export default function AnalyzePanel() {
           <input
             type="checkbox"
             checked={localMode}
-            onChange={(e) => setLocalMode(e.target.checked)}
+            onChange={(e) => { setLocalMode(e.target.checked); if (e.target.checked && mode === "pdf") setMode("text"); }}
             id="local-mode-chk"
           />
           <span>Local Engine (Instant)</span>

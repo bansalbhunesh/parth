@@ -96,8 +96,8 @@ def _finding_update_values(finding: dict, req: UpdateFindingRequest) -> tuple[st
     current_status = finding["status"]
     next_status = req.status or current_status
     _validate_finding_transition(current_status, next_status)
-    next_owner = (req.owner if req.owner is not None else finding["owner"]).strip()
-    next_note = (req.resolution_note if req.resolution_note is not None else finding["resolution_note"]).strip()
+    next_owner = (req.owner if req.owner is not None else finding["owner"] or "").strip()
+    next_note = (req.resolution_note if req.resolution_note is not None else finding["resolution_note"] or "").strip()
     _validate_finding_evidence(next_status, next_owner, next_note)
     return next_status, next_owner, next_note
 

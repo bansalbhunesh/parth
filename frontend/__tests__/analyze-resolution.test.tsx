@@ -99,6 +99,7 @@ describe("AnalyzeResolutionWorkflow", () => {
       "Runtime shall be 10 min.",
       expect.stringContaining("REVISION C"),
       "UPS",
+      expect.any(AbortSignal),
     );
     expect(updateRfi).toHaveBeenCalledTimes(2);
     expect(updateFinding).toHaveBeenLastCalledWith(credentials, "finding-1", expect.objectContaining({ status: "resolved" }));
@@ -174,5 +175,19 @@ describe("AnalyzeResolutionWorkflow", () => {
     await user.click(screen.getByRole("button", { name: "Persist the highest-priority finding" }));
     await user.click(await screen.findByRole("button", { name: "Delete this demo case and restart" }));
     expect(await screen.findByRole("button", { name: "Persist the highest-priority finding" })).toBeInTheDocument();
+  });
+
+  it("does not throw when unmounted during an async advance", async () => {
+    // Make createCase hang so the advance is in-flight when we unmount
+    let resolveCreate!: (value: typeof credentials) => void;
+    vi.mocked(createCase).mockImplementation(() => new Promise((resolve) => { resolveCreate = resolve; }));
+    const user = userEvent.setup();
+    const { unmount } = render(<AnalyzeResolutionWorkflow result={RESULT} specText="spec" submittalText="Runtime is 8 min." />);
+    await user.click(screen.getByRole("button", { name: "Persist the highest-priority finding" }));
+    // Unmount while advance() is still awaiting createCase
+    unmount();
+    // Resolve the hanging promise after unmount — should not throw
+    resolveCreate(credentials);
+    // If we reach here without an unhandled rejection, the abort guard works.
   });
 });

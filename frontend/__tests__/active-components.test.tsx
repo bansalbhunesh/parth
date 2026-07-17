@@ -107,7 +107,7 @@ describe("AnalyzePanel", () => {
   it("runs the realistic deviation fixture through the local rule floor", async () => {
     const user = userEvent.setup();
     render(<AnalyzePanel />);
-    await user.click(screen.getByRole("button", { name: /Load deviation demo/ }));
+    await user.click(screen.getByRole("button", { name: /Load realistic deviation demo/ }));
     await user.click(screen.getByRole("checkbox", { name: "Local Engine (Instant)" }));
     await user.click(screen.getByRole("button", { name: "Analyze for deviations" }));
     expect(await screen.findByText(/deviation(s)? found/, {}, { timeout: 2_000 })).toBeInTheDocument();
@@ -255,17 +255,23 @@ describe("AnalyzePanel", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Upload stream rejected");
   });
 
-  it("does not silently run the local text engine against uploaded files", async () => {
+  it("automatically switches to text mode when enabling local engine while in pdf mode", async () => {
     const user = userEvent.setup();
     render(<AnalyzePanel />);
     const inputs = document.querySelectorAll<HTMLInputElement>('input[type="file"]');
     await user.upload(inputs[0], new File(["spec"], "spec.pdf", { type: "application/pdf" }));
     await user.upload(inputs[1], new File(["sub"], "sub.pdf", { type: "application/pdf" }));
+    
+    // Currently in PDF mode, 'Upload & Analyze' is visible
+    expect(screen.getByRole("button", { name: "Upload & Analyze" })).toBeInTheDocument();
+    
+    // Toggle Local Engine
     await user.click(screen.getByRole("checkbox", { name: "Local Engine (Instant)" }));
-    await user.click(screen.getByRole("button", { name: "Upload & Analyze" }));
-
-    expect(await screen.findByRole("alert")).toHaveTextContent(/runs pasted text only/i);
-    expect(mockedStreamUploadAnalyze).not.toHaveBeenCalled();
+    
+    // Should automatically switch to Text mode
+    expect(screen.getByRole("button", { name: "Paste Text" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Analyze for deviations" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Upload & Analyze" })).not.toBeInTheDocument();
   });
 });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { analyzeOnce } from "../../lib/api";
 import {
   addFinding,
@@ -64,6 +64,7 @@ const STEPS: Array<{ stage: Exclude<WorkflowStage, "idle">; label: string; note:
 ];
 
 function stageIndex(stage: WorkflowStage): number {
+  if (stage === "idle") return -1; // No step is complete before the workflow starts.
   return STEPS.findIndex((step) => step.stage === stage);
 }
 
@@ -80,6 +81,11 @@ export default function AnalyzeResolutionWorkflow({
   }));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => { abortRef.current?.abort(); };
+  }, []);
 
   useEffect(() => {
     try {
@@ -100,6 +106,9 @@ export default function AnalyzeResolutionWorkflow({
   };
 
   async function advance() {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
     setBusy(true);
     setError("");
     try {
@@ -136,6 +145,7 @@ export default function AnalyzeResolutionWorkflow({
           specText,
           workflow.revisedSubmittal,
           result.system || selected.component.split("-", 1)[0] || "CUSTOM",
+          controller.signal,
         );
         if (!findingCleared(verification, selected)) {
           throw new Error("The revised submittal still fails this requirement. Correct it and re-run verification.");
@@ -163,9 +173,10 @@ export default function AnalyzeResolutionWorkflow({
         });
       }
     } catch (caught) {
+      if (controller.signal.aborted) return;
       setError(caught instanceof Error ? caught.message : "The resolution workflow could not continue.");
     } finally {
-      setBusy(false);
+      if (!controller.signal.aborted) setBusy(false);
     }
   }
 

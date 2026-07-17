@@ -13,7 +13,7 @@ export const PRODUCT_CLAIMS = {
     systems: 17,
   },
   verification: {
-    backendTests: 892,
+    backendTests: 893,
     frontendTests: 50,
     browserJourneys: 155,
   },

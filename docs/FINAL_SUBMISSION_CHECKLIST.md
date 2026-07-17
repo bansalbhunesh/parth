@@ -66,7 +66,7 @@
 
 Run from repo root.
 
-- [ ] **Tests** — `python -m pytest tests/ -q` → 892 passed.
+- [ ] **Tests** — `python -m pytest tests/ -q` → 893 passed.
 - [ ] **Lint** — `python -m ruff check .` → clean.
 - [ ] **Mandatory placeholders** — `python scripts/check_submission_ready.py` → green only after the pitch-video URL is public and logged-out accessible.
 - [ ] **Benchmark integrity untouched** — `git status --porcelain benchmarks/` → empty (labels/scores/reviewer files pristine).

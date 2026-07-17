@@ -16,11 +16,11 @@ for different reasons:
 
 | Threat | Why it can beat us in a judge room | Pramaan's answer |
 |---|---|---|
-| [`DKDVE/et-hackathon`](https://github.com/DKDVE/et-hackathon) | The strongest repository-engineering rival in the current all-track census: a broad operational-context product, substantial test organization, and multiple workflow files. Its inspected exact head still had 2/20 frontend tests failing and a red CI run, so repository breadth is not the same as a passing release. | Keep the smaller proof path fully green and borrow its strong operational-context organization without importing unverified surface area. |
-| [`suryanshvermaa/DCBrain`](https://github.com/suryanshvermaa/DCBrain) | The closest direct PS4 feature rival: a 16-page surface spanning compliance, schedule/P6, procurement, RFIs, analytics, and integrations. At the inspected exact head, workflows were disabled and the frontend build, typecheck, and only test did not pass. | Match the useful schedule/procurement/RFI information architecture only where each route can ship with contracts, authorization, accessibility, browser checks, and a passing build. |
-| [`sanskar9999/prahari`](https://github.com/sanskar9999/prahari) | Public-safety/fraud story is emotionally immediate; its current README links a phone-capable GitHub Pages demo, documents a 3–4 minute guided flow, and the repository now includes a GitHub Pages deployment workflow. It does not currently document a test suite. | We cannot out-drama digital-arrest scams. We out-verify: backend + frontend deploys, 858 backend tests, 43 frontend tests, 155 browser journeys, a frozen benchmark, claims register, explicit provenance, and no hidden eval. |
-| [`Agent-A345/PlantIQ`](https://github.com/Agent-A345/PlantIQ) | Industrial domain is close to ours; the current public repository documents 5 specialist agents, 22+ implemented features, 6 real government PDFs, a knowledge graph, Docker, and a useful honest disclosure that operating telemetry is simulated. It does not currently document a public deployment or test suite. | We avoid feature fog: one LLM reasoning core, deterministic services, a benchmark card, CI, and a judge path that proves one consequential workflow end to end. |
-| [`Exyons/ET-GenAI-Hackathon`](https://github.com/Exyons/ET-GenAI-Hackathon) | Agriculture has broad social impact; the current repository links a live Vercel frontend and documents multilingual web/SMS/WhatsApp access plus a drone simulation. It does not currently document a test suite. | We make the business consequence concrete: a vendor deviation becomes a dated commissioning failure and an owned resolution, with citations and reproducible checks. |
+| **Competitor A** (Operational focus) | The strongest repository-engineering rival in the current all-track census: a broad operational-context product, substantial test organization, and multiple workflow files. Its inspected exact head still had 2/20 frontend tests failing and a red CI run, so repository breadth is not the same as a passing release. | Keep the smaller proof path fully green and borrow its strong operational-context organization without importing unverified surface area. |
+| **Competitor B** (Direct PS4 rival) | The closest direct PS4 feature rival: a 16-page surface spanning compliance, schedule/P6, procurement, RFIs, analytics, and integrations. At the inspected exact head, workflows were disabled and the frontend build, typecheck, and only test did not pass. | Match the useful schedule/procurement/RFI information architecture only where each route can ship with contracts, authorization, accessibility, browser checks, and a passing build. |
+| **Competitor C** (Public safety narrative) | Public-safety/fraud story is emotionally immediate; its current README links a phone-capable GitHub Pages demo, documents a 3–4 minute guided flow, and the repository now includes a GitHub Pages deployment workflow. It does not currently document a test suite. | We cannot out-drama digital-arrest scams. We out-verify: backend + frontend deploys, 858 backend tests, 43 frontend tests, 155 browser journeys, a frozen benchmark, claims register, explicit provenance, and no hidden eval. |
+| **Competitor D** (Industrial agents) | Industrial domain is close to ours; the current public repository documents 5 specialist agents, 22+ implemented features, 6 real government PDFs, a knowledge graph, Docker, and a useful honest disclosure that operating telemetry is simulated. It does not currently document a public deployment or test suite. | We avoid feature fog: one LLM reasoning core, deterministic services, a benchmark card, CI, and a judge path that proves one consequential workflow end to end. |
+| **Competitor E** (Agriculture) | Agriculture has broad social impact; the current repository links a live Vercel frontend and documents multilingual web/SMS/WhatsApp access plus a drone simulation. It does not currently document a test suite. | We make the business consequence concrete: a vendor deviation becomes a dated commissioning failure and an owned resolution, with citations and reproducible checks. |
 
 Do **not** claim "best overall all-track project." The defensible claim is:
 **Pramaan ranked first in the dated public repository-evidence index, and the
@@ -32,8 +32,8 @@ measure, or product ranking.
 
 The earlier sweeps are retained in git history, but their aggregate
 counts are no longer used as current evidence. Public repositories changed:
-Prahari now visibly contains a GitHub Actions deployment workflow, DKDVE is the
-strongest repository-level engineering rival, and DCBrain has become a material
+Competitor C now visibly contains a GitHub Actions deployment workflow, Competitor A is the
+strongest repository-level engineering rival, and Competitor B has become a material
 PS4 product-surface rival. Commit counts, deployment availability, dependency
 advisories, and documentation continue to move, so exact-head observations are
 dated rather than presented as permanent facts.
@@ -46,22 +46,22 @@ boundaries; it is not proof of overall competition rank.
 
 ### Patterns worth adopting from the fresh scan
 
-1. **A guided story beats a feature index.** Prahari documents one timed demo
+1. **A guided story beats a feature index.** Competitor C documents one timed demo
    sequence. Pramaan now uses a 90-second evidence → consequence → owner → RFI →
    closure journey instead of a 22-section dashboard.
-2. **Honest data labels create trust.** PlantIQ explicitly separates real
+2. **Honest data labels create trust.** Competitor D explicitly separates real
    regulatory documents from simulated telemetry. Pramaan now keeps live,
    deterministic, bundled-reference, benchmark, and scenario states visually
    distinct.
-3. **Reach matters, but only where it serves the user.** Kisan AI's multi-channel
+3. **Reach matters, but only where it serves the user.** Competitor E's multi-channel
    story is compelling because it matches low-connectivity users. Pramaan should
    not imitate channel breadth; its equivalent is a printable/exportable evidence
    record and an API-backed case workflow for CxAs and owner's engineers.
-4. **Operational context deserves an explicit object model.** DKDVE's strongest
+4. **Operational context deserves an explicit object model.** Competitor A's strongest
    reusable pattern is the organization of context around workflows. Pramaan
    should apply that discipline to cases, findings, RFIs, commissioning tests,
    and audit events without multiplying product routes merely to match breadth.
-5. **Feature breadth without gates is negative evidence.** DCBrain's information
+5. **Feature breadth without gates is negative evidence.** Competitor B's information
    architecture is useful competitive research, but its inspected build/type/test
    state reinforces Pramaan's rule: a route counts only after its contracts,
    authorization, accessibility, and browser behavior pass.

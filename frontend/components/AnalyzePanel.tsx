@@ -155,6 +155,19 @@ export default function AnalyzePanel() {
     setSpecPreview("");
     setSubPreview("");
     setExtraction(null);
+    
+    // Render free-tier cold-start UX gracefully
+    setTimeout(() => {
+      if (!controller.signal.aborted) {
+        setStatus((prev) => {
+          if (prev === "Connecting to analysis engine..." || prev === "Uploading documents...") {
+            return "Waking up the analysis engine (free-tier cold start, ~15-30s)...";
+          }
+          return prev;
+        });
+      }
+    }, 4000);
+    
     return controller;
   };
 

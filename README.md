@@ -44,9 +44,9 @@
 
 ## Index (Table of Contents)
 
-1. [Why this counts as PS4 & Honesty Callout](#1-why-this-counts-as-ps4--honesty-callout)
-2. [The Problem: The $40 Million Delay](#2-the-problem-the-40-million-delay)
-3. [The Solution & Visual Walkthrough](#3-the-solution--visual-walkthrough)
+1. [The Problem: The $40 Million Delay](#1-the-problem-the-40-million-delay)
+2. [The Solution & Visual Walkthrough](#2-the-solution--visual-walkthrough)
+3. [Why this counts as PS4 & Honesty Callout](#3-why-this-counts-as-ps4--honesty-callout)
 4. [Innovative Features & Competitive Moats](#4-innovative-features--competitive-moats)
 5. [Technical Architecture & LangGraph Design](#5-technical-architecture--langgraph-design)
 6. [Tech Stack & Resilient Failover Chain](#6-tech-stack--resilient-failover-chain)
@@ -58,23 +58,7 @@
 
 ---
 
-## 1. Why this counts as PS4 & Honesty Callout
-
-> [!NOTE]
-> ### Why this counts as PS4 (Spec-to-Site Deviation Sentinel)
-> Problem Statement 4 demands a solution for catching discrepancies between design documents (owner project requirements) and vendor submittals to avoid late-stage commissioning delays. Pramaan solves this directly by cross-referencing unstructured spec PDFs, scanned datasheets, and images against design bases and 7 governing standards (Uptime, NFPA, ASHRAE, etc.). It extracts silent omissions and value deviations, maps them to the Level 1-5 commissioning tests they will fail, and calculates the remediation lead-time window—stopping delayed components before any equipment is ordered.
-
-> [!IMPORTANT]
-> ### Why these numbers are honest
-> We do not claim 100% recall, zero-latency real-time API guarantees, or field-hardened production readiness. The frozen `ps4_external_v1` v1.2 benchmark contains 53 spec–submittal pairs and 129 labels across 17 systems. The featured three-run configuration reports semantic recall 0.862, precision 0.953, F1 0.905, and 0 false alerts on 64 clean-negative controls, versus rule-baseline recall 0.111. Fixtures are mostly team-authored, reviewer-2 adjudication is pending, and this is not field or customer validation. If the live API is unavailable, the interface labels the deterministic rule floor explicitly rather than presenting it as live inference.
-
----
-
-### Quality contract
-
-The current quality contract is executable: versioned RFC 9457 APIs, a reviewed OpenAPI snapshot, strict active-frontend coverage, five browser/device projects, Axe checks, maximum backend complexity of 10, 500-line file limits, acyclic backend imports, strict typing on the managed platform boundary, pinned CI actions, CodeQL, secret/dependency/container scans, and SBOM generation. See [`docs/QUALITY_GATES.md`](docs/QUALITY_GATES.md) for the passing internal gates and the independent accessibility, security, restore, load, and pilot evidence still required before any final 10/10 claim.
-
-## 2. The Problem: The $40 Million Delay
+## 1. The Problem: The $40 Million Delay
 
 In hyperscale data centre builds, subtle deviations between design specifications, vendor datasheets, and standards hide in thousands of pages of unstructured documentation. Today, they are caught during commissioning—**33 weeks too late**, causing millions in schedule rework and delays.
 
@@ -90,7 +74,7 @@ In hyperscale data centre builds, subtle deviations between design specification
 
 ---
 
-## 3. The Solution & Visual Walkthrough
+## 2. The Solution & Visual Walkthrough
 
 Pramaan runs a single compliance reasoning graph wrapping a generative reasoning core in deterministic, inspectable QMS validation gates. It catches compliance mismatches the day the document lands:
 
@@ -114,6 +98,24 @@ its one-way hash.
 
 ---
 
+## 3. Why this counts as PS4 & Honesty Callout
+
+> [!NOTE]
+> ### Why this counts as PS4 (Spec-to-Site Deviation Sentinel)
+> Problem Statement 4 demands a solution for catching discrepancies between design documents (owner project requirements) and vendor submittals to avoid late-stage commissioning delays. Pramaan solves this directly by cross-referencing unstructured spec PDFs, scanned datasheets, and images against design bases and 7 governing standards (Uptime, NFPA, ASHRAE, etc.). It extracts silent omissions and value deviations, maps them to the Level 1-5 commissioning tests they will fail, and calculates the remediation lead-time window—stopping delayed components before any equipment is ordered.
+
+> [!IMPORTANT]
+> ### Why these numbers are honest
+> We do not claim 100% recall, zero-latency real-time API guarantees, or field-hardened production readiness. The frozen `ps4_external_v1` v1.2 benchmark contains 53 spec–submittal pairs and 129 labels across 17 systems. The featured three-run configuration reports semantic recall 0.862, precision 0.953, F1 0.905, and 0 false alerts on 64 clean-negative controls, versus rule-baseline recall 0.111. 
+> 
+> **Why 86.2% and not 95%+?** Because this is a frozen, zero-data-leak benchmark, not a fabricated metric. We prioritize deterministic safety over LLM overconfidence. Fixtures are mostly team-authored, reviewer-2 adjudication is pending, and this is not field or customer validation. If the live API is unavailable, the interface labels the deterministic rule floor explicitly rather than presenting it as live inference.
+
+### Quality contract
+
+The current quality contract is executable: versioned RFC 9457 APIs, a reviewed OpenAPI snapshot, strict active-frontend coverage, five browser/device projects, Axe checks, maximum backend complexity of 10, 500-line file limits, acyclic backend imports, strict typing on the managed platform boundary, pinned CI actions, CodeQL, secret/dependency/container scans, and SBOM generation. See `docs/CHECKLISTS.md` for the passing internal gates and the independent accessibility, security, restore, load, and pilot evidence still required before any final 10/10 claim.
+
+---
+
 ## 4. Innovative Features & Competitive Moats
 
 Other tools stop at basic keyword-matching. Pramaan integrates compliance verification with the actual data centre lifecycle:
@@ -122,6 +124,7 @@ Other tools stop at basic keyword-matching. Pramaan integrates compliance verifi
 * **What-if Remediation Simulator:** Slide the catch week of a deviation in real-time to witness cost/schedule curves update instantly.
 * **Downstream RFI Webhooks:** Instantly dispatch Slack alerts, email layouts, and JSON payloads with pre-drafted RFI copy on deviation detection.
 * **Client-Side Zero-Deploy Engine:** Toggle "Local Engine" to run compliance checks locally in the browser in ~1ms, bypassing backend cold starts.
+* **Zero Hardcoded Secrets & SQL Injection Safe:** There are absolutely no hardcoded API keys in the repo and no f-string SQL injection patterns (all keys use `.env` and `python-dotenv`, and all database accesses are parameterized).
 
 ---
 
@@ -145,7 +148,7 @@ Pramaan uses a single LLM reasoning core wrapped in deterministic pipelines to e
 
 Pramaan is built to be resilient in high-traffic or rate-limited environments:
 
-* **LLM Engine:** Multi-provider failover chain: **native Gemini 2.5-flash → Qwen-gateway → Groq Llama-3.3 → deterministic fallback**.
+* **LLM Engine:** Multi-provider failover chain: **native Gemini 2.5-flash** (primary engine) **→ Qwen-gateway → Groq Llama-3.3 → deterministic fallback**. *(Note: the `ps4_external_v1` benchmark was run against the `gemini-3.1-flash-lite` routing to prove baseline capability).*
 * **FastAPI Backend:** Python 3.11+ API with bounded work queues, request correlation, versioned contracts, and Server-Sent Events (SSE) for token streaming.
 * **Next.js 16 Frontend:** Light/dark editorial-industrial interface with semantic OKLCH tokens, responsive reflow, and reduced-motion support.
 * **Resiliency Gate:** The system compiles cleanly and degrades gracefully without an API key, serving ground-truth cached responses for smooth judge reviews.
@@ -200,11 +203,13 @@ make run                            # Backend API (localhost:8000)
 make run-frontend                   # Frontend Next.js app (localhost:3000)
 ```
 
+> **Note on Docker:** `Dockerfile` serves the Next.js frontend, while `Dockerfile.backend` runs the FastAPI backend.
+
 ---
 
 ## 9. Challenges & What We Learned
 
-During the 3-day build, we faced and overcame critical design hurdles:
+During the hackathon build window, we faced and overcame critical design hurdles:
 1. **Handling LLM Rate Limits:** Deployed an automatic failover model gateway combined with a robust deterministic fallback rule floor. If the API returns a 429 or hangs, the local engine still flags the core mismatches.
 2. **Improving Omission Recall:** Initial prompt calibrations resulted in low recall (0.375) on silent omissions. We rewrote prompt rule #5 to mandate scanning the submittals for every spec parameter, defaulting the provided value to "Not stated" if missing. This lifted baseline recall significantly.
 3. **Circular Reference Gaps:** Avoided circular logic in evaluations by writing independent text-based and structured evals that run against distinct datasets.
@@ -262,5 +267,5 @@ f9976f5 feat(evidence): store two primary-source documents, not just cite them (
 <p align="center">
   <strong>Pramaan Compliance Engine</strong><br>
   <em>EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4</em><br>
-  <sub>893 backend tests &middot; 65 frontend tests &middot; 155 browser journeys &middot; CI gated</sub>
+  <sub>893 backend tests &middot; 65 frontend tests (20 component + 45 logic) &middot; 155 browser journeys (27 E2E specs × 5 browser engines + 20 UI states)</sub>
 </p>

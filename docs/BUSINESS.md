@@ -79,6 +79,38 @@ early they caught it. What changed here is not the product; it's refusing to
 present the size of the industry's risk as the size of the product's proven
 value.
 
+### The in-app scenario, reconciled (₹, scenario — not a measured saving)
+
+The product itself shows a deterministic single-deviation scenario on
+`/war-room` (demo project Meghdoot, deviation DEV-001 — UPS battery autonomy),
+computed live by `/projects/{id}/remediation/{dev}` under one stated
+assumption: **₹2 crore (200 lakh) per week of ready-for-service slip**.
+
+| Catch moment | Week | Modeled slip | Modeled cost |
+|---|---:|---:|---:|
+| Design review | 4 | 6 wk | ₹12 cr |
+| **Pramaan, at submittal review** | **11** | **13 wk** | **₹26 cr** |
+| Commissioning discovery | 38 | 40 wk | ₹80 cr |
+
+**Avoided by catching this one deviation at week 11 instead of week 38:
+27 weeks ≈ ₹54 crore** — in the scenario, under the stated assumption.
+
+**Is ₹2 cr/week honest?** Cross-checking against §1's cited lease benchmarks:
+$180/kW·mo on a 50 MW build ≈ ₹17 cr/week of gross revenue at risk; typical
+Indian colocation rates ($80–110/kW·mo) give ₹8–11 cr/week; applying §2's
+25–50% contribution-margin haircut yields a defensible band of roughly
+**₹2–5 cr per slip week**. The app's ₹2 cr/week sits at the *bottom* of that
+band — a deliberately conservative conversion, not an inflated one.
+
+**How this relates to §2:** the in-app number is the *deterministic,
+single-deviation* view — the "months avoided × margin at risk" term shown for
+one catch, before probability weighting. §2 is the honest per-project expected
+value across all the probabilities (prevalence, incremental recall, adoption,
+critical-path odds). Both are labeled scenarios; neither is a measured
+customer saving. Against a $100–500K per-project licence, the base-case
+expected value clears **~3.2×** (§7) — and the low case is negative, which we
+say out loud.
+
 ## 3. Market
 
 India is one of the fastest-growing data-centre markets in the world. Three

@@ -751,8 +751,16 @@
     <div class="card"><div class="card-value green">Week 11</div><div class="card-label">caught at submittal review</div></div>
     <div class="card"><div class="card-value accent">27 wk</div><div class="card-label">lead time on the hero UPS deviation <span class="ev-tag ev-scenario">scenario</span></div></div>
   </div>
-  <p class="fade-up" style="color:var(--muted); font-size:0.84rem; margin-top:22px; max-width:860px; text-align:center;">
-    Any cost figure in the app is an explicitly-labelled illustrative scenario under stated assumptions — <strong>not</strong> a measured customer ROI. Manual-hours reduction is not yet measured.
+  <table class="fade-up" style="max-width:880px; margin-top:20px; font-size:0.88rem;">
+    <tr><th>One deviation (DEV-001), computed live in the app</th><th style="text-align:right;">Modeled slip</th><th style="text-align:right;">At ₹2 cr / slip-week</th></tr>
+    <tr><td>Discovered at commissioning (week 38)</td><td style="text-align:right; font-family:var(--mono);">40 wk</td><td style="text-align:right; font-family:var(--mono);" class="red">₹80 cr</td></tr>
+    <tr><td>Caught by Pramaan at submittal review (week 11)</td><td style="text-align:right; font-family:var(--mono);">13 wk</td><td style="text-align:right; font-family:var(--mono);">₹26 cr</td></tr>
+    <tr><td><strong>Avoided — this single catch</strong> <span class="ev-tag ev-scenario">scenario</span></td><td style="text-align:right; font-family:var(--mono);"><strong>27 wk</strong></td><td style="text-align:right; font-family:var(--mono);" class="green"><strong>₹54 cr</strong></td></tr>
+  </table>
+  <p class="fade-up" style="color:var(--muted); font-size:0.84rem; margin-top:16px; max-width:920px; text-align:center;">
+    ₹2 cr/week is the app's stated, <strong>conservative</strong> assumption — cited lease benchmarks put the band at ₹2–5 cr per slip-week (docs/BUSINESS.md).
+    Against a $100–500K per-project licence, our probability-weighted model clears <strong class="green">~3.2× in the base case</strong> — and is
+    <strong class="red">negative in the low case, which we say out loud</strong>. Not a measured customer ROI.
   </p>
 </div>
 

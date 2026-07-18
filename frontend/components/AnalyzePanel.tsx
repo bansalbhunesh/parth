@@ -139,9 +139,7 @@ export default function AnalyzePanel() {
       ? extraction.submittal.warning ?? extraction.spec.warning
       : null;
 
-  const canAnalyzeText = spec.length >= 10 && submittal.length >= 10;
   const canAnalyzePdf = specFile !== null && submittalFile !== null;
-  const canAnalyze = mode === "text" ? canAnalyzeText : canAnalyzePdf;
 
   const resetState = (): AbortController => {
     abortRef.current?.abort();

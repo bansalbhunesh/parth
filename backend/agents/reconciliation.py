@@ -376,7 +376,13 @@ def reconcile_system_at(base, sys_id: str, standards_text: str, with_cx: bool = 
     return devs
 
 
-def reconcile_system(sys_id: str, standards_text: str, feedback: str = None, spec_text: str = None, submittal_text: str = None):
+def reconcile_system(
+    sys_id: str,
+    standards_text: str,
+    feedback: str = None,
+    spec_text: str = None,
+    submittal_text: str = None
+):
     return reconcile_system_at(CORPUS, sys_id, standards_text, with_cx=True,
                                feedback=feedback, spec_text=spec_text, submittal_text=submittal_text)
 

@@ -62,8 +62,7 @@ test.describe("Live analysis — paste text", () => {
   test("shows a friendly error, not a crash, for an empty submission", async ({ page }) => {
     await page.goto("/judge");
     await page.getByRole("button", { name: "Paste Text" }).click();
-    // Analyze button is disabled with empty inputs — assert that directly
-    // rather than clicking a disabled control.
-    await expect(page.getByRole("button", { name: "Analyze for deviations" })).toBeDisabled();
+    await page.getByRole("button", { name: "Analyze for deviations" }).click();
+    await expect(page.getByText("Both spec and submittal must be at least 10 characters.")).toBeVisible();
   });
 });

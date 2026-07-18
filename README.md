@@ -98,6 +98,19 @@ are labelled **Verified cache replay**; the UI never calls a replay a fresh mode
 request. The case secret remains in the browser tab while the server stores only
 its one-way hash.
 
+### Platform showcase (live captures, 2026-07-18)
+
+| The 90-second proof | The decision brief |
+|---|---|
+| <img src="docs/screenshots/judge_systemic_risk.png" alt="Judge Mode after Analyze: live LLM reasoning chip (16.7s), systemic-risk panel with FIX THIS FIRST, and the 2N-to-N+1 UPS finding with standard, Cx-test, and lead-time chips" width="480"> | <img src="docs/screenshots/war_room_brief.png" alt="Intervention brief: 16.9-week modeled ready-for-service slip, 27-week timing consequence, and the long-lead watch table with per-shipment delivery risk" width="480"> |
+| [Judge Mode](https://parth-tan.vercel.app/judge) — live model reasoning, systemic compound risk, and a **Fix this first** action, each with its provenance chip. | [Intervention brief](https://parth-tan.vercel.app/war-room) — schedule exposure, the catch-week consequence, and the supply conditions that can close the window. |
+
+<p align="center">
+  <img src="docs/screenshots/home_mid.png" alt="A real case, not a staged animation: finding opened, owner assigned, RFI issued, finding closed — followed by the commissioning-aware register" width="900">
+  <br>
+  <sub>The resolution loop is a real protected case against the live API — finding → owner → RFI → closure — with the audit retained, then a register that reviews by consequence, not document order.</sub>
+</p>
+
 - **Catches Silent Omissions:** Flagging when a required design clause (like safety clearances or seismic ratings) is completely absent from a vendor submittal.
 - **Performs Derived Calculations:** Tracing implicit math (e.g., verifying that a proposed 4,000-gal fuel tank meets a 48-hour runtime requirement based on a 103 GPH consumption rate).
 - **Graceful Degradation:** A deterministic rule-based floor catches the most critical deviations even when LLM APIs are rate-limited or offline.

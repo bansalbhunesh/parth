@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 680" font-family="'Cascadia Mono', Consolas, 'SF Mono', Menlo, 'DejaVu Sans Mono', monospace">
+  <!-- Pramaan architecture — drawn as an engineering sheet, not a dashboard.
+       Palette mirrors the product: drafting-film paper, blue-black ink,
+       review-red accent. Single generative core inside deterministic gates. -->
+
+  <!-- Sheet -->
+  <rect x="0" y="0" width="1240" height="680" fill="#161a21"/>
+  <rect x="10" y="10" width="1220" height="660" fill="none" stroke="#46505f" stroke-width="1.5"/>
+  <rect x="16" y="16" width="1208" height="648" fill="none" stroke="#313845" stroke-width="1"/>
+
+  <!-- Title block -->
+  <text x="44" y="52" font-family="Georgia, 'Times New Roman', serif" font-size="22" fill="#e9ebef">Pramaan — compliance reasoning graph</text>
+  <line x1="828" y1="30" x2="828" y2="58" stroke="#313845"/>
+  <text x="848" y="48" font-size="10" letter-spacing="1.5" fill="#a2aab6">DWG PR-ARCH-01</text>
+  <line x1="978" y1="30" x2="978" y2="58" stroke="#313845"/>
+  <text x="998" y="48" font-size="10" letter-spacing="1.5" fill="#a2aab6">REV C</text>
+  <line x1="1058" y1="30" x2="1058" y2="58" stroke="#313845"/>
+  <text x="1078" y="48" font-size="10" letter-spacing="1.5" fill="#d96f52">FOR REVIEW</text>
+  <line x1="28" y1="74" x2="1212" y2="74" stroke="#46505f" stroke-width="1"/>
+
+  <!-- Bounded cycles label + arcs above the LLM core -->
+  <text x="800" y="102" text-anchor="middle" font-size="9.5" letter-spacing="1" fill="#a2aab6">BOUNDED CYCLES ×2 — RETRIEVE · CRITIQUE</text>
+  <path d="M 875 132 C 890 106 710 106 725 132" fill="none" stroke="#a2aab6" stroke-width="1" stroke-dasharray="4 3"/>
+  <polygon points="722,128 725,136 730,129" fill="#a2aab6"/>
+  <path d="M 855 132 C 866 114 734 114 745 132" fill="none" stroke="#a2aab6" stroke-width="1" stroke-dasharray="4 3"/>
+  <polygon points="742,128 745,136 750,129" fill="#a2aab6"/>
+
+  <!-- Input documents -->
+  <g>
+    <path d="M 44 122 L 154 122 L 164 132 L 164 186 L 44 186 Z" fill="#1d222b" stroke="#46505f"/>
+    <path d="M 154 122 L 154 132 L 164 132" fill="none" stroke="#46505f"/>
+    <text x="104" y="150" text-anchor="middle" font-size="9.5" letter-spacing="1" fill="#e9ebef">DESIGN BASIS</text>
+    <text x="104" y="168" text-anchor="middle" font-size="8.5" fill="#7f8794">spec · issued for construction</text>
+  </g>
+  <g>
+    <path d="M 44 206 L 154 206 L 164 216 L 164 270 L 44 270 Z" fill="#1d222b" stroke="#46505f"/>
+    <path d="M 154 206 L 154 216 L 164 216" fill="none" stroke="#46505f"/>
+    <text x="104" y="234" text-anchor="middle" font-size="9.5" letter-spacing="1" fill="#e9ebef">VENDOR SUBMITTAL</text>
+    <text x="104" y="252" text-anchor="middle" font-size="8.5" fill="#7f8794">datasheet · rev B</text>
+  </g>
+  <line x1="164" y1="154" x2="228" y2="176" stroke="#46505f"/>
+  <line x1="164" y1="238" x2="228" y2="196" stroke="#46505f"/>
+
+  <!-- 01 Ingest -->
+  <rect x="230" y="140" width="130" height="92" fill="#1d222b" stroke="#46505f"/>
+  <text x="244" y="162" font-size="9" letter-spacing="1.5" fill="#a2aab6">01 · INGEST</text>
+  <text x="244" y="188" font-family="Georgia, serif" font-size="15" fill="#e9ebef">Ingest</text>
+  <text x="244" y="208" font-size="8.5" fill="#7f8794">pdfplumber · OCR fallback</text>
+  <text x="244" y="222" font-size="8.5" fill="#7f8794">method + truncation reported</text>
+
+  <line x1="360" y1="186" x2="394" y2="186" stroke="#a2aab6"/>
+  <polygon points="394,182 402,186 394,190" fill="#a2aab6"/>
+
+  <!-- Standards KB above node 02 -->
+  <path d="M 420 88 L 520 88 L 528 96 L 528 126 L 420 126 Z" fill="#1d222b" stroke="#46505f"/>
+  <text x="474" y="106" text-anchor="middle" font-size="8.5" letter-spacing="1" fill="#e9ebef">STANDARDS KB</text>
+  <text x="474" y="119" text-anchor="middle" font-size="8" fill="#7f8794">7 governing documents</text>
+  <line x1="474" y1="126" x2="474" y2="140" stroke="#46505f"/>
+
+  <!-- 02 Context -->
+  <rect x="404" y="140" width="140" height="92" fill="#1d222b" stroke="#46505f"/>
+  <text x="418" y="162" font-size="9" letter-spacing="1.5" fill="#a2aab6">02 · CONTEXT</text>
+  <text x="418" y="188" font-family="Georgia, serif" font-size="15" fill="#e9ebef">Load standards</text>
+  <text x="418" y="208" font-size="8.5" fill="#7f8794">deterministic KB read</text>
+
+  <line x1="544" y1="186" x2="576" y2="186" stroke="#a2aab6"/>
+  <polygon points="576,182 584,186 576,190" fill="#a2aab6"/>
+
+  <!-- Validate gate -->
+  <polygon points="626,150 670,186 626,222 582,186" fill="#1d222b" stroke="#caa04a" stroke-width="1.2"/>
+  <text x="626" y="183" text-anchor="middle" font-size="8.5" letter-spacing="1" fill="#caa04a">VALIDATE</text>
+  <text x="626" y="196" text-anchor="middle" font-size="8" fill="#caa04a">gate</text>
+  <text x="626" y="240" text-anchor="middle" font-size="8" fill="#7f8794">fail-closed · explicit error</text>
+
+  <line x1="670" y1="186" x2="696" y2="186" stroke="#a2aab6"/>
+  <polygon points="696,182 704,186 696,190" fill="#a2aab6"/>
+
+  <!-- 03 LLM core -->
+  <rect x="706" y="132" width="188" height="108" fill="#1d222b" stroke="#d96f52" stroke-width="1.5"/>
+  <text x="720" y="156" font-size="9" letter-spacing="1.5" fill="#d96f52">03 · RECONCILE — LLM CORE</text>
+  <text x="720" y="184" font-family="Georgia, serif" font-size="16" fill="#e9ebef">Generative reasoning</text>
+  <text x="720" y="206" font-size="8.5" fill="#7f8794">cross-document · cited findings only</text>
+  <text x="720" y="222" font-size="8.5" fill="#7f8794">numbers grounded or template fallback</text>
+
+  <line x1="894" y1="186" x2="926" y2="186" stroke="#a2aab6"/>
+  <polygon points="926,182 934,186 926,190" fill="#a2aab6"/>
+
+  <!-- 04 Cx predictor -->
+  <rect x="936" y="140" width="140" height="92" fill="#1d222b" stroke="#46505f"/>
+  <text x="950" y="162" font-size="9" letter-spacing="1.5" fill="#a2aab6">04 · CONSEQUENCE</text>
+  <text x="950" y="188" font-family="Georgia, serif" font-size="15" fill="#e9ebef">Cx predictor</text>
+  <text x="950" y="208" font-size="8.5" fill="#7f8794">test mapping · lead time</text>
+
+  <line x1="1076" y1="186" x2="1106" y2="186" stroke="#a2aab6"/>
+  <polygon points="1106,182 1114,186 1106,190" fill="#a2aab6"/>
+
+  <!-- Deviation register (output document) -->
+  <path d="M 1116 122 L 1194 122 L 1204 132 L 1204 250 L 1116 250 Z" fill="#1d222b" stroke="#e9ebef"/>
+  <path d="M 1194 122 L 1194 132 L 1204 132" fill="none" stroke="#e9ebef"/>
+  <text x="1160" y="144" text-anchor="middle" font-size="8" letter-spacing="0.8" fill="#d96f52">DEVIATION</text>
+  <text x="1160" y="156" text-anchor="middle" font-size="8" letter-spacing="0.8" fill="#d96f52">REGISTER</text>
+  <line x1="1126" y1="166" x2="1194" y2="166" stroke="#313845"/>
+  <rect x="1126" y="174" width="6" height="6" fill="#d96f52"/>
+  <rect x="1138" y="175" width="52" height="4" fill="#313845"/>
+  <line x1="1126" y1="190" x2="1194" y2="190" stroke="#313845"/>
+  <rect x="1126" y="198" width="6" height="6" fill="#caa04a"/>
+  <rect x="1138" y="199" width="44" height="4" fill="#313845"/>
+  <line x1="1126" y1="214" x2="1194" y2="214" stroke="#313845"/>
+  <text x="1160" y="230" text-anchor="middle" font-size="7.5" fill="#7f8794">citation · Cx test</text>
+  <text x="1160" y="242" text-anchor="middle" font-size="7.5" fill="#7f8794">decision window</text>
+
+  <!-- Notes block (drafting vernacular) -->
+  <text x="44" y="322" font-size="9" letter-spacing="1.5" fill="#a2aab6">NOTES</text>
+  <text x="44" y="342" font-size="9.5" fill="#e9ebef">1. One generative core; every other station is deterministic.</text>
+  <text x="44" y="360" font-size="9.5" fill="#e9ebef">2. Cycles are bounded — no unbounded agent loops.</text>
+  <text x="44" y="378" font-size="9.5" fill="#e9ebef">3. A fallback result is never relabelled as live.</text>
+
+  <!-- Provider chain under the LLM core -->
+  <line x1="800" y1="240" x2="800" y2="300" stroke="#a2aab6" stroke-dasharray="4 3"/>
+  <polygon points="796,300 800,308 804,300" fill="#a2aab6"/>
+  <text x="560" y="298" font-size="9" letter-spacing="1" fill="#a2aab6">PROVIDER CHAIN — EVERY LEG TIME-BOXED</text>
+
+  <g font-size="9.5">
+    <rect x="560" y="312" width="88" height="34" fill="#1d222b" stroke="#46505f"/>
+    <text x="604" y="333" text-anchor="middle" fill="#e9ebef">gemini</text>
+    <text x="656" y="333" fill="#7f8794">→</text>
+    <rect x="672" y="312" width="110" height="34" fill="#1d222b" stroke="#46505f"/>
+    <text x="727" y="333" text-anchor="middle" fill="#e9ebef">qwen gateway</text>
+    <text x="790" y="333" fill="#7f8794">→</text>
+    <rect x="806" y="312" width="78" height="34" fill="#1d222b" stroke="#46505f"/>
+    <text x="845" y="333" text-anchor="middle" fill="#e9ebef">groq</text>
+    <text x="892" y="333" fill="#7f8794">→</text>
+    <rect x="908" y="312" width="84" height="34" fill="#1d222b" stroke="#46505f"/>
+    <text x="950" y="333" text-anchor="middle" fill="#e9ebef">claude</text>
+    <text x="1000" y="333" fill="#7f8794">→</text>
+    <rect x="1016" y="312" width="112" height="34" fill="#1d222b" stroke="#d96f52" stroke-dasharray="4 3"/>
+    <text x="1072" y="333" text-anchor="middle" fill="#d96f52">rule floor</text>
+  </g>
+  <text x="560" y="368" font-size="8.5" fill="#7f8794">every answer states its provenance — model, deterministic rules, or unavailable</text>
+
+  <!-- Downstream instruments -->
+  <line x1="28" y1="404" x2="1212" y2="404" stroke="#313845"/>
+  <text x="44" y="432" font-size="9" letter-spacing="1.5" fill="#a2aab6">DOWNSTREAM INSTRUMENTS — FED BY THE REGISTER</text>
+
+  <!-- Register feed lines -->
+  <line x1="1160" y1="250" x2="1160" y2="384" stroke="#46505f"/>
+  <line x1="219" y1="384" x2="1160" y2="384" stroke="#46505f"/>
+  <line x1="219" y1="384" x2="219" y2="446" stroke="#46505f"/>
+  <polygon points="215,446 219,454 223,446" fill="#46505f"/>
+  <line x1="610" y1="384" x2="610" y2="446" stroke="#46505f"/>
+  <polygon points="606,446 610,454 614,446" fill="#46505f"/>
+  <line x1="1000" y1="384" x2="1000" y2="446" stroke="#46505f"/>
+  <polygon points="996,446 1000,454 1004,446" fill="#46505f"/>
+
+  <g>
+    <rect x="44" y="456" width="350" height="84" fill="#1d222b" stroke="#46505f"/>
+    <text x="60" y="482" font-family="Georgia, serif" font-size="14" fill="#e9ebef">Case &amp; RFI workflow</text>
+    <text x="60" y="504" font-size="8.5" fill="#7f8794">protected cases · one-way secret hash</text>
+    <text x="60" y="520" font-size="8.5" fill="#7f8794">draft → issue → verify revision → immutable audit log</text>
+  </g>
+  <g>
+    <rect x="434" y="456" width="350" height="84" fill="#1d222b" stroke="#46505f"/>
+    <text x="450" y="482" font-family="Georgia, serif" font-size="14" fill="#e9ebef">Project graph</text>
+    <text x="450" y="504" font-size="8.5" fill="#7f8794">blast radius · schedule risk (CPM + Monte-Carlo)</text>
+    <text x="450" y="520" font-size="8.5" fill="#7f8794">supply chain · remediation catch-week scenarios</text>
+  </g>
+  <g>
+    <rect x="824" y="456" width="350" height="84" fill="#1d222b" stroke="#46505f"/>
+    <text x="840" y="482" font-family="Georgia, serif" font-size="14" fill="#e9ebef">Ask the record</text>
+    <text x="840" y="504" font-size="8.5" fill="#7f8794">retrieval copilot · cited answers</text>
+    <text x="840" y="520" font-size="8.5" fill="#7f8794">prior-RFI matching · offline-honest</text>
+  </g>
+
+  <!-- Footer -->
+  <line x1="28" y1="586" x2="1212" y2="586" stroke="#46505f"/>
+  <text x="44" y="620" font-size="8.5" letter-spacing="1" fill="#7f8794">PRAMAAN · ET AI HACKATHON 2026 · PS4</text>
+  <text x="620" y="620" text-anchor="middle" font-size="8.5" letter-spacing="1" fill="#a2aab6">LANGGRAPH STATEGRAPH · TYPED STATE · CONDITIONAL EDGES · SINGLE LLM CORE INSIDE DETERMINISTIC GATES</text>
+  <text x="1196" y="620" text-anchor="end" font-size="8.5" letter-spacing="1" fill="#7f8794">SCALE: NONE · SHEET 1 OF 1</text>
+</svg>

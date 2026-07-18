@@ -152,7 +152,10 @@ Other tools stop at basic keyword-matching. Pramaan integrates compliance verifi
 Pramaan uses a single LLM reasoning core wrapped in deterministic pipelines to ensure reliability and explainability:
 
 <p align="center">
-  <img src="docs/pipeline-diagram.svg" alt="Pramaan compliance reasoning graph" width="100%">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/pipeline-diagram-dark.svg">
+    <img src="docs/pipeline-diagram.svg" alt="Pramaan architecture drawn as an engineering sheet: design basis and vendor submittal feed Ingest, Load standards and a fail-closed Validate gate; the single generative reasoning core (with two bounded retrieve/critique cycles and a time-boxed provider chain ending in a deterministic rule floor) hands to the Cx predictor, which writes the deviation register; the register feeds the case/RFI workflow, the project graph, and the Ask-the-record copilot" width="100%">
+  </picture>
 </p>
 
 1. **Ingest:** PDF/image → normalized text per system using `pdfplumber` and `Tesseract OCR` fallback.

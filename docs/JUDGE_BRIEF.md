@@ -11,11 +11,14 @@ project.
 4. Check that each finding includes the mismatched value, cited basis, predicted
    commissioning test, severity, and lead-time impact.
 5. Read the **Systemic risk** panel above the findings — this is the 90-second
-   money shot. It shows the project compound-risk band, the **schedule cliff**
-   (the soonest week where two or more findings fail together), and a **Fix this
-   first** action. The story to tell: three findings are not three tickets — they
-   are *one cliff at Week 44*, and clearing the converged cluster reduces risk more
-   than any single fix (resolving one alone leaves the commissioning gate failing).
+   money shot. On the demo pair it shows the project compound-risk band
+   (**Critical · 100%**), the converged failure cluster, and a **Fix this
+   first** action. The story to tell: two findings are not two tickets — the
+   2N→N+1 topology gap and the 10→8-minute autonomy shortfall converge on the
+   *same UPS commissioning gate at Week 36*, and fixing either one alone leaves
+   that gate failing; the panel ranks the converged cluster, not line items.
+   (When findings span multiple systems, the panel also names the schedule
+   cliff — the soonest week where two or more of them fail together.)
 6. Note each finding's **Evidence: <band>** chip — a deterministic strength read
    (numeric exactness, rule/graph grounding, citation), not a probability of
    correctness.

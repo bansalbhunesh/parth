@@ -50,6 +50,32 @@ rule floor (no silent zeros), OCR for scanned submittals, and honest
 provenance chips on every result. 898 automated tests, full CI, live on
 Vercel + Render.
 
+The finding is the start of a workflow, not the end of a report: one click
+persists it as a case, assigns a named owner, drafts and issues the RFI,
+re-analyzes the vendor's revised submittal, and closes only when the same
+deviation no longer appears — with an audit register (JSON + printable HTML,
+SHA-256 integrity hash) exported straight from the dashboard. Scanned and
+image-only submittals are read via Tesseract OCR with an explicit
+"verify critical values" caveat, and a documented Gemini-vision path reads
+stamped datasheet images directly. The demo stays honest under failure:
+every result carries a provenance chip (live model, cache replay, or
+deterministic rule floor), and each failover leg has its own time budget so
+a slow provider degrades gracefully instead of silently.
+
+All five PS4 build areas are implemented deeply, not sketched: the
+specification-compliance agent (the reasoning core above), a schedule-risk
+engine (critical-path analysis plus 10,000-trial Monte-Carlo giving
+P50/P80/P90 finish dates and the on-time-probability drop each uncaught
+deviation causes), a supply-chain layer (per-shipment lateness probability
+and cost-of-delay-ranked alternatives), a commissioning QA copilot (each
+deviation mapped to the exact test it will fail on a 17-test graph keyed to
+Uptime/TIA-942/BICSI), and an RFI intelligence service (cited answers over
+the project corpus with prior-RFI surfacing). A deterministic project graph
+ties them together, so one deviation's blast radius — the failed test, the
+long-lead procurement exposure, the milestone slip — is a single traversal
+computed from data; the LLM narrates it but never draws an edge or moves a
+date.
+
 Why it generalises: any specification → vendor submittal → acceptance-test
 domain (pharma GMP qualification, aerospace AS9100, medical-device V&V) is the
 same problem. Data-centre EPC is the highest-stakes instance we proved it on.

@@ -111,6 +111,9 @@
 - ⬜ **Morning-of probe** — Gemini free-tier quota resets daily and has
   failed probes before (2026-07-14); run `make verify-live` the morning of,
   not just the night before.
+- ⬜ **Keep-warm active** — `.github/workflows/keepwarm.yml` pings `/health`
+  every 10 minutes (guard lapses after 2026-07-24) so the first judge click
+  never hits a Render cold start; delete the workflow after judging.
 
 ## 4. Truth gates (all must pass — commands are copy-paste)
 

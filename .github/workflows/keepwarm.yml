@@ -1,0 +1,28 @@
+name: Keep demo warm
+
+# Judges click the hosted demo at random hours; Render's free tier sleeps
+# after ~15 idle minutes and cold-starts in 30-50s. Ping /health through the
+# judging window so the first judge click is never the cold one.
+# The date guard lapses after 2026-07-24 — delete this workflow after judging.
+# Cost note: keeping the instance warm spends Render free-tier instance hours
+# (~750/month allowance; this window uses ~130).
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Ping backend health (guard lapses after 2026-07-24)
+        run: |
+          if [ "$(date -u +%Y%m%d)" -gt 20260724 ]; then
+            echo "past judging window - not pinging"
+            exit 0
+          fi
+          curl -sS --max-time 90 https://parth-1-ma30.onrender.com/health | head -c 300

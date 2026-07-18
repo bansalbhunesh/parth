@@ -1,6 +1,6 @@
 import Link from "../components/AppLink";
+import RegisterExplorer from "../components/RegisterExplorer";
 import ResolutionWorkflow from "../components/ResolutionWorkflow";
-import ThemeToggle from "../components/ThemeToggle";
 import { BENCHMARK_LIMITATION, PRODUCT_CLAIMS } from "../lib/claims";
 import { Deviation, getRegisterSnapshot } from "../lib/api";
 
@@ -54,50 +54,35 @@ function EvidencePath({ finding }: { finding: Deviation }) {
   );
 }
 
-function RegisterTable({ rows }: { rows: Deviation[] }) {
+function DocumentPair() {
   return (
-    <div className="register-scroll" role="region" aria-label="Prioritized deviation register" tabIndex={0}>
-      <table className="register-table">
-        <thead>
-          <tr>
-            <th scope="col">Finding</th>
-            <th scope="col">Variance</th>
-            <th scope="col">Cx consequence</th>
-            <th scope="col">Window</th>
-            <th scope="col">Evidence</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.slice(0, 6).map((row) => (
-            <tr key={`${row.component}-${row.parameter}`}>
-              <td>
-                <span className={`severity severity-${row.severity.toLowerCase()}`}>{row.severity}</span>
-                <strong>{row.component}</strong>
-                <small>{row.parameter.replaceAll("_", " ")}</small>
-              </td>
-              <td>
-                <span className="value-pair">
-                  <del>{formatValue(row.provided_value, row.unit)}</del>
-                  <span aria-hidden="true">→</span>
-                  <ins>{formatValue(row.required_value, row.unit)}</ins>
-                </span>
-              </td>
-              <td>
-                <strong>{row.predicted_cx_test ?? "Review required"}</strong>
-                <small>{row.predicted_cx_name ?? "Commissioning acceptance check"}</small>
-              </td>
-              <td>
-                <strong>{row.lead_time_weeks ?? "—"} weeks</strong>
-                <small>Week {row.week_caught} → {row.week_fail ?? "—"}</small>
-              </td>
-              <td>
-                <strong>{row.spec_clause}</strong>
-                <small>{row.standard_ref}</small>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="doc-pair" aria-label="A specification clause and the vendor submittal line that deviates from it" role="img">
+      <figure className="doc-sheet doc-sheet-spec" aria-hidden="true">
+        <figcaption>
+          <span className="doc-ref">SECTION 26 33 53 · STATIC UPS</span>
+          <span className="doc-stamp doc-stamp-issued">Issued for construction</span>
+        </figcaption>
+        <div className="doc-lines">
+          <p><span className="doc-clause">2.1</span> System configuration — distributed redundant, <strong>2N across two paths</strong></p>
+          <p className="doc-line-marked"><span className="doc-clause">2.3</span> Battery autonomy at full load — not less than <strong>10 minutes, at end of life</strong></p>
+          <p><span className="doc-clause">2.4</span> Efficiency at 100% load — ≥ 96.0%</p>
+        </div>
+      </figure>
+      <figure className="doc-sheet doc-sheet-submittal" aria-hidden="true">
+        <figcaption>
+          <span className="doc-ref">SUBMITTAL APX-EL-0241 · REV B</span>
+          <span className="doc-stamp doc-stamp-approval">For approval</span>
+        </figcaption>
+        <div className="doc-lines">
+          <p><span className="doc-clause">2.3</span> System redundancy (per bus) — <strong className="doc-flag">N+1</strong></p>
+          <p className="doc-line-marked"><span className="doc-clause">2.4</span> Battery autonomy at full load — <strong className="doc-flag">8 minutes</strong> (beginning of life @ 25 °C)</p>
+          <p><span className="doc-clause">2.5</span> Online efficiency at 100% load — 96.5%</p>
+        </div>
+      </figure>
+      <div className="doc-annotation" aria-hidden="true">
+        <span className="doc-annotation-mark">Deviation</span>
+        <span className="doc-annotation-note">IST-07 at risk · converges week 36</span>
+      </div>
     </div>
   );
 }
@@ -108,70 +93,60 @@ export default async function Page() {
   const claims = PRODUCT_CLAIMS.benchmark;
 
   return (
-    <>
-      <a className="skip-link" href="#main-content">Skip to main content</a>
-      <header className="site-header">
-        <Link href="/" className="wordmark" aria-label="Pramaan home">
-          Pramaan<span aria-hidden="true">/</span>
-        </Link>
-        <nav className="site-nav" aria-label="Primary navigation">
-          <a href="#proof">Trace</a>
-          <a href="#resolve">Resolve</a>
-          <a href="#register">Register</a>
-          <Link href="/evidence">Evidence</Link>
-        </nav>
-        <ThemeToggle />
-      </header>
-
-      <main id="main-content">
+    <main id="main-content">
       <section className="hero shell" aria-labelledby="hero-title">
-        <div className="hero-copy">
-          <div className="provenance-line">
-            <span className={`provenance-dot provenance-${snapshot.provenance.kind}`} aria-hidden="true" />
-            {snapshot.provenance.label}
+        <div className="hero-grid">
+          <div className="hero-copy">
+            <div className="provenance-line">
+              <span className={`provenance-dot provenance-${snapshot.provenance.kind}`} aria-hidden="true" />
+              {snapshot.provenance.label}
+            </div>
+            <h1 id="hero-title">Find the deviation. Prove the consequence. Close it before commissioning.</h1>
+            <p className="hero-lede">
+              Pramaan reads the design basis and the vendor submittal the way a senior reviewer would —
+              then keeps the requirement, the variance, the test at risk and the closure record attached to each other.
+            </p>
+            <div className="hero-actions">
+              <Link className="button button-primary" href="/judge">Run the live analysis</Link>
+              <a className="button button-secondary" href="#proof">Follow one finding</a>
+            </div>
+            <p className="provenance-description">{snapshot.provenance.description}</p>
           </div>
-          <h1 id="hero-title">Find the deviation. Prove the consequence. Close it before commissioning.</h1>
-          <p className="hero-lede">
-            Pramaan turns a specification mismatch into a cited, owned decision: the requirement, the vendor variance, the test at risk, and the record that closes it.
-          </p>
-          <div className="hero-actions">
-            <a className="button button-primary" href="#proof">Follow one finding</a>
-            <Link className="button button-secondary" href="/judge">Analyze documents</Link>
-          </div>
-          <p className="provenance-description">{snapshot.provenance.description}</p>
+          <DocumentPair />
         </div>
 
-        {hero ? (
-          <aside className="hero-dossier" aria-label="Priority finding">
-            <div className="dossier-meta">
-              <span>Priority finding</span>
-              <span className={`severity severity-${hero.severity.toLowerCase()}`}>{hero.severity}</span>
-            </div>
-            <p className="dossier-id">{hero.component} · {hero.spec_clause}</p>
-            <h2>{hero.parameter.replaceAll("_", " ")}</h2>
-            <div className="dossier-values">
-              <div><span>Required</span><strong>{formatValue(hero.required_value, hero.unit)}</strong></div>
-              <div><span>Submitted</span><strong>{formatValue(hero.provided_value, hero.unit)}</strong></div>
-            </div>
-            <p>{hero.rationale}</p>
-            <div className="dossier-foot">
-              <strong>{hero.lead_time_weeks} weeks</strong>
-              <span>between review and {hero.predicted_cx_test}</span>
-            </div>
-          </aside>
-        ) : (
-          <aside className="hero-dossier dossier-unavailable" role="status">
-            <p className="section-kicker">Register unavailable</p>
-            <h2>No finding could be loaded.</h2>
-            <p>The page will not invent a live result. Open Evidence for the frozen benchmark record.</p>
-          </aside>
-        )}
+        <ol className="judge-journey" aria-label="The 90-second review">
+          <li>
+            <Link href="/judge">
+              <span className="journey-index">1</span>
+              <span className="journey-body"><strong>Run the analysis</strong><small>Load the deviation demo and watch it reason live</small></span>
+            </Link>
+          </li>
+          <li>
+            <a href="#register">
+              <span className="journey-index">2</span>
+              <span className="journey-body"><strong>Open a dossier</strong><small>Any finding unfolds to its live blast radius</small></span>
+            </a>
+          </li>
+          <li>
+            <a href="#resolve">
+              <span className="journey-index">3</span>
+              <span className="journey-body"><strong>Close it with an RFI</strong><small>A real case against the API, audited end to end</small></span>
+            </a>
+          </li>
+          <li>
+            <Link href="/evidence">
+              <span className="journey-index">4</span>
+              <span className="journey-body"><strong>Verify every number</strong><small>Each claim travels with its limitation</small></span>
+            </Link>
+          </li>
+        </ol>
       </section>
 
       {hero ? (
         <section className="section-block section-rule shell" id="proof" aria-labelledby="proof-title">
           <div className="section-intro">
-            <p className="section-number">01 / Trace</p>
+            <p className="section-number">01 · Trace</p>
             <div>
               <p className="section-kicker">One finding, end to end</p>
               <h2 id="proof-title">The evidence chain stays attached to the consequence.</h2>
@@ -185,12 +160,23 @@ export default async function Page() {
             <cite>{hero.standard_ref} · clause {hero.spec_clause}</cite>
           </blockquote>
         </section>
-      ) : null}
+      ) : (
+        <section className="section-block section-rule shell" id="proof" aria-labelledby="proof-title">
+          <div className="section-intro">
+            <p className="section-number">01 · Trace</p>
+            <div>
+              <p className="section-kicker">Register unavailable</p>
+              <h2 id="proof-title">The evidence chain stays attached to the consequence.</h2>
+            </div>
+            <p>No finding could be loaded, and the page will not invent one. Open Evidence for the frozen benchmark record.</p>
+          </div>
+        </section>
+      )}
 
       <section className="section-block section-ink" id="resolve" aria-labelledby="resolve-title">
         <div className="shell">
           <div className="section-intro section-intro-inverse">
-            <p className="section-number">02 / Resolve</p>
+            <p className="section-number">02 · Resolve</p>
             <div>
               <p className="section-kicker">Finding to closure</p>
               <h2 id="resolve-title">A finding only matters when someone owns the next action.</h2>
@@ -203,14 +189,17 @@ export default async function Page() {
 
       <section className="section-block shell" id="register" aria-labelledby="register-title">
         <div className="section-intro">
-          <p className="section-number">03 / Prioritize</p>
+          <p className="section-number">03 · Prioritize</p>
           <div>
             <p className="section-kicker">Commissioning-aware register</p>
             <h2 id="register-title">Review by consequence, not document order.</h2>
           </div>
-          <p>{snapshot.rows.length} findings loaded from {snapshot.provenance.label.toLowerCase()}. The six highest-priority rows are shown here.</p>
+          <p>
+            {snapshot.rows.length} findings loaded from {snapshot.provenance.label.toLowerCase()}.
+            Open any row: its dossier unfolds with the live blast radius from the project graph.
+          </p>
         </div>
-        <RegisterTable rows={snapshot.rows} />
+        <RegisterExplorer rows={snapshot.rows} />
         <div className="register-actions">
           <Link className="text-link" href="/judge">Run a new document comparison <span aria-hidden="true">→</span></Link>
           <Link className="text-link" href="/war-room">Open intervention analysis <span aria-hidden="true">→</span></Link>
@@ -219,7 +208,7 @@ export default async function Page() {
 
       <section className="section-block proof-section shell" aria-labelledby="benchmark-title">
         <div className="section-intro">
-          <p className="section-number">04 / Verify</p>
+          <p className="section-number">04 · Verify</p>
           <div>
             <p className="section-kicker">Frozen benchmark · v{claims.version}</p>
             <h2 id="benchmark-title">The claim and its boundary travel together.</h2>
@@ -234,21 +223,6 @@ export default async function Page() {
         </dl>
         <Link className="button button-secondary" href="/evidence">Inspect sources and limitations</Link>
       </section>
-
-      </main>
-
-      <footer className="site-footer shell">
-        <div>
-          <Link href="/" className="wordmark">Pramaan<span aria-hidden="true">/</span></Link>
-          <p>Evidence to resolution for consequential infrastructure.</p>
-        </div>
-        <nav aria-label="Footer navigation">
-          <Link href="/judge">Analyze</Link>
-          <Link href="/evidence">Evidence</Link>
-          <Link href="/war-room">Interventions</Link>
-          <a href="https://github.com/bansalbhunesh/parth" target="_blank" rel="noreferrer">Source ↗</a>
-        </nav>
-      </footer>
-    </>
+    </main>
   );
 }

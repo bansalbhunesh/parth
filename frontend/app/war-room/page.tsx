@@ -1,5 +1,5 @@
 import Link from "../../components/AppLink";
-import ThemeToggle from "../../components/ThemeToggle";
+import BlastRadiusExplorer from "../../components/BlastRadiusExplorer";
 import { getRegisterSnapshot, getRemediation, getSchedule, getSupplyChain } from "../../lib/api";
 
 export const revalidate = 600;
@@ -18,26 +18,16 @@ export default async function WarRoomPage() {
   ]);
   const hero = snapshot.rows.find((row) => row.component === "UPS-02") ?? snapshot.rows[0];
   const shipments = [...supply.shipments].sort((a, b) => b.delivery_risk.score - a.delivery_risk.score).slice(0, 3);
+  const scenarios = remediation.scenarios;
 
   return (
-    <>
-      <a className="skip-link" href="#main-content">Skip to main content</a>
-      <header className="site-header">
-        <Link href="/" className="wordmark" aria-label="Pramaan home">Pramaan<span aria-hidden="true">/</span></Link>
-        <nav className="site-nav" aria-label="Intervention navigation">
-          <Link href="/">Overview</Link>
-          <Link href="/judge">Analyze</Link>
-          <Link href="/evidence">Evidence</Link>
-        </nav>
-        <ThemeToggle />
-      </header>
-
-      <main id="main-content">
+    <main id="main-content">
       <section className="route-hero intervention-hero shell">
         <p className="section-kicker">Intervention brief · Project Meghdoot</p>
         <h1>Decide what moves before the schedule does.</h1>
         <p>
-          A composed operating view of the highest-consequence finding, its decision window, and the supply-chain conditions that determine whether recovery is still possible.
+          A composed operating view of the highest-consequence finding, its decision window, and the
+          supply-chain conditions that determine whether recovery is still possible.
         </p>
         <div className="provenance-line"><span className={`provenance-dot provenance-${snapshot.provenance.kind}`} aria-hidden="true" />{snapshot.provenance.label}</div>
       </section>
@@ -62,6 +52,21 @@ export default async function WarRoomPage() {
         </section>
       ) : null}
 
+      <section className="blast-section shell" aria-labelledby="blast-title">
+        <div className="section-intro">
+          <p className="section-number">Blast radius</p>
+          <div>
+            <p className="section-kicker">Live project-graph traversal</p>
+            <h2 id="blast-title">What one deviation actually reaches.</h2>
+          </div>
+          <p>
+            Pick a finding. The project graph answers with every commissioning test, milestone and
+            long-lead supplier it touches — computed live, never staged.
+          </p>
+        </div>
+        <BlastRadiusExplorer rows={snapshot.rows} />
+      </section>
+
       <section className="intervention-grid shell" aria-label="Schedule and supply evidence">
         <article>
           <p className="section-number">Schedule exposure</p>
@@ -80,6 +85,34 @@ export default async function WarRoomPage() {
         </article>
       </section>
 
+      <section className="catch-week-section shell" aria-labelledby="catch-week-title">
+        <div className="section-intro">
+          <p className="section-number">When it is caught</p>
+          <div>
+            <p className="section-kicker">Same deviation, three discovery moments</p>
+            <h2 id="catch-week-title">The catch week decides the cost.</h2>
+          </div>
+          <p>Deterministic remediation scenarios for the priority finding — flat until the zero-slip deadline (week {remediation.zero_slip_deadline_week}), then every week compounds.</p>
+        </div>
+        <ol className="catch-week-ledger">
+          <li>
+            <span className="catch-week-label">Design review</span>
+            <span className="catch-week-week">week {scenarios.design_review.catch_week}</span>
+            <span className="catch-week-out">{scenarios.design_review.slip_weeks} wk slip · ₹{scenarios.design_review.cost_lakh} lakh</span>
+          </li>
+          <li className="catch-week-pramaan">
+            <span className="catch-week-label">Pramaan catch</span>
+            <span className="catch-week-week">week {scenarios.pramaan.catch_week}</span>
+            <span className="catch-week-out">{scenarios.pramaan.slip_weeks} wk slip · ₹{scenarios.pramaan.cost_lakh} lakh</span>
+          </li>
+          <li>
+            <span className="catch-week-label">Commissioning discovery</span>
+            <span className="catch-week-week">week {scenarios.commissioning.catch_week}</span>
+            <span className="catch-week-out">{scenarios.commissioning.slip_weeks} wk slip · ₹{scenarios.commissioning.cost_lakh} lakh</span>
+          </li>
+        </ol>
+      </section>
+
       <section className="shipment-section shell" aria-labelledby="shipments-title">
         <div className="shipment-head"><div><p className="section-kicker">Long-lead watch</p><h2 id="shipments-title">Supply conditions that can close the window.</h2></div><p>{supply.summary.at_risk} of {supply.summary.total} modeled shipments are currently at risk.</p></div>
         <div className="shipment-list">
@@ -95,13 +128,6 @@ export default async function WarRoomPage() {
       </section>
 
       <section className="assumption-note shell"><strong>Scenario, not forecast truth.</strong><span>Schedule and cost edges are deterministic outputs under stated assumptions. They are decision support, not measured savings.</span></section>
-
-      </main>
-
-      <footer className="site-footer shell">
-        <div><Link href="/" className="wordmark">Pramaan<span aria-hidden="true">/</span></Link><p>Evidence to resolution for consequential infrastructure.</p></div>
-        <nav aria-label="Footer navigation"><Link href="/">Overview</Link><Link href="/judge">Analyze</Link><Link href="/evidence">Evidence</Link></nav>
-      </footer>
-    </>
+    </main>
   );
 }

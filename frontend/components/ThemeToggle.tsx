@@ -32,7 +32,7 @@ export default function ThemeToggle() {
       aria-label={`Switch to ${theme === "light" ? "dark" : "light"} theme`}
     >
       <span aria-hidden="true">{theme === "light" ? "◐" : "◑"}</span>
-      {theme === "light" ? "Dark" : "Light"}
+      <span className="theme-toggle-text">{theme === "light" ? "Dark" : "Light"}</span>
     </button>
   );
 }

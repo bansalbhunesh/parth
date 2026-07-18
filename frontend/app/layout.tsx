@@ -1,18 +1,29 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
-import { Geologica, Hanken_Grotesk } from "next/font/google";
+import { IBM_Plex_Mono, IBM_Plex_Sans, IBM_Plex_Serif } from "next/font/google";
+import SiteHeader from "../components/SiteHeader";
+import SiteFooter from "../components/SiteFooter";
 import { PRODUCT_CLAIMS } from "../lib/claims";
 
-const geologica = Geologica({
+const plexSerif = IBM_Plex_Serif({
   subsets: ["latin"],
+  weight: ["300", "400", "500"],
   variable: "--font-display",
-  display: "optional",
+  display: "swap",
 });
 
-const hanken = Hanken_Grotesk({
+const plexSans = IBM_Plex_Sans({
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
   variable: "--font-body",
-  display: "optional",
+  display: "swap",
+});
+
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-mono",
+  display: "swap",
 });
 
 const OG_IMAGE = {
@@ -48,8 +59,8 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "oklch(95.2% 0.011 89.7)" },
-    { media: "(prefers-color-scheme: dark)", color: "oklch(20.7% 0.006 122)" },
+    { media: "(prefers-color-scheme: light)", color: "oklch(96.6% 0.004 240)" },
+    { media: "(prefers-color-scheme: dark)", color: "oklch(17.5% 0.014 255)" },
   ],
 };
 
@@ -61,7 +72,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geologica.variable} ${hanken.variable}`}
+      className={`${plexSerif.variable} ${plexSans.variable} ${plexMono.variable}`}
       suppressHydrationWarning
     >
       <head>
@@ -72,7 +83,12 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <a className="skip-link" href="#main-content">Skip to main content</a>
+        <SiteHeader />
+        {children}
+        <SiteFooter />
+      </body>
     </html>
   );
 }

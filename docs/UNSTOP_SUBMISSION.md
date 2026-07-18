@@ -15,7 +15,7 @@ PRAMAAN — EPC Deviation Intelligence (PS4)
 See it work (90 seconds):  https://parth-tan.vercel.app/judge
   → click "Load deviation demo ★", hit Analyze, watch it reason live.
 Every number + its limitation:  https://parth-tan.vercel.app/evidence
-Full source, benchmark, 893 tests, CI:  https://github.com/bansalbhunesh/parth
+Full source, benchmark, 898 tests, CI:  https://github.com/bansalbhunesh/parth
 Pitch video (2:50):  <VIDEO_LINK_HERE>
 ```
 
@@ -47,7 +47,7 @@ deterministic services — commissioning-test mapping, Monte-Carlo schedule
 risk, supply-chain risk, and a blast-radius project graph — plus a reliability
 layer: multi-provider failover with per-provider spend guards, a deterministic
 rule floor (no silent zeros), OCR for scanned submittals, and honest
-provenance chips on every result. 893 automated tests, full CI, live on
+provenance chips on every result. 898 automated tests, full CI, live on
 Vercel + Render.
 
 Why it generalises: any specification → vendor submittal → acceptance-test
@@ -69,7 +69,7 @@ same problem. Data-centre EPC is the highest-stakes instance we proved it on.
 
 ## Pre-submit gate
 
-Run `docs/FINAL_SUBMISSION_CHECKLIST.md` end-to-end first — every truth-gate
+Run the Final Submission Checklist section of `docs/CHECKLISTS.md` end-to-end first — every truth-gate
 must be green, `make verify-live` must say `GREEN -- demo away.`, `make
 verify-submission` must pass, and the video link must open in an incognito
 window.

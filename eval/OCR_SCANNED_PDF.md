@@ -79,4 +79,5 @@ Tests: [`../tests/test_ocr.py`](../tests/test_ocr.py) — builds an image-only P
 in-memory, asserts OCR recovery (skipped where Tesseract is absent), and asserts
 graceful empty-string degradation when OCR is disabled or broken. Prove it in
 your environment with `make verify-ocr` (local) or `make verify-ocr-docker` (the
-shipping image). Deploy/verify steps: [`../docs/OCR_DEPLOYMENT_CHECKLIST.md`](../docs/OCR_DEPLOYMENT_CHECKLIST.md).
+shipping image). Deploy/verify steps: the OCR Deployment Checklist section of
+[`../docs/CHECKLISTS.md`](../docs/CHECKLISTS.md).

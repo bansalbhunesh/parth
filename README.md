@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/reproducible_tests-700%2B-b54a31?style=flat-square&labelColor=20221e" alt="More than 700 tests">
+  <img src="https://img.shields.io/badge/reproducible_tests-890%2B-b54a31?style=flat-square&labelColor=20221e" alt="More than 890 tests">
   <img src="https://img.shields.io/badge/benchmark_recall-0.862-ffb020?style=flat-square&labelColor=1a1508" alt="Benchmark recall 0.862">
   <img src="https://img.shields.io/badge/clean--negative_false_alerts-0-35c98b?style=flat-square&labelColor=0d1a14" alt="0 false alerts on 64 controls">
   <img src="https://img.shields.io/badge/license-MIT-5b8cff?style=flat-square&labelColor=111820" alt="MIT License">
@@ -39,6 +39,12 @@
     <a href="docs/DECK.md">Pitch deck outline</a>
   </sub>
 </p>
+
+> ### ⚡ Judges: start here (90 seconds)
+> 1. **See it work:** open [Judge Mode](https://parth-tan.vercel.app/judge) → click **Load deviation demo ★** → **Analyze** — watch it reason live and read the systemic-risk panel (the schedule cliff).
+> 2. **Every number + its limitation:** [Evidence dashboard](https://parth-tan.vercel.app/evidence).
+> 3. **Pitch (2:50):** BLOCKER until the public link is pasted here.
+> 4. **Verify it yourself:** `git clone` → `make verify` (no API key needed), or read the [Judge brief](docs/JUDGE_BRIEF.md).
 
 ---
 
@@ -160,17 +166,20 @@ Pramaan is built to be resilient in high-traffic or rate-limited environments:
 Pramaan runs an automated health-and-deployment validation script to verify that the deployed backend is live, API credentials are functional, and all frontend components load cleanly:
 
 ```
-Pramaan live verification • API https://parth-1-ma30.onrender.com • APP https://parth-tan.vercel.app
-  [PASS] backend /health ok • commit 75d1905 / llm ready=True
+Pramaan live verification — API https://parth-1-ma30.onrender.com · APP https://parth-tan.vercel.app
+  [PASS] backend /health ok — commit f44e5b8 / llm ready=True
+  [PASS] deployed commit == origin/main — live f44e5b8 vs expected f44e5b8
   [PASS] PS4 layer /schedule live
   [PASS] PS4 layer /supply-chain live
   [PASS] PS4 layer /graph live
-  [PASS] PS4 layer /register live
-  [PASS] PS4 layer /remediation live
-  [PASS] frontend landing page loads ok • title 'Pramaan'
-  [PASS] frontend judge page loads ok • title 'Pramaan'
-  [PASS] /evidence status 200 ok
-  [PASS] /evidence table is populated
+  [PASS] deep LLM probe (/llm-check?deep=1) — 2790ms, 5 findings
+  [PASS] real-pair /analyze uses the LLM — mode=llm, 5 findings in 15s
+  [PASS] real-pair /analyze/stream uses the LLM — mode=llm, 5 findings
+  [PASS] frontend / responds 200
+  [PASS] frontend /judge responds 200
+
+10/10 checks passed in 62s
+GREEN -- demo away.
 ```
 
 ### Frozen Benchmark Performance (`ps4_external_v1` v1.2)
@@ -190,7 +199,7 @@ You can run the entire verification suite, deterministic eval harnesses, and fro
 make setup
 make corpus
 
-# 2. Run the full test suite (700+ tests, no API key needed)
+# 2. Run the full test suite (890+ reproducible tests, no API key needed)
 make test
 
 # 3. Run deterministic evals (no-key offline harnesses)
@@ -267,5 +276,5 @@ f9976f5 feat(evidence): store two primary-source documents, not just cite them (
 <p align="center">
   <strong>Pramaan Compliance Engine</strong><br>
   <em>EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4</em><br>
-  <sub>893 backend tests &middot; 65 frontend tests (20 component + 45 logic) &middot; 155 browser journeys (27 E2E specs × 5 browser engines + 20 UI states)</sub>
+  <sub>898 backend tests &middot; 72 frontend tests &middot; 160 Playwright browser tests (8 specs across 5 browser engines)</sub>
 </p>

@@ -16,8 +16,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 SCANNED_FILES = [
     "README.md",
     "docs/UNSTOP_SUBMISSION.md",
-    "docs/SUBMISSION_CHECKLIST.md",
-    "docs/FINAL_SUBMISSION_CHECKLIST.md",
+    "docs/CHECKLISTS.md",
     "docs/detailed_submission.html",
 ]
 

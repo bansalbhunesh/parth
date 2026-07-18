@@ -256,3 +256,99 @@ def test_all_providers_unparseable_raises_llmerror(monkeypatch):
     _stub(monkeypatch, "openai", result="also garbage")
     with pytest.raises(L.LLMError):
         L.complete_json("prompt")
+
+
+# ── Per-leg wall-clock budget (slow leg != failed leg, until now) ────
+# Found live 2026-07-18: a free-tier primary in slow-generation mode (no
+# error raised, just slow) ate the entire request budget, so failover never
+# fired and the demo pair degraded to the rule floor while the healthy funded
+# gateway leg sat unused. A slow leg must count as a failed leg.
+
+def test_slow_leg_times_out_and_fails_over(monkeypatch):
+    # Long fake keys: _redact() strips key VALUES from reasons, and a
+    # single-letter key like "g" would redact every 'g' in the message.
+    import time as _t
+    monkeypatch.setenv("GEMINI_API_KEY", "fake-gem-key-XYZ")
+    monkeypatch.setenv("OPENAI_API_KEY", "fake-open-key-XYZ")
+    monkeypatch.setenv("PRAMAAN_LLM_LEG_TIMEOUT", "0.2")
+
+    def slow(prompt, system, json_mode):
+        _t.sleep(1.0)
+        return "TOO_LATE"
+    monkeypatch.setitem(L._DISPATCH, "gemini", slow)
+    _stub(monkeypatch, "openai", result="FAST_OK")
+    t0 = _t.monotonic()
+    assert L.complete("hi") == "FAST_OK"
+    assert _t.monotonic() - t0 < 1.0  # did not wait out the slow leg
+    assert L.FAILOVER_STATUS["last_successful_provider"] == "openai"
+    fo = L.FAILOVER_STATUS["last_failover"]
+    assert fo["from"] == "gemini" and "per-leg budget" in fo["reason"]
+
+
+def test_leg_timeout_zero_disables_bound(monkeypatch):
+    import time as _t
+    monkeypatch.setenv("GEMINI_API_KEY", "g")
+    monkeypatch.setenv("PRAMAAN_LLM_LEG_TIMEOUT", "0")
+
+    def slowish(prompt, system, json_mode):
+        _t.sleep(0.3)
+        return "SLOW_OK"
+    monkeypatch.setitem(L._DISPATCH, "gemini", slowish)
+    assert L.complete("hi") == "SLOW_OK"
+
+
+def test_json_slow_leg_fails_over(monkeypatch):
+    import time as _t
+    monkeypatch.setenv("GEMINI_API_KEY", "g")
+    monkeypatch.setenv("OPENAI_API_KEY", "o")
+    monkeypatch.setenv("PRAMAAN_LLM_LEG_TIMEOUT", "0.2")
+
+    def slow(prompt, system, json_mode):
+        _t.sleep(1.0)
+        return '[{"component": "LATE"}]'
+    monkeypatch.setitem(L._DISPATCH, "gemini", slow)
+    _stub(monkeypatch, "openai", result='[{"component": "UPS-02"}]')
+    assert L.complete_json("prompt") == [{"component": "UPS-02"}]
+    assert L.FAILOVER_STATUS["last_successful_provider"] == "openai"
+
+
+def test_stream_slow_first_chunk_fails_over(monkeypatch):
+    """A stream leg that produces NOTHING within the per-leg budget is
+    abandoned pre-emit in favour of the next leg — the only safe failover
+    window for streams."""
+    import time as _t
+    monkeypatch.setenv("GEMINI_API_KEY", "g")
+    monkeypatch.setenv("OPENAI_API_KEY", "o")
+    monkeypatch.setenv("PRAMAAN_LLM_LEG_TIMEOUT", "0.2")
+
+    def slow_stream(prompt, system):
+        _t.sleep(1.0)
+        yield "late"
+
+    def good_stream(prompt, system):
+        yield "hello "
+        yield "world"
+    monkeypatch.setitem(L._STREAM_DISPATCH, "gemini", slow_stream)
+    monkeypatch.setitem(L._STREAM_DISPATCH, "openai", good_stream)
+    assert "".join(L.complete_stream("hi")) == "hello world"
+    assert L.FAILOVER_STATUS["last_successful_provider"] == "openai"
+
+
+def test_stream_slow_after_first_chunk_not_switched(monkeypatch):
+    """The per-leg bound covers only the first chunk: once a provider has
+    emitted, slow pacing is the outer wall-clock ceiling's problem and the
+    stream must NOT switch providers (no duplicated text)."""
+    import time as _t
+    monkeypatch.setenv("GEMINI_API_KEY", "g")
+    monkeypatch.setenv("OPENAI_API_KEY", "o")
+    monkeypatch.setenv("PRAMAAN_LLM_LEG_TIMEOUT", "0.2")
+
+    def emits_then_slow(prompt, system):
+        yield "first "
+        _t.sleep(0.4)  # longer than the leg budget, after emitting
+        yield "second"
+    monkeypatch.setitem(L._STREAM_DISPATCH, "gemini", emits_then_slow)
+    monkeypatch.setitem(L._STREAM_DISPATCH, "openai",
+                        lambda p, s: iter(["should-not-run"]))
+    assert "".join(L.complete_stream("hi")) == "first second"
+    assert L.FAILOVER_STATUS["last_successful_provider"] == "gemini"

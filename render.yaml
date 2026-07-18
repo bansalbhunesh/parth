@@ -24,6 +24,15 @@ services:
         value: gemini-2.5-flash
       - key: PRAMAAN_LLM_TIMEOUT
         value: "60"
+      # Per-provider wall-clock budget INSIDE the request budget above. A slow
+      # (not erroring) free-tier leg used to eat the whole 60s so failover
+      # never fired (observed live 2026-07-18); with a 30s leg budget the worst
+      # case is one slow leg (30s) + the funded gateway leg (~24s measured)
+      # still inside the request budget. "0" disables the per-leg bound.
+      # Dashboard-managed like everything here — set it there too, then
+      # Manual Deploy.
+      - key: PRAMAAN_LLM_LEG_TIMEOUT
+        value: "30"
       # Explicit, deterministic failover order for the hosted demo. Ollama is a
       # LOCAL leg (needs a local daemon), so it is intentionally NOT listed here
       # — hosted Render has no Ollama, and it stays filtered out regardless.

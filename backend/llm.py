@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import concurrent.futures
 import logging
 import os
 import re
@@ -62,6 +63,79 @@ def _with_transient_retry(call, label):  # noqa: ANN001, ANN201
     finally:
         _core._RETRY_BACKOFF_S = previous
 
+def _leg_timeout_s() -> float:
+    """Wall-clock budget for ONE provider attempt (seconds). 0 disables.
+
+    Found live 2026-07-18: a free-tier primary in slow-generation mode (no
+    error, just slow) consumed the entire PRAMAAN_LLM_TIMEOUT request budget,
+    so failover never fired and the demo pair degraded to the rule floor even
+    though the funded gateway leg was healthy (24s). Bounding each leg keeps
+    the worst case at one slow leg + one healthy leg inside the request budget.
+    Must stay comfortably above a healthy big-pair completion (~15-25s
+    measured) or a healthy-but-slowish leg would fail over spuriously."""
+    try:
+        return float(os.getenv("PRAMAAN_LLM_LEG_TIMEOUT", "30"))
+    except ValueError:
+        return 30.0
+
+
+def _bounded_leg(fn, provider: str):  # noqa: ANN001, ANN201
+    """Run one provider attempt under the per-leg wall-clock budget.
+
+    A leg that exceeds the budget raises LLMError so the chain walks on. The
+    timed-out worker thread is abandoned (threads cannot be killed) and ends
+    when the provider call returns — the same abandonment contract as the
+    sync path's outer future in analyze.py."""
+    timeout_s = _leg_timeout_s()
+    if timeout_s <= 0:
+        return fn()
+    pool = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+    try:
+        future = pool.submit(fn)
+        try:
+            return future.result(timeout=timeout_s)
+        except concurrent.futures.TimeoutError as exc:
+            future.cancel()
+            raise LLMError(f"{provider} exceeded the per-leg budget of "
+                           f"{timeout_s:g}s") from exc
+    finally:
+        pool.shutdown(wait=False)
+
+
+_FIRST_CHUNK_SENTINEL = object()
+
+
+def _bounded_stream(gen_fn, prompt: str, system: str, provider: str):  # noqa: ANN001
+    """Yield a provider's stream, bounding only the wait for the FIRST chunk.
+
+    Pre-emit is the only safe failover point for streams (switching mid-stream
+    would duplicate text to the judge), so this bounds exactly that window: a
+    provider that has produced nothing within the per-leg budget raises
+    LLMError and the chain walks on. Once the first chunk lands, mid-stream
+    pacing is governed by the caller's overall wall-clock ceiling
+    (analyze._stream_llm_bounded)."""
+    timeout_s = _leg_timeout_s()
+    gen = gen_fn(prompt, system)
+    if timeout_s <= 0:
+        yield from gen
+        return
+    pool = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+    try:
+        future = pool.submit(next, gen, _FIRST_CHUNK_SENTINEL)
+        try:
+            first = future.result(timeout=timeout_s)
+        except concurrent.futures.TimeoutError as exc:
+            future.cancel()
+            raise LLMError(f"{provider} streamed no output within the per-leg "
+                           f"budget of {timeout_s:g}s") from exc
+    finally:
+        pool.shutdown(wait=False)
+    if first is _FIRST_CHUNK_SENTINEL:
+        return  # empty stream == zero-chunk success, same as before
+    yield first
+    yield from gen
+
+
 def complete(prompt: str, system: str = "", json_mode: bool = True) -> str:
     """Complete against the first configured provider in the failover chain,
     walking to the next provider on any failure (quota/429, timeout, transient,
@@ -78,7 +152,9 @@ def complete(prompt: str, system: str = "", json_mode: bool = True) -> str:
     for i, provider in enumerate(chain):
         try:
             _budget_charge(provider)  # spend guard: exhausted budget == leg failure
-            result = _DISPATCH[provider](prompt, system, json_mode)
+            result = _bounded_leg(
+                lambda p=provider: _DISPATCH[p](prompt, system, json_mode),
+                provider)
             if i > 0:
                 _record_failover(chain[i - 1], provider,
                                  last_exc or "previous provider failed")
@@ -116,7 +192,9 @@ def complete_json(prompt: str, system: str = ""):
     for i, provider in enumerate(chain):
         try:
             _budget_charge(provider)  # spend guard: exhausted budget == leg failure
-            raw = _DISPATCH[provider](prompt, system, True)
+            raw = _bounded_leg(
+                lambda p=provider: _DISPATCH[p](prompt, system, True),
+                provider)
             if raw is None or not str(raw).strip():
                 raise LLMError("provider returned an empty response")
             result = _extract_json(raw)
@@ -230,7 +308,8 @@ def complete_stream(prompt: str, system: str = ""):
         emitted = False
         try:
             _budget_charge(provider)  # spend guard: exhausted budget == leg failure
-            for chunk in _STREAM_DISPATCH[provider](prompt, system):
+            for chunk in _bounded_stream(_STREAM_DISPATCH[provider],
+                                         prompt, system, provider):
                 emitted = True
                 yield chunk
             if i > 0:

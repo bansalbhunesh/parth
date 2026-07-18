@@ -73,6 +73,7 @@ deployment wired with the old names keeps running unchanged).
 | ollama | *(keyless)* `LOCAL_LLM_ENABLED=1` | `OLLAMA_BASE_URL` (`http://localhost:11434`), `OLLAMA_MODEL` (`llama3.1`) | local daemon; needs no network/quota |
 | — | `PRAMAAN_LLM` | primary provider id | `gemini` \| `qwen` \| `claude` \| `ollama` |
 | — | `PRAMAAN_LLM_TIMEOUT` | seconds (`60`) | sync `/analyze` wait before the rule floor |
+| — | `PRAMAAN_LLM_LEG_TIMEOUT` | seconds (`30`), `0` disables | per-leg budget inside the request budget: a slow non-erroring leg (sync call, or a stream's first chunk) is abandoned so the chain walks on instead of starving failover |
 | — | `PRAMAAN_LLM_PROVIDER_ORDER` | e.g. `gemini,qwen,groq` | overrides the whole order |
 
 ### The Qwen gateway must be a genuinely separate quota

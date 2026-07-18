@@ -84,7 +84,6 @@ def test_model_fooled_into_empty_returns_honest_empty_not_seeded(monkeypatch):
     """If a model IS fooled by injection and returns [], /analyze must return an
     honest empty result — never backfill the seeded demo answer key."""
     monkeypatch.setenv("GEMINI_API_KEY", "test-key")
-    import backend.llm as llm
     monkeypatch.setattr("backend.agents.reconciliation.complete_json", lambda prompt, system="": [])
     res = run_analysis(
         "**UPS-02** - battery runtime: shall be **10 min**",

@@ -213,4 +213,44 @@ describe("AnalyzeResolutionWorkflow", () => {
     await user.click(screen.getByRole("button", { name: "Re-analyze revision and close" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Paste the full design basis and revised vendor text before verification.");
   });
+
+  it("handles empty cx gate and decision window gracefully", async () => {
+    const EMPTY_RESULT: AnalyzeResult = {
+      system: "UPS",
+      input_hash: null as unknown as string,
+      count: 1,
+      elapsed_ms: 1_200,
+      mode: "llm",
+      deviations: [{
+        component: "UPS-02",
+        parameter: "battery_runtime_min",
+        required_value: 10,
+        provided_value: 8,
+        unit: "min",
+        severity: "Critical",
+        rationale: "Runtime is below the requirement.",
+        standard_ref: "UPTIME-TIER4",
+        spec_clause: "DB-4.3",
+        // Notice: missing cx_test and lead_time
+      }],
+    };
+    
+    vi.mocked(analyzeOnce).mockResolvedValue({
+      ...EMPTY_RESULT,
+      input_hash: null as unknown as string,
+      count: 0,
+      deviations: [],
+    });
+
+    const user = userEvent.setup();
+    render(<AnalyzeResolutionWorkflow result={EMPTY_RESULT} specText="Runtime shall be 10 min." submittalText="Runtime is 8 min." />);
+
+    expect(screen.getByText("Needs project mapping")).toBeInTheDocument();
+    expect(screen.getByText("Not yet quantified")).toBeInTheDocument();
+
+    await reachIssuedStage(user);
+    await user.click(screen.getByRole("button", { name: "Re-analyze revision and close" }));
+    expect(await screen.findByText("Closed with read-back evidence.")).toBeInTheDocument();
+    expect(screen.getByText(/hash unavailable/)).toBeInTheDocument();
+  });
 });

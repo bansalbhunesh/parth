@@ -46,10 +46,28 @@ describe("ThemeToggle", () => {
     expect(toggle).toHaveAccessibleName("Switch to dark theme");
   });
 
-  it("defaults to the light theme when no valid theme is present", async () => {
+  it("defaults to the light theme when no valid theme is present and can toggle to dark", async () => {
     delete document.documentElement.dataset.theme;
+    const user = userEvent.setup();
     render(<ThemeToggle />);
-    expect(await screen.findByRole("button", { name: "Switch to dark theme" })).toBeInTheDocument();
+    const toggle = await screen.findByRole("button", { name: "Switch to dark theme" });
+    expect(toggle).toBeInTheDocument();
+    
+    await user.click(toggle);
+    expect(document.documentElement.dataset.theme).toBe("dark");
+  });
+
+  it("defaults to the dark theme when prefers-color-scheme: dark is true", async () => {
+    delete document.documentElement.dataset.theme;
+    Object.defineProperty(window, "matchMedia", {
+      writable: true,
+      value: vi.fn().mockImplementation(query => ({
+        matches: query === "(prefers-color-scheme: dark)",
+        media: query,
+      })),
+    });
+    render(<ThemeToggle />);
+    expect(await screen.findByRole("button", { name: "Switch to light theme" })).toBeInTheDocument();
   });
 });
 
@@ -58,7 +76,7 @@ describe("AnalyzePanel", () => {
     render(<AnalyzePanel />);
 
     expect(screen.getByRole("button", { name: "Upload PDFs" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "Upload & Analyze" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Upload & Analyze" })).toBeEnabled();
     expect(screen.getByRole("button", { name: /Spec document Drop/ })).toHaveAttribute("aria-disabled", "false");
     expect(await screen.findByText(/OCR disabled in this deployment/)).toBeInTheDocument();
   });
@@ -86,7 +104,7 @@ describe("AnalyzePanel", () => {
     expect(screen.getByRole("button", { name: "Analyze for deviations" })).toBeEnabled();
 
     await user.click(screen.getByRole("button", { name: "Upload PDFs" }));
-    expect(screen.getByRole("button", { name: "Upload & Analyze" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Upload & Analyze" })).toBeEnabled();
     await user.click(screen.getByRole("button", { name: "Paste Text" }));
     expect(screen.getByLabelText("Design basis specification text")).toHaveValue("runtime must be 10 minutes");
   });
@@ -295,6 +313,31 @@ describe("AnalyzePanel", () => {
     
     // Resolve the hanging promise to cleanup, which shouldn't throw an unhandled error
     resolveStream(null);
+  });
+
+  it("rejects short texts", async () => {
+    const user = userEvent.setup();
+    render(<AnalyzePanel />);
+    await user.click(screen.getByRole("button", { name: "Paste Text" }));
+    await user.type(screen.getByLabelText("Design basis specification text"), "short");
+    await user.type(screen.getByLabelText("Vendor submittal text"), "short");
+    await user.click(screen.getByRole("button", { name: "Analyze for deviations" }));
+    expect(await screen.findByText("Both spec and submittal must be at least 10 characters.")).toBeInTheDocument();
+  });
+
+  it("cancels analysis without triggering fallback error", async () => {
+    mockedStreamAnalyze.mockImplementation(async (_spec, _submittal, _onStatus, _onToken, _onResult, _onDone, onError) => {
+      await onError?.("Analysis cancelled.");
+    });
+    vi.spyOn(globalThis, "fetch");
+    const user = userEvent.setup();
+    render(<AnalyzePanel />);
+    await user.click(screen.getByRole("button", { name: "Load compact example" }));
+    await user.click(screen.getByRole("button", { name: "Analyze for deviations" }));
+    
+    // Wait for the mock to resolve. fetch should not be called because it was cancelled.
+    await waitFor(() => expect(screen.queryByRole("button", { name: "Cancel analysis" })).not.toBeInTheDocument());
+    expect(globalThis.fetch).not.toHaveBeenCalled();
   });
 });
 

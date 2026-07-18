@@ -387,7 +387,10 @@ def test_reconciliation_defaults_missing_inputs_and_wrapper_contract(
     )
     assert reconciliation.reconcile_system("UPS", "standard", feedback="review") == ["result"]
     assert wrapper_calls == [
-        (reconciliation.CORPUS, "UPS", "standard", {"with_cx": True, "feedback": "review", "spec_text": None, "submittal_text": None})
+        (reconciliation.CORPUS, "UPS", "standard", {
+            "with_cx": True, "feedback": "review",
+            "spec_text": None, "submittal_text": None
+        })
     ]
 
 

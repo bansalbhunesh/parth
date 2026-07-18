@@ -160,7 +160,6 @@ def test_untrusted_forwarded_ip_cannot_evade_rate_limit(monkeypatch):
 
 
 def test_deep_probe_has_its_own_tight_limit(monkeypatch):
-    import backend.llm as llm_mod
     monkeypatch.setenv("PRAMAAN_RATE_LIMIT_ENABLED", "1")
     monkeypatch.setenv("PRAMAAN_DEEP_PROBE_LIMIT_PER_HOUR", "1")
     monkeypatch.setenv("GEMINI_API_KEY", "test-key")

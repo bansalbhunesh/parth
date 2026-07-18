@@ -528,7 +528,8 @@ class TestOrchestratorResilience:
     def test_pipeline_runs_without_key(self):
         # Without a key, reconciliation throws LLMError on the first pass
         _clear_keys()
-        from backend.orchestrator import run_pipeline
         import pytest
+
+        from backend.orchestrator import run_pipeline
         with pytest.raises(Exception):
             run_pipeline("UPS")

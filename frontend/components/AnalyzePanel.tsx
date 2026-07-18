@@ -439,7 +439,7 @@ export default function AnalyzePanel() {
         <button
           className="analyze-submit"
           onClick={handleAnalyze}
-          disabled={loading || !canAnalyze}
+          disabled={loading}
         >
           {loading ? "Analyzing..." : mode === "pdf" ? "Upload & Analyze" : "Analyze for deviations"}
         </button>

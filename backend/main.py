@@ -30,7 +30,10 @@ log = logging.getLogger("pramaan.api")
 
 app = FastAPI(
     title="Pramaan — EPC Deviation Intelligence",
-    description="The proof engine for construction documents — spec-to-site deviation intelligence for hyperscale data-centre EPC delivery",
+    description=(
+        "The proof engine for construction documents — spec-to-site deviation "
+        "intelligence for hyperscale data-centre EPC delivery"
+    ),
     version="2.0.0",
 )
 

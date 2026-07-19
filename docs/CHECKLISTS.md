@@ -48,7 +48,7 @@
 
 `eval/` + committed results · `data/samples/real/` + `PROVENANCE.md` ·
 `data/corpus/` (git add -f trap) · `gemini-2.5-flash` pin · git history.
-# Pramaan — Final Submission Checklist (Phase 11)
+# Pramaan — Final Submission Checklist
 
 > The single pre-flight page for the ET AI Hackathon 2026 · PS4 submission. It
 > collects every judge-facing URL, artifact path, and truth-gate in one place.

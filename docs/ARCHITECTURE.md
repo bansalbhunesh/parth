@@ -136,7 +136,7 @@ The pooled recall isn't the whole story — stratified 95% confidence intervals
 by system type, difficulty, modality, and construction batch:
 [`calibration_report.md`](../benchmarks/ps4_external_v1/reports/calibration_report.md).
 
-**858 backend tests + 43 frontend tests + 155 Playwright journeys · GitHub Actions CI.** Deeper runtime detail:
+**901 backend tests + 72 frontend tests + 160 Playwright journeys · GitHub Actions CI.** Deeper runtime detail:
 [`TECHNICAL_OVERVIEW.md`](TECHNICAL_OVERVIEW.md).
 
 ## Tech stack

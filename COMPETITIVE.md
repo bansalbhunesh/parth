@@ -126,8 +126,8 @@ sets; that bounded combination is the current differentiation:
 2. **Lead-time-to-failure.** A quantified "you caught this N weeks before the test
    fails" — the number that converts a finding into a dated, prioritised action
    and a board-level schedule-risk metric.
-3. **Open, reproducible eval + benchmark result.** A public test harness, 858
-   backend tests, 43 frontend tests, 155 browser journeys, and a frozen **53-pair / 129-label / 17-system** benchmark with
+3. **Open, reproducible eval + benchmark result.** A public test harness, 901 backend tests,
+   72 frontend tests, 160 browser journeys, and a frozen **53-pair / 129-label / 17-system** benchmark with
    repeat-run model results, clean-negative controls, and a rule baseline
    ([`benchmarks/ps4_external_v1/BENCHMARK_PROTOCOL.md`](benchmarks/ps4_external_v1/BENCHMARK_PROTOCOL.md)).
    Closed SaaS asks you to trust the marketing; we ship the harness and its limits.

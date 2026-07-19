@@ -41,6 +41,9 @@ EXACT_BACKEND_SURFACES: tuple[tuple[str, str], ...] = (
     ("presentation.html", r"card-value purple\">(\d+)</div><div class=\"card-label\">automated tests"),
     ("docs/DECK.md", r"\*\*(\d+)\*\* tests"),
     ("docs/CHECKLISTS.md", r"\*\*Tests\*\*.*?(\d+) passed"),
+    ("README.md", r"(\d{3,}) backend tests"),
+    ("COMPETITIVE.md", r"(\d{3,}) backend tests"),
+    ("docs/ARCHITECTURE.md", r"(\d{3,}) backend tests"),
 )
 
 FLOOR_BACKEND_SURFACES: tuple[tuple[str, str], ...] = (

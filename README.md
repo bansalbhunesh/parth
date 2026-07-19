@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/reproducible_tests-890%2B-b54a31?style=flat-square&labelColor=20221e" alt="More than 890 tests">
+  <img src="https://img.shields.io/badge/reproducible_tests-900%2B-b54a31?style=flat-square&labelColor=20221e" alt="More than 900 tests">
   <img src="https://img.shields.io/badge/benchmark_recall-0.862-ffb020?style=flat-square&labelColor=1a1508" alt="Benchmark recall 0.862">
   <img src="https://img.shields.io/badge/clean--negative_false_alerts-0-35c98b?style=flat-square&labelColor=0d1a14" alt="0 false alerts on 64 controls">
   <img src="https://img.shields.io/badge/license-MIT-5b8cff?style=flat-square&labelColor=111820" alt="MIT License">
@@ -169,7 +169,7 @@ Pramaan uses a single LLM reasoning core wrapped in deterministic pipelines to e
 
 Pramaan is built to be resilient in high-traffic or rate-limited environments:
 
-* **LLM Engine:** Multi-provider failover chain: **native Gemini 2.5-flash** (primary engine) **→ Qwen-gateway → Groq Llama-3.3 → deterministic fallback**. *(Note: the `ps4_external_v1` benchmark was run against the `gemini-3.1-flash-lite` routing to prove baseline capability).*
+* **LLM Engine:** Multi-provider failover chain: **native Gemini 2.5-flash** (primary engine) **→ Qwen-gateway → Groq Llama-3.3 → deterministic fallback**. *(the frozen benchmark’s featured run used the funded `gemini-3.1-flash-lite` gateway leg).*
 * **FastAPI Backend:** Python 3.11+ API with bounded work queues, request correlation, versioned contracts, and Server-Sent Events (SSE) for token streaming.
 * **Next.js 16 Frontend:** Light/dark editorial-industrial interface with semantic OKLCH tokens, responsive reflow, and reduced-motion support.
 * **Resiliency Gate:** The system compiles cleanly and degrades gracefully without an API key, serving ground-truth cached responses for smooth judge reviews.
@@ -178,7 +178,7 @@ Pramaan is built to be resilient in high-traffic or rate-limited environments:
 
 ## 7. The Proof: Deployed Verification & Benchmark
 
-Pramaan runs an automated health-and-deployment validation script to verify that the deployed backend is live, API credentials are functional, and all frontend components load cleanly:
+Pramaan runs an automated health-and-deployment validation script (`make verify-live`) against the deployed system. The transcript below is a dated capture — re-run it any time to reproduce:
 
 ```
 Pramaan live verification — API https://parth-1-ma30.onrender.com · APP https://parth-tan.vercel.app
@@ -214,7 +214,7 @@ You can run the entire verification suite, deterministic eval harnesses, and fro
 make setup
 make corpus
 
-# 2. Run the full test suite (890+ reproducible tests, no API key needed)
+# 2. Run the full test suite (900+ reproducible tests, no API key needed)
 make test
 
 # 3. Run deterministic evals (no-key offline harnesses)
@@ -236,7 +236,7 @@ make run-frontend                   # Frontend Next.js app (localhost:3000)
 During the hackathon build window, we faced and overcame critical design hurdles:
 1. **Handling LLM Rate Limits:** Deployed an automatic failover model gateway combined with a robust deterministic fallback rule floor. If the API returns a 429 or hangs, the local engine still flags the core mismatches.
 2. **Improving Omission Recall:** Initial prompt calibrations resulted in low recall (0.375) on silent omissions. We rewrote prompt rule #5 to mandate scanning the submittals for every spec parameter, defaulting the provided value to "Not stated" if missing. This lifted baseline recall significantly.
-3. **Circular Reference Gaps:** Avoided circular logic in evaluations by writing independent text-based and structured evals that run against distinct datasets.
+3. **Integrity checks vs capability proofs:** Recovery evals on our own generated corpus only prove the pipeline round-trips, so we keep them labelled as integrity checks — every capability claim rests on the frozen benchmark with clean negatives instead.
 
 ---
 
@@ -251,7 +251,6 @@ Our roadmap for scaling Pramaan to enterprise data centre portfolios:
 
 ## 11. Academic Foundation
 
-### Peer-Reviewed Foundations
 1. **ASCE J. Constr. Eng. Mgmt. (2026):** ["Generative AI-Assisted Compliance Checking for Construction Requirements"](https://ascelibrary.org/doi/10.1061/JCEMD4.COENG-18122) — *GenAI for automated construction compliance checks.*
 2. **arXiv 2412.08593 (2024):** ["Leveraging Graph-RAG and Prompt Engineering to Enhance LLM-Based Automated Requirement Traceability and Compliance Checks"](https://arxiv.org/abs/2412.08593) — *Graph-RAG precedent.*
 3. **J. Information Technology in Construction (2023):** ["Invariant Signature, Logic Reasoning, and Semantic NLP-Based Automated Building Code Compliance Checking (I-SNACC)"](https://www.itcon.org/paper/2023/1) — *NLP + logic compliance checking.*

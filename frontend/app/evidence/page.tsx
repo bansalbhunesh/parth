@@ -134,7 +134,7 @@ export default async function EvidencePage() {
             </div>
             <ul className="limitations-list">
               <li><strong>No field-validation claim.</strong><span>The frozen corpus is primarily team-authored and is not customer outcome data.</span></li>
-              <li><strong>Reviewer adjudication is incomplete.</strong><span>The second independent label review remains pending.</span></li>
+              <li><strong>Reviewer adjudication is incomplete.</strong><span>The second independent label review remains pending — the frozen labels and scoring protocol are published for independent review.</span></li>
               <li><strong>Local case persistence is single-instance.</strong><span>SQLite is honest prototype persistence, not multi-region durability.</span></li>
               <li><strong>Provider availability varies.</strong><span>The interface states whether analysis used a model, deterministic rules, or was unavailable.</span></li>
             </ul>

@@ -271,8 +271,8 @@ export default function AnalyzeResolutionWorkflow({
       {workflow.stage === "resolved" ? (
         <div className="resolution-success" role="status">
           <strong>Closed with read-back evidence.</strong>
-          <span>{workflow.auditCount} audit events · {workflow.remainingFindings} other finding(s) remain in the revised document.</span>
-          <small>Verification {workflow.verificationMode} · {workflow.verificationHash.slice(0, 12) || "hash unavailable"}</small>
+          <span>{workflow.auditCount} audit events · {workflow.remainingFindings} other {workflow.remainingFindings === 1 ? "finding remains" : "findings remain"} in the revised document.</span>
+          <small>Verification hash · {workflow.verificationHash.slice(0, 12) || "unavailable"}</small>
         </div>
       ) : (
         <button

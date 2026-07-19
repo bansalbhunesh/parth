@@ -251,6 +251,6 @@ describe("AnalyzeResolutionWorkflow", () => {
     await reachIssuedStage(user);
     await user.click(screen.getByRole("button", { name: "Re-analyze revision and close" }));
     expect(await screen.findByText("Closed with read-back evidence.")).toBeInTheDocument();
-    expect(screen.getByText(/hash unavailable/)).toBeInTheDocument();
+    expect(screen.getByText(/Verification hash · unavailable/)).toBeInTheDocument();
   });
 });

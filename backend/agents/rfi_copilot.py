@@ -172,7 +172,8 @@ def ask_fallback(query: str, devs: list[dict]) -> dict:
     return {
         "answer": "[Offline reference — the AI copilot is unavailable; this answer is "
                   "drawn from the stored project deviation register, not a live model.] "
-                  + f"Based on the deviation register, {len(relevant)} relevant finding(s) found. "
+                  + f"Based on the deviation register, {len(relevant)} relevant "
+                  + ("finding" if len(relevant) == 1 else "findings") + " found. "
                   + " ".join(
                       f"{d['component']}.{d['parameter']}: provided {d.get('provided_value','')} "
                       f"vs required {d.get('required_value','')} ({d.get('severity','')}, "

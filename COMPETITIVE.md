@@ -57,7 +57,14 @@ object storage, queue infrastructure) without adding an evaluation layer — at
 inspection its README quick-start cloned a placeholder URL and its linked live
 demo returned HTTP 404; and a new PS4-classified entrant assembled its entire
 repository within a single day (2026-07-18), README-led, with no visible
-deployment. The same visibility limits apply as everywhere in this document:
+deployment. A supplementary expanded-vocabulary sweep the same day — event-name
+variants, US spellings, and non-adjacent word order that the official-phrase
+queries do not match — surfaced roughly one hundred additional repositories,
+including six more PS4-flavored builds; none of those shows an evaluation
+artifact, a CI workflow, a live deployment, or a committed demo recording
+either, and an afternoon rerun (414 candidates) found no new PS4 entrant, with
+the only significant index riser being a cross-track repository. The same
+visibility limits apply as everywhere in this document:
 private work is not observable, "not documented" is not "does not exist," and
 the index is repository evidence, not a judge score. The official judging axes
 and finale format extracted from the live competition record are in

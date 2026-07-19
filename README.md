@@ -35,7 +35,6 @@
     <a href="docs/JUDGE_BRIEF.md">Judge brief</a> ·
     <a href="docs/PRODUCTION_BLUEPRINT.md">Production blueprint</a> ·
     <a href="docs/ARCHITECTURE.md">Architecture one-pager</a> ·
-    <a href="docs/HACKATHON_WINNING_PLAYBOOK.md">Hackathon playbook</a> ·
     <a href="docs/DECK.md">Pitch deck outline</a>
   </sub>
 </p>
@@ -60,7 +59,7 @@
 8. [Quick Start & Local Verification Guide](#8-quick-start--local-verification-guide)
 9. [Challenges & What We Learned](#9-challenges--what-we-learned)
 10. [Future Roadmap](#10-future-roadmap)
-11. [Academic Foundation & Commit History](#11-academic-foundation--commit-history)
+11. [Academic Foundation](#11-academic-foundation)
 
 ---
 
@@ -250,47 +249,17 @@ Our roadmap for scaling Pramaan to enterprise data centre portfolios:
 
 ---
 
-## 11. Academic Foundation & Commit History
+## 11. Academic Foundation
 
 ### Peer-Reviewed Foundations
 1. **ASCE J. Constr. Eng. Mgmt. (2026):** ["Generative AI-Assisted Compliance Checking for Construction Requirements"](https://ascelibrary.org/doi/10.1061/JCEMD4.COENG-18122) — *GenAI for automated construction compliance checks.*
 2. **arXiv 2412.08593 (2024):** ["Leveraging Graph-RAG and Prompt Engineering to Enhance LLM-Based Automated Requirement Traceability and Compliance Checks"](https://arxiv.org/abs/2412.08593) — *Graph-RAG precedent.*
 3. **J. Information Technology in Construction (2023):** ["Invariant Signature, Logic Reasoning, and Semantic NLP-Based Automated Building Code Compliance Checking (I-SNACC)"](https://www.itcon.org/paper/2023/1) — *NLP + logic compliance checking.*
 
-### Git Commit History (`git log --oneline -n 25`)
-
-```
-75d1905 docs: Add rule baseline recall, pairs, and label counts to README to satisfy consistency tests
-46f73fe docs: Reframe README and landing page to remove hype claims, add PS4 and Honesty callouts, and paste verification results
-90b404a feat: Implement competitor-inspired features including Indian standards, downstream webhooks, what-if simulator slider, and client-side offline mode
-9872311 feat(audit): implement P0/P1 fixes from ecosystem audit (case deletion, omission recall, ITP frontend, telemetry)
-4fda5e6 feat(qms): SHA-256 integrity block on the audit evidence pack + test count 644->647
-82aba27 fix(judge-surface): close the 2026-07-14 external-audit findings
-15e19fb fix(deploy): ship the frozen benchmark reports so /metrics headline works live
-29b6c1f docs(readme): collapse deep-reference sections to cut judge surface (P1.3)
-6c674b3 chore(submission): harden repo hygiene, fix doc drift, foreground benchmark on /metrics
-28e576e docs: polish pass - test count 635->644, document the two new endpoints
-85379e6 feat: PDF Inspection & Test Plan export for the case workflow
-17a37ad feat: per-stage latency + provider telemetry on /analyze response
-f99e7b1 fix: stale benchmark claim in PS4_ALIGNMENT.md + close its CI coverage gap
-64810cf fix: bandit B310 in measure_deployment_latency.py
-48f1250 fix: ruff E501 line-length in measure_deployment_latency.py
-0c8c1f0 docs: measure real cold vs warm deployment latency by endpoint
-e055b60 docs: full consistency pass — this session's work was invisible everywhere
-f6392dc feat(eval): stratified confidence intervals for the frozen benchmark (P2-4)
-61de5b2 test(metrics): enforce headline benchmark numbers can't silently drift (P2-3)
-3e39f69 feat(e2e): add Playwright coverage for upload, paste, evidence links, keyboard nav, mobile (P2-2)
-ecc18b7 fix(cases): eliminate B608 f-string SQL, caught by our own new CI gate
-bc9634e feat(cases): persisted, tenant-isolated submittal->RFI workflow (P1-3)
-f520ebe feat(evidence): build and live-verify two prompt-naive eval pairs (P1-1)
-f9976f5 feat(evidence): store two primary-source documents, not just cite them (P1-1)
-269e4fa ci: gate on pip-audit and bandit, not just pytest/ruff (P2-1)
-```
-
 ---
 
 <p align="center">
   <strong>Pramaan Compliance Engine</strong><br>
   <em>EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4</em><br>
-  <sub>898 backend tests &middot; 72 frontend tests &middot; 160 Playwright browser tests (8 specs across 5 browser engines)</sub>
+  <sub>901 backend tests &middot; 72 frontend tests &middot; 160 Playwright browser tests (8 specs across 5 browser engines)</sub>
 </p>

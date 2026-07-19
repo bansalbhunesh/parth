@@ -56,7 +56,15 @@ def changed_line_violations(diff: str) -> list[str]:
         if line.startswith("+++ b/"):
             current_path = line[6:]
             continue
-        if current_path == SELF_PATH or line.startswith(("+++", "---")):
+        if line.startswith("+++ "):
+            # "+++ /dev/null": the file was deleted outright. Removing a
+            # whole non-protected file is not an edit to the video scope
+            # (protected files are still caught by the path check), and
+            # without this reset its lines would be blamed on the previous
+            # file in the diff.
+            current_path = ""
+            continue
+        if not current_path or current_path == SELF_PATH or line.startswith("---"):
             continue
         if line.startswith(("+", "-")) and PROTECTED_LINE.search(line[1:]):
             violations.append(f"{current_path}: {line[:180]}")

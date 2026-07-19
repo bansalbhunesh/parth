@@ -87,7 +87,7 @@ verify:  ## One-command verification: tests + calibration + evals + frontend che
 	@echo "▸ [3/6] Baseline eval (Meghdoot, 14 devs)..."
 	$(PY) eval/run_eval.py
 	@echo ""
-	@echo "▸ [4/6] Text-based eval (non-circular)..."
+	@echo "▸ [4/6] Text-based eval (extraction integrity check on our own corpus)..."
 	$(PY) eval/text_eval.py
 	@echo ""
 	@echo "▸ [5/6] Multi-project eval (12 projects, 50 devs)..."

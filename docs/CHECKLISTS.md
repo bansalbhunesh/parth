@@ -11,7 +11,7 @@
 
 ## Hard deadline
 
-- [x] **Phase 2 submission deadline (live Unstop record):** `2026-07-22, 23:59:21 IST` (re-confirm on the dashboard before submitting — organizers may adjust; re-confirmed 2026-07-19 against the live public record — see [`FINALE_BRIEF.md`](FINALE_BRIEF.md))
+- [x] **Phase 2 submission deadline (live Unstop record):** `2026-07-22, 23:59:21 IST` (re-confirmed 2026-07-19 against the live public Unstop record; still re-confirm on the dashboard before submitting — organizers may adjust)
 - [ ] Submit by **21 July evening** (leave a full night of slack for cold starts, upload retries, form surprises).
 - [ ] Freeze window: **no risky changes after 19 July** — final 3 days (20–22 July) are verify/rehearse/record only.
 
@@ -101,7 +101,7 @@
 
 - ⬜ **Finale window (recorded)** — the live competition record shows Phase 3
   as a **10–15 minute live session with demo + Q&A**, in a recorded window
-  overlapping 22–23 July ([`FINALE_BRIEF.md`](FINALE_BRIEF.md)); apply every
+  overlapping 22–23 July (per the live Unstop record, 2026-07-19); apply every
   toggle in this section before that session, not only for async judging.
 - ⬜ **Raise the per-IP rate limits** — a venue's shared Wi-Fi NAT puts every
   judge behind ONE public IP, so the defaults (20 analyses / 3 deep probes
@@ -123,7 +123,7 @@
 
 Run from repo root.
 
-- [ ] **Tests** — `python -m pytest tests/ -q` → 898 passed.
+- [ ] **Tests** — `python -m pytest tests/ -q` → 901 passed.
 - [ ] **Lint** — `python -m ruff check .` → clean.
 - [ ] **Mandatory placeholders** — `python scripts/check_submission_ready.py` → green only after the pitch-video URL is public and logged-out accessible.
 - [ ] **Benchmark integrity untouched** — `git status --porcelain benchmarks/` → empty (labels/scores/reviewer files pristine).

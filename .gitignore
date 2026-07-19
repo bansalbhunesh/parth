@@ -34,18 +34,8 @@ coverage-backend.xml
 benchmarks/ps4_external_v1/sources/raw/*
 !benchmarks/ps4_external_v1/sources/raw/.gitkeep
 
-# Internal audit notes (win-probability estimates, competitor scans, strategy)
-# stay private — never publish the attack surface alongside the submission.
-# The census SCRAPER stays private with its outputs: a judge browsing scripts/
-# should not find the tool that scores rival repos.
-scripts/audit_et_hackathon_field.py
-docs/EXTERNAL_AUDIT_*.md
-docs/*_PUBLIC_REPO_CENSUS_*.json
-docs/*_PUBLIC_REPO_CENSUS_*.md
-docs/DOMINANCE_GAP_AUDIT_*.md
-docs/COMPETITOR_RESPONSE_ACTIONS_*.md
-docs/AUDIT_PRAMAAN.md
-docs/*_LIGHTHOUSE_JUDGE_*.json
+# Local working notes (not part of the submission)
+docs/_local_*
 
 # Local agent/runtime hooks + design context. Keep the submission repo portable
 # and judge-facing.

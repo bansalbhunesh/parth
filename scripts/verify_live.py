@@ -92,7 +92,8 @@ def expected_commit() -> str | None:
     try:
         out = subprocess.run(
             ["git", "rev-parse", "--short=7", "origin/main"],
-            capture_output=True, text=True, cwd=ROOT, timeout=10, check=True,
+            capture_output=True, text=True, encoding="utf-8", errors="replace",
+            cwd=ROOT, timeout=10, check=True,
         )
         return out.stdout.strip()[:7]
     except Exception:

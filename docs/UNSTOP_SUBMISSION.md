@@ -15,7 +15,7 @@ PRAMAAN — EPC Deviation Intelligence (PS4)
 See it work (90 seconds):  https://parth-tan.vercel.app/judge
   → click "Load deviation demo ★", hit Analyze, watch it reason live.
 Every number + its limitation:  https://parth-tan.vercel.app/evidence
-Full source, benchmark, 898 tests, CI:  https://github.com/bansalbhunesh/parth
+Full source, benchmark, 901 tests, CI:  https://github.com/bansalbhunesh/parth
 Pitch video (2:50):  <VIDEO_LINK_HERE>
 ```
 
@@ -47,7 +47,7 @@ deterministic services — commissioning-test mapping, Monte-Carlo schedule
 risk, supply-chain risk, and a blast-radius project graph — plus a reliability
 layer: multi-provider failover with per-provider spend guards, a deterministic
 rule floor (no silent zeros), OCR for scanned submittals, and honest
-provenance chips on every result. 898 automated tests, full CI, live on
+provenance chips on every result. 901 automated tests, full CI, live on
 Vercel + Render.
 
 The finding is the start of a workflow, not the end of a report: one click

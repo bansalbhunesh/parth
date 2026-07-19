@@ -133,7 +133,7 @@
 
 <h2>8. Deployment &amp; reproducibility</h2>
 <div class="grid">
-  <div class="fact"><b>Tests <span class="lab meas">measured</span></b><strong>898</strong> automated tests (API, agents, security, resilience, benchmark, failover) + 160 Playwright E2E journeys. Full CI: Python tests + lint + pip-audit + bandit, frontend types/tests/build/E2E, Docker.</div>
+  <div class="fact"><b>Tests <span class="lab meas">measured</span></b><strong>901</strong> automated tests (API, agents, security, resilience, benchmark, failover) + 160 Playwright E2E journeys. Full CI: Python tests + lint + pip-audit + bandit, frontend types/tests/build/E2E, Docker.</div>
   <div class="fact"><b>Reproduce offline <span class="lab det">deterministic&nbsp;offline</span></b><code>python scripts/run_benchmark_suite.py --rule-only</code> (manifest + hash + rule baseline + report) — no API key, a judge's laptop is enough.</div>
   <div class="fact"><b>Deploy <span class="lab meas">measured</span></b>Frontend on Vercel, API on Render (Docker backend). <code>/health</code> shows the running commit; <code>verify_live.py</code> checks the deployment end-to-end.</div>
 </div>
@@ -164,7 +164,7 @@
   <tr><th>Criterion</th><th>How Pramaan addresses it</th><th>Honest status</th></tr>
   <tr><td>Innovation (25%)</td><td>Spec &rarr; deviation &rarr; commissioning test &rarr; lead-time chain; a distinctive wedge beyond submittal review</td><td>Strong &mdash; the moat is the Cx-test / lead-time link, not module count</td></tr>
   <tr><td>Business impact (25%)</td><td>Cost-of-late-nonconformance thesis; expected-value impact model (docs/BUSINESS.md) with low/base/high assumption bands, not a single deterministic number</td><td><span class="lab scen">scenario</span> base case ~3.2x on modeled assumptions, honestly negative in the low case; no paid-pilot validation yet</td></tr>
-  <tr><td>Technical excellence (20%)</td><td>LangGraph reasoning graph + one LLM core, deterministic services, 898 tests, CI, frozen benchmark</td><td><span class="lab bench">benchmarked</span> 0.862/0.953/0.905; reviewer-2 pending</td></tr>
+  <tr><td>Technical excellence (20%)</td><td>LangGraph reasoning graph + one LLM core, deterministic services, 901 tests, CI, frozen benchmark</td><td><span class="lab bench">benchmarked</span> 0.862/0.953/0.905; reviewer-2 pending</td></tr>
   <tr><td>Scalability (15%)</td><td>Modular, containerized; deterministic services run at high throughput; async job flow + input-hash cache; persisted case workflow (SQLite, tenant-isolated) for submittal&rarr;RFI&rarr;audit-log</td><td>Prototype: single-instance auth/rate-limit; LLM path is the scale constraint</td></tr>
   <tr><td>User experience (15%)</td><td>Focused Judge Mode + streaming reasoning + evidence page; provenance chips</td><td>Lighthouse (/judge): Performance 53&rarr;92, Accessibility 92&rarr;100 this phase</td></tr>
 </table>
@@ -176,7 +176,7 @@
 <p><strong class="k">What if the LLM is down during judging?</strong> Every endpoint returns 200, the rule engine still finds headline deviations, and the UI labels that as the low-recall floor — not a clean bill of health. <code>/llm-check</code> reports the true status.</p>
 
 <div class="foot">
-  Evidence-safe proof points: "On the frozen ps4_external_v1 (v1.2) benchmark — 53 team-authored pairs, 129 single-author-frozen labels, 17 systems, 64 clean negatives — the featured 3-pass run reports recall 0.862, precision 0.953, F1 0.905, and 0 false alerts on the clean negatives, vs a deterministic rule baseline of 0.111." · "898 automated tests; full CI." · "Reviewer-2 human adjudication is pending; the automated cross-check is machine QA." · Every metric carries an evidence label. Results are observations at the audited commit, not evergreen badges.
+  Evidence-safe proof points: "On the frozen ps4_external_v1 (v1.2) benchmark — 53 team-authored pairs, 129 single-author-frozen labels, 17 systems, 64 clean negatives — the featured 3-pass run reports recall 0.862, precision 0.953, F1 0.905, and 0 false alerts on the clean negatives, vs a deterministic rule baseline of 0.111." · "901 automated tests; full CI." · "Reviewer-2 human adjudication is pending; the automated cross-check is machine QA." · Every metric carries an evidence label. Results are observations at the audited commit, not evergreen badges.
 </div>
 
 </body>

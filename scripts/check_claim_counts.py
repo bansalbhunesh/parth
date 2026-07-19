@@ -58,7 +58,8 @@ def collect_backend_count() -> int:
     """Collect the suite exactly as CI runs it and parse pytest's own total."""
     out = subprocess.run(
         [sys.executable, "-m", "pytest", "tests/", "--collect-only", "-q"],
-        cwd=ROOT, capture_output=True, text=True, check=True,
+        cwd=ROOT, capture_output=True, text=True, encoding="utf-8",
+        errors="replace", check=True,
     ).stdout
     match = re.search(r"(\d+) tests collected", out)
     if not match:

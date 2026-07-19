@@ -1,98 +1,10 @@
 # Competitive Positioning — Pramaan
 
-> Honest landscape analysis. We don't claim to be the only system that reads
-> submittals; we claim a specific, defensible edge and back every number.
+> Honest landscape analysis of the commercial market. We don't claim to be the
+> only system that reads submittals; we claim a specific, defensible edge and
+> back every number.
 
-## 1. The visible hackathon field (refreshed 2026-07-15; final pre-freeze snapshot 2026-07-19 — §1b)
-
-The reproducible all-track public scan now covers 357 unique repositories (119
-exact event-name matches plus 238 problem-title additions), including 14
-classified PS4 repositories. See the dated methodology, limits, exact-head checks,
-and adopt/reject decisions in
-[`docs/COMPETITIVE_SCAN_2026-07-15.md`](docs/COMPETITIVE_SCAN_2026-07-15.md).
-Pramaan should be positioned as **dominant on verifiable engineering**, not as an
-automatic overall favorite. The strongest public all-track threats are strong
-for different reasons:
-
-| Threat | Why it can beat us in a judge room | Pramaan's answer |
-|---|---|---|
-| **Competitor A** (Operational focus) | The strongest repository-engineering rival in the current all-track census: a broad operational-context product, substantial test organization, and multiple workflow files. Its inspected exact head still had 2/20 frontend tests failing and a red CI run, so repository breadth is not the same as a passing release. | Keep the smaller proof path fully green and borrow its strong operational-context organization without importing unverified surface area. |
-| **Competitor B** (Direct PS4 rival) | The closest direct PS4 feature rival: a 16-page surface spanning compliance, schedule/P6, procurement, RFIs, analytics, and integrations. At the inspected exact head, workflows were disabled and the frontend build, typecheck, and only test did not pass. | Match the useful schedule/procurement/RFI information architecture only where each route can ship with contracts, authorization, accessibility, browser checks, and a passing build. |
-| **Competitor C** (Public safety narrative) | Public-safety/fraud story is emotionally immediate; its current README links a phone-capable GitHub Pages demo, documents a 3–4 minute guided flow, and the repository now includes a GitHub Pages deployment workflow. It does not currently document a test suite. | We cannot out-drama digital-arrest scams. We out-verify: backend + frontend deploys, 858 backend tests, 43 frontend tests, 155 browser journeys, a frozen benchmark, claims register, explicit provenance, and no hidden eval. |
-| **Competitor D** (Industrial agents) | Industrial domain is close to ours; the current public repository documents 5 specialist agents, 22+ implemented features, 6 real government PDFs, a knowledge graph, Docker, and a useful honest disclosure that operating telemetry is simulated. It does not currently document a public deployment or test suite. | We avoid feature fog: one LLM reasoning core, deterministic services, a benchmark card, CI, and a judge path that proves one consequential workflow end to end. |
-| **Competitor E** (Agriculture) | Agriculture has broad social impact; the current repository links a live Vercel frontend and documents multilingual web/SMS/WhatsApp access plus a drone simulation. It does not currently document a test suite. | We make the business consequence concrete: a vendor deviation becomes a dated commissioning failure and an owned resolution, with citations and reproducible checks. |
-
-Do **not** claim "best overall all-track project." The defensible claim is:
-**Pramaan ranked first in the dated public repository-evidence index, and the
-exact-head comparison found the most complete visible PS4 reproducibility
-package.** The index is a repository-proof heuristic, not a judge score, accuracy
-measure, or product ranking.
-
-## 1a. What changed since the earlier snapshot
-
-The earlier sweeps are retained in git history, but their aggregate
-counts are no longer used as current evidence. Public repositories changed:
-Competitor C now visibly contains a GitHub Actions deployment workflow, Competitor A is the
-strongest repository-level engineering rival, and Competitor B has become a material
-PS4 product-surface rival. Commit counts, deployment availability, dependency
-advisories, and documentation continue to move, so exact-head observations are
-dated rather than presented as permanent facts.
-
-The current comparison therefore uses only checkable, repository-level facts and
-states the visibility limit plainly: private submissions are not observable, and
-"not documented" is not the same as "does not exist." The defensible position is
-that Pramaan's public package is unusually deep on reproducibility and claim
-boundaries; it is not proof of overall competition rank.
-
-### 1b. Final pre-freeze field snapshot (2026-07-19)
-
-The census rerun on 2026-07-19 — the last planned refresh before the change
-freeze — found **408 unique public candidates** (357 on 07-15; 16 repositories
-appeared in the final 24 hours alone) and **17 classified PS4 repositories**.
-The evidence gap did not close: none of the other 16 visible PS4 repositories
-shows an evaluation artifact or a committed demo recording in its tree, and most
-still show no visible tests or CI. Two dated, checkable movement notes: the
-closest PS4 rival continued an enterprise-platform buildout (auth, roles,
-object storage, queue infrastructure) without adding an evaluation layer — at
-inspection its README quick-start cloned a placeholder URL and its linked live
-demo returned HTTP 404; and a new PS4-classified entrant assembled its entire
-repository within a single day (2026-07-18), README-led, with no visible
-deployment. A supplementary expanded-vocabulary sweep the same day — event-name
-variants, US spellings, and non-adjacent word order that the official-phrase
-queries do not match — surfaced roughly one hundred additional repositories,
-including six more PS4-flavored builds; none of those shows an evaluation
-artifact, a CI workflow, a live deployment, or a committed demo recording
-either, and an afternoon rerun (414 candidates) found no new PS4 entrant, with
-the only significant index riser being a cross-track repository. The same
-visibility limits apply as everywhere in this document:
-private work is not observable, "not documented" is not "does not exist," and
-the index is repository evidence, not a judge score. The official judging axes
-and finale format extracted from the live competition record are in
-[`docs/FINALE_BRIEF.md`](docs/FINALE_BRIEF.md).
-
-### Patterns worth adopting from the fresh scan
-
-1. **A guided story beats a feature index.** Competitor C documents one timed demo
-   sequence. Pramaan now uses a 90-second evidence → consequence → owner → RFI →
-   closure journey instead of a 22-section dashboard.
-2. **Honest data labels create trust.** Competitor D explicitly separates real
-   regulatory documents from simulated telemetry. Pramaan now keeps live,
-   deterministic, bundled-reference, benchmark, and scenario states visually
-   distinct.
-3. **Reach matters, but only where it serves the user.** Competitor E's multi-channel
-   story is compelling because it matches low-connectivity users. Pramaan should
-   not imitate channel breadth; its equivalent is a printable/exportable evidence
-   record and an API-backed case workflow for CxAs and owner's engineers.
-4. **Operational context deserves an explicit object model.** Competitor A's strongest
-   reusable pattern is the organization of context around workflows. Pramaan
-   should apply that discipline to cases, findings, RFIs, commissioning tests,
-   and audit events without multiplying product routes merely to match breadth.
-5. **Feature breadth without gates is negative evidence.** Competitor B's information
-   architecture is useful competitive research, but its inspected build/type/test
-   state reinforces Pramaan's rule: a route counts only after its contracts,
-   authorization, accessibility, and browser behavior pass.
-
-## 2. The commercial landscape (and where we differ)
+## 1. The commercial landscape (and where we differ)
 
 AI submittal-review tools already exist — **BuildSync, Part3, Spec-ID,
 InspectMind, and Document Crunch**. BuildSync and Part3 now publicly document
@@ -116,7 +28,7 @@ generate RFIs. So "AI reads a submittal vs a spec," "shows citations," and
 reproducible eval** — turning "this submittal deviates" into "this will fail
 IST-07 at Week 44; you have 27 weeks to act."
 
-### 2a. Market validation + the agentic tier (2026)
+### 1a. Market validation + the agentic tier (2026)
 
 The thesis is no longer speculative: in **April 2026 Trimble completed its
 acquisition of Document Crunch** — a construction "AI risk-intelligence" platform that compares documents
@@ -137,7 +49,7 @@ case-scoped webhooks are a secured integration boundary, not a moat; (2) the moa
 claim below therefore rests entirely on the commissioning-risk join, which
 their public feature set still does not include.
 
-### 2b. Commercial patterns adopted in this redesign
+### 1b. Commercial patterns adopted in this redesign
 
 - **Part3:** its April 2026 Submittal Assistant presents the spec requirement,
   submitted evidence, exact gap, notes, and direct page links; it then recommends
@@ -157,8 +69,8 @@ their public feature set still does not include.
   grids, and channel proliferation. They add surface area without strengthening
   Pramaan's one buyer-critical workflow.
 
-Where we are *not* a follower: among the named public product surfaces inspected
-as of 2026-07-15, we did not find an agentic-risk or submittal tool (Document
+Where we are *not* a follower: among the named public commercial product
+surfaces inspected (dated diligence, 2026-07-15), we did not find an agentic-risk or submittal tool (Document
 Crunch, BuildSync, Trunk Tools, Part3, InspectMind) that publicly unifies a
 spec deviation → the **commissioning test it fails** → the **schedule milestone it
 slips** (CPM + beta-PERT Monte-Carlo) → the **long-lead supplier whose
@@ -170,7 +82,7 @@ key, is the part we have not found in any public competitor. That is the wedge a
 hackathon judge can see end-to-end in two minutes; the incumbents sell the pieces
 separately and behind a login.
 
-## 3. Evidence hierarchy (strongest first)
+## 2. Evidence hierarchy (strongest first)
 
 1. **Third-party-derived document** — a Vertiv Liebert datasheet built from
    Vertiv's published figures, outside the seeded corpus, analysed live: 8 genuine
@@ -186,7 +98,7 @@ separately and behind a login.
 We label (3) and (4) as integrity checks, not capability proofs — because they
 are. Judges reward that honesty.
 
-## 4. Where a judge could still push — and our answer
+## 3. Where a judge could still push — and our answer
 
 - *"A perfect score looks too clean."* On the **synthetic** seeded corpus it is —
   those are integrity checks confirming the harness recovers what it seeded, not a
@@ -201,7 +113,7 @@ are. Judges reward that honesty.
   true status, and the rule-based fallback returns Cx-mapped deviations in <1s
   when the model is rate-limited (free-tier reality), instead of a silent zero.
 
-## 5. Feature teardown — five currently differentiating properties
+## 4. Feature teardown — five currently differentiating properties
 
 Submittal-review tools extract product data and check it against the spec. We did
 not find the following five properties **together** in the named public feature
@@ -217,7 +129,7 @@ sets; that bounded combination is the current differentiation:
 3. **Open, reproducible eval + benchmark result.** A public test harness, 858
    backend tests, 43 frontend tests, 155 browser journeys, and a frozen **53-pair / 129-label / 17-system** benchmark with
    repeat-run model results, clean-negative controls, and a rule baseline
-   ([`benchmarks/ps4_external_v1/METHODOLOGY.md`](benchmarks/ps4_external_v1/METHODOLOGY.md)).
+   ([`benchmarks/ps4_external_v1/BENCHMARK_PROTOCOL.md`](benchmarks/ps4_external_v1/BENCHMARK_PROTOCOL.md)).
    Closed SaaS asks you to trust the marketing; we ship the harness and its limits.
 4. **No-silent-zero resilience.** A deterministic detector that still returns the
    headline deviations when the LLM is rate-limited or absent — a property a
@@ -232,7 +144,7 @@ The category proves the *demand* is real and buyers already pay for adjacent
 tooling. Pramaan's wedge is the **commissioning-risk layer on top** — the part
 that ties a document deviation to a dated, costed schedule event.
 
-### 5a. The systemic decision loop (deterministic, added this build)
+### 4a. The systemic decision loop (deterministic, added this build)
 
 Beyond per-finding detection, Pramaan now computes three deterministic layers over
 the findings — no LLM, fully reproducible, each unit-tested at 100% line and branch:
@@ -251,12 +163,11 @@ the findings — no LLM, fully reproducible, each unit-tested at 100% line and b
    signals (numeric exactness, rule/graph grounding, standard and clause citation). It is
    *evidence strength, not a probability of correctness*.
 
-Each is offline, reproducible, and surfaced in the analysis result. Among the public
-PS4 feature sets inspected in the dated scan, none expose this systemic risk →
+Each is offline, reproducible, and surfaced in the analysis result. Among the named public commercial feature sets inspected, none expose this systemic risk →
 optimal-remediation loop; it is the deterministic decision layer on top of the
 commissioning-risk join.
 
-## 6. The durable moat — what compounds with use
+## 5. The durable moat — what compounds with use
 
 Features can be copied; the items below get *harder* to catch the longer Pramaan
 runs, which is what makes them a moat rather than a checklist:
@@ -304,12 +215,11 @@ both true, and we say both:
    by Trimble, April 2026), BuildSync, InspectMind, and Trunk Tools have run on
    live projects for years and have accumulated real submittals, real engineer
    corrections, and real commissioning outcomes. Pramaan is a weeks-old build
-   evaluated on **team-authored fixtures** (§2a, §3); it is **not** field-validated,
+   evaluated on **team-authored fixtures** (§1a, §2); it is **not** field-validated,
    and every benchmark surface says so. On accumulated field evidence, they lead —
    full stop, no asterisk.
 
-2. **Pramaan ships the most complete public reproducibility package found in this
-   scan.** Every benchmark number Pramaan reports
+2. **Pramaan ships a complete public reproducibility package.** Every benchmark number Pramaan reports
    ships with the means to reproduce it: a frozen 53-pair / 129-label benchmark,
    the eval scripts, the labels, the deterministic rule baseline, and a **claims
    register that enumerates its own limits** ([`docs/CLAIMS_REGISTER.md`](docs/CLAIMS_REGISTER.md))
@@ -341,9 +251,8 @@ That reframes the gap as one of **timing, not architecture:**
   set for the same inspection.
 
 So "we do not have their field data" is not a hedge we merely tolerate — it is the
-setup for the sentence that follows it: **Pramaan has the most complete public,
-self-checkable benchmark and claims-governance package found in this dated
-scan.**
+setup for the sentence that follows it: **Pramaan publishes a complete, self-checkable benchmark and
+claims-governance package.**
 Naming our own gap is what makes that credible; a tool that hides its limits has
 already shown you it will hide the next one.
 

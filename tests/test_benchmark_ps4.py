@@ -214,3 +214,29 @@ def test_multi_label_pair_has_multiple_checks():
     by = L.group_labels_by_pair(L.load_labels())
     assert len(by["pair_018"]) >= 5          # chiller pair carries several independent checks
     assert sum(1 for lb in L.load_labels() if lb["label_type"] == "clean_negative") >= 15
+
+
+def test_code_provenance_hashes_binary_diff_without_decoding(monkeypatch):
+    """`git diff --binary` output is bytes, not text. Decoding it with the
+    platform code page (the Windows default under text=True) crashes on any
+    byte the code page cannot represent, so provenance must hash raw bytes."""
+    import benchmark_ps4_external as B
+
+    class _Result:
+        def __init__(self, stdout):
+            self.stdout = stdout
+
+    def fake_run(cmd, **kwargs):
+        if cmd[:2] == ["git", "rev-parse"]:
+            return _Result("abc1234\n")
+        assert "text" not in kwargs and "encoding" not in kwargs, (
+            "the diff capture must stay binary"
+        )
+        return _Result("₹ utf-8 line\n".encode("utf-8") + b"\x81\xfe\x00raw")
+
+    monkeypatch.setattr(B.subprocess, "run", fake_run)
+    prov = B.code_provenance()
+    assert prov["code_revision"] == "abc1234"
+    assert prov["worktree_dirty"] is True
+    digest = prov["working_tree_diff_sha256"]
+    assert len(digest) == 64 and int(digest, 16) >= 0

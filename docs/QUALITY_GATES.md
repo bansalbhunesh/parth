@@ -22,7 +22,7 @@ Backend coverage is ratcheted at the final 95% line and 90% branch threshold. Se
 
 ## Latest verified working-tree evidence (2026-07-18)
 
-- Backend: 898 tests; 97.17% line and 93.09% branch coverage; every critical module is 100% line and branch covered, and every non-exempt module clears the 80% line / 65% branch per-file floor. A CI claim gate (`scripts/check_claim_counts.py`) now fails the build when any published test count drifts from the collected suite.
+- Backend: 901 tests; 97.17% line and 93.09% branch coverage; every critical module is 100% line and branch covered, and every non-exempt module clears the 80% line / 65% branch per-file floor. A CI claim gate (`scripts/check_claim_counts.py`) now fails the build when any published test count drifts from the collected suite.
 - Frontend: 72 tests; 98.78% line and 91.31% branch coverage; strict TypeScript, design-system audit, dependency audit, and production build pass. Every discovered page is within the enforced 200 KiB initial-JavaScript budget (181.25-189.54 KiB gzip in the latest local build).
 - Browser: 160/160 production-mode journeys pass (latest green CI on `main`) across Chromium, Firefox, WebKit, Pixel, and iPhone projects, including exact visible-label matching, route-wide console/error/rejection guards, no-JavaScript navigation, and deferred-layout anchor behavior.
 - Database: empty reset succeeds; 36/36 pgTAP assertions pass; schema lint and both database advisors report no issues.

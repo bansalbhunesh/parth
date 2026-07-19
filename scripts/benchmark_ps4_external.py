@@ -12,6 +12,7 @@ writes a self-contained directory under runs/.
 
 import argparse
 import csv
+import hashlib
 import json
 import os
 import pathlib
@@ -191,15 +192,20 @@ def _sanitize(s: str) -> str:
 
 
 def code_provenance() -> dict[str, str | bool]:
-    """Bind a run to both HEAD and any uncommitted tracked-file patch."""
+    """Bind a run to both HEAD and any uncommitted tracked-file patch.
+
+    The diff is captured and hashed as raw bytes: `git diff --binary` output
+    is not text, and decoding it (which on Windows means the locale code page)
+    crashes on any byte the code page cannot represent.
+    """
     try:
         revision = subprocess.run(
             ["git", "rev-parse", "HEAD"], cwd=L.ROOT, check=True,
-            capture_output=True, text=True,
+            capture_output=True, text=True, encoding="utf-8",
         ).stdout.strip()
         diff = subprocess.run(
             ["git", "diff", "--binary", "--no-ext-diff", "HEAD"],
-            cwd=L.ROOT, check=True, capture_output=True, text=True,
+            cwd=L.ROOT, check=True, capture_output=True,
         ).stdout
     except (OSError, subprocess.CalledProcessError):
         return {"code_revision": "unknown", "worktree_dirty": True,
@@ -207,7 +213,7 @@ def code_provenance() -> dict[str, str | bool]:
     return {
         "code_revision": revision,
         "worktree_dirty": bool(diff),
-        "working_tree_diff_sha256": L.sha256_text(diff),
+        "working_tree_diff_sha256": hashlib.sha256(diff).hexdigest(),
     }
 
 

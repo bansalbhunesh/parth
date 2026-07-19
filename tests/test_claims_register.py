@@ -54,15 +54,9 @@ EXEMPT = {
     # Allowed-vs-banned wording table (claims governance index).
     "docs/SOURCE_PROVENANCE.md",
 }
-# Private audit notes are untracked; exempt by prefix in case one appears.
-# The hackathon-field census quotes hundreds of *other teams'* GitHub
-# descriptions/READMEs verbatim (via scripts/audit_et_hackathon_field.py) -
-# those are third-party claims about their own repos, not ours, and will
-# routinely contain banned-sounding phrasing ("production-ready", "5 agents")
-# that has nothing to do with Pramaan.
-EXEMPT_PREFIXES = ("docs/EXTERNAL_AUDIT", "docs/ET_AI_HACKATHON_PUBLIC_REPO_CENSUS",
-                   "docs/DOMINANCE_GAP_AUDIT", "docs/COMPETITOR_RESPONSE_ACTIONS",
-                   "docs/AUDIT_PRAMAAN", "docs/ET_AI_HACKATHON_LIGHTHOUSE_JUDGE")
+# Untracked local notes may sit under docs/_local_* (gitignored); exempt by
+# prefix so a local run matches CI.
+EXEMPT_PREFIXES = ("docs/_local_",)
 
 # Negation / governance markers that make a banned phrase a legal disclaimer.
 # PRE markers must precede the phrase in the same sentence; POST markers
@@ -192,24 +186,47 @@ def test_scan_covers_the_core_surfaces():
         assert must in rels, f"claims gate no longer scans {must}"
 
     competitive = (ROOT / "COMPETITIVE.md").read_text(encoding="utf-8")
-    snapshot = (ROOT / "docs/COMPETITIVE_SCAN_2026-07-15.md").read_text(
-        encoding="utf-8"
-    )
-    for threat in ("Competitor A", "Competitor B"):
-        assert threat in competitive
     for retired_overclaim in (
         "We are the only one you can actually check",
         "Pramaan is the only entrant",
     ):
         assert retired_overclaim not in competitive
-    for evidence_boundary in (
-        "357 unique public candidates",
-        "not a judge ranking",
-        "0fb48d708c30",
-        "f1caf1925280",
-        "audit_et_hackathon_field.py",
-    ):
-        assert evidence_boundary in snapshot
+
+
+# Public surfaces describe the product and the commercial market — never
+# internal research into other hackathon entries. These patterns lock that
+# boundary: if any of them reappears on a scanned surface, the build fails.
+FIELD_RESEARCH_RX = [
+    re.compile(rx, re.IGNORECASE)
+    for rx in (
+        r"repo(?:sitory)?\s+census",
+        r"hackathon[\s-]field",
+        r"ranked\s+first",
+        r"evidence\s+index",
+        r"competitor[\s-]inspired",
+        r"field\s+survey",
+        r"rival\s+repo",
+        r"scores?\s+rival",
+        r"win[\s-]probability",
+        r"scanned\s+repositor",
+    )
+] + [re.compile(r"Competitor [A-E]\b")]
+
+
+def test_no_field_research_wording_on_public_surfaces():
+    """No public surface may describe internal research into other entries."""
+    offenders: list[str] = []
+    for path in _scanned_files():
+        rel = path.relative_to(ROOT).as_posix()
+        for n, line in enumerate(
+            path.read_text(encoding="utf-8", errors="replace").splitlines(), 1
+        ):
+            for rx in FIELD_RESEARCH_RX:
+                if rx.search(line):
+                    offenders.append(f"{rel}:{n}: {line.strip()[:100]}")
+    assert not offenders, "field-research wording on public surfaces:\n" + "\n".join(
+        offenders
+    )
 
 
 def _line_violates(line: str) -> bool:

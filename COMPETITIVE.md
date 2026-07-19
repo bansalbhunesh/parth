@@ -3,7 +3,7 @@
 > Honest landscape analysis. We don't claim to be the only system that reads
 > submittals; we claim a specific, defensible edge and back every number.
 
-## 1. The visible hackathon field (refreshed 2026-07-15)
+## 1. The visible hackathon field (refreshed 2026-07-15; final pre-freeze snapshot 2026-07-19 — §1b)
 
 The reproducible all-track public scan now covers 357 unique repositories (119
 exact event-name matches plus 238 problem-title additions), including 14
@@ -43,6 +43,25 @@ states the visibility limit plainly: private submissions are not observable, and
 "not documented" is not the same as "does not exist." The defensible position is
 that Pramaan's public package is unusually deep on reproducibility and claim
 boundaries; it is not proof of overall competition rank.
+
+### 1b. Final pre-freeze field snapshot (2026-07-19)
+
+The census rerun on 2026-07-19 — the last planned refresh before the change
+freeze — found **408 unique public candidates** (357 on 07-15; 16 repositories
+appeared in the final 24 hours alone) and **17 classified PS4 repositories**.
+The evidence gap did not close: none of the other 16 visible PS4 repositories
+shows an evaluation artifact or a committed demo recording in its tree, and most
+still show no visible tests or CI. Two dated, checkable movement notes: the
+closest PS4 rival continued an enterprise-platform buildout (auth, roles,
+object storage, queue infrastructure) without adding an evaluation layer — at
+inspection its README quick-start cloned a placeholder URL and its linked live
+demo returned HTTP 404; and a new PS4-classified entrant assembled its entire
+repository within a single day (2026-07-18), README-led, with no visible
+deployment. The same visibility limits apply as everywhere in this document:
+private work is not observable, "not documented" is not "does not exist," and
+the index is repository evidence, not a judge score. The official judging axes
+and finale format extracted from the live competition record are in
+[`docs/FINALE_BRIEF.md`](docs/FINALE_BRIEF.md).
 
 ### Patterns worth adopting from the fresh scan
 

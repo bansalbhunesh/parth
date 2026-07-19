@@ -11,7 +11,7 @@
 
 ## Hard deadline
 
-- [x] **Phase 2 submission deadline (live Unstop record):** `2026-07-22, 23:59:21 IST` (re-confirm on the dashboard before submitting — organizers may adjust)
+- [x] **Phase 2 submission deadline (live Unstop record):** `2026-07-22, 23:59:21 IST` (re-confirm on the dashboard before submitting — organizers may adjust; re-confirmed 2026-07-19 against the live public record — see [`FINALE_BRIEF.md`](FINALE_BRIEF.md))
 - [ ] Submit by **21 July evening** (leave a full night of slack for cold starts, upload retries, form surprises).
 - [ ] Freeze window: **no risky changes after 19 July** — final 3 days (20–22 July) are verify/rehearse/record only.
 
@@ -99,6 +99,10 @@
 
 ### Judging-day environment (set in the Render dashboard, revert after)
 
+- ⬜ **Finale window (recorded)** — the live competition record shows Phase 3
+  as a **10–15 minute live session with demo + Q&A**, in a recorded window
+  overlapping 22–23 July ([`FINALE_BRIEF.md`](FINALE_BRIEF.md)); apply every
+  toggle in this section before that session, not only for async judging.
 - ⬜ **Raise the per-IP rate limits** — a venue's shared Wi-Fi NAT puts every
   judge behind ONE public IP, so the defaults (20 analyses / 3 deep probes
   per hour) become a *shared* budget. Set `PRAMAAN_ANALYSIS_LIMIT_PER_HOUR=120`

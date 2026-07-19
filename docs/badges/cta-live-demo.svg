@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="279" height="28" role="img" aria-label="▶ Live Demo: parth-tan.vercel.app">
+  <g shape-rendering="crispEdges">
+    <rect width="107" height="28" fill="#20221e"/>
+    <rect x="107" width="172" height="28" fill="#b54a31"/>
+  </g>
+  <g text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="10" font-weight="bold" letter-spacing="1">
+    <text x="54" y="18" fill="#fff" textLength="79" lengthAdjust="spacingAndGlyphs">▶ LIVE DEMO</text>
+    <text x="193" y="18" fill="#fff" textLength="144" lengthAdjust="spacingAndGlyphs">PARTH-TAN.VERCEL.APP</text>
+  </g>
+</svg>

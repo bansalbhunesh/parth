@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/PRA-MAAN-d27357?style=for-the-badge&labelColor=171815">
-    <img alt="Pramaan" src="https://img.shields.io/badge/PRA-MAAN-b54a31?style=for-the-badge&labelColor=f2efe7">
+    <source media="(prefers-color-scheme: dark)" srcset="docs/badges/wordmark-dark.svg">
+    <img alt="Pramaan" src="docs/badges/wordmark-light.svg">
   </picture>
 </p>
 
@@ -14,17 +14,18 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/reproducible_tests-900%2B-b54a31?style=flat-square&labelColor=20221e" alt="More than 900 tests">
-  <img src="https://img.shields.io/badge/benchmark_recall-0.862-ffb020?style=flat-square&labelColor=1a1508" alt="Benchmark recall 0.862">
-  <img src="https://img.shields.io/badge/clean--negative_false_alerts-0-35c98b?style=flat-square&labelColor=0d1a14" alt="0 false alerts on 64 controls">
-  <img src="https://img.shields.io/badge/license-MIT-5b8cff?style=flat-square&labelColor=111820" alt="MIT License">
-  <img src="https://img.shields.io/badge/docker-compose-2496ED?style=flat-square&labelColor=111820&logo=docker&logoColor=white" alt="Docker">
+  <a href="https://github.com/bansalbhunesh/parth/actions/workflows/ci.yml"><img src="https://github.com/bansalbhunesh/parth/actions/workflows/ci.yml/badge.svg" alt="Pramaan CI status"></a>
+  <img src="docs/badges/tests-900plus.svg" alt="More than 900 tests">
+  <img src="docs/badges/benchmark-recall.svg" alt="Benchmark recall 0.862">
+  <img src="docs/badges/false-alerts.svg" alt="0 false alerts on 64 controls">
+  <img src="docs/badges/license-mit.svg" alt="MIT License">
+  <img src="docs/badges/docker-compose.svg" alt="Docker Compose">
 </p>
 
 <p align="center">
-  <a href="https://parth-tan.vercel.app/judge"><img src="https://img.shields.io/badge/★_JUDGE_MODE-90--second_proof-ffb020?style=for-the-badge&labelColor=1a1508" alt="Judge Mode"></a>
-  <a href="https://parth-tan.vercel.app"><img src="https://img.shields.io/badge/▶_LIVE_DEMO-parth--tan.vercel.app-b54a31?style=for-the-badge&labelColor=20221e" alt="Live Demo"></a>
-  <a href="https://parth-1-ma30.onrender.com/health"><img src="https://img.shields.io/badge/API-parth--1--ma30.onrender.com-35c98b?style=for-the-badge&labelColor=0d1a14" alt="API"></a>
+  <a href="https://parth-tan.vercel.app/judge"><img src="docs/badges/cta-judge-mode.svg" alt="Judge Mode — the 90-second proof"></a>
+  <a href="https://parth-tan.vercel.app"><img src="docs/badges/cta-live-demo.svg" alt="Live demo at parth-tan.vercel.app"></a>
+  <a href="https://parth-1-ma30.onrender.com/health"><img src="docs/badges/cta-api.svg" alt="API health at parth-1-ma30.onrender.com"></a>
 </p>
 
 <p align="center">

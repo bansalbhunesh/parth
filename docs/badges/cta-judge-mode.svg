@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="250" height="28" role="img" aria-label="★ Judge Mode: 90-second proof">
+  <g shape-rendering="crispEdges">
+    <rect width="114" height="28" fill="#1a1508"/>
+    <rect x="114" width="136" height="28" fill="#ffb020"/>
+  </g>
+  <g text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="10" font-weight="bold" letter-spacing="1">
+    <text x="57" y="18" fill="#fff" textLength="86" lengthAdjust="spacingAndGlyphs">★ JUDGE MODE</text>
+    <text x="182" y="18" fill="#1a1508" textLength="108" lengthAdjust="spacingAndGlyphs">90-SECOND PROOF</text>
+  </g>
+</svg>

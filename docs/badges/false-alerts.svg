@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="198" height="20" role="img" aria-label="clean-negative false alerts: 0">
+  <g shape-rendering="crispEdges">
+    <rect width="181" height="20" fill="#0d1a14"/>
+    <rect x="181" width="17" height="20" fill="#35c98b"/>
+  </g>
+  <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="11">
+    <text x="90" y="14" textLength="171" lengthAdjust="spacingAndGlyphs">clean-negative false alerts</text>
+    <text x="190" y="14" fill="#fff" textLength="7" lengthAdjust="spacingAndGlyphs">0</text>
+  </g>
+</svg>

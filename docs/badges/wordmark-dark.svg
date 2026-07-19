@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="105" height="28" role="img" aria-label="PRA: MAAN">
+  <g shape-rendering="crispEdges">
+    <rect width="49" height="28" fill="#171815"/>
+    <rect x="49" width="56" height="28" fill="#d27357"/>
+  </g>
+  <g text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="10" font-weight="bold" letter-spacing="1">
+    <text x="24" y="18" fill="#fff" textLength="21" lengthAdjust="spacingAndGlyphs">PRA</text>
+    <text x="77" y="18" fill="#fff" textLength="28" lengthAdjust="spacingAndGlyphs">MAAN</text>
+  </g>
+</svg>

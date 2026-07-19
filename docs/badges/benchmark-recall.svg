@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="153" height="20" role="img" aria-label="benchmark recall: 0.862">
+  <g shape-rendering="crispEdges">
+    <rect width="111" height="20" fill="#1a1508"/>
+    <rect x="111" width="42" height="20" fill="#ffb020"/>
+  </g>
+  <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="11">
+    <text x="56" y="14" textLength="101" lengthAdjust="spacingAndGlyphs">benchmark recall</text>
+    <text x="132" y="14" fill="#fff" textLength="32" lengthAdjust="spacingAndGlyphs">0.862</text>
+  </g>
+</svg>

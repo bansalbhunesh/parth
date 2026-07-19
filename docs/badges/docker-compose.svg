@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="103" height="20" role="img" aria-label="docker: compose">
+  <g shape-rendering="crispEdges">
+    <rect width="48" height="20" fill="#111820"/>
+    <rect x="48" width="55" height="20" fill="#2496ED"/>
+  </g>
+  <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="11">
+    <text x="24" y="14" textLength="38" lengthAdjust="spacingAndGlyphs">docker</text>
+    <text x="76" y="14" fill="#fff" textLength="45" lengthAdjust="spacingAndGlyphs">compose</text>
+  </g>
+</svg>

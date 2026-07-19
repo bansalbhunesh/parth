@@ -6,11 +6,12 @@
 </p>
 
 <h1 align="center">Pramaan</h1>
-<h3 align="center">EPC Compliance Deviation Sentinel & Commissioning Risk Twin</h3>
+<h3 align="center">The proof engine for construction documents</h3>
 
 <p align="center">
-  <strong>Catching compliance discrepancies the day the vendor datasheet is uploaded.</strong><br>
-  <em>ET AI Hackathon 2026 &middot; Problem Statement 4</em>
+  <strong>Pramaan reads the plan and the vendor's documents the day they arrive — and catches every
+  broken promise before it costs crores.</strong><br>
+  <em>ET AI Hackathon 2026 &middot; Problem Statement 4 (Data Centre EPC)</em>
 </p>
 
 <p align="center">
@@ -141,6 +142,10 @@ its one-way hash.
 > ### Why this counts as PS4 (Spec-to-Site Deviation Sentinel)
 > Problem Statement 4 demands a solution for catching discrepancies between design documents (owner project requirements) and vendor submittals to avoid late-stage commissioning delays. Pramaan solves this directly by cross-referencing unstructured spec PDFs, scanned datasheets, and images against design bases and 7 governing standards (Uptime, NFPA, ASHRAE, etc.). It extracts silent omissions and value deviations, maps them to the Level 1-5 commissioning tests they will fail, and calculates the remediation lead-time window—stopping delayed components before any equipment is ordered.
 
+> [!TIP]
+> ### The national stakes
+> India's data-centre buildout carries **US$126B+ in cumulative investment commitments** (US$16.4B deployed in 2025; capacity growing ~30% in 2026 — CBRE/KPMG), while construction studies put **direct rework at ~5% of build cost** (CII) and total avoidable error at 10–25% (GIRI, UK). In EPC delivery, avoidable error begins life as an unread document — that document layer is what Pramaan audits. Sources and scope notes: [`docs/BUSINESS.md` §0](docs/BUSINESS.md).
+
 > [!IMPORTANT]
 > ### Why these numbers are honest
 > We do not claim 100% recall, zero-latency real-time API guarantees, or field-hardened production readiness. The frozen `ps4_external_v1` v1.2 benchmark contains 53 spec–submittal pairs and 129 labels across 17 systems. The featured three-run configuration reports semantic recall 0.862, precision 0.953, F1 0.905, and 0 false alerts on 64 clean-negative controls, versus rule-baseline recall 0.111. 
@@ -162,6 +167,15 @@ Other tools stop at basic keyword-matching. Pramaan integrates compliance verifi
 * **Downstream RFI Webhooks:** Instantly dispatch Slack alerts, email layouts, and JSON payloads with pre-drafted RFI copy on deviation detection.
 * **Client-Side Zero-Deploy Engine:** Toggle "Local Engine" to run compliance checks locally in the browser in ~1ms, bypassing backend cold starts.
 * **Zero Hardcoded Secrets & SQL Injection Safe:** There are absolutely no hardcoded API keys in the repo and no f-string SQL injection patterns (all keys use `.env` and `python-dotenv`, and all database accesses are parameterized).
+
+### Where it lives (delivery surfaces)
+
+| Today (working) | Roadmap (labeled, not claimed) |
+|---|---|
+| Web app (this demo) — reviewer workflow end to end | Reviewer-inbox email ingest (submittals arrive by email; Pramaan replies with the deviation dossier) |
+| REST API (28+ endpoints, RFC 9457 errors) — embed in any document pipeline | CDE hooks (Aconex/ACC-style connectors) |
+| RFI issue path — findings leave as actionable vendor queries | WhatsApp/mobile field notifications |
+| Client-side Local Engine — instant checks with zero backend | |
 
 ---
 

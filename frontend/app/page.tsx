@@ -103,8 +103,10 @@ export default async function Page() {
             </div>
             <h1 id="hero-title">Find the deviation. Prove the consequence. Close it before commissioning.</h1>
             <p className="hero-lede">
-              Pramaan reads the design basis and the vendor submittal the way a senior reviewer would —
-              then keeps the requirement, the variance, the test at risk and the closure record attached to each other.
+              <strong>The proof engine for construction documents.</strong> Pramaan reads the design basis
+              and the vendor submittal (the vendor&rsquo;s build proposal) the way a senior reviewer would —
+              then keeps the requirement, the variance, the handover test at risk and the closure record
+              attached to each other.
             </p>
             <div className="hero-actions">
               <Link className="button button-primary" href="/judge">Run the live analysis</Link>

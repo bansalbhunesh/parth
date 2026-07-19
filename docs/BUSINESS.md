@@ -7,6 +7,34 @@
 
 ---
 
+## 0. The national stakes
+
+India is in the middle of a data-centre construction boom, and the documents
+that govern that construction are the weakest link:
+
+- **US$126B+ in cumulative investment commitments** to Indian data centres, with
+  **US$16.4B deployed in 2025 alone**; CBRE projects capacity to grow **~30% in
+  2026** (≈500 MW of new supply on a ~1.3–1.5 GW operational base), toward
+  **4–5 GW by 2030** (CBRE, via BusinessToday, Apr 2026; KPMG, *India Data
+  Centre Opportunity*, Jul 2026).
+- Construction industry studies put **direct rework at ~5% of construction
+  cost** (CII) and total **avoidable error at 10–25% of project cost** once
+  indirect effects are counted (Get It Right Initiative, UK — ~£25B/yr lost);
+  peer-reviewed field studies measure 2.4–6% of contract value (Love & Li;
+  Josephson & Hammarlund).
+- GIRI's estimate: **error-prevention effort pays back 5–10×** in avoided rework.
+
+On a single 100 MW campus (₹8,000+ crore class), even the conservative 5%
+direct-rework rate is a **₹400-crore class exposure** — and in EPC delivery,
+avoidable error begins life as an unread or unreconciled document. That is the
+document layer Pramaan audits.
+
+*(Scope note: rework percentages are industry-wide construction figures, not
+data-centre-specific measurements; they are cited here as the best available
+published base rates.)*
+
+---
+
 ## 1. The problem, in money
 
 A spec deviation that slips through review doesn't surface on submittal day — it

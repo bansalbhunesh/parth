@@ -22,9 +22,10 @@ Pitch video (2:50):  <VIDEO_LINK_HERE>
 ## Project description (main body)
 
 ```
-Pramaan reads a vendor submittal against the owner's design basis and the
-governing standards (Uptime, NFPA, ASHRAE, IEC, IS 1893…) and flags every
-deviation THE DAY the document lands — then tells you exactly which
+Pramaan is the proof engine for construction documents. It reads a vendor
+submittal against the owner's design basis and the governing standards
+(Uptime, NFPA, ASHRAE, IEC, IS 1893…) and flags every deviation THE DAY the
+document lands — then tells you exactly which
 commissioning test that deviation will fail and how many weeks of lead time
 remain to fix it. That converts a design-review miss into a scheduled,
 preventable commissioning failure, at the one moment the fix is a one-line RFI

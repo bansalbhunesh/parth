@@ -182,18 +182,18 @@ Pramaan runs an automated health-and-deployment validation script (`make verify-
 
 ```
 Pramaan live verification — API https://parth-1-ma30.onrender.com · APP https://parth-tan.vercel.app
-  [PASS] backend /health ok — commit f44e5b8 / llm ready=True
-  [PASS] deployed commit == origin/main — live f44e5b8 vs expected f44e5b8
+  [PASS] backend /health ok — commit 386078e / llm ready=True
+  [PASS] deployed commit == origin/main — live 386078e vs expected 386078e
   [PASS] PS4 layer /schedule live
   [PASS] PS4 layer /supply-chain live
   [PASS] PS4 layer /graph live
-  [PASS] deep LLM probe (/llm-check?deep=1) — 2790ms, 5 findings
-  [PASS] real-pair /analyze uses the LLM — mode=llm, 5 findings in 15s
+  [PASS] deep LLM probe (/llm-check?deep=1) — 11429ms, 5 findings
+  [PASS] real-pair /analyze uses the LLM — mode=llm, 5 findings in 51s
   [PASS] real-pair /analyze/stream uses the LLM — mode=llm, 5 findings
   [PASS] frontend / responds 200
   [PASS] frontend /judge responds 200
 
-10/10 checks passed in 62s
+10/10 checks passed in 123s (2026-07-19)
 GREEN -- demo away.
 ```
 

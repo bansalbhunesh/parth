@@ -28,23 +28,41 @@
   <a href="https://parth-1-ma30.onrender.com/health"><img src="docs/badges/cta-api.svg" alt="API health at parth-1-ma30.onrender.com"></a>
 </p>
 
-<p align="center">
-  <sub>
-    Submission documents:
-    <a href="docs/BUSINESS.md">Business case</a> ·
-    <a href="docs/VALIDATION.md">Validation dossier</a> ·
-    <a href="docs/JUDGE_BRIEF.md">Judge brief</a> ·
-    <a href="docs/PRODUCTION_BLUEPRINT.md">Production blueprint</a> ·
-    <a href="docs/ARCHITECTURE.md">Architecture one-pager</a> ·
-    <a href="docs/DECK.md">Pitch deck outline</a>
-  </sub>
-</p>
 
 > ### ⚡ Judges: start here (90 seconds)
 > 1. **See it work:** open [Judge Mode](https://parth-tan.vercel.app/judge) → click **Load deviation demo ★** → **Analyze** — watch it reason live and read the systemic-risk panel (the schedule cliff).
 > 2. **Every number + its limitation:** [Evidence dashboard](https://parth-tan.vercel.app/evidence).
 > 3. **Pitch (2:50):** BLOCKER until the public link is pasted here.
 > 4. **Verify it yourself:** `git clone` → `make verify` (no API key needed), or read the [Judge brief](docs/JUDGE_BRIEF.md).
+
+### 📎 Every link in one place
+
+| Live surface | URL |
+|---|---|
+| ★ Judge Mode — start here | <https://parth-tan.vercel.app/judge> |
+| Product app | <https://parth-tan.vercel.app> |
+| Evidence dashboard | <https://parth-tan.vercel.app/evidence> |
+| API health | <https://parth-1-ma30.onrender.com/health> |
+| Live LLM status (deep probe) | <https://parth-1-ma30.onrender.com/llm-check?deep=1> |
+| OCR readiness | <https://parth-1-ma30.onrender.com/ocr-check> |
+| CI runs | <https://github.com/bansalbhunesh/parth/actions/workflows/ci.yml> |
+
+| Document | File |
+|---|---|
+| Pitch deck — 12-page PDF | [`docs/Pramaan_Deck.pdf`](docs/Pramaan_Deck.pdf) |
+| Detailed submission — PDF, selectable text | [`docs/Pramaan_Detailed_Submission.pdf`](docs/Pramaan_Detailed_Submission.pdf) |
+| Deck source — HTML | [`presentation.html`](presentation.html) |
+| Detailed submission source — HTML | [`docs/detailed_submission.html`](docs/detailed_submission.html) |
+| Architecture one-pager + diagram | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
+| Business case / impact model | [`docs/BUSINESS.md`](docs/BUSINESS.md) |
+| Judge brief — guided walkthrough | [`docs/JUDGE_BRIEF.md`](docs/JUDGE_BRIEF.md) |
+| Pitch script | [`PITCH.md`](PITCH.md) |
+| Validation dossier | [`docs/VALIDATION.md`](docs/VALIDATION.md) |
+| Claims register — wording governance | [`docs/CLAIMS_REGISTER.md`](docs/CLAIMS_REGISTER.md) |
+| Frozen benchmark — data, protocol, reports | [`benchmarks/ps4_external_v1/`](benchmarks/ps4_external_v1/) |
+| Executive summary | [`docs/EXECUTIVE_SUMMARY.md`](docs/EXECUTIVE_SUMMARY.md) |
+| Production blueprint | [`docs/PRODUCTION_BLUEPRINT.md`](docs/PRODUCTION_BLUEPRINT.md) |
+| Pitch deck outline | [`docs/DECK.md`](docs/DECK.md) |
 
 ---
 

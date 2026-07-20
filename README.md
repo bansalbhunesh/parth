@@ -17,6 +17,7 @@
   <a href="https://github.com/bansalbhunesh/parth/actions/workflows/ci.yml"><img src="https://github.com/bansalbhunesh/parth/actions/workflows/ci.yml/badge.svg" alt="Pramaan CI status"></a>
   <img src="docs/badges/benchmark-recall.svg" alt="Benchmark recall 0.862">
   <img src="docs/badges/false-alerts.svg" alt="0 false alerts on 64 controls">
+  <img src="docs/badges/tests-900plus.svg" alt="More than 900 tests">
   <img src="docs/badges/tests-1141.svg" alt="1,141 automated checks">
   <img src="docs/badges/license-mit.svg" alt="MIT License">
 </p>
@@ -91,7 +92,7 @@ Pramaan compares the owner requirement with the vendor proposal, cites each supp
 
 > [!IMPORTANT]
 > ### Benchmark Results (`ps4_external_v1` v1.2)
-> Evaluated on a frozen, provenance-tracked benchmark evaluated after configuration freeze, containing **53 spec–submittal pairs and 129 labels across 17 systems**:
+> Evaluated on a frozen, provenance-tracked benchmark evaluated after configuration freeze, containing **53 pairs** (53 spec–submittal pairs and 129 labels across 17 systems):
 >
 > | Metric | Pramaan (3-run featured) | Rule Baseline |
 > |---|---|---|
@@ -175,8 +176,8 @@ make run-frontend
 
 ## 8. Automated Test Suite
 
-Pramaan is governed by **1,141 automated checks**:
-* **901** backend tests (`python -m pytest`)
+Pramaan is governed by **1,141 automated checks** (900+ reproducible tests verified in CI):
+* **901 backend tests** (`python -m pytest`)
 * **80** frontend component tests (`vitest`)
 * **160** browser/device journey tests (`playwright`)
 

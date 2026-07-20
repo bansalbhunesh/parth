@@ -83,6 +83,12 @@ export default function AnalyzeResults({ result, extraction, specText, submittal
                   </span>
                 ) : null}
               </div>
+              {deviation.predicted_cx_test && deviation.lead_time_weeks && deviation.lead_time_weeks > 0 ? (
+                <div className="analyze-dev-consequence">
+                  → left unfixed, this fails <strong>{deviation.predicted_cx_test}</strong> at commissioning ·{" "}
+                  <strong>{deviation.lead_time_weeks} weeks</strong> to act · slip ≈ ₹2 cr/week (modelled)
+                </div>
+              ) : null}
             </article>
             );
           })}

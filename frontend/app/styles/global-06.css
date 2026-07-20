@@ -429,3 +429,20 @@
   cursor: pointer;
   list-style: none;
 }
+
+/* Live pipeline stages (real orchestrator order, presentational inference) */
+.analyze-stages { display: flex; flex-wrap: wrap; gap: 0.35rem 1.1rem; list-style: none; margin: 0.65rem 0 0; padding: 0; font-family: var(--font-mono, monospace); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3, #7a766a); }
+.analyze-stage { display: inline-flex; align-items: center; gap: 0.4rem; }
+.analyze-stage-dot { width: 7px; height: 7px; border-radius: 50%; border: 1px solid currentColor; }
+.analyze-stage.is-done { color: var(--ink-2, #57544a); }
+.analyze-stage.is-done .analyze-stage-dot { background: currentColor; }
+.analyze-stage.is-active { color: var(--accent, #b3261e); }
+.analyze-stage.is-active .analyze-stage-dot { background: currentColor; animation: stage-pulse 1.1s ease-in-out infinite; }
+@keyframes stage-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+/* Instant deterministic preview */
+.instant-preview { margin-top: 1rem; }
+.instant-preview-banner { border: 1px solid var(--rule, #c9c5ba); border-left: 3px solid var(--accent, #b3261e); padding: 0.55rem 0.8rem; font-size: 0.85rem; background: color-mix(in srgb, var(--paper-2, #efede6) 70%, transparent); margin-bottom: 0.6rem; }
+
+/* Per-finding consequence chain */
+.analyze-dev-consequence { margin-top: 0.5rem; padding-top: 0.45rem; border-top: 1px dashed var(--rule, #c9c5ba); font-size: 0.82rem; color: var(--ink-2, #57544a); }

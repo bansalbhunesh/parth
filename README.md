@@ -33,7 +33,7 @@
 > ### ⚡ Judges: start here (90 seconds)
 > 1. **See it work:** open [Judge Mode](https://parth-tan.vercel.app/judge) → click **Load deviation demo ★** → **Analyze** — watch it reason live and read the systemic-risk panel (the schedule cliff).
 > 2. **Every number + its limitation:** [Evidence dashboard](https://parth-tan.vercel.app/evidence).
-> 3. **Pitch (2:50):** BLOCKER until the public link is pasted here.
+> 3. **Pitch (3:16):** [Watch the pitch](https://youtu.be/A6l1nf87rIQ) — the live product, the frozen benchmark, and the limits.
 > 4. **Verify it yourself:** `git clone` → `make verify` (no API key needed), or read the [Judge brief](docs/JUDGE_BRIEF.md).
 
 ### 📎 Every link in one place
@@ -102,6 +102,14 @@ In hyperscale data centre builds, subtle deviations between design specification
 ## 2. The Solution & Visual Walkthrough
 
 Pramaan runs a single compliance reasoning graph wrapping a generative reasoning core in deterministic, inspectable QMS validation gates. It catches compliance mismatches the day the document lands:
+
+<p align="center">
+  <a href="https://youtu.be/A6l1nf87rIQ" title="Pramaan — the 3:16 pitch">
+    <img src="https://img.youtube.com/vi/A6l1nf87rIQ/maxresdefault.jpg" alt="Watch the Pramaan pitch: the live product, the frozen benchmark, and the published limits" width="900">
+  </a>
+  <br>
+  <sub>▶ <a href="https://youtu.be/A6l1nf87rIQ"><strong>Watch the 3:16 pitch</strong></a> — documents disagree → live model catches it → consequence priced → closed with audit evidence.</sub>
+</p>
 
 <p align="center">
   <img src="docs/demo.gif" alt="Pramaan judge mode: load a realistic vendor document, hit Analyze, watch the AI stream its reasoning and return cited deviations" width="900">

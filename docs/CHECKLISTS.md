@@ -20,7 +20,7 @@
 | # | Deliverable (per rules) | Artifact | Status |
 |---|---|---|---|
 | 1 | **Public GitHub repository** | `https://github.com/bansalbhunesh/parth` | ✅ public since 2026-07-03; CI badge verified "passing" logged-out. NOTE: the repo home renders `main`'s README — keep `main` fast-forwarded to the submission tip |
-| 2 | **Pitch video** (2:50) | YouTube unlisted link → also placed in the README "Judges: start here" block, `UNSTOP_SUBMISSION.md`, the Final Submission Checklist section below, and `docs/detailed_submission.html`. NOTE: the paste commit trips `scripts/check_protected_scope.py` (video-token lines) — update that script's freeze in the SAME commit (self-edits are exempt) so CI stays green | ⬜ **BLOCKER** — record per `docs/VIDEO_RUNBOOK.md` (script: `PITCH.md`) |
+| 2 | **Pitch video** (2:50) | YouTube unlisted link → also placed in the README "Judges: start here" block, `UNSTOP_SUBMISSION.md`, the Final Submission Checklist section below, and `docs/detailed_submission.html`. NOTE: the paste commit trips `scripts/check_protected_scope.py` (video-token lines) — update that script's freeze in the SAME commit (self-edits are exempt) so CI stays green | ✅ **DONE** — https://youtu.be/A6l1nf87rIQ (Unlisted, 3:16) |
 | 3 | **Architecture document** | [`docs/ARCHITECTURE.md`](ARCHITECTURE.md) (+ `docs/pipeline-diagram.svg`) | ✅ |
 | 4 | **Impact model** (quantified business benefit) | [`docs/BUSINESS.md`](BUSINESS.md) — every figure cited | ✅ |
 | 5 | Pitch deck (if the form takes a file) | [`docs/Pramaan_Deck.pdf`](Pramaan_Deck.pdf) — 12 pages, regenerate with `python scripts/export_deck.py` after any deck edit | ✅ |
@@ -88,7 +88,7 @@
 | Architecture | [`ARCHITECTURE.md`](ARCHITECTURE.md) + [`pipeline-diagram.svg`](pipeline-diagram.svg) | one reasoning graph; one LLM node; copilot = service |
 | Impact model | [`BUSINESS.md`](BUSINESS.md) | figures labelled illustrative scenario |
 | Unstop form text | [`UNSTOP_SUBMISSION.md`](UNSTOP_SUBMISSION.md) | paste-ready after the video URL is inserted |
-| Pitch video | ⬜ **BLOCKER** — YouTube (Unlisted) → paste into the README "Judges: start here" block, Submission Checklist row 2 above, Unstop, and detailed submission source | record per `VIDEO_RUNBOOK.md` |
+| Pitch video | ✅ **DONE** — https://youtu.be/A6l1nf87rIQ (Unlisted, 3:16) | pasted into README, UNSTOP_SUBMISSION.md, detailed submission, Unstop form |
 
 ## 3. Repo / deploy state (fill on submission day)
 

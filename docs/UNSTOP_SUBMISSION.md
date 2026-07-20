@@ -16,7 +16,7 @@ See it work (90 seconds):  https://parth-tan.vercel.app/judge
   → click "Load deviation demo ★", hit Analyze, watch it reason live.
 Every number + its limitation:  https://parth-tan.vercel.app/evidence
 Full source, benchmark, 901 tests, CI:  https://github.com/bansalbhunesh/parth
-Pitch video (2:50):  <VIDEO_LINK_HERE>
+Pitch video (3:16):  https://youtu.be/A6l1nf87rIQ
 ```
 
 ## Project description (main body)
@@ -88,7 +88,7 @@ same problem. Data-centre EPC is the highest-stakes instance we proved it on.
 |---|---|
 | GitHub repo | https://github.com/bansalbhunesh/parth |
 | Live demo | https://parth-tan.vercel.app/judge |
-| Pitch video | `<VIDEO_LINK_HERE>` (YouTube Unlisted — check it opens logged-out) |
+| Pitch video | https://youtu.be/A6l1nf87rIQ (YouTube Unlisted, 3:16 — verified it opens logged-out) |
 | Architecture document | https://github.com/bansalbhunesh/parth/blob/main/docs/ARCHITECTURE.md |
 | Impact model | https://github.com/bansalbhunesh/parth/blob/main/docs/BUSINESS.md |
 | Detailed submission (PDF) | https://github.com/bansalbhunesh/parth/blob/main/docs/Pramaan_Detailed_Submission.pdf |

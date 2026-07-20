@@ -293,5 +293,5 @@ Our roadmap for scaling Pramaan to enterprise data centre portfolios:
 <p align="center">
   <strong>Pramaan Compliance Engine</strong><br>
   <em>EPC Deviation Intelligence &middot; ET AI Hackathon 2026 &middot; Problem Statement 4</em><br>
-  <sub>901 backend tests &middot; 78 frontend tests &middot; 160 Playwright browser tests (8 specs across 5 browser engines)</sub>
+  <sub>901 backend tests &middot; 80 frontend tests &middot; 160 Playwright browser tests (8 specs across 5 browser engines)</sub>
 </p>

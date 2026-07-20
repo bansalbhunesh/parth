@@ -183,7 +183,30 @@ Pramaan is governed by **1,141 automated checks**:
 
 ---
 
-## 9. Team
+## 9. Deliverables & Rubric Mapping (PS4)
+
+### Expected Deliverables
+
+| Deliverable | Status | Location / URL |
+|---|---|---|
+| 🚀 **Working Prototype** | ✅ **Live** | [Judge Mode](https://parth-tan.vercel.app/judge) &middot; [Live Product](https://parth-tan.vercel.app) &middot; [API Health](https://parth-1-ma30.onrender.com/health) |
+| 📐 **Architecture Diagram** | ✅ **Complete** | [`docs/pipeline-diagram.svg`](docs/pipeline-diagram.svg) &middot; [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
+| 📊 **Presentation Deck** | ✅ **Complete** | 12-Page PDF: [`docs/Pramaan_Deck.pdf`](docs/Pramaan_Deck.pdf) &middot; Source: [`presentation.html`](presentation.html) |
+| 🎥 **Demo Video** | ✅ **Complete** | [YouTube (3:16 Unlisted)](https://youtu.be/A6l1nf87rIQ) &middot; GitHub MP4 Asset |
+
+### Judging Criteria Mapping
+
+| Criteria | Weight | Pramaan Implementation & Evidence |
+|---|---|---|
+| **Innovation** | **25%** | Spec-to-Commissioning Risk Twin — bridges unstructured spec PDFs with generative reasoning, Level 1–5 commissioning test risk (IST/FPT), and catch-week schedule simulation. |
+| **Business Impact** | **25%** | Shifts deviation detection from Week 30–44 commissioning to Week 11 submittal day — catching ₹54 crore in illustrative modelled exposure before equipment orders. |
+| **Technical Excellence** | **20%** | Governed by 1,141 automated checks (901 backend, 80 frontend, 160 browser journeys); evaluated on frozen benchmark `ps4_external_v1` (Recall 0.862, FAR 0/64). |
+| **Scalability** | **15%** | Client-side zero-deploy engine (~1 ms), decoupled RFC 9457 API architecture, parameterized queries, and environment-managed secrets. |
+| **User Experience** | **15%** | 90-second `/judge` flow with single-click demo load, real-time reasoning streaming, systemic compound risk panel, and one-click RFI resolution workflow. |
+
+---
+
+## 10. Team
 
 **Team `bbansal_be21`**
 * **Bhunesh Bansal** — Product (Pramaan), AI Architecture & Full-Stack Engineering

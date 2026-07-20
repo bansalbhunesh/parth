@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="28" role="img" aria-label="▶ Pitch Video (3:16)">
+  <g shape-rendering="crispEdges">
+    <rect width="115" height="28" fill="#ff0000"/>
+    <rect x="115" width="125" height="28" fill="#1a1508"/>
+  </g>
+  <g text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="10" font-weight="bold" letter-spacing="1">
+    <text x="57" y="18" fill="#fff" textLength="85" lengthAdjust="spacingAndGlyphs">▶ YOUTUBE</text>
+    <text x="177" y="18" fill="#fff" textLength="95" lengthAdjust="spacingAndGlyphs">PITCH (3:16)</text>
+  </g>
+</svg>

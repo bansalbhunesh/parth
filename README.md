@@ -24,6 +24,7 @@
 </p>
 
 <p align="center">
+  <a href="https://youtu.be/A6l1nf87rIQ"><img src="https://img.shields.io/badge/YouTube-Watch%20Pitch%20(3:16)-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="Watch Pitch Video on YouTube"></a>
   <a href="https://parth-tan.vercel.app/judge"><img src="docs/badges/cta-judge-mode.svg" alt="Judge Mode — the 90-second proof"></a>
   <a href="https://parth-tan.vercel.app"><img src="docs/badges/cta-live-demo.svg" alt="Live demo at parth-tan.vercel.app"></a>
   <a href="https://parth-1-ma30.onrender.com/health"><img src="docs/badges/cta-api.svg" alt="API health at parth-1-ma30.onrender.com"></a>
@@ -104,11 +105,17 @@ In hyperscale data centre builds, subtle deviations between design specification
 Pramaan runs a single compliance reasoning graph wrapping a generative reasoning core in deterministic, inspectable QMS validation gates. It catches compliance mismatches the day the document lands:
 
 <p align="center">
-  <a href="https://youtu.be/A6l1nf87rIQ" title="Pramaan — the 3:16 pitch">
+  <a href="https://youtu.be/A6l1nf87rIQ">
+    <img src="https://img.shields.io/badge/YouTube-Watch%20Pitch%20Video%20(3%3A16)-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="Watch Pitch Video on YouTube">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://youtu.be/A6l1nf87rIQ" title="Pramaan — the 3:16 pitch video">
     <img src="https://img.youtube.com/vi/A6l1nf87rIQ/maxresdefault.jpg" alt="Watch the Pramaan pitch: the live product, the frozen benchmark, and the published limits" width="900">
   </a>
   <br>
-  <sub>▶ <a href="https://youtu.be/A6l1nf87rIQ"><strong>Watch the 3:16 pitch</strong></a> — documents disagree → live model catches it → consequence priced → closed with audit evidence.</sub>
+  <sub>▶ <a href="https://youtu.be/A6l1nf87rIQ"><strong>Watch the 3:16 pitch video on YouTube</strong></a> — documents disagree → live model catches it → consequence priced → closed with audit evidence.</sub>
 </p>
 
 <p align="center">

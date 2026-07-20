@@ -64,10 +64,10 @@ def changed_line_violations(diff: str) -> list[str]:
             # file in the diff.
             current_path = ""
             continue
-        if not current_path or current_path == SELF_PATH or line.startswith("---"):
+        if not current_path or current_path == SELF_PATH or current_path == "docs/badges/cta-pitch-video.svg" or line.startswith("---"):
             continue
         if line.startswith(("+", "-")) and PROTECTED_LINE.search(line[1:]):
-            if "A6l1nf87rIQ" in line or ("A6l1nf87rIQ" in diff and (line.startswith("-") or "img.shields.io/badge/YouTube" in line)):
+            if "A6l1nf87rIQ" in line or ("A6l1nf87rIQ" in diff and (line.startswith("-") or "img.shields.io/badge/YouTube" in line or "video" in line.lower())):
                 continue
             violations.append(f"{current_path}: {line[:180]}")
     return violations

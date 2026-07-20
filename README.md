@@ -111,11 +111,11 @@ Pramaan runs a single compliance reasoning graph wrapping a generative reasoning
 </p>
 
 <p align="center">
-  <a href="https://youtu.be/A6l1nf87rIQ" title="Pramaan — the 3:16 pitch video">
-    <img src="https://img.youtube.com/vi/A6l1nf87rIQ/maxresdefault.jpg" alt="Watch the Pramaan pitch: the live product, the frozen benchmark, and the published limits" width="900">
-  </a>
+  <video src="https://github.com/bansalbhunesh/parth/raw/main/docs/pitch.mp4" controls width="900" poster="https://img.youtube.com/vi/A6l1nf87rIQ/maxresdefault.jpg">
+    <a href="https://youtu.be/A6l1nf87rIQ">Watch the 3:16 pitch video on YouTube</a>
+  </video>
   <br>
-  <sub>▶ <a href="https://youtu.be/A6l1nf87rIQ"><strong>Watch the 3:16 pitch video on YouTube</strong></a> — documents disagree → live model catches it → consequence priced → closed with audit evidence.</sub>
+  <sub>▶ <strong>Watch the 3:16 pitch video</strong> — documents disagree → live model catches it → consequence priced → closed with audit evidence. (Also on <a href="https://youtu.be/A6l1nf87rIQ">YouTube</a>)</sub>
 </p>
 
 <p align="center">

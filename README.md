@@ -34,13 +34,10 @@
 
 ---
 
-### ⚡ Quick Start for Judges
-
-> **90-second product proof:** Open **[Judge Mode](https://parth-tan.vercel.app/judge)** &rarr; click **Load deviation demo ★** &rarr; **Analyze**, then watch the analysis stages, cited findings and systemic-risk result.
-
-<p align="center">
-  <a href="https://parth-tan.vercel.app/evidence"><strong>Evidence Dashboard</strong></a> &middot; <a href="docs/JUDGE_BRIEF.md"><strong>Judge Brief</strong></a>
-</p>
+> ### ⚡ Quick Start for Judges (90 seconds)
+> 1. **See it work:** Open **[Judge Mode](https://parth-tan.vercel.app/judge)** &rarr; click **Load deviation demo ★** &rarr; **Analyze** — watch the analysis stages, cited findings, and systemic-risk result.
+> 2. **Inspect evidence:** Review the **[Evidence Dashboard](https://parth-tan.vercel.app/evidence)** for frozen benchmark recall (0.862) and zero false-alert rate (0/64).
+> 3. **Verify it:** Read the **[Judge Brief](docs/JUDGE_BRIEF.md)** or run `make verify`.
 
 ---
 

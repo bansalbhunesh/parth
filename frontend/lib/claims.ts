@@ -14,7 +14,7 @@ export const PRODUCT_CLAIMS = {
   },
   verification: {
     backendTests: 901,
-    frontendTests: 72,
+    frontendTests: 78,
     browserJourneys: 160,
   },
   hero: {

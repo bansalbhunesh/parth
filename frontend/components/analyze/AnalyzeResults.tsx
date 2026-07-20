@@ -1,4 +1,7 @@
+"use client";
+import { useState } from "react";
 import type { UploadExtraction } from "../../lib/api";
+import { consequenceHi, deviationSummaryHi } from "../../lib/hindi";
 import AnalyzeResolutionWorkflow from "./AnalyzeResolutionWorkflow";
 import RiskRemediation from "./RiskRemediation";
 import { formatElapsed, isModelBacked, provenance, resultIdentity, timingTitle, type AnalyzeResult } from "./model";
@@ -14,6 +17,7 @@ export default function AnalyzeResults({ result, extraction, specText, submittal
   const source = provenance(result.mode);
   const usedOcr = extraction?.spec.ocr_used || extraction?.submittal.ocr_used;
   const evidenceByTarget = new Map((result.evidence?.findings ?? []).map((finding) => [finding.target, finding]));
+  const [hindi, setHindi] = useState(false);
   return (
     <div className="analyze-results" aria-live="polite">
       <div className="analyze-results-header">
@@ -38,6 +42,26 @@ export default function AnalyzeResults({ result, extraction, specText, submittal
           <span className="analyze-results-time" title={timingTitle(result.timing)}>{formatElapsed(result.elapsed_ms)}</span>
           {result.input_hash ? <span className="analyze-results-hash" title={result.input_hash}>Input {result.input_hash.slice(0, 10)}</span> : null}
         </span>
+      </div>
+
+      <div className="analyze-results-tools no-print">
+        <button
+          type="button"
+          className="analyze-tool-btn"
+          aria-pressed={hindi}
+          onClick={() => setHindi((on) => !on)}
+          title="Restate each finding in Hindi. Template-only: every number and identifier is carried through unchanged."
+        >
+          {hindi ? "English" : "हिंदी में देखें"}
+        </button>
+        <button
+          type="button"
+          className="analyze-tool-btn"
+          onClick={() => window.print()}
+          title="Print or save this deviation dossier as a PDF."
+        >
+          Print dossier
+        </button>
       </div>
 
       <RiskRemediation
@@ -83,6 +107,12 @@ export default function AnalyzeResults({ result, extraction, specText, submittal
                   </span>
                 ) : null}
               </div>
+              {hindi ? (
+                <div className="analyze-dev-hindi" lang="hi">
+                  <div>{deviationSummaryHi(deviation)}</div>
+                  {consequenceHi(deviation) ? <div>{consequenceHi(deviation)}</div> : null}
+                </div>
+              ) : null}
               {deviation.predicted_cx_test && deviation.lead_time_weeks && deviation.lead_time_weeks > 0 ? (
                 <div className="analyze-dev-consequence">
                   → left unfixed, this fails <strong>{deviation.predicted_cx_test}</strong> at commissioning ·{" "}

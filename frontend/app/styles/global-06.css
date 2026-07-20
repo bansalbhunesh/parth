@@ -458,3 +458,19 @@
 .pitch-nav-btn { font-size: 1.1rem; padding: 0.3rem 0.9rem; border: 1px solid var(--hairline); background: transparent; cursor: pointer; }
 .pitch-nav-btn:disabled { opacity: 0.35; cursor: default; }
 .pitch-count { font-family: var(--font-mono); font-size: 0.8rem; color: var(--ink-soft); }
+
+/* Result tools: Hindi restatement + dossier print */
+.analyze-results-tools { display: flex; gap: 0.5rem; margin: 0.6rem 0 0.2rem; }
+.analyze-tool-btn { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.35rem 0.7rem; border: 1px solid var(--hairline-strong); background: var(--ground-raised); color: var(--ink-soft); cursor: pointer; }
+.analyze-tool-btn:hover { color: var(--ink); border-color: var(--ink-soft); }
+.analyze-tool-btn[aria-pressed="true"] { color: var(--ink); border-color: var(--accent); }
+.analyze-dev-hindi { margin-top: 0.5rem; padding-top: 0.45rem; border-top: 1px dashed var(--hairline); font-size: 0.86rem; color: var(--ink-soft); line-height: 1.7; }
+
+/* Dossier print: drop the app chrome, keep the record */
+@media print {
+  .no-print, .site-header, .site-nav, .site-footer, .copilot-trigger,
+  .analyze-mode-toggle, .analyze-editors, .analyze-actions, .analyze-loading { display: none !important; }
+  .analyze-results { break-inside: avoid; }
+  .analyze-dev { break-inside: avoid; page-break-inside: avoid; }
+  a[href]::after { content: " (" attr(href) ")"; font-size: 0.7em; }
+}

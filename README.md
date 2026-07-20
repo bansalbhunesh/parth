@@ -33,7 +33,7 @@ https://github.com/bansalbhunesh/parth/releases/download/v1.0.0-video/pitch.mp4
 
 ### ⚡ Quick Start for Judges
 
-> **90-second product proof:** Open **[Judge Mode](https://parth-tan.vercel.app/judge)** &rarr; click **Load deviation demo ★** &rarr; **Analyze** (watch real-time streaming reasoning and systemic risk panel).
+> **90-second product proof:** Open **[Judge Mode](https://parth-tan.vercel.app/judge)** &rarr; click **Load deviation demo ★** &rarr; **Analyze**, then watch the analysis stages, cited findings and systemic-risk result.
 
 <p align="center">
   <a href="https://parth-tan.vercel.app/evidence"><strong>Evidence Dashboard</strong></a> &middot; <a href="docs/JUDGE_BRIEF.md"><strong>Judge Brief</strong></a>
@@ -91,7 +91,7 @@ Pramaan compares the owner requirement with the vendor proposal, cites each supp
 
 > [!IMPORTANT]
 > ### Benchmark Results (`ps4_external_v1` v1.2)
-> Evaluated on a frozen, zero-data-leak benchmark containing **53 spec–submittal pairs and 129 labels across 17 systems**:
+> Evaluated on a frozen, provenance-tracked benchmark evaluated after configuration freeze, containing **53 spec–submittal pairs and 129 labels across 17 systems**:
 >
 > | Metric | Pramaan (3-run featured) | Rule Baseline |
 > |---|---|---|
@@ -104,7 +104,7 @@ Pramaan compares the owner requirement with the vendor proposal, cites each supp
 > ### Transparent Limitations & Governance
 > * **Omission Recall:** Supports silent-omission detection, currently the weakest measured class and an explicit improvement priority.
 > * **Verified Cache Replay:** Identical inputs may return a verified cache replay, clearly labelled with input identity and provenance.
-> * **Evaluation Scope:** Fixtures are team-authored, reviewer-2 adjudication is pending, and evaluation was conducted on a frozen set after configuration freeze.
+> * **Evaluation Scope:** Fixtures are team-authored and modelled on public reference values. Labels are single-author frozen; an automated consistency audit has been completed, while two-person human adjudication remains pending. The featured evaluation was run after configuration freeze.
 
 ---
 

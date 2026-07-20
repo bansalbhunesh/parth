@@ -168,8 +168,8 @@ Pramaan is governed by **1,141 automated checks**:
 
 ## 9. Team
 
-**Team Pramaan**
-* **Bhunesh Bansal** — Product, AI Architecture & Full-Stack Engineering
+**Team `bbansal_be21`**
+* **Bhunesh Bansal** — Product (Pramaan), AI Architecture & Full-Stack Engineering
 * Built for **ET AI Hackathon 2026** · Problem Statement 4 (Data Centre EPC)
 
 ---

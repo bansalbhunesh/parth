@@ -23,10 +23,12 @@
 
 ## 🎬 Product Pitch
 
-https://github.com/bansalbhunesh/parth/releases/download/v1.0.0-video/pitch.mp4
-
 <p align="center">
-  <sub>▶ <a href="https://youtu.be/A6l1nf87rIQ"><strong>Watch on YouTube ↗</strong></a> (3:16 Unlisted) &middot; Live product, frozen benchmark, and published limits</sub>
+  <a href="https://youtu.be/A6l1nf87rIQ" title="Watch Pramaan 3:16 Pitch Video on YouTube">
+    <img src="https://img.youtube.com/vi/A6l1nf87rIQ/maxresdefault.jpg" alt="Pramaan 3:16 Pitch Video" width="850">
+  </a>
+  <br>
+  <sub>▶ <a href="https://youtu.be/A6l1nf87rIQ"><strong>Watch 3:16 Pitch Video on YouTube ↗</strong></a> &middot; Live product, frozen benchmark, and published limits</sub>
 </p>
 
 ---

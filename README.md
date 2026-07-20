@@ -147,23 +147,29 @@ Pramaan compares the owner requirement with the vendor proposal, cites each supp
 
 ## 7. Quick Start
 
-### Automated Verification (No API key needed)
+### Full Local Verification — No API Key Required
 
 ```bash
 git clone https://github.com/bansalbhunesh/parth.git
 cd parth
+make setup
 make verify
 ```
 
-### Local Development
+### Check the Live Deployment
 
 ```bash
-make setup
+make verify-live
+```
+
+### Local Development Server
+
+```bash
 make run
 make run-frontend
 ```
 
-> **Live Deployment Verification:** [View live verification evidence](docs/evidence/live/)
+> **Live Deployment Verification Logs:** [View live verification evidence](docs/evidence/live/)
 
 ---
 

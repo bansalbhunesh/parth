@@ -47,9 +47,7 @@ EXACT_BACKEND_SURFACES: tuple[tuple[str, str], ...] = (
 )
 
 FLOOR_BACKEND_SURFACES: tuple[tuple[str, str], ...] = (
-    ("README.md", r"tests-(\d+)plus"),
-    ("README.md", r"(\d+)\+ (?:reproducible )?tests"),
-    ("README.md", r"More than (\d+) tests"),
+    ("README.md", r"(\d{3,}) backend tests"),
 )
 
 FRONTEND_SURFACES: tuple[tuple[str, str], ...] = (

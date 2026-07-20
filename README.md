@@ -17,7 +17,6 @@
   <a href="https://github.com/bansalbhunesh/parth/actions/workflows/ci.yml"><img src="https://github.com/bansalbhunesh/parth/actions/workflows/ci.yml/badge.svg" alt="Pramaan CI status"></a>
   <img src="docs/badges/benchmark-recall.svg" alt="Benchmark recall 0.862">
   <img src="docs/badges/false-alerts.svg" alt="0 false alerts on 64 controls">
-  <img src="docs/badges/tests-900plus.svg" alt="More than 900 tests">
   <img src="docs/badges/tests-1141.svg" alt="1,141 automated checks">
   <img src="docs/badges/license-mit.svg" alt="MIT License">
 </p>
@@ -29,15 +28,16 @@
     <img src="https://img.youtube.com/vi/A6l1nf87rIQ/maxresdefault.jpg" alt="Watch the Pramaan pitch: the live product, the frozen benchmark, and published limits" width="900">
   </a>
   <br>
-  <sub>▶ <a href="https://youtu.be/A6l1nf87rIQ"><strong>Watch the 3:16 pitch video on YouTube ↗</strong></a> — documents disagree → live model catches it → consequence priced → closed with audit evidence.</sub>
+  <sub>▶ <a href="https://youtu.be/A6l1nf87rIQ"><strong>Watch the 3:16 pitch video on YouTube ↗</strong></a> — documents disagree → live model catches it → consequence modelled → closed with audit evidence.</sub>
 </p>
 
 ---
 
 > ### ⚡ Quick Start for Judges (90 seconds)
-> 1. **See it work:** Open **[Judge Mode](https://parth-tan.vercel.app/judge)** &rarr; click **Load deviation demo ★** &rarr; **Analyze** — watch the analysis stages, cited findings, and systemic-risk result.
+> 1. **See it work:** Open **[Judge Mode](https://parth-tan.vercel.app/judge)** &rarr; click **Load deviation demo ★** &rarr; **Analyze** — watch analysis stages, cited findings, and systemic-risk result.
 > 2. **Inspect evidence:** Review the **[Evidence Dashboard](https://parth-tan.vercel.app/evidence)** for frozen benchmark recall (0.862) and zero false-alert rate (0/64).
-> 3. **Verify it:** Read the **[Judge Brief](docs/JUDGE_BRIEF.md)** or run `make verify`.
+
+*Local technical verification & guided walkthrough:* **[Judge Brief](docs/JUDGE_BRIEF.md)** &middot; `make verify`
 
 ---
 
@@ -45,11 +45,12 @@
 
 In hyperscale data centre builds, subtle deviations between design specifications, vendor datasheets, and governing standards hide within thousands of pages of unstructured documentation. In the demonstration project, vendor submittals arrive at **Week 11**, but manual cross-checking misses discrepancies until commissioning at **Weeks 30–44**—costing millions in schedule rework and delays.
 
-### Canonical Demonstration Case (UPS Battery Autonomy)
+### Canonical Demonstration Cases
 
-| Discrepancy | Spec requirement | Vendor proposal | Consequence & Impact | Fix Lead |
+| Discrepancy | Spec requirement | Vendor proposal | Consequence & Impact | Decision window |
 |---|---|---|---|---|
-| **UPS battery runtime** | 10 min (End of Life) | 8 min (Beginning of Life) | Tier IV fault tolerance broken; **IST-05 & IST-07 at risk** | 27 weeks |
+| **UPS battery runtime** | 10 min (End of Life) | 8 min (Beginning of Life) | Tier IV fault tolerance broken; **IST-07 at risk** | 27 weeks |
+| **Electrical redundancy** | 2N topology | N+1 topology | Single-path maintenance vulnerability; **IST-05 at risk** | 25 weeks |
 
 * **Today:** Discrepancies surface during commissioning at **Weeks 30–44**, causing late-stage rework.
 * **With Pramaan:** Deviation review moves to submittal day (**Week 11**), catching gaps before equipment is ordered.
@@ -58,7 +59,7 @@ In hyperscale data centre builds, subtle deviations between design specification
 <details>
 <summary><strong>View additional demonstration systems</strong></summary>
 
-| System | Spec requirement | Vendor proposal | Consequence & Impact | Fix Lead |
+| System | Spec requirement | Vendor proposal | Consequence & Impact | Decision window |
 |---|---|---|---|---|
 | **Generator fuel autonomy** | 24 h | 12 h | Cannot sustain design-duration outage; **IST-02 at risk** | 30 weeks |
 | **Cooling redundancy** | N+2 | N+1 | No concurrent maintenance tolerance; **FPT-04 at risk** | 28 weeks |
@@ -73,7 +74,7 @@ In hyperscale data centre builds, subtle deviations between design specification
 Pramaan compares the owner requirement with the vendor proposal, cites each supported mismatch, maps its commissioning consequence, and tracks the correction to verified closure.
 
 <p align="center">
-  <img src="docs/demo.gif" alt="Pramaan judge mode: load a vendor document, click Analyze, watch AI stream reasoning and return cited deviations" width="900">
+  <img src="docs/demo.gif" alt="Pramaan judge mode: load a vendor document, click Analyze, stream analysis stages and return cited deviations" width="900">
   <br>
   <sub><strong>The 4-Step Resolution Loop:</strong> 1. <strong>Detect</strong> (cited mismatch) → 2. <strong>Consequence</strong> (IST test mapped) → 3. <strong>Act</strong> (RFI issued to owner) → 4. <strong>Verify</strong> (Revision C re-analyzed & closed).</sub>
 </p>
@@ -91,7 +92,7 @@ Pramaan compares the owner requirement with the vendor proposal, cites each supp
 
 > [!IMPORTANT]
 > ### Benchmark Results (`ps4_external_v1` v1.2)
-> Evaluated on a frozen, provenance-tracked benchmark evaluated after configuration freeze, containing **53 pairs** (53 spec–submittal pairs and 129 labels across 17 systems):
+> The featured configuration was evaluated after configuration freeze on a frozen, provenance-tracked benchmark containing **53 pairs** (53 spec–submittal pairs and 129 labels across 17 systems):
 >
 > | Metric | Pramaan (3-run featured) | Rule Baseline |
 > |---|---|---|
@@ -175,7 +176,7 @@ make run-frontend
 
 ## 8. Automated Test Suite
 
-Pramaan is governed by **1,141 automated checks** (900+ reproducible tests verified in CI):
+Pramaan is governed by **1,141 automated checks**:
 * **901 backend tests** (`python -m pytest`)
 * **80** frontend component tests (`vitest`)
 * **160** browser/device journey tests (`playwright`)

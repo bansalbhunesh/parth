@@ -23,21 +23,21 @@
 
 ## 🎬 Product Pitch
 
+https://github.com/bansalbhunesh/parth/releases/download/v1.0.0-video/pitch.mp4
+
 <p align="center">
-  <a href="https://youtu.be/A6l1nf87rIQ" title="Watch Pramaan 3:16 Pitch Video on YouTube">
-    <img src="https://img.youtube.com/vi/A6l1nf87rIQ/maxresdefault.jpg" alt="Pramaan 3:16 Pitch Video" width="850">
-  </a>
-  <br>
-  <sub>▶ <a href="https://youtu.be/A6l1nf87rIQ"><strong>Watch 3:16 Pitch Video on YouTube ↗</strong></a> &middot; Live product, frozen benchmark, and published limits</sub>
+  <sub>▶ <a href="https://youtu.be/A6l1nf87rIQ"><strong>Watch on YouTube ↗</strong></a> (3:16 Unlisted) &middot; Live product, frozen benchmark, and published limits</sub>
 </p>
 
 ---
 
-### ⚡ Quick Start for Judges (90 seconds)
+### ⚡ Quick Start for Judges
 
-1. 🚀 **[Open Judge Mode](https://parth-tan.vercel.app/judge)** → Click **Load deviation demo ★** → **Analyze** (watch real-time streaming reasoning and systemic risk panel).
-2. 📊 **[Evidence Dashboard](https://parth-tan.vercel.app/evidence)** → Review frozen benchmark recall (0.862), zero false-alert rate (0/64), and published limitations.
-3. 🔍 **[Judge Brief](docs/JUDGE_BRIEF.md)** → Guided technical walkthrough and verification steps.
+> **90-second product proof:** Open **[Judge Mode](https://parth-tan.vercel.app/judge)** &rarr; click **Load deviation demo ★** &rarr; **Analyze** (watch real-time streaming reasoning and systemic risk panel).
+
+<p align="center">
+  <a href="https://parth-tan.vercel.app/evidence"><strong>Evidence Dashboard</strong></a> &middot; <a href="docs/JUDGE_BRIEF.md"><strong>Judge Brief</strong></a>
+</p>
 
 ---
 
@@ -45,22 +45,32 @@
 
 In hyperscale data centre builds, subtle deviations between design specifications, vendor datasheets, and governing standards hide within thousands of pages of unstructured documentation. In the demonstration project, vendor submittals arrive at **Week 11**, but manual cross-checking misses discrepancies until commissioning at **Weeks 30–44**—costing millions in schedule rework and delays.
 
-| What went wrong | Spec requirement | Vendor proposal | Consequence & Impact | Fix Lead |
+### Canonical Demonstration Case (UPS Battery Autonomy)
+
+| Discrepancy | Spec requirement | Vendor proposal | Consequence & Impact | Fix Lead |
 |---|---|---|---|---|
-| **UPS battery runtime** | 10 min (End of Life) | 8 min (Beginning of Life) | Tier IV fault tolerance broken; **IST-07 at risk** | 27 weeks |
-| **Generator fuel autonomy** | 24 h | 12 h | Cannot sustain design-duration outage; **IST-02 at risk** | 30 weeks |
-| **Cooling redundancy** | N+2 | N+1 | No concurrent maintenance tolerance; **FPT-04 at risk** | 28 weeks |
-| **Switchgear fault rating** | 50 kA | 40 kA | Below prospective fault level; **IST-01 at risk** | 19 weeks |
+| **UPS battery runtime** | 10 min (End of Life) | 8 min (Beginning of Life) | Tier IV fault tolerance broken; **IST-05 & IST-07 at risk** | 27 weeks |
 
 * **Today:** Discrepancies surface during commissioning at **Weeks 30–44**, causing late-stage rework.
 * **With Pramaan:** Deviation review moves to submittal day (**Week 11**), catching gaps before equipment is ordered.
 * *Note: ₹54 crore represents illustrative modelled exposure for the demonstration case based on published assumptions—not field-validated savings.*
 
+<details>
+<summary><strong>View additional demonstration systems</strong></summary>
+
+| System | Spec requirement | Vendor proposal | Consequence & Impact | Fix Lead |
+|---|---|---|---|---|
+| **Generator fuel autonomy** | 24 h | 12 h | Cannot sustain design-duration outage; **IST-02 at risk** | 30 weeks |
+| **Cooling redundancy** | N+2 | N+1 | No concurrent maintenance tolerance; **FPT-04 at risk** | 28 weeks |
+| **Switchgear fault rating** | 50 kA | 40 kA | Below prospective fault level; **IST-01 at risk** | 19 weeks |
+
+</details>
+
 ---
 
 ## 2. The Solution: Detect → Consequence → Act → Verify
 
-Pramaan runs a single compliance reasoning graph wrapping a generative reasoning core in deterministic, inspectable QMS validation gates:
+Pramaan compares the owner requirement with the vendor proposal, cites each supported mismatch, maps its commissioning consequence, and tracks the correction to verified closure.
 
 <p align="center">
   <img src="docs/demo.gif" alt="Pramaan judge mode: load a vendor document, click Analyze, watch AI stream reasoning and return cited deviations" width="900">
@@ -94,7 +104,7 @@ Pramaan runs a single compliance reasoning graph wrapping a generative reasoning
 > ### Transparent Limitations & Governance
 > * **Omission Recall:** Supports silent-omission detection, currently the weakest measured class and an explicit improvement priority.
 > * **Verified Cache Replay:** Identical inputs may return a verified cache replay, clearly labelled with input identity and provenance.
-> * **Evaluation Scope:** Benchmark fixtures are reviewer-adjudicated; evaluation was conducted on a frozen set after configuration freeze.
+> * **Evaluation Scope:** Fixtures are team-authored, reviewer-2 adjudication is pending, and evaluation was conducted on a frozen set after configuration freeze.
 
 ---
 
@@ -103,7 +113,7 @@ Pramaan runs a single compliance reasoning graph wrapping a generative reasoning
 * **Beyond Keyword Matching:** Connects document evidence to commissioning consequences, schedule impact, and verified closure.
 * **Commissioning Risk Twin:** Maps each supported deviation to the Level 1–5 commissioning test (e.g., IST-07, FPT-04) most directly at risk.
 * **What-if Remediation Simulator:** Interactive catch-week slider updates project cost and schedule curves in real-time.
-* **Client-Side Zero-Deploy Engine:** Instant compliance checks executed locally in-browser (~1ms).
+* **Client-Side Deterministic Preview:** Runs locally in-browser in approximately 1 ms; low recall by design and clearly separated from model-backed analysis.
 
 ---
 
@@ -117,7 +127,7 @@ Pramaan runs a single compliance reasoning graph wrapping a generative reasoning
 </p>
 
 * **Deterministic Validation Gates:** Generative reasoning is bounded by schema validation, audit logging, and rule floors.
-* **Security Controls:** Environment-managed secrets, parameterised database access, dependency scanning, secret scanning, and non-root container execution.
+* **Security Controls:** Environment-managed secrets, parameterised database access, dependency scanning, secret scanning, and non-root container execution. *Note: These controls harden the public demonstration; they are not a claim of production or enterprise security maturity.*
 
 ---
 
@@ -125,10 +135,10 @@ Pramaan runs a single compliance reasoning graph wrapping a generative reasoning
 
 | Capability | Status | Notes |
 |---|---|---|
-| **Spec-to-Submittal Deviation Detection** | ✅ **Live** | Full pipeline active on 17 data centre sub-systems |
+| **Spec-to-Submittal Deviation Detection** | ✅ **Live** | Live document-analysis pipeline; frozen benchmark covers 17 data-centre system types |
 | **Commissioning Test Risk Mapping** | ✅ **Live** | Maps findings to Level 1–5 commissioning tests |
 | **Interactive Judge Mode & Resolution Loop** | ✅ **Live** | Case credentials in browser, RFI drafting & closure |
-| **Client-Side Local Engine** | ✅ **Live** | Instant browser-only local compliance check |
+| **Client-Side Deterministic Preview** | ✅ **Live** | In-browser preview (~1 ms); low recall by design |
 | **JSON Webhook Payload Dispatch** | ✅ **Live / Verified** | Webhook delivery on deviation detection |
 | **Slack Alert Delivery** | 🟡 **Prototype** | Webhook payload structure verified |
 | **Email Inbox Submittal Ingestion** | 🔵 **Roadmap** | Direct email submittal ingest |
@@ -137,7 +147,7 @@ Pramaan runs a single compliance reasoning graph wrapping a generative reasoning
 
 ## 7. Quick Start
 
-### 30-Second Verification (No API key needed)
+### Automated Verification (No API key needed)
 
 ```bash
 git clone https://github.com/bansalbhunesh/parth.git

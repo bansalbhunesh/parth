@@ -49,7 +49,10 @@ try {
   await page.addInitScript(() => localStorage.setItem("pramaan-theme", "light"));
 
   for (const capture of captures) {
-    await page.goto(`${baseUrl}${capture.route}`, { waitUntil: "networkidle" });
+    // domcontentloaded + settle: hosted pages keep long-lived connections open,
+    // so networkidle never fires against production.
+    await page.goto(`${baseUrl}${capture.route}`, { waitUntil: "domcontentloaded", timeout: 90_000 });
+    await page.waitForTimeout(2_500);
     await page.evaluate(() => {
       document.querySelectorAll("nextjs-portal").forEach((node) => node.remove());
     });

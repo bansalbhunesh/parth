@@ -60,7 +60,7 @@ dev = [
     # Starlette 1.2 uses httpx2 for TestClient; keeping this explicit removes
     # its plain-httpx deprecation path so warnings can fail CI.
     "httpx2>=2.0,<3.0",
-    "mypy>=1.18,<2.0",
+    "mypy>=1.18,<3.0",
     "radon>=6.0,<7.0",
     "import-linter>=2.9,<3.0",
     "pip-audit>=2.9,<3.0",
